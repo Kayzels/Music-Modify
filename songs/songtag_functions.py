@@ -1,13 +1,13 @@
 """Functions related to SongTags.
    """
 # ? Separate from SongTag module due to import cycles
-from typing import Union
+from typing import Optional
 
 from prefs import settings
 from songs.songtag import SongTag
 
 
-def map_tag(display_name: str) -> Union[SongTag, None]:
+def map_tag(display_name: str) -> Optional[SongTag]:
     """When given a display_name, determines which tag it refers to.
         If the tag doesn't exist, returns None.
 
@@ -27,14 +27,12 @@ def map_tag(display_name: str) -> Union[SongTag, None]:
             tag_name = tag_pair[1]
             break
     if tag_name is None:
-        tag = None
-    else:
-        tag = SongTag(display_name, tag_name)
-    return tag
+        return None
+    return SongTag(display_name, tag_name)
 
 
 def map_optional_tag(tag_name: str,
-                     optional_name: str) -> Union[SongTag, None]:
+                     optional_name: str) -> Optional[SongTag]:
     """Gets the tag from the given tag name. If the tag is None,
         gets the tag from the optional name.
 
