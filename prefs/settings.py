@@ -10,7 +10,7 @@ from songs.songtag import SongTag
 
 
 config = configparser.ConfigParser()
-config.read(Path("prefs", "config.ini"))
+config.read(Path("config.ini"))
 
 # ? the symbol that entered text should split on:
 split_text_entered = config['Split']['split_text_entered'] + ' '
@@ -59,8 +59,7 @@ def create_tag(tag_list: Tuple[str, str]) -> SongTag:
         """
     display_name = tag_list[0]
     tag_name = tag_list[1]
-    tag = SongTag(tag_name, display_name)
-    return tag
+    return SongTag(tag_name, display_name)
 
 
 def create_tags_list(tag_list: List[Tuple[str, str]]) -> List[SongTag]:
