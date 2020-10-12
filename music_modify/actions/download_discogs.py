@@ -61,7 +61,7 @@ def get_discogs_artist_mappings() -> pd.core.frame.DataFrame:
         pd.core.frame.DataFrame
             DataFrame of the download excel file that stores discogs mappings.
         """
-    excel_file = Path.cwd()/Path('excel', 'download_discogs_mappings.xlsx')
+    excel_file = Path.cwd()/Path("music_modify", 'excel', 'download_discogs_mappings.xlsx')
     dataframe_orig = pd.read_excel(excel_file, index_col=0)
     dataframe_orig.index = dataframe_orig.index.str.lower()
     return dataframe_orig

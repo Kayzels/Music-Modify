@@ -444,7 +444,7 @@ def add_discogs_tags(response: requests.Response,
 
 # region Excel Actions
 tag_workbook = openpyxl.load_workbook(
-    Path.cwd()/Path('excel', 'excel_current_info.xlsx'))
+    Path.cwd()/Path('music_modify', 'excel', 'excel_current_info.xlsx'))
 
 
 def _add_values_to_sheet(tag: SongTag,

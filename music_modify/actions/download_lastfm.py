@@ -57,7 +57,7 @@ def get_lastfm_mappings() -> pd.core.frame.DataFrame:
         pd.core.frame.DataFrame
             Dataframe of mappings for Last.fm tags
         """
-    excel_file = Path.cwd()/Path("excel", "download_lastfm_mappings.xlsx")
+    excel_file = Path.cwd()/Path("music_modify", "excel", "download_lastfm_mappings.xlsx")
     dataframe = pd.read_excel(str(excel_file))
     for column in list(dataframe):
         dataframe[column] = dataframe[column].str.split('; ')
