@@ -1,3 +1,7 @@
+"""Add this folder to the path, so that resources are accessible.
+    """
 import sys
+from pathlib import Path
 
-sys.path.append(r"C:\Users\Kyzan\Desktop\Music Modify 4\gui")
+PATH_TO_ADD = str(Path(Path.cwd(), 'gui'))
+sys.path.append(PATH_TO_ADD)
