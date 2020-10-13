@@ -6,3 +6,6 @@ excel/
 old/
 fonts/
 mm_venv/
+build/
+*.spec
+/music_modify/resources_rc.py

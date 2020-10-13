@@ -1,0 +1,766 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>997</width>
+    <height>902</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Music Modify</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="resources.qrc">
+    <normaloff>:/icons/resources/icons/music_icon.png</normaloff>:/icons/resources/icons/music_icon.png</iconset>
+  </property>
+  <property name="autoFillBackground">
+   <bool>true</bool>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <property name="styleSheet">
+    <string notr="true">QWidget#centralwidget {border: 1px solid grey; border-radius: 15px}</string>
+   </property>
+   <layout class="QVBoxLayout" name="verticalLayout_6" stretch="0">
+    <property name="leftMargin">
+     <number>9</number>
+    </property>
+    <property name="bottomMargin">
+     <number>9</number>
+    </property>
+    <item>
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+       <widget class="QWidget" name="filesButtonsWidget" native="true">
+        <property name="styleSheet">
+         <string notr="true">QPushButton {  
+  border-width: 3px;
+  border-style: outset;
+  border-radius: 18px
+}
+
+QPushButton:disabled {
+  color:grey;
+  background-color:lightgrey
+}
+
+QPushButton:pressed {
+  border-style: inset
+}</string>
+        </property>
+        <layout class="QHBoxLayout" name="filesButtonsHorizontalLayout" stretch="1,1,1,1">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QPushButton" name="addFilesButton">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="font">
+            <font>
+             <pointsize>14</pointsize>
+            </font>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">QPushButton:enabled {
+  border-color:green;
+  background: rgb(200,240,200);
+  color:green;
+  border-style: outset
+}
+
+QPushButton:pressed {
+  background: rgb(120, 200, 120);
+  border-style: inset
+}</string>
+           </property>
+           <property name="text">
+            <string>ADD FILES</string>
+           </property>
+           <property name="icon">
+            <iconset resource="resources.qrc">
+             <normaloff>:/icons/resources/icons/plus_icon_64.png</normaloff>:/icons/resources/icons/plus_icon_64.png</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>32</width>
+             <height>32</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="addFolderButton">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="font">
+            <font>
+             <pointsize>14</pointsize>
+            </font>
+           </property>
+           <property name="contextMenuPolicy">
+            <enum>Qt::DefaultContextMenu</enum>
+           </property>
+           <property name="autoFillBackground">
+            <bool>false</bool>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">QPushButton:enabled {
+  border-color:rgb(250,100,50);
+  background: navajowhite;
+  color:rgb(250,100,50)
+}
+
+QPushButton:pressed {
+  background: rgb(255, 200, 120)
+}</string>
+           </property>
+           <property name="text">
+            <string notr="true">ADD FOLDER</string>
+           </property>
+           <property name="icon">
+            <iconset resource="resources.qrc">
+             <normaloff>:/icons/resources/icons/folder_icon_circle_64.png</normaloff>:/icons/resources/icons/folder_icon_circle_64.png</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>32</width>
+             <height>32</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="clearFilesButton">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="font">
+            <font>
+             <pointsize>14</pointsize>
+            </font>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">QPushButton:enabled {
+  border-color:red;
+  background:pink;
+  color:darkred
+}
+
+QPushButton:pressed {
+  background: rgb(255, 160, 180)
+}</string>
+           </property>
+           <property name="text">
+            <string>CLEAR FILES</string>
+           </property>
+           <property name="icon">
+            <iconset resource="resources.qrc">
+             <normaloff>:/icons/resources/icons/minus_icon_64.png</normaloff>:/icons/resources/icons/minus_icon_64.png</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>32</width>
+             <height>32</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="refreshButton">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="font">
+            <font>
+             <pointsize>14</pointsize>
+            </font>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">QPushButton:enabled {
+  border-color:rgb(0,115,150);
+  background: lightblue;
+  color: rgb(0,115,150)
+}
+
+QPushButton:pressed {
+  background: lightsteelblue
+}</string>
+           </property>
+           <property name="text">
+            <string>REFRESH</string>
+           </property>
+           <property name="icon">
+            <iconset resource="resources.qrc">
+             <normaloff>:/icons/resources/icons/refresh_icon_64.png</normaloff>:/icons/resources/icons/refresh_icon_64.png</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>32</width>
+             <height>32</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <widget class="QTableView" name="filesTableView">
+        <property name="font">
+         <font>
+          <pointsize>10</pointsize>
+         </font>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QTableView QTableCornerButton::section {
+  background-color: lavender;
+  border: none;
+  /* border-right: 1px solid rgb(100, 100, 215);
+  border-bottom: 1px solid rgb(100, 100, 215);
+  border-top: 0px;
+  border-left: 0px;*/
+  border-top-left-radius: 15px
+}
+
+QHeaderView::section::horizontal {
+  font-size:12pt;
+  padding-bottom:6px;
+  background-color: lavender;
+  border: none;
+  /*border-right: 1px solid rgb(100, 100, 215);*/
+  border-bottom: 1px solid rgb(100, 100, 215);
+ }
+
+QHeaderView::section::horizontal::last {
+  border-right: 0px;
+  border-top-right-radius: 15px
+}
+
+QHeaderView::section::horizontal::only-one {
+  background-color: transparent;
+  border: none;
+  border-left: 0px;
+  border-top-left-radius: 15px;
+  border-right: 0px;
+  border-top-right-radius: 15px
+}
+
+QHeaderView::section::vertical {
+  background-color: lavender;
+  border: none;
+  border-right: 1px solid rgb(100, 100, 215);
+  /*border-bottom: 1px solid lightgrey;*/
+  padding-left: 9px
+ }
+
+QHeaderView::section::vertical::last {
+  border-bottom: 0px;
+  border-bottom-left-radius: 15px
+}
+
+QHeaderView {
+  border:0px;
+  background-color: transparent;
+  border-radius: 15px
+}
+
+QTableView {
+  margin-top:3px;
+  margin-bottom:3px;
+  border-color:black;
+  border-width: 1px;        
+  border-style: solid;
+  border-radius: 15px;
+  background-color:white;
+  alternate-background-color: rgb(245, 245, 255);
+  gridline-color: lavender
+}
+
+QAbstractScrollArea::corner {
+  background: transparent
+}
+
+QScrollBar {
+  border: 1px solid black;
+  background: white;
+  border-radius: 12px;
+  margin: 0px
+}
+
+QScrollBar::handle {
+ border: 1px solid lavender;
+  background:lavender;
+  border-radius: 9px;
+}
+
+QScrollBar::sub-line, QScrollBar::add-line {
+  background:transparent;
+  subcontrol-origin:margin;
+}
+
+QScrollBar::left-arrow, QScrollBar::right-arrow,
+QScrollBar::add-page, 
+QScrollBar::sub-page {
+  background:transparent
+}
+
+QScrollBar:horizontal {
+  height:25px
+}
+
+QScrollBar:vertical {
+  width: 25px
+}
+
+QScrollBar::sub-line:horizontal {
+  width: 0px;
+  subcontrol-position:left
+}
+
+QScrollBar::add-line:horizontal {
+  width: 0px;
+  subcontrol-position:right
+}
+
+QScrollBar::sub-line:vertical {
+  height: 0px;
+  subcontrol-position: top
+}
+
+QScrollBar::add-line:vertical {
+  height: 0px;
+  subcontrol-position: bottom
+}</string>
+        </property>
+        <property name="editTriggers">
+         <set>QAbstractItemView::NoEditTriggers</set>
+        </property>
+        <property name="dragDropMode">
+         <enum>QAbstractItemView::DropOnly</enum>
+        </property>
+        <property name="alternatingRowColors">
+         <bool>true</bool>
+        </property>
+        <property name="selectionBehavior">
+         <enum>QAbstractItemView::SelectRows</enum>
+        </property>
+        <attribute name="verticalHeaderCascadingSectionResizes">
+         <bool>true</bool>
+        </attribute>
+       </widget>
+      </item>
+      <item>
+       <widget class="QWidget" name="selectionButtonsWidget" native="true">
+        <property name="styleSheet">
+         <string notr="true">QPushButton  {
+  border-width: 2px;
+  border-style: outset;
+  border-radius: 9px
+}
+QPushButton:disabled {
+  color:grey;
+  background-color:lightgrey
+}
+
+QPushButton:pressed {
+  border-style:inset
+}</string>
+        </property>
+        <layout class="QHBoxLayout" name="horizontalLayout">
+         <property name="spacing">
+          <number>4</number>
+         </property>
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QPushButton" name="selectAllFilesButton">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="font">
+            <font>
+             <pointsize>12</pointsize>
+            </font>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">QPushButton:enabled {
+  border-color:rgb(0,115,150);
+  background: lightblue;
+  color:rgb(0,115,150)
+}
+
+QPushButton:pressed {
+  background: lightsteelblue
+}</string>
+           </property>
+           <property name="text">
+            <string>SELECT ALL</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="selectNoFilesButton">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="font">
+            <font>
+             <pointsize>12</pointsize>
+            </font>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">QPushButton:enabled {
+  border-color:rgb(0,115,150);
+  background: lightblue;
+  color:rgb(0,115,150)
+}
+
+QPushButton:pressed {
+  background: lightsteelblue
+}</string>
+           </property>
+           <property name="text">
+            <string>SELECT NONE</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="removeSelectedButton">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="font">
+            <font>
+             <pointsize>12</pointsize>
+            </font>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">QPushButton:enabled {
+  border-color:red;
+  background:pink;
+  color:darkred
+}
+
+QPushButton:pressed {
+  background: rgb(255, 160, 180)
+}</string>
+           </property>
+           <property name="text">
+            <string>REMOVE SELECTED FILES</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="jobPushButton">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>10</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="sizeIncrement">
+         <size>
+          <width>0</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>16</pointsize>
+         </font>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QPushButton {
+  border-radius:14px;
+  border-width: 3px;
+  border-style: outset;
+}
+
+QPushButton:disabled {
+  color:grey;
+  background-color:lightgrey
+}
+
+QPushButton:pressed {
+  border-style:inset;
+  background: rgb(170, 170, 255)
+}
+
+QPushButton:enabled {
+  border-color:rgb(100,100,215);
+  background: rgb(200,200,250);
+  color: rgb(100,100,215);
+}
+QPushButton::menu-indicator {
+  image: url(:/icons/icons/down_icon.png);
+  width:20px;
+  height:20px;
+  subcontrol-position: right center
+}
+QPushButton QMenu {
+  font-size:14pt;
+  border-color:rgb(100,100,215);
+  border-width: 2px;        
+  border-style: solid;
+  background-color:rgb(240,230,255);
+  color:rgb(100,100,215);
+  margin:2px;
+}
+QPushButton QMenu::item {
+  background:transparent
+}
+QPushButton QMenu::item::selected{
+  background-color:rgb(200,200,250)
+}</string>
+        </property>
+        <property name="text">
+         <string>NEW JOB</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>997</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="actionAbout"/>
+   </widget>
+   <widget class="QMenu" name="menuFile">
+    <property name="font">
+     <font>
+      <pointsize>9</pointsize>
+     </font>
+    </property>
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionAdd_Files"/>
+    <addaction name="actionAdd_Folder"/>
+    <addaction name="actionClear_Files"/>
+    <addaction name="actionRefresh_Files"/>
+    <addaction name="separator"/>
+    <addaction name="actionRemove_Selected_Files"/>
+   </widget>
+   <widget class="QMenu" name="menuView">
+    <property name="title">
+     <string>View</string>
+    </property>
+    <addaction name="actionCurrent_Jobs"/>
+   </widget>
+   <widget class="QMenu" name="menuSelection">
+    <property name="title">
+     <string>Selection</string>
+    </property>
+    <addaction name="actionSelect_All"/>
+    <addaction name="actionSelect_None"/>
+   </widget>
+   <widget class="QMenu" name="menuJobs">
+    <property name="title">
+     <string>Jobs</string>
+    </property>
+    <addaction name="actionCreate_New_Job"/>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuView"/>
+   <addaction name="menuSelection"/>
+   <addaction name="menuJobs"/>
+   <addaction name="menuHelp"/>
+  </widget>
+  <widget class="QStatusBar" name="mainStatusBar"/>
+  <action name="actionAdd_Folder">
+   <property name="icon">
+    <iconset>
+     <normaloff>../../Music Modify 2/icons/folder_icon_64.png</normaloff>../../Music Modify 2/icons/folder_icon_64.png</iconset>
+   </property>
+   <property name="text">
+    <string>Add Folder</string>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
+  </action>
+  <action name="actionClear_Files">
+   <property name="icon">
+    <iconset>
+     <normaloff>../../Music Modify 2/icons/minus_icon_64.png</normaloff>../../Music Modify 2/icons/minus_icon_64.png</iconset>
+   </property>
+   <property name="text">
+    <string>Clear Files</string>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
+  </action>
+  <action name="actionAdd_Files">
+   <property name="icon">
+    <iconset>
+     <normaloff>../../Music Modify 2/icons/plus_icon_64.png</normaloff>../../Music Modify 2/icons/plus_icon_64.png</iconset>
+   </property>
+   <property name="text">
+    <string>Add Files</string>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
+  </action>
+  <action name="actionRefresh_Files">
+   <property name="icon">
+    <iconset>
+     <normaloff>../../Music Modify 2/icons/refresh_icon_64.png</normaloff>../../Music Modify 2/icons/refresh_icon_64.png</iconset>
+   </property>
+   <property name="text">
+    <string>Refresh Files</string>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="text">
+    <string>About</string>
+   </property>
+  </action>
+  <action name="actionCurrent_Jobs">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Current Jobs</string>
+   </property>
+  </action>
+  <action name="actionSelect_All">
+   <property name="text">
+    <string>Select All</string>
+   </property>
+  </action>
+  <action name="actionSelect_None">
+   <property name="text">
+    <string>Select None</string>
+   </property>
+  </action>
+  <action name="actionNew_Job">
+   <property name="text">
+    <string>New Job</string>
+   </property>
+  </action>
+  <action name="actionRemove_Selected_Files">
+   <property name="text">
+    <string>Remove Selected Files</string>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
+  </action>
+  <action name="actionManual_Editing">
+   <property name="text">
+    <string>Manual Editing</string>
+   </property>
+  </action>
+  <action name="actionDownload_Data">
+   <property name="text">
+    <string>Download Data</string>
+   </property>
+  </action>
+  <action name="actionOrganise_Artwork">
+   <property name="text">
+    <string>Organise Artwork</string>
+   </property>
+  </action>
+  <action name="actionImport_Replace_Sheet">
+   <property name="text">
+    <string>Import Replace Sheet</string>
+   </property>
+  </action>
+  <action name="actionCreate_New_Job">
+   <property name="text">
+    <string>Create New Job</string>
+   </property>
+  </action>
+ </widget>
+ <resources>
+  <include location="resources.qrc"/>
+ </resources>
+ <connections/>
+</ui>
