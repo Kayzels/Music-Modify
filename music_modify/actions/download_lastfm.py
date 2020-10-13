@@ -42,8 +42,7 @@ def get_last_fm_data(payload: Dict[str, str]) -> requests.Response:
     payload['api_key'] = API_KEY
     payload['format'] = 'json'
 
-    response = requests.get(url, headers=headers, params=payload)
-    return response
+    return requests.get(url, headers=headers, params=payload)
 # endregion
 
 
@@ -57,6 +56,7 @@ def get_lastfm_mappings() -> pd.core.frame.DataFrame:
         pd.core.frame.DataFrame
             Dataframe of mappings for Last.fm tags
         """
+
     relative_path = str(Path("music_modify", "excel", "download_lastfm_mappings.xlsx"))
     excel_file = file_utils.get_resource_path(relative_path)
     # excel_file = Path.cwd()/Path("excel", "download_lastfm_mappings.xlsx")

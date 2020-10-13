@@ -151,17 +151,16 @@ def remove_duplicates(song: Song, tag: SongTag):
     values = tag.get_tag(song.id3)
     if values is None:
         return
-    else:
-        values = tuple([tuple(value)  # type: ignore
-                       if isinstance(value, list)
-                       else value
-                       for value in values])
-        new_list = [list(value)
-                    if isinstance(value, tuple)
-                    else value
-                    for value in list(OrderedDict.fromkeys((values)))]
-        tag.set_tag(song.id3, new_list)
-        song.save()
+    values = tuple(tuple(value)  # type: ignore
+                   if isinstance(value, list)
+                   else value
+                   for value in values)
+    new_list = [list(value)
+                if isinstance(value, tuple)
+                else value
+                for value in list(OrderedDict.fromkeys((values)))]
+    tag.set_tag(song.id3, new_list)
+    song.save()
 
 
 def _split_value(value: str) -> List[str]:
@@ -271,10 +270,8 @@ def _replace_value(values_copy: np.ndarray,
                         np.append(values_copy, [new_value], 0)
                     elif tag_length == 2:
                         pair = cast(List[str], pair)
-                        if item_index == 0:
-                            new_pair = [new_value, pair[1]]
-                        else:
-                            new_pair = [pair[0], new_value]
+                        new_pair = [new_value, pair[1]] if item_index == 0\
+                            else [pair[0], new_value]
                         np.append(values_copy, [new_pair], 0)
 
 
@@ -345,12 +342,10 @@ def copy_values(song: Song,
             Song data should be sent to. If None, uses the original song.
             By default None
         """
-    if copy_mode & CopyType.Across:
-        if to_song is None:
+    if to_song is None:
+        if copy_mode & CopyType.Across:
             return
-    else:
-        if to_song is None:
-            to_song = song
+        to_song = song
     to_song = cast(Song, to_song)
     tag = tag_selection.tag
     copy_tag = tag_selection.copy_tag
@@ -450,7 +445,6 @@ tag_workbook = openpyxl.load_workbook(excel_file)
 # tag_workbook = openpyxl.load_workbook(
 #     Path.cwd()/Path('excel', 'excel_current_info.xlsx'))
 
-
 def _add_values_to_sheet(tag: SongTag,
                          song: Song,
                          sheet: Worksheet,
@@ -522,14 +516,14 @@ def add_values_to_excel(song: Song):
                              role_sheet,
                              people_sheet)
 
-    genre_sheet = tag_workbook['Genres']
     genre = songtag_functions.map_tag('Genre')
     if genre is not None:
+        genre_sheet = tag_workbook['Genres']
         _add_values_to_sheet(genre, song, genre_sheet)
 
-    publisher_sheet = tag_workbook['Publishers']
     publisher = songtag_functions.map_tag('Publisher')
     if publisher is not None:
+        publisher_sheet = tag_workbook['Publishers']
         _add_values_to_sheet(publisher, song, publisher_sheet)
 
     # ! to reduce excess memory, spreadsheet is not saved in this function.

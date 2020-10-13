@@ -33,6 +33,7 @@ setup(
     keywords="mp3 music tags",
     url="https://github.com/KyzanHartwig/Music-Modify",
     long_description=read('README.md'),
-    packages=find_packages(exclude=["config"]),
+    package_dir={"": "music_modify"},
+    packages=find_packages(where="music_modify", exclude=["config"]),
     python_requires='>=3.8',
 )
