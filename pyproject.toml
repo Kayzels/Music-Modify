@@ -1,0 +1,10 @@
+[project]
+name = "music_modify"
+version = "2.0.0"
+authors = [
+  {name = "Kyzan Hartwig"}
+]
+description = "Music file tag editor"
+license = "GPL-3.0-or-later"
+license-files = ["LICENSE"]
+keywords = ["mp3", "music", "tags"]
