@@ -1,4 +1,4 @@
-from music_modify.types import SongTag
+from music_modify.custom_types import SongTag
 from music_modify.prefs import settings
 
 

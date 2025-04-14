@@ -1,6 +1,6 @@
 from PySide6.QtCore import QSettings
 from typing import cast, final
-from music_modify.types.songtag import SongTag
+from music_modify.custom_types.songtag import SongTag
 
 
 @final
