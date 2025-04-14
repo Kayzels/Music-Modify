@@ -39,10 +39,11 @@ class Ui_MainWindow(object):
         self.centralwidget.setObjectName(u"centralwidget")
         self.verticalLayout_2 = QVBoxLayout(self.centralwidget)
         self.verticalLayout_2.setObjectName(u"verticalLayout_2")
-        self.tableView = QTableView(self.centralwidget)
-        self.tableView.setObjectName(u"tableView")
+        self.filesTableView = QTableView(self.centralwidget)
+        self.filesTableView.setObjectName(u"filesTableView")
+        self.filesTableView.horizontalHeader().setStretchLastSection(True)
 
-        self.verticalLayout_2.addWidget(self.tableView)
+        self.verticalLayout_2.addWidget(self.filesTableView)
 
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(MainWindow)
