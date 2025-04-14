@@ -12,8 +12,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.songs_repository: Final[SongRepository] = SongRepository()
         self.songs_model: Final[SongTableModel] = SongTableModel(self.songs_repository)
-        self.filesTableView.setModel(self.songs_model)
-        self.filesTableView.resizeColumnsToContents()
+        self.files_table_view.setModel(self.songs_model)
+        self.files_table_view.resizeColumnsToContents()
 
 
 def main():
