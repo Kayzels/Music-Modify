@@ -4,7 +4,8 @@ import os
 from typing import cast
 
 from mutagen.id3 import ID3
-from music_modify.prefs.settings import settings
+
+from music_modify.prefs import settings
 
 
 class Song:

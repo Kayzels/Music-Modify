@@ -8,8 +8,8 @@ from PySide6.QtCore import (
     Qt,
     QSortFilterProxyModel,
 )
-from music_modify.models.song_repository import SongRepository
-from music_modify.prefs.settings import settings
+from .song_repository import SongRepository
+from music_modify.prefs import settings
 
 
 class SongTableModel(QAbstractTableModel):

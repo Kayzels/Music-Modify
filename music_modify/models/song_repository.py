@@ -1,4 +1,4 @@
-from music_modify.types.song import Song
+from music_modify.types import Song
 
 
 class SongRepository:

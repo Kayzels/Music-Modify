@@ -4,7 +4,7 @@ from typing import Final
 from mutagen import id3
 from mutagen.id3 import Frames, ID3
 
-from music_modify.types.enums import TagType
+from .enums import TagType
 
 
 class SongTag:

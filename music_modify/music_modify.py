@@ -1,8 +1,7 @@
 import sys
 from PySide6.QtWidgets import QApplication, QMainWindow
-from music_modify.gui.window_main import Ui_MainWindow
-from music_modify.models.song_repository import SongRepository
-from music_modify.models.song_models import SongTableModel
+from music_modify.gui import Ui_MainWindow
+from music_modify.models import SongTableModel, SongRepository
 from typing import Final
 
 

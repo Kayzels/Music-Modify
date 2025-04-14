@@ -1,5 +1,5 @@
-from music_modify.types.songtag import SongTag
-from music_modify.prefs.settings import settings
+from music_modify.types import SongTag
+from music_modify.prefs import settings
 
 
 def map_tag(display_name: str) -> SongTag | None:
