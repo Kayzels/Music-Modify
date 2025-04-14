@@ -1,3 +1,3 @@
-from .tag_utils import map_tag, map_optional_tag
+from .tag_utils import mapTag, mapOptionalTag
 
-__all__ = ["map_tag", "map_optional_tag"]
+__all__ = ["mapTag", "mapOptionalTag"]

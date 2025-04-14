@@ -29,7 +29,7 @@ class SongTableModel(QAbstractTableModel):
             return None
 
         if role == Qt.ItemDataRole.DisplayRole:
-            song = self.repository.get_songs()[index.row()]
+            song = self.repository.getSongs()[index.row()]
             tag_info = song.display_info[index.column()]
             return tag_info
         return None
@@ -75,7 +75,7 @@ class SongTableProxyModel(QSortFilterProxyModel):
     def filterAcceptsRow(self, source_row: int, _: QModelIndex) -> bool:
         return source_row in self.selected_rows
 
-    def change_model_indexes(self, model_indexes: list[QModelIndex]):
+    def changeModelIndexes(self, model_indexes: list[QModelIndex]):
         self.model_indexes = model_indexes
         self.selected_rows = [model_index.row() for model_index in self.model_indexes]
         self.invalidateFilter()

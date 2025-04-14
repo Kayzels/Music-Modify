@@ -14,16 +14,16 @@ class Song:
     def __init__(self, file: str | os.PathLike[str]):
         self.file: str | os.PathLike[str] = file
         self.id3: ID3 = ID3(file)
-        self.display_info: list[str] = self._generate_columns()
+        self.display_info: list[str] = self._generateColumns()
 
-    def _generate_columns(self) -> list[str]:
+    def _generateColumns(self) -> list[str]:
         info: list[str] = []
         display_split = settings.split_values_display
         for column in settings.file_tags:
             data_string = ""
             current_data: list[str] | list[list[str]] | None
             try:
-                current_data = column.get_tag(self.id3)
+                current_data = column.getTag(self.id3)
                 if current_data in [[], None]:
                     data_string = "-"
                 elif len(column) == 1:
@@ -49,4 +49,4 @@ class Song:
 
     def save(self):
         self.id3.save(v2_version=4)
-        self.display_info = self._generate_columns()
+        self.display_info = self._generateColumns()

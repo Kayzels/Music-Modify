@@ -2,7 +2,7 @@ from music_modify.custom_types import SongTag
 from music_modify.prefs import settings
 
 
-def map_tag(display_name: str) -> SongTag | None:
+def mapTag(display_name: str) -> SongTag | None:
     """When given a display_name, determines which tag it refers to.
     If the tag doesn't exist, returns None."""
     found_tag = list(
@@ -13,7 +13,7 @@ def map_tag(display_name: str) -> SongTag | None:
     return found_tag[0]
 
 
-def map_optional_tag(tag_name: str, optional_name: str) -> SongTag | None:
+def mapOptionalTag(tag_name: str, optional_name: str) -> SongTag | None:
     """Gets the tag from the given tag name.
     If the tag is None, gets the tag from the optional name.
 
@@ -22,7 +22,7 @@ def map_optional_tag(tag_name: str, optional_name: str) -> SongTag | None:
     tag_name: str - Display name of the tag to get
     optional_name: str - Display name of the tag to get if the original tag doesn't exist
     """
-    tag = map_tag(tag_name)
+    tag = mapTag(tag_name)
     if tag is None:
-        tag = map_tag(optional_name)
+        tag = mapTag(optional_name)
     return tag

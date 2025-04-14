@@ -13,7 +13,7 @@ class SongTag:
     def __init__(self, display_name: str, id3_key: str):
         self._id3_key: Final[str] = display_name
         self._display_name: Final[str] = display_name
-        self._frame_type: Final[TagType] = SongTag.get_frame_type(display_name)
+        self._frame_type: Final[TagType] = SongTag._getFrameType(display_name)
 
     @property
     def id3_key(self) -> str:
@@ -28,7 +28,7 @@ class SongTag:
         return self._frame_type
 
     @staticmethod
-    def get_frame_type(tag_name: str) -> TagType:
+    def _getFrameType(tag_name: str) -> TagType:
         """Depending on the tag, determines the list name of the type of
         data that is stored."""
         if "TXXX" in tag_name:
@@ -49,7 +49,7 @@ class SongTag:
         Returns 2 if the format is [role, person]"""
         return 2 if self.frame_type == TagType.People else 1
 
-    def get_tag(self, song: ID3) -> list[str] | list[list[str]] | None:
+    def getTag(self, song: ID3) -> list[str] | list[list[str]] | None:
         """Gets the current data for this tag in the sent song.
         Returns None if tag is not in song, or empty."""
         try:
@@ -59,23 +59,23 @@ class SongTag:
         except AttributeError:
             return None
 
-    def set_tag(self, song: ID3, values: list[str] | list[list[str]]) -> None:
+    def setTag(self, song: ID3, values: list[str] | list[list[str]]) -> None:
         """Sets the tag for this song to contain the values that are sent."""
-        if not self.has_tag(song):
-            self.generate_frame(song)
+        if not self.hasTag(song):
+            self.generateFrame(song)
         setattr(song[self.id3_key], self.frame_type.value, values)
 
-    def has_tag(self, song: ID3) -> bool:
+    def hasTag(self, song: ID3) -> bool:
         """Checks whether the existing tag object is in the ID3 song."""
         return self.id3_key in song
 
-    def remove_tag(self, song: ID3) -> None:
+    def removeTag(self, song: ID3) -> None:
         """Removes the SongTag object(s) with this name from the ID3 file."""
         song.delall(self.id3_key)
 
-    def generate_frame(self, song: ID3) -> None:
+    def generateFrame(self, song: ID3) -> None:
         """Creates a frame object of the SongTag in the ID3 file."""
-        if self.has_tag(song):
+        if self.hasTag(song):
             return
         encoding = id3.Encoding.UTF8
         try:

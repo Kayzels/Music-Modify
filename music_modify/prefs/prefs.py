@@ -6,8 +6,8 @@ from music_modify.custom_types.songtag import SongTag
 @final
 class _Settings:
     def __init__(self):
-        self._settings: QSettings = QSettings()
-        self._initialize_defaults()
+        self._settings: QSettings = QSettings("Kayzels", "Music Modify")
+        self._initializeDefaults()
 
     @property
     def split_text_entered(self) -> str:
@@ -139,7 +139,7 @@ class _Settings:
     def all_tags(self) -> list[SongTag]:
         return self.standard_tags + self.custom_tags
 
-    def _initialize_defaults(self):
+    def _initializeDefaults(self):
         if not self._settings.contains("Split/split_text_entered"):
             self.split_text_entered = ","
         if not self._settings.contains("Split/split_values_display"):
