@@ -24,3 +24,7 @@ class SongRepository(QObject):
     def addFiles(self, files: list[str] | list[PathLike[str]]):
         for file in files:
             self.addFile(file)
+
+    def clearFiles(self):
+        self._songs.clear()
+        self.songs_updated.emit()

@@ -60,6 +60,8 @@
     </property>
     <addaction name="action_add_files"/>
     <addaction name="action_add_folder"/>
+    <addaction name="action_clear_files"/>
+    <addaction name="action_remove_selected"/>
    </widget>
    <widget class="QMenu" name="menu_view">
     <property name="title">
@@ -70,21 +72,20 @@
     <property name="title">
      <string>Edit</string>
     </property>
-   </widget>
-   <widget class="QMenu" name="menu_settings">
-    <property name="title">
-     <string>Settings</string>
-    </property>
+    <addaction name="action_select_all"/>
+    <addaction name="action_select_none"/>
+    <addaction name="separator"/>
+    <addaction name="action_preferences"/>
    </widget>
    <widget class="QMenu" name="menu_help">
     <property name="title">
      <string>Help</string>
     </property>
+    <addaction name="action_about"/>
    </widget>
    <addaction name="menu_file"/>
    <addaction name="menu_edit"/>
    <addaction name="menu_view"/>
-   <addaction name="menu_settings"/>
    <addaction name="menu_help"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
@@ -103,10 +104,12 @@
    </attribute>
    <addaction name="action_add_files"/>
    <addaction name="action_add_folder"/>
+   <addaction name="action_clear_files"/>
+   <addaction name="action_remove_selected"/>
   </widget>
   <action name="action_add_files">
    <property name="icon">
-    <iconset theme="document-new"/>
+    <iconset theme="QIcon::ThemeIcon::DocumentNew"/>
    </property>
    <property name="text">
     <string>Add Files</string>
@@ -120,13 +123,88 @@
   </action>
   <action name="action_add_folder">
    <property name="icon">
-    <iconset theme="folder-new"/>
+    <iconset theme="QIcon::ThemeIcon::FolderNew"/>
    </property>
    <property name="text">
     <string>Add Folder</string>
    </property>
    <property name="toolTip">
     <string>Add Folder</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::MenuRole::NoRole</enum>
+   </property>
+  </action>
+  <action name="action_clear_files">
+   <property name="icon">
+    <iconset theme="QIcon::ThemeIcon::ListRemove"/>
+   </property>
+   <property name="text">
+    <string>Clear Files</string>
+   </property>
+   <property name="toolTip">
+    <string>Remove all added files from the table</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::MenuRole::NoRole</enum>
+   </property>
+  </action>
+  <action name="action_select_all">
+   <property name="icon">
+    <iconset theme="QIcon::ThemeIcon::EditSelectAll"/>
+   </property>
+   <property name="text">
+    <string>Select All</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+A</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::MenuRole::NoRole</enum>
+   </property>
+  </action>
+  <action name="action_preferences">
+   <property name="text">
+    <string>Preferences...</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+,</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::MenuRole::NoRole</enum>
+   </property>
+  </action>
+  <action name="action_select_none">
+   <property name="text">
+    <string>Select None</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+A</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::MenuRole::NoRole</enum>
+   </property>
+  </action>
+  <action name="action_about">
+   <property name="icon">
+    <iconset theme="QIcon::ThemeIcon::HelpAbout"/>
+   </property>
+   <property name="text">
+    <string>About Music Modify...</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::MenuRole::NoRole</enum>
+   </property>
+  </action>
+  <action name="action_remove_selected">
+   <property name="icon">
+    <iconset theme="QIcon::ThemeIcon::EditDelete"/>
+   </property>
+   <property name="text">
+    <string>Remove Selected</string>
+   </property>
+   <property name="toolTip">
+    <string>Removes the selected files from the app</string>
    </property>
    <property name="menuRole">
     <enum>QAction::MenuRole::NoRole</enum>

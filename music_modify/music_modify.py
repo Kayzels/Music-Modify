@@ -37,12 +37,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.files_table_view.dragEnterEvent = self.processTableDragEvent
         self.files_table_view.dragMoveEvent = self.processTableDragEvent
 
+        # Actions
         self.action_add_files.triggered.connect(
             lambda: self.openAddDialog(QFileDialog.FileMode.ExistingFiles)
         )
         self.action_add_folder.triggered.connect(
             lambda: self.openAddDialog(QFileDialog.FileMode.Directory)
         )
+        self.action_clear_files.triggered.connect(self.songs_repository.clearFiles)
 
     def openAddDialog(self, file_mode: QFileDialog.FileMode):
         files_dialog = QFileDialog(self)
