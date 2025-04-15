@@ -16,9 +16,9 @@ from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
     QIcon, QImage, QKeySequence, QLinearGradient,
     QPainter, QPalette, QPixmap, QRadialGradient,
     QTransform)
-from PySide6.QtWidgets import (QApplication, QHeaderView, QMainWindow, QMenu,
-    QMenuBar, QSizePolicy, QStatusBar, QTableView,
-    QToolBar, QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QAbstractItemView, QApplication, QHeaderView, QMainWindow,
+    QMenu, QMenuBar, QSizePolicy, QStatusBar,
+    QTableView, QToolBar, QVBoxLayout, QWidget)
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -42,6 +42,9 @@ class Ui_MainWindow(object):
         self.verticalLayout_2.setContentsMargins(0, 0, 0, 0)
         self.files_table_view = QTableView(self.centralwidget)
         self.files_table_view.setObjectName(u"files_table_view")
+        self.files_table_view.setDragDropMode(QAbstractItemView.DragDropMode.DropOnly)
+        self.files_table_view.setAlternatingRowColors(True)
+        self.files_table_view.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
         self.files_table_view.horizontalHeader().setStretchLastSection(True)
 
         self.verticalLayout_2.addWidget(self.files_table_view)

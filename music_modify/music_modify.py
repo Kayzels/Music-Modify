@@ -6,10 +6,16 @@ import sys
 import time
 from typing import Final
 
-from PySide6.QtWidgets import QApplication, QFileDialog, QMainWindow, QProgressDialog
+from PySide6.QtGui import QDragEnterEvent, QDragMoveEvent, QDropEvent
+from PySide6.QtWidgets import (
+    QApplication,
+    QFileDialog,
+    QMainWindow,
+    QProgressDialog,
+)
 from music_modify.gui import Ui_MainWindow
 from music_modify.models import SongTableModel, SongRepository
-from music_modify.utils import formatTime
+from music_modify.utils import formatTime, updateTableView
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):
@@ -21,6 +27,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.songs_model: Final[SongTableModel] = SongTableModel(self.songs_repository)
         self.files_table_view.setModel(self.songs_model)
         self.files_table_view.resizeColumnsToContents()
+        self.songs_repository.songs_updated.connect(
+            lambda: updateTableView(self.files_table_view, self.songs_repository)
+        )
+
+        # Drag and Drop
+        self.files_table_view.setAcceptDrops(True)
+        self.files_table_view.dropEvent = self.processTableDropEvents
+        self.files_table_view.dragEnterEvent = self.processTableDragEvent
+        self.files_table_view.dragMoveEvent = self.processTableDragEvent
 
         self.action_add_files.triggered.connect(
             lambda: self.openAddDialog(QFileDialog.FileMode.ExistingFiles)
@@ -80,6 +95,37 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             if progress_dialog.wasCanceled():
                 break
         progress_dialog.setValue(len(files))
+
+    def processTableDragEvent(self, event: QDragEnterEvent | QDragMoveEvent):
+        if event.mimeData().hasUrls():
+            event.acceptProposedAction()
+        else:
+            print(f"Unsupported mimedata: {event.mimeData()}")
+
+    def processTableDropEvents(self, event: QDropEvent):
+        """Processes the mimedata dropped on the tableview.
+
+        Information
+        ___________
+        If the mimedata is not a list of urls, rejects.
+        Determines whether the url is a file or folder,
+        and then adds to the table."""
+        files: list[str] | list[os.PathLike[str]] = []
+        folders: list[str] | list[os.PathLike[str]] = []
+        for url in event.mimeData().urls():
+            if url.toLocalFile().endswith(".mp3"):
+                event.acceptProposedAction()
+                files.append(url.toLocalFile())
+            elif os.path.isdir(url.toLocalFile()):
+                event.acceptProposedAction()
+                folders.append(url.toLocalFile())
+        if files:
+            self.addFiles(files)
+        if folders:
+            new_files: list[str] | list[os.PathLike[str]] = []
+            for folder in folders:
+                new_files.extend(self.getFolderFiles(folder))
+            self.addFiles(new_files)
 
 
 def main():
