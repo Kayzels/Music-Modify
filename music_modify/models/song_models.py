@@ -18,6 +18,7 @@ class SongTableModel(QAbstractTableModel):
     def __init__(self, repository: SongRepository):
         super().__init__()
         self.repository: SongRepository = repository
+        self.repository.songs_updated.connect(self.layoutChanged.emit)
 
     @override
     def data(

@@ -46,18 +46,18 @@ class _Settings:
         self._settings.setValue("Split/split_values_at", value)
 
     default_file_tags: list[SongTag] = [
-        SongTag("Track", "TRCK"),
-        SongTag("Title", "TIT2"),
-        SongTag("Artist", "TPE1"),
-        SongTag("Album Artist", "TPE2"),
-        SongTag("Album", "TALB"),
-        SongTag("Composer", "TCOM"),
-        SongTag("Lyricist", "TEXT"),
-        SongTag("Language", "TLAN"),
-        SongTag("BPM", "TBPM"),
-        SongTag("Key", "TKEY"),
-        SongTag("Involved People", "TIPL"),
-        SongTag("Musician Credits", "TMCL"),
+        SongTag(display_name="Track", id3_key="TRCK"),
+        SongTag(display_name="Title", id3_key="TIT2"),
+        SongTag(display_name="Artist", id3_key="TPE1"),
+        SongTag(display_name="Album Artist", id3_key="TPE2"),
+        SongTag(display_name="Album", id3_key="TALB"),
+        SongTag(display_name="Composer", id3_key="TCOM"),
+        SongTag(display_name="Lyricist", id3_key="TEXT"),
+        SongTag(display_name="Language", id3_key="TLAN"),
+        SongTag(display_name="BPM", id3_key="TBPM"),
+        SongTag(display_name="Key", id3_key="TKEY"),
+        SongTag(display_name="Involved People", id3_key="TIPL"),
+        SongTag(display_name="Musician Credits", id3_key="TMCL"),
     ]
 
     @property
@@ -73,19 +73,19 @@ class _Settings:
         self._settings.setValue("Tags/file_tags", value)
 
     default_standard_tags: list[SongTag] = default_file_tags + [
-        SongTag("Sort Composer", "TSOC"),
-        SongTag("Conductor", "TPE3"),
-        SongTag("Year", "TDRC"),
-        SongTag("Original Album", "TOAL"),
-        SongTag("Original Artist", "TOPE"),
-        SongTag("Subtitle", "TIT3"),
-        SongTag("Disc Number", "TPOS"),
-        SongTag("Set Subtitle", "TSST"),
-        SongTag("Sort Artist", "TSOP"),
-        SongTag("Sort Album Artist", "TSO2"),
-        SongTag("Genre", "TCON"),
-        SongTag("Publisher", "TPUB"),
-        SongTag("Mood", "TMOO"),
+        SongTag(display_name="Sort Composer", id3_key="TSOC"),
+        SongTag(display_name="Conductor", id3_key="TPE3"),
+        SongTag(display_name="Year", id3_key="TDRC"),
+        SongTag(display_name="Original Album", id3_key="TOAL"),
+        SongTag(display_name="Original Artist", id3_key="TOPE"),
+        SongTag(display_name="Subtitle", id3_key="TIT3"),
+        SongTag(display_name="Disc Number", id3_key="TPOS"),
+        SongTag(display_name="Set Subtitle", id3_key="TSST"),
+        SongTag(display_name="Sort Artist", id3_key="TSOP"),
+        SongTag(display_name="Sort Album Artist", id3_key="TSO2"),
+        SongTag(display_name="Genre", id3_key="TCON"),
+        SongTag(display_name="Publisher", id3_key="TPUB"),
+        SongTag(display_name="Mood", id3_key="TMOO"),
     ]
 
     @property
@@ -101,25 +101,25 @@ class _Settings:
         self._settings.setValue("Tags/standard_tags", value)
 
     default_custom_tags: list[SongTag] = [
-        SongTag("Display Composer", "TXXX:DISPLAY COMPOSER"),
-        SongTag("Release Date", "TXXX:RELEASE DATE"),
-        SongTag("Original Year", "TXXX:originalyear"),
-        SongTag("Scrobble Title", "TXXX:SCROBBLE TITLE"),
-        SongTag("Track Name", "TXXX:TRACK NAME"),
-        SongTag("Song Type", "TXXX:SONG TYPE"),
-        SongTag("Scrobble Album", "TXXX:SCROBBLE ALBUM"),
-        SongTag("Album Name", "TXXX:ALBUM NAME"),
-        SongTag("Album Type", "TXXX:ALBUM TYPE"),
-        SongTag("Album Version", "TXXX:ALBUM VERSION"),
-        SongTag("Scrobble Artist", "TXXX:SCROBBLE ARTIST"),
-        SongTag("Artist Shown", "TXXX:ARTIST SHOWN"),
-        SongTag("Display Artist", "TXXX:DISPLAY ARTIST"),
-        SongTag("Label", "TXXX:LABEL"),
-        SongTag("Performer", "TXXX:PERFORMER"),
-        SongTag("Remixer", "TXXX:REMIXER"),
-        SongTag("Occasion", "TXXX:OCCASION"),
-        SongTag("Keywords", "TXXX:KEYWORDS"),
-        SongTag("Tempo", "TXXX:TEMPO"),
+        SongTag(display_name="Display Composer", id3_key="TXXX:DISPLAY COMPOSER"),
+        SongTag(display_name="Release Date", id3_key="TXXX:RELEASE DATE"),
+        SongTag(display_name="Original Year", id3_key="TXXX:originalyear"),
+        SongTag(display_name="Scrobble Title", id3_key="TXXX:SCROBBLE TITLE"),
+        SongTag(display_name="Track Name", id3_key="TXXX:TRACK NAME"),
+        SongTag(display_name="Song Type", id3_key="TXXX:SONG TYPE"),
+        SongTag(display_name="Scrobble Album", id3_key="TXXX:SCROBBLE ALBUM"),
+        SongTag(display_name="Album Name", id3_key="TXXX:ALBUM NAME"),
+        SongTag(display_name="Album Type", id3_key="TXXX:ALBUM TYPE"),
+        SongTag(display_name="Album Version", id3_key="TXXX:ALBUM VERSION"),
+        SongTag(display_name="Scrobble Artist", id3_key="TXXX:SCROBBLE ARTIST"),
+        SongTag(display_name="Artist Shown", id3_key="TXXX:ARTIST SHOWN"),
+        SongTag(display_name="Display Artist", id3_key="TXXX:DISPLAY ARTIST"),
+        SongTag(display_name="Label", id3_key="TXXX:LABEL"),
+        SongTag(display_name="Performer", id3_key="TXXX:PERFORMER"),
+        SongTag(display_name="Remixer", id3_key="TXXX:REMIXER"),
+        SongTag(display_name="Occasion", id3_key="TXXX:OCCASION"),
+        SongTag(display_name="Keywords", id3_key="TXXX:KEYWORDS"),
+        SongTag(display_name="Tempo", id3_key="TXXX:TEMPO"),
     ]
 
     @property

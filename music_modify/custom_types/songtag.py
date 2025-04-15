@@ -11,9 +11,9 @@ class SongTag:
     """Object representing an ID3 tag"""
 
     def __init__(self, display_name: str, id3_key: str):
-        self._id3_key: Final[str] = display_name
+        self._id3_key: Final[str] = id3_key
         self._display_name: Final[str] = display_name
-        self._frame_type: Final[TagType] = SongTag._getFrameType(display_name)
+        self._frame_type: Final[TagType] = SongTag._getFrameType(id3_key)
 
     @property
     def id3_key(self) -> str:
@@ -28,20 +28,23 @@ class SongTag:
         return self._frame_type
 
     @staticmethod
-    def _getFrameType(tag_name: str) -> TagType:
+    def _getFrameType(id3_key: str) -> TagType:
         """Depending on the tag, determines the list name of the type of
-        data that is stored."""
-        if "TXXX" in tag_name:
+        data that is stored.
+        This is needed to extract the correct type of data from the tag later."""
+        if "TXXX" in id3_key:
             tag_frame = getattr(id3, "TXXX").__base__
         else:
             try:
-                tag_frame = getattr(id3, tag_name).__base__
+                tag_frame = getattr(id3, id3_key).__base__
             except AttributeError:
                 return TagType.Text
         if tag_frame == id3.PairedTextFrame:
             return TagType.People
         elif tag_frame in (id3.UrlFrame, id3.UrlFrameU):
             return TagType.Url
+        elif tag_frame == id3.BinaryFrame:
+            return TagType.Data
         return TagType.Text
 
     def __len__(self) -> int:
@@ -53,10 +56,20 @@ class SongTag:
         """Gets the current data for this tag in the sent song.
         Returns None if tag is not in song, or empty."""
         try:
+            # NOTE: Done like this because the frame type changes,
+            # and there is no quick way to directly extract the right type.
+            # The result of song[self.id3_key] looks like
+            # [TRCK(encoding=<Encoding.LATIN1: 0>, text=['1/16'])]
+            # The 'text' field there changes depending on the frame type.
+            # The most common types are 'text', 'people', 'url', and 'data'.
             return getattr(song[self.id3_key], self.frame_type.value)
         except KeyError:
+            # Happens if trying to get a key from a song that doesn't have it.
+            # For example, if a song hasn't got a composer (TCOM) set,
+            # this will happen.
             return None
         except AttributeError:
+            # Shouldn't happen: means trying to get the wrong frame type.
             return None
 
     def setTag(self, song: ID3, values: list[str] | list[list[str]]) -> None:

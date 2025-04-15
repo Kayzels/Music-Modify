@@ -37,7 +37,7 @@ class Song:
                     tag_values: list[str] = []
                     for value in current_data:
                         if len(value) == 2:
-                            tag_values.append(f"{value[0]}:{value:1}")
+                            tag_values.append(f"{value[0]}:{value[1]}")
                         else:
                             print(f"Value has an invalid length: {value}")
                             continue
