@@ -56,6 +56,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         )
         self.action_clear_files.triggered.connect(self.clearFiles)
         self.action_remove_selected.triggered.connect(self.removeSelectedFiles)
+        self.action_select_all.triggered.connect(self.files_table_view.selectAll)
+        self.action_select_none.triggered.connect(self.files_table_view.clearSelection)
 
         self.setActionState()
         self.updateStatusbarMessage()
