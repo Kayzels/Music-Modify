@@ -28,3 +28,13 @@ class SongRepository(QObject):
     def clearFiles(self):
         self._songs.clear()
         self.songs_updated.emit()
+
+    def removeSongs(self, indexes: list[int]):
+        if not indexes:
+            return
+        # NOTE: Sort the indexes and make sure they're reversed,
+        # to avoid shifting indexes when deleting
+        indexes = sorted(indexes, reverse=True)
+        for index in indexes:
+            self._songs.pop(index)
+        self.songs_updated.emit()

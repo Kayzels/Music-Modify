@@ -4,7 +4,7 @@ from os import PathLike
 from pathlib import Path
 import sys
 import time
-from typing import Final
+from typing import Final, cast
 
 from PySide6.QtGui import QDragEnterEvent, QDragMoveEvent, QDropEvent
 from PySide6.QtWidgets import (
@@ -13,6 +13,7 @@ from PySide6.QtWidgets import (
     QMainWindow,
     QProgressDialog,
 )
+from PySide6.QtCore import QModelIndex, QSortFilterProxyModel
 from music_modify.gui import Ui_MainWindow
 from music_modify.models import SongTableModel, SongRepository
 from music_modify.utils import formatTime, updateTableView
@@ -52,6 +53,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             lambda: self.openAddDialog(QFileDialog.FileMode.Directory)
         )
         self.action_clear_files.triggered.connect(self.clearFiles)
+        self.action_remove_selected.triggered.connect(self.removeSelectedFiles)
 
         self.setActionState()
 
@@ -173,6 +175,34 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             )
         else:
             self.statusbar.showMessage("")
+
+    def removeSelectedFiles(self):
+        """Removes the files at the indexes provided by the selectionModel"""
+        selectionLength = self.getSelectionLength()
+        if selectionLength == 0:
+            # NOTE: This should never need to be checked:
+            # the button is disabled when there's no selection
+            # But keeping the check here in case
+            return
+        if selectionLength == len(self.songs_repository):
+            self.songs_repository.clearFiles()
+        selection: list[QModelIndex] = (
+            self.files_table_view.selectionModel().selectedRows()
+        )
+
+        # NOTE: Map to source model if filtering or sorting using a Proxy model is used
+        source_indexes: list[QModelIndex] = [
+            cast(QSortFilterProxyModel, self.files_table_view.model()).mapToSource(
+                index
+            )
+            if isinstance(self.files_table_view.model(), QSortFilterProxyModel)
+            else index
+            for index in selection
+        ]
+
+        self.songs_repository.removeSongs([index.row() for index in source_indexes])
+
+        self.files_table_view.clearSelection()
 
 
 def main():
