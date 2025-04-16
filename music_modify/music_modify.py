@@ -9,15 +9,23 @@ from typing import Final, cast
 from PySide6.QtGui import QDragEnterEvent, QDragMoveEvent, QDropEvent
 from PySide6.QtWidgets import (
     QApplication,
+    QDialog,
     QFileDialog,
     QLabel,
     QMainWindow,
     QProgressDialog,
+    QWidget,
 )
 from PySide6.QtCore import QModelIndex, QSortFilterProxyModel
-from music_modify.gui import Ui_MainWindow
+from music_modify.gui import Ui_MainWindow, Ui_AboutDialog
 from music_modify.models import SongTableModel, SongRepository
 from music_modify.utils import formatTime, updateTableView
+
+
+class AboutDialog(QDialog, Ui_AboutDialog):
+    def __init__(self, parent: QWidget | None = None):
+        QDialog.__init__(self, parent)
+        self.setupUi(self)  # pyright: ignore[reportUnknownMemberType]
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):
@@ -58,6 +66,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.action_remove_selected.triggered.connect(self.removeSelectedFiles)
         self.action_select_all.triggered.connect(self.files_table_view.selectAll)
         self.action_select_none.triggered.connect(self.files_table_view.clearSelection)
+        self.action_about.triggered.connect(self.showAboutDialog)
 
         self.setActionState()
         self.updateStatusbarMessage()
@@ -210,6 +219,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def addStatusbarAppMessage(self, appName: str, appVersion: str):
         self.statusbar.addPermanentWidget(QLabel(f"{appName} {appVersion}"))
+
+    def showAboutDialog(self):
+        about_dialog = AboutDialog(self)
+        about_dialog.show()
 
 
 def main():
