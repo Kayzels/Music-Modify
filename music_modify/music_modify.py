@@ -27,9 +27,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.songs_model: Final[SongTableModel] = SongTableModel(self.songs_repository)
         self.files_table_view.setModel(self.songs_model)
         self.files_table_view.resizeColumnsToContents()
+        self.files_table_view.selectionModel().selectionChanged.connect(
+            self.updateStatusbarSelectionMessage
+        )
+        self.files_table_view.selectionModel().selectionChanged.connect(
+            self.setSelectionActionState
+        )
         self.songs_repository.songs_updated.connect(
             lambda: updateTableView(self.files_table_view, self.songs_repository)
         )
+        self.songs_repository.songs_updated.connect(self.setFileActionState)
 
         # Drag and Drop
         self.files_table_view.setAcceptDrops(True)
@@ -44,7 +51,24 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.action_add_folder.triggered.connect(
             lambda: self.openAddDialog(QFileDialog.FileMode.Directory)
         )
-        self.action_clear_files.triggered.connect(self.songs_repository.clearFiles)
+        self.action_clear_files.triggered.connect(self.clearFiles)
+
+        self.setActionState()
+
+    def setActionState(self):
+        self.setFileActionState()
+        self.setSelectionActionState()
+
+    def setSelectionActionState(self):
+        self.action_select_all.setEnabled(len(self.songs_repository) > 0)
+
+        has_selection = self.getSelectionLength() > 0
+        self.action_select_none.setEnabled(has_selection)
+        self.action_remove_selected.setEnabled(has_selection)
+
+    def setFileActionState(self):
+        self.action_clear_files.setEnabled(len(self.songs_repository) > 0)
+        self.setSelectionActionState()
 
     def openAddDialog(self, file_mode: QFileDialog.FileMode):
         files_dialog = QFileDialog(self)
@@ -97,6 +121,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             if progress_dialog.wasCanceled():
                 break
         progress_dialog.setValue(len(files))
+        # self.action_clear_files.setEnabled(len(self.songs_repository) > 0)
+        # # if len(self.songs_repository) > 0:
+        # #     self.setFilesState(True)
 
     def processTableDragEvent(self, event: QDragEnterEvent | QDragMoveEvent):
         if event.mimeData().hasUrls():
@@ -128,6 +155,24 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             for folder in folders:
                 new_files.extend(self.getFolderFiles(folder))
             self.addFiles(new_files)
+
+    def clearFiles(self):
+        self.songs_model.layoutAboutToBeChanged.emit()
+        self.songs_repository.clearFiles()
+        self.files_table_view.clearSelection()
+        self.action_clear_files.setEnabled(False)
+
+    def getSelectionLength(self) -> int:
+        return len(self.files_table_view.selectionModel().selectedRows())
+
+    def updateStatusbarSelectionMessage(self):
+        selected_length = self.getSelectionLength()
+        if selected_length > 0:
+            self.statusbar.showMessage(
+                f"{selected_length} file{'s' if selected_length > 1 else ''} selected."
+            )
+        else:
+            self.statusbar.showMessage("")
 
 
 def main():
