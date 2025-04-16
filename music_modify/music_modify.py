@@ -10,6 +10,7 @@ from PySide6.QtGui import QDragEnterEvent, QDragMoveEvent, QDropEvent
 from PySide6.QtWidgets import (
     QApplication,
     QFileDialog,
+    QLabel,
     QMainWindow,
     QProgressDialog,
 )
@@ -29,7 +30,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.files_table_view.setModel(self.songs_model)
         self.files_table_view.resizeColumnsToContents()
         self.files_table_view.selectionModel().selectionChanged.connect(
-            self.updateStatusbarSelectionMessage
+            self.updateStatusbarMessage
         )
         self.files_table_view.selectionModel().selectionChanged.connect(
             self.setSelectionActionState
@@ -38,6 +39,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             lambda: updateTableView(self.files_table_view, self.songs_repository)
         )
         self.songs_repository.songs_updated.connect(self.setFileActionState)
+        self.songs_repository.songs_updated.connect(self.updateStatusbarMessage)
 
         # Drag and Drop
         self.files_table_view.setAcceptDrops(True)
@@ -56,6 +58,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.action_remove_selected.triggered.connect(self.removeSelectedFiles)
 
         self.setActionState()
+        self.updateStatusbarMessage()
 
     def setActionState(self):
         self.setFileActionState()
@@ -167,14 +170,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def getSelectionLength(self) -> int:
         return len(self.files_table_view.selectionModel().selectedRows())
 
-    def updateStatusbarSelectionMessage(self):
+    def updateStatusbarMessage(self):
+        num_songs = len(self.songs_repository)
+        message: str = f"{num_songs} songs"
         selected_length = self.getSelectionLength()
         if selected_length > 0:
-            self.statusbar.showMessage(
-                f"{selected_length} file{'s' if selected_length > 1 else ''} selected."
-            )
-        else:
-            self.statusbar.showMessage("")
+            message += f" [{selected_length} selected]"
+        self.statusbar.showMessage(message)
 
     def removeSelectedFiles(self):
         """Removes the files at the indexes provided by the selectionModel"""
@@ -204,13 +206,18 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.files_table_view.clearSelection()
 
+    def addStatusbarAppMessage(self, appName: str, appVersion: str):
+        self.statusbar.addPermanentWidget(QLabel(f"{appName} {appVersion}"))
+
 
 def main():
     app = QApplication(sys.argv)
     app.setOrganizationName("Kayzels")
     app.setApplicationName("Music Modify")
+    app.setApplicationVersion("2.0.0")
 
     window = MainWindow()
+    window.addStatusbarAppMessage(app.applicationName(), app.applicationVersion())
     window.show()
     sys.exit(app.exec())
 
