@@ -16,3 +16,5 @@ class TagDialog(QDialog, Ui_TagDialog):
 
         self.model: TagModel = TagModel(tags)
         self.tag_table.setModel(self.model)
+        if tag_group == TagGroup.CustomTags:
+            self.tag_table.resizeColumnsToContents()

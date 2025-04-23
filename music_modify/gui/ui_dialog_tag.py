@@ -23,11 +23,15 @@ class Ui_TagDialog(object):
     def setupUi(self, TagDialog):
         if not TagDialog.objectName():
             TagDialog.setObjectName(u"TagDialog")
-        TagDialog.resize(655, 434)
+        TagDialog.resize(389, 434)
         self.verticalLayout = QVBoxLayout(TagDialog)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.tag_table = QTableView(TagDialog)
         self.tag_table.setObjectName(u"tag_table")
+        self.tag_table.setAlternatingRowColors(True)
+        self.tag_table.setShowGrid(True)
+        self.tag_table.horizontalHeader().setStretchLastSection(True)
+        self.tag_table.verticalHeader().setVisible(False)
 
         self.verticalLayout.addWidget(self.tag_table)
 
