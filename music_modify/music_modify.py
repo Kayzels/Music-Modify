@@ -15,9 +15,10 @@ from PySide6.QtWidgets import (
     QProgressDialog,
 )
 from PySide6.QtCore import QModelIndex, QSortFilterProxyModel
-from music_modify.gui import Ui_MainWindow, AboutDialog
+from music_modify.gui import Ui_MainWindow, AboutDialog, PrefsDialog
 from music_modify.models import SongTableModel, SongRepository
 from music_modify.utils import formatTime, updateTableView
+from music_modify.prefs import settings
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):
@@ -59,6 +60,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.action_select_all.triggered.connect(self.files_table_view.selectAll)
         self.action_select_none.triggered.connect(self.files_table_view.clearSelection)
         self.action_about.triggered.connect(self.showAboutDialog)
+        self.action_preferences.triggered.connect(self.showPrefsDialog)
 
         self.setActionState()
         self.updateStatusbarMessage()
@@ -215,6 +217,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def showAboutDialog(self):
         about_dialog = AboutDialog(self)
         about_dialog.show()
+
+    def showPrefsDialog(self):
+        prefs_dialog = PrefsDialog(parent=self)
+        prefs_dialog.show()
 
 
 def main():
