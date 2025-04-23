@@ -1,0 +1,14 @@
+from PySide6.QtWidgets import QDialog, QWidget
+
+from music_modify.custom_types.enums import TagGroup
+from .ui_dialog_tag import Ui_TagDialog
+from music_modify.custom_types import SongTag
+
+
+class TagDialog(QDialog, Ui_TagDialog):
+    def __init__(
+        self, parent: QWidget | None, tags: list[SongTag], tag_group: TagGroup
+    ):
+        super().__init__(parent)
+        self.setupUi(self)  # pyright: ignore[reportUnknownMemberType]
+        self.setWindowTitle(tag_group.value)
