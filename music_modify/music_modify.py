@@ -1,11 +1,12 @@
 import datetime
 import os
-from os import PathLike
-from pathlib import Path
 import sys
 import time
+from os import PathLike
+from pathlib import Path
 from typing import Final, cast
 
+from PySide6.QtCore import QModelIndex, QSortFilterProxyModel
 from PySide6.QtGui import QDragEnterEvent, QDragMoveEvent, QDropEvent
 from PySide6.QtWidgets import (
     QApplication,
@@ -14,11 +15,10 @@ from PySide6.QtWidgets import (
     QMainWindow,
     QProgressDialog,
 )
-from PySide6.QtCore import QModelIndex, QSortFilterProxyModel
-from music_modify.gui import Ui_MainWindow, AboutDialog, PrefsDialog
-from music_modify.models import SongTableModel, SongRepository
+
+from music_modify.gui import AboutDialog, PrefsDialog, Ui_MainWindow
+from music_modify.models import SongRepository, SongTableModel
 from music_modify.utils import formatTime, updateTableView
-from music_modify.prefs import settings
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):

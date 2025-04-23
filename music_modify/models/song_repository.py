@@ -1,6 +1,8 @@
 from os import PathLike
+
+from PySide6.QtCore import QObject, Signal
+
 from music_modify.custom_types import Song
-from PySide6.QtCore import Signal, QObject
 
 
 class SongRepository(QObject):

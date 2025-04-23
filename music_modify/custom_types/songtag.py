@@ -1,8 +1,9 @@
 # pyright: reportPrivateImportUsage=false, reportUnknownVariableType=false, reportUnknownArgumentType=false, reportUnknownMemberType=false
 
 from typing import Final, override
+
 from mutagen import id3
-from mutagen.id3 import Frames, ID3
+from mutagen.id3 import ID3, Frames
 
 from .enums import TagType
 

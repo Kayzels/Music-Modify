@@ -1,8 +1,11 @@
 from typing import TYPE_CHECKING, TypedDict
+
 from PySide6.QtWidgets import QDialog, QWidget
-from .ui_dialog_prefs import Ui_PrefsDialog
+
 from music_modify.custom_types.enums import TagGroup
+
 from .dialog_tag import TagDialog
+from .ui_dialog_prefs import Ui_PrefsDialog
 
 if TYPE_CHECKING:
     from music_modify.prefs import _Settings

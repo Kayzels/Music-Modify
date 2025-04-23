@@ -1,15 +1,18 @@
 # pyright: reportIncompatibleMethodOverride=false
 
 from typing import Final, override
+
 from PySide6.QtCore import (
     QAbstractTableModel,
     QModelIndex,
     QPersistentModelIndex,
-    Qt,
     QSortFilterProxyModel,
+    Qt,
 )
-from .song_repository import SongRepository
+
 from music_modify.prefs import settings
+
+from .song_repository import SongRepository
 
 
 class SongTableModel(QAbstractTableModel):

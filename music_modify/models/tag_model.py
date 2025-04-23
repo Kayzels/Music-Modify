@@ -1,6 +1,7 @@
 # pyright: reportIncompatibleMethodOverride=false
 
 from typing import override
+
 from PySide6.QtCore import QAbstractTableModel, QModelIndex, QPersistentModelIndex, Qt
 
 from music_modify.custom_types import SongTag
