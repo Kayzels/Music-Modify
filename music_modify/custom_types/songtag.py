@@ -1,6 +1,6 @@
 # pyright: reportPrivateImportUsage=false, reportUnknownVariableType=false, reportUnknownArgumentType=false, reportUnknownMemberType=false
 
-from typing import Final
+from typing import Final, override
 from mutagen import id3
 from mutagen.id3 import Frames, ID3
 
@@ -14,6 +14,18 @@ class SongTag:
         self._id3_key: Final[str] = id3_key
         self._display_name: Final[str] = display_name
         self._frame_type: Final[TagType] = SongTag._getFrameType(id3_key)
+
+    @override
+    def __repr__(self) -> str:
+        return f"SongTag({self.id3_key}, {self.display_name})"
+
+    @override
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, SongTag):
+            return False
+        return (self.display_name == other.display_name) and (
+            self.id3_key == other.id3_key
+        )
 
     @property
     def id3_key(self) -> str:
