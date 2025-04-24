@@ -77,7 +77,6 @@ class PrefsDialog(QDialog, Ui_PrefsDialog):
             self.changed_settings.append(
                 {"setting_name": setting_name, "setting_value": setting_value}
             )
-        print(self.changed_settings)
 
     def showTags(self, tag_group: TagGroup):
         match tag_group:

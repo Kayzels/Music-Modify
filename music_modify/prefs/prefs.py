@@ -69,12 +69,9 @@ class _Settings:
 
     @file_tags.setter
     def file_tags(self, value: list[SongTag]):
-        """Should be a list of FileTag instead of SongTag,
-        so that it's usable in settings.
-        Otherwise you'd need to convert to FileTag, and then back into SongTag later."""
         self._setArray("Tags/file_tags", value)
 
-    default_standard_tags: list[SongTag] = default_file_tags + [
+    default_standard_tags: list[SongTag] = [
         SongTag(display_name="Sort Composer", id3_key="TSOC"),
         SongTag(display_name="Conductor", id3_key="TPE3"),
         SongTag(display_name="Year", id3_key="TDRC"),
@@ -97,9 +94,6 @@ class _Settings:
 
     @standard_tags.setter
     def standard_tags(self, value: list[SongTag]):
-        """Should be a list of FileTag instead of SongTag,
-        so that it's usable in settings.
-        Otherwise you'd need to convert to FileTag, and then back into SongTag later."""
         self._setArray("Tags/standard_tags", value)
 
     default_custom_tags: list[SongTag] = [
@@ -132,14 +126,11 @@ class _Settings:
 
     @custom_tags.setter
     def custom_tags(self, value: list[SongTag]):
-        """Should be a list of FileTag instead of SongTag,
-        so that it's usable in settings.
-        Otherwise you'd need to convert to FileTag, and then back into SongTag later."""
         self._setArray("Tags/custom_tags", value)
 
     @property
     def all_tags(self) -> list[SongTag]:
-        return self.standard_tags + self.custom_tags
+        return self.file_tags + self.standard_tags + self.custom_tags
 
     def _setArray(self, key: str, vals: list[SongTag]):
         self._settings.beginWriteArray(key)
