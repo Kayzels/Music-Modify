@@ -1,11 +1,14 @@
 # pyright: reportUnknownMemberType=false
 
+import logging
 import os
 from typing import cast
 
 from mutagen.id3 import ID3
 
 from music_modify.prefs import prefs
+
+logger = logging.getLogger(__name__)
 
 
 class Song:
@@ -39,7 +42,9 @@ class Song:
                         if len(value) == 2:
                             tag_values.append(f"{value[0]}:{value[1]}")
                         else:
-                            print(f"Value has an invalid length: {value}")
+                            logger.warning(
+                                f"Song column value has an invalid length: {value}"
+                            )
                             continue
                     data_string = display_split.join(tag_values)
             except KeyError:

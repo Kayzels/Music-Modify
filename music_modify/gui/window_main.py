@@ -1,4 +1,5 @@
 import datetime
+import logging
 import os
 import time
 from os import PathLike
@@ -15,6 +16,8 @@ from music_modify.utils import formatTime, updateTableView
 from .ui_window_main import Ui_MainWindow
 from .dialog_about import AboutDialog
 from .dialog_prefs import PrefsDialog
+
+logger = logging.getLogger(__name__)
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):
@@ -135,7 +138,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if event.mimeData().hasUrls():
             event.acceptProposedAction()
         else:
-            print(f"Unsupported mimedata: {event.mimeData()}")
+            logger.warning(
+                f"Unsupported mimedata when drag/dropping: {event.mimeData()}"
+            )
 
     def processTableDropEvents(self, event: QDropEvent):
         """Processes the mimedata dropped on the tableview.

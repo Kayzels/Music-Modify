@@ -1,11 +1,14 @@
 # pyright: reportPrivateImportUsage=false, reportUnknownVariableType=false, reportUnknownArgumentType=false, reportUnknownMemberType=false
 
+import logging
 from typing import Final, override
 
 from mutagen import id3
 from mutagen.id3 import ID3, Frames
 
 from .enums import TagType
+
+logger = logging.getLogger(__name__)
 
 
 class SongTag:
@@ -117,4 +120,4 @@ class SongTag:
             song.add(frame)
         except TypeError:
             # ? Cannot create a tag frame with this key
-            print(f"Tag Name: {self.id3_key}")
+            logger.warning(f"Cannot create a tag frame with this key: {self.id3_key}")
