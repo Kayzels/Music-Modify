@@ -1,4 +1,4 @@
-from .window_main import Ui_MainWindow
+from .ui_window_main import Ui_MainWindow
 from .dialog_about import AboutDialog
 from .dialog_prefs import PrefsDialog
 
