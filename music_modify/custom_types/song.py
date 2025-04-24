@@ -5,7 +5,7 @@ from typing import cast
 
 from mutagen.id3 import ID3
 
-from music_modify.prefs import settings
+from music_modify.prefs import prefs
 
 
 class Song:
@@ -18,8 +18,8 @@ class Song:
 
     def _generateColumns(self) -> list[str]:
         info: list[str] = []
-        display_split = settings.split_values_display
-        for column in settings.file_tags:
+        display_split = prefs.settings.split_values_display
+        for column in prefs.settings.file_tags:
             data_string = ""
             current_data: list[str] | list[list[str]] | None
             try:

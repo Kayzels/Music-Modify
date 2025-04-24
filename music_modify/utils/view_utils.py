@@ -1,7 +1,7 @@
 from PySide6.QtWidgets import QTableView
 
 from music_modify.models import SongRepository
-from music_modify.prefs import settings
+from music_modify.prefs import prefs
 
 PEOPLE_TAG_WIDTH = 150
 
@@ -13,7 +13,7 @@ def updateTableView(table_view: QTableView, repository: SongRepository) -> None:
     if len(repository) == 0:
         return
 
-    for index, tag in enumerate(settings.file_tags):
+    for index, tag in enumerate(prefs.settings.file_tags):
         if len(tag) == 1:
             table_view.resizeColumnToContents(index)
         else:

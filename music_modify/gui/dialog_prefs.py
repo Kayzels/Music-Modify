@@ -1,14 +1,12 @@
-from typing import TYPE_CHECKING, TypedDict
+from typing import TypedDict
 
 from PySide6.QtWidgets import QDialog, QWidget
 
 from music_modify.custom_types.enums import TagGroup
+from music_modify.prefs import prefs
 
 from .dialog_tag import TagDialog
 from .ui_dialog_prefs import Ui_PrefsDialog
-
-if TYPE_CHECKING:
-    from music_modify.prefs import _Settings
 
 
 class SettingPair(TypedDict):
@@ -18,12 +16,8 @@ class SettingPair(TypedDict):
 
 class PrefsDialog(QDialog, Ui_PrefsDialog):
     def __init__(self, /, parent: QWidget | None = None):
-        # Import at runtime to avoid import cycle
-        from music_modify.prefs import settings
-
         super().__init__(parent)
         self.setupUi(self)  # pyright: ignore[reportUnknownMemberType]
-        self._settings: _Settings = settings
         self.changed_settings: list[SettingPair] = []
         self.displaySettings()
 
@@ -51,9 +45,9 @@ class PrefsDialog(QDialog, Ui_PrefsDialog):
         )
 
     def displaySettings(self):
-        self.line_edit_split_text_entered.setText(self._settings.split_text_entered)
-        self.line_edit_split_values_display.setText(self._settings.split_values_display)
-        self.line_edit_split_values_at.setText(self._settings.split_values_at)
+        self.line_edit_split_text_entered.setText(prefs.settings.split_text_entered)
+        self.line_edit_split_values_display.setText(prefs.settings.split_values_display)
+        self.line_edit_split_values_at.setText(prefs.settings.split_values_at)
 
     def updateSetting(self, setting_name: str, setting_value: str):
         """Gets the value a specific setting has been changed to.
@@ -73,7 +67,7 @@ class PrefsDialog(QDialog, Ui_PrefsDialog):
 
         # Add the new value to the list of changed settings,
         # if it's different than the original setting.
-        if getattr(self._settings, setting_name) != setting_value:
+        if getattr(prefs.settings, setting_name) != setting_value:
             self.changed_settings.append(
                 {"setting_name": setting_name, "setting_value": setting_value}
             )
@@ -81,11 +75,11 @@ class PrefsDialog(QDialog, Ui_PrefsDialog):
     def showTags(self, tag_group: TagGroup):
         match tag_group:
             case TagGroup.FileTags:
-                tags = self._settings.file_tags
+                tags = prefs.settings.file_tags
             case TagGroup.StandardTags:
-                tags = self._settings.standard_tags
+                tags = prefs.settings.standard_tags
             case TagGroup.CustomTags:
-                tags = self._settings.custom_tags
+                tags = prefs.settings.custom_tags
 
         dialog = TagDialog(self, tags, tag_group)
         dialog.show()
