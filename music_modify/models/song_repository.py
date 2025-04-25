@@ -40,3 +40,7 @@ class SongRepository(QObject):
         for index in indexes:
             self._songs.pop(index)
         self.songs_updated.emit()
+
+    def refreshDisplay(self):
+        for song in self._songs:
+            song.updateInfo()

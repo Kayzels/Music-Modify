@@ -52,6 +52,9 @@ class Song:
             info.append(data_string)
         return info
 
+    def updateInfo(self):
+        self.display_info = self._generateColumns()
+
     def save(self):
         self.id3.save(v2_version=4)
-        self.display_info = self._generateColumns()
+        self.updateInfo()

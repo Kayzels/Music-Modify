@@ -222,3 +222,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def showPrefsDialog(self):
         prefs_dialog = PrefsDialog(parent=self)
         prefs_dialog.show()
+        prefs_dialog.accepted.connect(prefs_dialog.updateSettings)
+        prefs_dialog.settings_updated.connect(self.refreshTable)
+
+    def refreshTable(self):
+        self.songs_repository.refreshDisplay()
