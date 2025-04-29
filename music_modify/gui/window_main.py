@@ -226,4 +226,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         prefs_dialog.settings_updated.connect(self.refreshTable)
 
     def refreshTable(self):
+        self.songs_model.layoutAboutToBeChanged.emit()
         self.songs_repository.refreshDisplay()
+        self.songs_model.layoutChanged.emit()
+        updateTableView(self.files_table_view, self.songs_repository)

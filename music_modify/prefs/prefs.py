@@ -1,3 +1,4 @@
+import logging
 from typing import final
 
 from PySide6.QtCore import QSettings
@@ -5,10 +6,13 @@ from PySide6.QtCore import QSettings
 from music_modify.custom_types.songtag import SongTag
 from music_modify.custom_types.tag_info import TagInfo
 
+logger = logging.getLogger(__name__)
+
 
 @final
 class _Settings:
     def __init__(self):
+        logger.info("In init method for Settings object")
         self._settings: QSettings = QSettings("Kayzels", "Music Modify")
         self._initializeDefaults()
 
@@ -120,6 +124,12 @@ class _Settings:
         return self._setArray("Tags/info_tags", value)
 
     def _setArray(self, key: str, vals: list[TagInfo]):
+        logger.info(f"Began creating array for {key} with {len(vals)} entries.")
+
+        self._settings.beginGroup(key)
+        self._settings.remove("")
+        self._settings.endGroup()
+
         self._settings.beginWriteArray(key)
         for index, tag in enumerate(vals):
             self._settings.setArrayIndex(index)
@@ -148,14 +158,28 @@ class _Settings:
         return tags
 
     def _initializeDefaults(self):
+        logger.info("Called initialise defaults")
         if not self._settings.contains("Split/split_text_entered"):
             self.split_text_entered = ","
+        else:
+            logger.info("Split text entered already set")
         if not self._settings.contains("Split/split_values_display"):
             self.split_values_display = r"\\"
+        else:
+            logger.info("Split values display already set")
         if not self._settings.contains("Split/split_values_at"):
             self.split_values_at = ";"
-        if not self._settings.contains("Tags/info_tags"):
+        else:
+            logger.info("Split values at already set")
+
+        size = self._settings.beginReadArray("Tags/info_tags")
+        self._settings.endArray()
+
+        if not self._settings.contains("Tags/info_tags") and size == 0:
+            logger.info("Setting info tags")
             self.info_tags = _Settings.default_tags
+        else:
+            logger.info("Info Tags already set")
 
 
 settings = _Settings()
