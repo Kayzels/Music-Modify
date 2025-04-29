@@ -14,6 +14,9 @@ class _Settings:
     def __init__(self):
         logger.info("In init method for Settings object")
         self._settings: QSettings = QSettings("Kayzels", "Music Modify")
+
+        # Store in a cache to prevent needing to call getArray on every cell
+        self._table_tags_cache: list[SongTag] | None = None
         self._initializeDefaults()
 
     @property
@@ -102,11 +105,13 @@ class _Settings:
     @property
     def table_tags(self) -> list[SongTag]:
         """The tags shown in the main table."""
-        return [
-            SongTag(display_name=tag.display_name, id3_key=tag.id3_key)
-            for tag in self.info_tags
-            if tag.show_in_table
-        ]
+        if self._table_tags_cache is None:
+            self._table_tags_cache = [
+                SongTag(display_name=tag.display_name, id3_key=tag.id3_key)
+                for tag in self.info_tags
+                if tag.show_in_table
+            ]
+        return self._table_tags_cache
 
     @property
     def all_tags(self) -> list[SongTag]:
@@ -121,6 +126,7 @@ class _Settings:
 
     @info_tags.setter
     def info_tags(self, value: list[TagInfo]):
+        self._table_tags_cache = None  # Invalidate cache
         return self._setArray("Tags/info_tags", value)
 
     def _setArray(self, key: str, vals: list[TagInfo]):
