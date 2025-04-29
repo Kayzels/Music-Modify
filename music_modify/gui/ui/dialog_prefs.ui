@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>561</width>
-    <height>284</height>
+    <width>361</width>
+    <height>227</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -87,34 +87,27 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="QPushButton" name="button_file_tags">
+      <widget class="QPushButton" name="button_edit_tags">
        <property name="toolTip">
         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The tags shown in the main table.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
        <property name="text">
-        <string>File Tags...</string>
+        <string>Edit Tags...</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="button_standard_tags">
-       <property name="toolTip">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The tags that are generally defined for music files.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Orientation::Horizontal</enum>
        </property>
-       <property name="text">
-        <string>Standard Tags...</string>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
        </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="button_custom_tags">
-       <property name="toolTip">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Additional tags which are not common. These tags always start with TXXX.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-       </property>
-       <property name="text">
-        <string>Custom Tags...</string>
-       </property>
-      </widget>
+      </spacer>
      </item>
     </layout>
    </item>

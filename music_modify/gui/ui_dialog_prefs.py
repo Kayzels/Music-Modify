@@ -24,7 +24,7 @@ class Ui_PrefsDialog(object):
     def setupUi(self, PrefsDialog):
         if not PrefsDialog.objectName():
             PrefsDialog.setObjectName(u"PrefsDialog")
-        PrefsDialog.resize(561, 284)
+        PrefsDialog.resize(361, 227)
         self.verticalLayout = QVBoxLayout(PrefsDialog)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.formLayout_2 = QFormLayout()
@@ -70,20 +70,14 @@ class Ui_PrefsDialog(object):
 
         self.horizontalLayout = QHBoxLayout()
         self.horizontalLayout.setObjectName(u"horizontalLayout")
-        self.button_file_tags = QPushButton(PrefsDialog)
-        self.button_file_tags.setObjectName(u"button_file_tags")
+        self.button_edit_tags = QPushButton(PrefsDialog)
+        self.button_edit_tags.setObjectName(u"button_edit_tags")
 
-        self.horizontalLayout.addWidget(self.button_file_tags)
+        self.horizontalLayout.addWidget(self.button_edit_tags)
 
-        self.button_standard_tags = QPushButton(PrefsDialog)
-        self.button_standard_tags.setObjectName(u"button_standard_tags")
+        self.horizontalSpacer = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
 
-        self.horizontalLayout.addWidget(self.button_standard_tags)
-
-        self.button_custom_tags = QPushButton(PrefsDialog)
-        self.button_custom_tags.setObjectName(u"button_custom_tags")
-
-        self.horizontalLayout.addWidget(self.button_custom_tags)
+        self.horizontalLayout.addItem(self.horizontalSpacer)
 
 
         self.verticalLayout.addLayout(self.horizontalLayout)
@@ -127,16 +121,8 @@ class Ui_PrefsDialog(object):
 #endif // QT_CONFIG(tooltip)
         self.label_split_values_at.setText(QCoreApplication.translate("PrefsDialog", u"Split Values At", None))
 #if QT_CONFIG(tooltip)
-        self.button_file_tags.setToolTip(QCoreApplication.translate("PrefsDialog", u"<html><head/><body><p>The tags shown in the main table.</p></body></html>", None))
+        self.button_edit_tags.setToolTip(QCoreApplication.translate("PrefsDialog", u"<html><head/><body><p>The tags shown in the main table.</p></body></html>", None))
 #endif // QT_CONFIG(tooltip)
-        self.button_file_tags.setText(QCoreApplication.translate("PrefsDialog", u"File Tags...", None))
-#if QT_CONFIG(tooltip)
-        self.button_standard_tags.setToolTip(QCoreApplication.translate("PrefsDialog", u"<html><head/><body><p>The tags that are generally defined for music files.</p></body></html>", None))
-#endif // QT_CONFIG(tooltip)
-        self.button_standard_tags.setText(QCoreApplication.translate("PrefsDialog", u"Standard Tags...", None))
-#if QT_CONFIG(tooltip)
-        self.button_custom_tags.setToolTip(QCoreApplication.translate("PrefsDialog", u"<html><head/><body><p>Additional tags which are not common. These tags always start with TXXX.</p></body></html>", None))
-#endif // QT_CONFIG(tooltip)
-        self.button_custom_tags.setText(QCoreApplication.translate("PrefsDialog", u"Custom Tags...", None))
+        self.button_edit_tags.setText(QCoreApplication.translate("PrefsDialog", u"Edit Tags...", None))
     # retranslateUi
 

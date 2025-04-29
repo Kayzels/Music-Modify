@@ -48,7 +48,7 @@ class SongTableModel(QAbstractTableModel):
             return 1
             # ? Uses 1 to keep a column for info
         else:
-            return len(prefs.settings.file_tags)
+            return len(prefs.settings.table_tags)
 
     @override
     def headerData(
@@ -61,7 +61,7 @@ class SongTableModel(QAbstractTableModel):
                 if orientation == Qt.Orientation.Vertical:
                     return None
             if orientation == Qt.Orientation.Horizontal:
-                return prefs.settings.file_tags[section].display_name
+                return prefs.settings.table_tags[section].display_name
             elif orientation == Qt.Orientation.Vertical:
                 return f"{section + 1}"
         return None

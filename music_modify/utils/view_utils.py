@@ -13,7 +13,7 @@ def updateTableView(table_view: QTableView, repository: SongRepository) -> None:
     if len(repository) == 0:
         return
 
-    for index, tag in enumerate(prefs.settings.file_tags):
+    for index, tag in enumerate(prefs.settings.table_tags):
         if len(tag) == 1:
             table_view.resizeColumnToContents(index)
         else:

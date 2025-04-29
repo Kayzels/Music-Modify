@@ -5,19 +5,15 @@ from typing import override
 
 from PySide6.QtCore import QAbstractTableModel, QModelIndex, QPersistentModelIndex, Qt
 
-from music_modify.custom_types import SongTag, TagInfo
+from music_modify.custom_types import TagInfo
 
 logger = logging.getLogger(__name__)
 
 
 class TagModel(QAbstractTableModel):
-    def __init__(self, tags: list[SongTag]):
+    def __init__(self, tags: list[TagInfo]):
         super().__init__()
-        # TODO: Convert to dict to allow editing in table
-        # self._tags: list[SongTag] = tags
-        self._tags: list[TagInfo] = [
-            {"id3_key": tag.id3_key, "display_name": tag.display_name} for tag in tags
-        ]
+        self._tags: list[TagInfo] = tags
 
     @override
     def rowCount(self, parent: QModelIndex | QPersistentModelIndex) -> int:
@@ -56,10 +52,5 @@ class TagModel(QAbstractTableModel):
             return None
         row = index.row()
         field = "id3_key" if col == 0 else "display_name"
-        return self._tags[row][field]
-
-    def toSongTags(self) -> list[SongTag]:
-        return [
-            SongTag(display_name=tag["display_name"], id3_key=tag["id3_key"])
-            for tag in self._tags
-        ]
+        return getattr(self._tags[row], field)
+        # return self._tags[row][field]

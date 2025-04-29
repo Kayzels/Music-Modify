@@ -4,7 +4,6 @@ from typing import TypedDict
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QDialog, QWidget
 
-from music_modify.custom_types.enums import TagGroup
 from music_modify.prefs import prefs
 
 from .dialog_tag import TagDialog
@@ -42,13 +41,7 @@ class PrefsDialog(QDialog, Ui_PrefsDialog):
                 "split_values_at", self.line_edit_split_values_at.text()
             )
         )
-        self.button_file_tags.clicked.connect(lambda: self.showTags(TagGroup.FileTags))
-        self.button_standard_tags.clicked.connect(
-            lambda: self.showTags(TagGroup.StandardTags)
-        )
-        self.button_custom_tags.clicked.connect(
-            lambda: self.showTags(TagGroup.CustomTags)
-        )
+        self.button_edit_tags.clicked.connect(self.showTags)
 
     def displaySettings(self):
         self.line_edit_split_text_entered.setText(prefs.settings.split_text_entered)
@@ -78,16 +71,8 @@ class PrefsDialog(QDialog, Ui_PrefsDialog):
                 {"setting_name": setting_name, "setting_value": setting_value}
             )
 
-    def showTags(self, tag_group: TagGroup):
-        match tag_group:
-            case TagGroup.FileTags:
-                tags = prefs.settings.file_tags
-            case TagGroup.StandardTags:
-                tags = prefs.settings.standard_tags
-            case TagGroup.CustomTags:
-                tags = prefs.settings.custom_tags
-
-        dialog = TagDialog(self, tags, tag_group)
+    def showTags(self):
+        dialog = TagDialog(self, prefs.settings.info_tags)
         dialog.show()
 
     def updateSettings(self):

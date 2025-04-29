@@ -1,6 +1,8 @@
-from typing import TypedDict
+from dataclasses import dataclass
 
 
-class TagInfo(TypedDict):
+@dataclass
+class TagInfo:
     id3_key: str
     display_name: str
+    show_in_table: bool = False

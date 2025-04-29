@@ -22,7 +22,7 @@ class Song:
     def _generateColumns(self) -> list[str]:
         info: list[str] = []
         display_split = prefs.settings.split_values_display
-        for column in prefs.settings.file_tags:
+        for column in prefs.settings.table_tags:
             data_string = ""
             current_data: list[str] | list[list[str]] | None
             try:
