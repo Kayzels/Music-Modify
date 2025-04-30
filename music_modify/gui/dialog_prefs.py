@@ -76,8 +76,6 @@ class PrefsDialog(QDialog, Ui_PrefsDialog):
             # If the dialog is accepted, update the changed_settings dictionary value
             if result == QDialog.DialogCode.Accepted:
                 self._getSettingChange("info_tags", dialog.model._tags)
-            else:
-                logger.info("Didn't accept tag dialog")
 
         # TODO: Add warning to TagDialog to say tags are only updated on preference close.
 
