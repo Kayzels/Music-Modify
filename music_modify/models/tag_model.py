@@ -54,16 +54,45 @@ class TagModel(QAbstractTableModel):
 
     @override
     def data(
-        self, index: QModelIndex | QPersistentModelIndex, /, role: Qt.ItemDataRole
-    ) -> str | None:
-        if not index.isValid() or role != Qt.ItemDataRole.DisplayRole:
+        self, index: QModelIndex | QPersistentModelIndex, role: Qt.ItemDataRole
+    ) -> str | Qt.CheckState | None:
+        if not index.isValid():
             return None
+
         col = index.column()
         if col >= self.columnCount() or col < 0:
             return None
+
         row = index.row()
         field = TAG_MODEL_COLUMNS[col].key
-        return getattr(self._tags[row], field)
+
+        if field == "show_in_table":
+            if role == Qt.ItemDataRole.CheckStateRole:
+                return (
+                    Qt.CheckState.Checked
+                    if getattr(self._tags[row], field)
+                    else Qt.CheckState.Unchecked
+                )
+            if role == Qt.ItemDataRole.DisplayRole:
+                return ""
+
+        if role == Qt.ItemDataRole.DisplayRole:
+            return getattr(self._tags[row], field)
+
+        return None
+
+    @override
+    def flags(self, index: QModelIndex | QPersistentModelIndex) -> Qt.ItemFlag:
+        if not index.isValid():
+            return Qt.ItemFlag.NoItemFlags
+
+        col = index.column()
+        field = TAG_MODEL_COLUMNS[col].key
+
+        if field == "show_in_table":
+            return super().flags(index) | Qt.ItemFlag.ItemIsUserCheckable
+
+        return super().flags(index)
 
     def addTag(self, id3_key: str, display_name: str, show_in_table: bool = False):
         new_tag: TagInfo = TagInfo(id3_key, display_name, show_in_table)
