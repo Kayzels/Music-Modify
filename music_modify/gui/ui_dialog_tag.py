@@ -89,19 +89,19 @@ class Ui_TagDialog(object):
 
         self.verticalLayout_2.addWidget(self.save_warning_text_edit)
 
-        self.buttonBox = QDialogButtonBox(TagDialog)
-        self.buttonBox.setObjectName(u"buttonBox")
-        self.buttonBox.setOrientation(Qt.Orientation.Horizontal)
-        self.buttonBox.setStandardButtons(QDialogButtonBox.StandardButton.Cancel|QDialogButtonBox.StandardButton.Ok)
+        self.button_box = QDialogButtonBox(TagDialog)
+        self.button_box.setObjectName(u"button_box")
+        self.button_box.setOrientation(Qt.Orientation.Horizontal)
+        self.button_box.setStandardButtons(QDialogButtonBox.StandardButton.Cancel|QDialogButtonBox.StandardButton.Ok)
 
-        self.verticalLayout_2.addWidget(self.buttonBox)
+        self.verticalLayout_2.addWidget(self.button_box)
 
         self.verticalLayout_2.setStretch(0, 10)
         self.verticalLayout_2.setStretch(1, 2)
 
         self.retranslateUi(TagDialog)
-        self.buttonBox.accepted.connect(TagDialog.accept)
-        self.buttonBox.rejected.connect(TagDialog.reject)
+        self.button_box.accepted.connect(TagDialog.accept)
+        self.button_box.rejected.connect(TagDialog.reject)
 
         QMetaObject.connectSlotsByName(TagDialog)
     # setupUi

@@ -86,12 +86,12 @@ class Ui_PrefsDialog(object):
 
         self.verticalLayout.addItem(self.verticalSpacer)
 
-        self.buttonBox = QDialogButtonBox(PrefsDialog)
-        self.buttonBox.setObjectName(u"buttonBox")
-        self.buttonBox.setOrientation(Qt.Orientation.Horizontal)
-        self.buttonBox.setStandardButtons(QDialogButtonBox.StandardButton.Cancel|QDialogButtonBox.StandardButton.Ok)
+        self.button_box = QDialogButtonBox(PrefsDialog)
+        self.button_box.setObjectName(u"button_box")
+        self.button_box.setOrientation(Qt.Orientation.Horizontal)
+        self.button_box.setStandardButtons(QDialogButtonBox.StandardButton.Cancel|QDialogButtonBox.StandardButton.Ok|QDialogButtonBox.StandardButton.RestoreDefaults)
 
-        self.verticalLayout.addWidget(self.buttonBox)
+        self.verticalLayout.addWidget(self.button_box)
 
 #if QT_CONFIG(shortcut)
         self.label_split_text_entered.setBuddy(self.line_edit_split_text_entered)
@@ -100,8 +100,8 @@ class Ui_PrefsDialog(object):
 #endif // QT_CONFIG(shortcut)
 
         self.retranslateUi(PrefsDialog)
-        self.buttonBox.accepted.connect(PrefsDialog.accept)
-        self.buttonBox.rejected.connect(PrefsDialog.reject)
+        self.button_box.accepted.connect(PrefsDialog.accept)
+        self.button_box.rejected.connect(PrefsDialog.reject)
 
         QMetaObject.connectSlotsByName(PrefsDialog)
     # setupUi

@@ -19,12 +19,20 @@ class _Settings:
         self._table_tags_cache: list[SongTag] | None = None
         self._initializeDefaults()
 
+    default_split_text_entered = ","
+    default_split_values_display = "; "
+    default_split_values_at = ";"
+
     @property
     def split_text_entered(self) -> str:
         """The symbol that should split the data typed in.
         For example, with it set to be ",",
         John Smith, Jane Doe should be understood as two separate values."""
-        return str(self._settings.value("Split/split_text_entered", ","))
+        return str(
+            self._settings.value(
+                "Split/split_text_entered", _Settings.default_split_text_entered
+            )
+        )
 
     @split_text_entered.setter
     def split_text_entered(self, value: str):
@@ -37,7 +45,11 @@ class _Settings:
         If set to \\, John Smith, Jane Doe would be shown as
         John Smith\\Jane Doe
         """
-        return str(self._settings.value("Split/split_values_display", r"\\"))
+        return str(
+            self._settings.value(
+                "Split/split_values_display", _Settings.default_split_values_display
+            )
+        )
 
     @split_values_display.setter
     def split_values_display(self, value: str):
@@ -49,7 +61,11 @@ class _Settings:
         For example, if an existing field is John Smith; Jane Doe,
         this should split it into separate values.
         """
-        return str(self._settings.value("Split/split_values_at", ";"))
+        return str(
+            self._settings.value(
+                "Split/split_values_at", _Settings.default_split_values_at
+            )
+        )
 
     @split_values_at.setter
     def split_values_at(self, value: str):
@@ -166,15 +182,15 @@ class _Settings:
     def _initializeDefaults(self):
         logger.info("Called initialise defaults")
         if not self._settings.contains("Split/split_text_entered"):
-            self.split_text_entered = ","
+            self.split_text_entered = _Settings.default_split_text_entered
         else:
             logger.info("Split text entered already set")
         if not self._settings.contains("Split/split_values_display"):
-            self.split_values_display = r"\\"
+            self.split_values_display = _Settings.default_split_values_display
         else:
             logger.info("Split values display already set")
         if not self._settings.contains("Split/split_values_at"):
-            self.split_values_at = ";"
+            self.split_values_at = _Settings.default_split_values_at
         else:
             logger.info("Split values at already set")
 
@@ -186,6 +202,18 @@ class _Settings:
             self.info_tags = _Settings.default_tags
         else:
             logger.info("Info Tags already set")
+
+    def resetSplit(self) -> None:
+        """Reset the value for the split preferences back to default"""
+        logger.info("Called reset split")
+        self.split_text_entered = _Settings.default_split_text_entered
+        self.split_values_at = _Settings.default_split_values_at
+        self.split_values_display = _Settings.default_split_values_display
+
+    def resetTags(self) -> None:
+        """Reset the value for the tag list back to default"""
+        logger.info("Called reset tags")
+        self.info_tags = _Settings.default_tags
 
 
 settings = _Settings()

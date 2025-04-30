@@ -2,12 +2,13 @@ import logging
 from typing import cast
 
 from PySide6.QtCore import Signal
-from PySide6.QtWidgets import QDialog, QWidget
+from PySide6.QtWidgets import QDialog, QDialogButtonBox, QWidget
 
 from music_modify.prefs import prefs
 from music_modify.custom_types import TagInfo
 
 from .dialog_tag import TagDialog
+from .dialog_reset import ResetDialog
 from .ui_dialog_prefs import Ui_PrefsDialog
 
 logger = logging.getLogger(__name__)
@@ -38,6 +39,10 @@ class PrefsDialog(QDialog, Ui_PrefsDialog):
             )
         )
         self.button_edit_tags.clicked.connect(self.editTags)
+
+        self.button_box.button(
+            QDialogButtonBox.StandardButton.RestoreDefaults
+        ).clicked.connect(self.restoreDefaults)
 
     def displaySettings(self):
         self.line_edit_split_text_entered.setText(prefs.settings.split_text_entered)
@@ -88,4 +93,45 @@ class PrefsDialog(QDialog, Ui_PrefsDialog):
             # to refresh the main table
             self.settings_updated.emit()
 
-    # TODO: Add way of setting back to defaults.
+    def restoreDefaults(self) -> None:
+        dialog = ResetDialog(self)
+        dialog.setModal(True)
+
+        def processDialogResult(result: QDialog.DialogCode):
+            if result == QDialog.DialogCode.Accepted:
+                reset_split = dialog.split_check_box.isChecked()
+                reset_tags = dialog.tags_check_box.isChecked()
+                if not reset_split and not reset_tags:
+                    return
+                if reset_split:
+                    # Call reset split on prefs
+                    prefs.settings.resetSplit()
+
+                    # Clear the changed settings
+                    self.changed_settings = {
+                        key: value
+                        for key, value in self.changed_settings.items()
+                        if key
+                        not in (
+                            "split_text_entered",
+                            "split_values_at",
+                            "split_values_display",
+                        )
+                    }
+
+                    # Update UI
+                    self.displaySettings()
+                if reset_tags:
+                    # Call reset tags on prefs
+                    prefs.settings.resetTags()
+
+                    # Clear the changed settings
+                    self.changed_settings = {
+                        key: value
+                        for key, value in self.changed_settings.items()
+                        if key != "info_tags"
+                    }
+                self.settings_updated.emit()
+
+        dialog.finished.connect(processDialogResult)
+        dialog.show()
