@@ -1,7 +1,8 @@
 # pyright: reportIncompatibleMethodOverride=false, reportCallInDefaultInitializer=false
 
+import dataclasses
 import logging
-from typing import override, NamedTuple, cast
+from typing import override, cast
 
 from PySide6.QtCore import (
     QAbstractTableModel,
@@ -12,21 +13,11 @@ from PySide6.QtCore import (
 )
 
 from music_modify.custom_types import TagInfo
-from music_modify.utils import snakeToTitle
+from music_modify.utils import tableHeader
 
 logger = logging.getLogger(__name__)
 
-
-class ColumnId(NamedTuple):
-    key: str
-    display_name: str
-
-
-TAG_MODEL_COLUMNS: tuple[ColumnId, ...] = (
-    ColumnId(key="show_in_table", display_name="Show"),
-    ColumnId(key="id3_key", display_name="ID3 Key"),
-    ColumnId(key="display_name", display_name="Display Name"),
-)
+TAG_MODEL_COLUMNS = [field.name for field in dataclasses.fields(TagInfo)]
 
 
 class TagModel(QAbstractTableModel):
@@ -59,7 +50,7 @@ class TagModel(QAbstractTableModel):
             return None
         if section >= self.columnCount() or section < 0:
             return None
-        return TAG_MODEL_COLUMNS[section].display_name
+        return tableHeader(TAG_MODEL_COLUMNS[section])
 
     @override
     def data(
@@ -73,7 +64,7 @@ class TagModel(QAbstractTableModel):
             return None
 
         row = index.row()
-        field = TAG_MODEL_COLUMNS[col].key
+        field = TAG_MODEL_COLUMNS[col]
 
         if field == "show_in_table":
             if role == Qt.ItemDataRole.CheckStateRole:
@@ -97,7 +88,7 @@ class TagModel(QAbstractTableModel):
             return Qt.ItemFlag.NoItemFlags
 
         col = index.column()
-        field = TAG_MODEL_COLUMNS[col].key
+        field = TAG_MODEL_COLUMNS[col]
 
         if field == "show_in_table":
             return super().flags(index) | Qt.ItemFlag.ItemIsUserCheckable
@@ -118,19 +109,19 @@ class TagModel(QAbstractTableModel):
 
         col = index.column()
         row = index.row()
-        field = TAG_MODEL_COLUMNS[col].key
+        field = TAG_MODEL_COLUMNS[col]
 
         # Editing display name or id3_key
         if role == Qt.ItemDataRole.EditRole and field in ("display_name", "id3_key"):
             value = cast(str, value)
             if value == "":
-                self.invalid_input.emit(f"{snakeToTitle(field)} cannot be empty.")
+                self.invalid_input.emit(f"{tableHeader(field)} cannot be empty.")
                 return False
             if value in (
                 getattr(tag, field) for i, tag in enumerate(self._tags) if i != row
             ):
                 self.invalid_input.emit(
-                    f"{snakeToTitle(field)} with {value} already exists."
+                    f"{tableHeader(field)} with {value} already exists."
                 )
                 return False
 
