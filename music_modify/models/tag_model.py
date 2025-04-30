@@ -1,11 +1,18 @@
 # pyright: reportIncompatibleMethodOverride=false, reportCallInDefaultInitializer=false
 
 import logging
-from typing import override, NamedTuple
+from typing import override, NamedTuple, cast
 
-from PySide6.QtCore import QAbstractTableModel, QModelIndex, QPersistentModelIndex, Qt
+from PySide6.QtCore import (
+    QAbstractTableModel,
+    QModelIndex,
+    QPersistentModelIndex,
+    Qt,
+    Signal,
+)
 
 from music_modify.custom_types import TagInfo
+from music_modify.utils import snakeToTitle
 
 logger = logging.getLogger(__name__)
 
@@ -23,6 +30,8 @@ TAG_MODEL_COLUMNS: tuple[ColumnId, ...] = (
 
 
 class TagModel(QAbstractTableModel):
+    invalid_input: Signal = Signal(str)
+
     def __init__(self, tags: list[TagInfo]):
         super().__init__()
         self._tags: list[TagInfo] = tags
@@ -90,9 +99,59 @@ class TagModel(QAbstractTableModel):
         field = TAG_MODEL_COLUMNS[col].key
 
         if field == "show_in_table":
-            return super().flags(index) | Qt.ItemFlag.ItemIsUserCheckable
+            return (
+                super().flags(index)
+                | Qt.ItemFlag.ItemIsEditable
+                | Qt.ItemFlag.ItemIsUserCheckable
+            )
+        elif field in ("display_name", "id3_key"):
+            return super().flags(index) | Qt.ItemFlag.ItemIsEditable
 
         return super().flags(index)
+
+    @override
+    def setData(
+        self,
+        index: QModelIndex | QPersistentModelIndex,
+        value: str | int,
+        role: Qt.ItemDataRole,
+    ) -> bool:
+        if not index.isValid():
+            return False
+
+        col = index.column()
+        row = index.row()
+        field = TAG_MODEL_COLUMNS[col].key
+
+        # Editing display name or id3_key
+        if role == Qt.ItemDataRole.EditRole and field in ("display_name", "id3_key"):
+            value = cast(str, value)
+            if value == "":
+                self.invalid_input.emit(f"{snakeToTitle(field)} cannot be empty.")
+                return False
+            if value in (
+                getattr(tag, field) for i, tag in enumerate(self._tags) if i != row
+            ):
+                self.invalid_input.emit(
+                    f"{snakeToTitle(field)} with {value} already exists."
+                )
+                return False
+
+            # Update the value
+            setattr(self._tags[row], field, value)
+            self.dataChanged.emit(index, index, [role])
+            return True
+
+        # Editing checkbox for Show column
+        if field == "show_in_table" and role == Qt.ItemDataRole.CheckStateRole:
+            value = cast(int, value)
+            # Note that you need to convert to the enum value for comparison,
+            # otherwise it's always false.
+            self._tags[row].show_in_table = value == Qt.CheckState.Checked.value
+            self.dataChanged.emit(index, index, [role])
+            return True
+
+        return False
 
     def addTag(self, id3_key: str, display_name: str, show_in_table: bool = False):
         new_tag: TagInfo = TagInfo(id3_key, display_name, show_in_table)

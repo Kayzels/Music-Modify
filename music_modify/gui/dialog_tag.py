@@ -21,6 +21,7 @@ class TagDialog(QDialog, Ui_TagDialog):
         self.model: TagModel = TagModel(tags)
         self.tag_table.setModel(self.model)
         self.tag_table.resizeColumnsToContents()
+        self.model.invalid_input.connect(self.showInvalidInputMessage)
 
         self.add_toolbutton.clicked.connect(self.addTag)
         self.remove_toolbutton.clicked.connect(self.removeSelectedTags)
@@ -121,3 +122,6 @@ class TagDialog(QDialog, Ui_TagDialog):
 
         for row in selected_rows:
             self.model.moveTag(row, row + 1)
+
+    def showInvalidInputMessage(self, message: str):
+        QMessageBox.warning(self.tag_table, "Invalid Input", message)
