@@ -108,17 +108,13 @@ class PrefsDialog(QDialog, Ui_PrefsDialog):
                     prefs.settings.resetSplit()
 
                     # Clear the changed settings
-                    self.changed_settings = {
-                        key: value
-                        for key, value in self.changed_settings.items()
-                        if key
-                        not in (
-                            "split_text_entered",
-                            "split_values_at",
-                            "split_values_display",
-                        )
-                    }
-
+                    for setting_key in (
+                        "split_text_entered",
+                        "split_values_at",
+                        "split_values_display",
+                    ):
+                        # Need to have the None there as default to prevent KeyError
+                        self.changed_settings.pop(setting_key, None)
                     # Update UI
                     self.displaySettings()
                 if reset_tags:
@@ -126,11 +122,7 @@ class PrefsDialog(QDialog, Ui_PrefsDialog):
                     prefs.settings.resetTags()
 
                     # Clear the changed settings
-                    self.changed_settings = {
-                        key: value
-                        for key, value in self.changed_settings.items()
-                        if key != "info_tags"
-                    }
+                    self.changed_settings.pop("info_tags", None)
                 self.settings_updated.emit()
 
         dialog.finished.connect(processDialogResult)
