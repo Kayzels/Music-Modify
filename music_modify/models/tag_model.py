@@ -84,8 +84,9 @@ class TagModel(QAbstractTableModel):
                 )
             if role == Qt.ItemDataRole.DisplayRole:
                 return ""
+            return None
 
-        if role == Qt.ItemDataRole.DisplayRole:
+        if role == Qt.ItemDataRole.DisplayRole or role == Qt.ItemDataRole.EditRole:
             return getattr(self._tags[row], field)
 
         return None
@@ -99,11 +100,7 @@ class TagModel(QAbstractTableModel):
         field = TAG_MODEL_COLUMNS[col].key
 
         if field == "show_in_table":
-            return (
-                super().flags(index)
-                | Qt.ItemFlag.ItemIsEditable
-                | Qt.ItemFlag.ItemIsUserCheckable
-            )
+            return super().flags(index) | Qt.ItemFlag.ItemIsUserCheckable
         elif field in ("display_name", "id3_key"):
             return super().flags(index) | Qt.ItemFlag.ItemIsEditable
 
