@@ -1,13 +1,25 @@
 # pyright: reportIncompatibleMethodOverride=false, reportCallInDefaultInitializer=false
 
 import logging
-from typing import override
+from typing import override, NamedTuple
 
 from PySide6.QtCore import QAbstractTableModel, QModelIndex, QPersistentModelIndex, Qt
 
 from music_modify.custom_types import TagInfo
 
 logger = logging.getLogger(__name__)
+
+
+class ColumnId(NamedTuple):
+    key: str
+    display_name: str
+
+
+TAG_MODEL_COLUMNS: tuple[ColumnId, ...] = (
+    ColumnId(key="show_in_table", display_name="Show"),
+    ColumnId(key="id3_key", display_name="ID3 Key"),
+    ColumnId(key="display_name", display_name="Display Name"),
+)
 
 
 class TagModel(QAbstractTableModel):
@@ -25,8 +37,7 @@ class TagModel(QAbstractTableModel):
     def columnCount(
         self, parent: QModelIndex | QPersistentModelIndex = QModelIndex()
     ) -> int:
-        # ID3 Tag, Display Name
-        return 2
+        return len(TAG_MODEL_COLUMNS)
 
     @override
     def headerData(
@@ -37,13 +48,9 @@ class TagModel(QAbstractTableModel):
             or orientation == Qt.Orientation.Vertical
         ):
             return None
-        match section:
-            case 0:
-                return "ID3 Tag"
-            case 1:
-                return "Display Name"
-            case _:
-                return None
+        if section >= self.columnCount() or section < 0:
+            return None
+        return TAG_MODEL_COLUMNS[section].display_name
 
     @override
     def data(
@@ -52,12 +59,11 @@ class TagModel(QAbstractTableModel):
         if not index.isValid() or role != Qt.ItemDataRole.DisplayRole:
             return None
         col = index.column()
-        if col > 1 or col < 0:
+        if col >= self.columnCount() or col < 0:
             return None
         row = index.row()
-        field = "id3_key" if col == 0 else "display_name"
+        field = TAG_MODEL_COLUMNS[col].key
         return getattr(self._tags[row], field)
-        # return self._tags[row][field]
 
     def addTag(self, id3_key: str, display_name: str, show_in_table: bool = False):
         new_tag: TagInfo = TagInfo(id3_key, display_name, show_in_table)
