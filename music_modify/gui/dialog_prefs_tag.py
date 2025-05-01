@@ -3,7 +3,7 @@ import logging
 from typing import override
 
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QDialog, QDialogButtonBox, QMessageBox, QWidget
+from PySide6.QtWidgets import QDialog, QMessageBox, QWidget
 
 from music_modify.custom_types import TagInfo
 from music_modify.models import TagModel
@@ -35,13 +35,7 @@ class PrefsTagDialog(PrefsAbstractDialog, Ui_PrefsTagDialog):
         self.up_toolbutton.clicked.connect(self.moveTagsUp)
         self.down_toolbutton.clicked.connect(self.moveTagsDown)
 
-        self.button_box.button(
-            QDialogButtonBox.StandardButton.RestoreDefaults
-        ).clicked.connect(self.restoreDefaults)
-
-        self.button_box.button(QDialogButtonBox.StandardButton.Reset).clicked.connect(
-            self.resetSettings
-        )
+        self.setButtonBoxConnections()
 
     def addTag(self):
         add_dialog = PrefsTagAddDialog(self)
@@ -152,12 +146,13 @@ class PrefsTagDialog(PrefsAbstractDialog, Ui_PrefsTagDialog):
 
     @override
     def restoreDefaults(self) -> None:
-        logger.info("Restore defaults called for tag")
+        logger.debug("Restore defaults called for tag")
         # Make a copy to avoid changing the original default settings
         self.model.setTags(prefs.settings.default_tags)
 
     @override
     def resetSettings(self) -> None:
+        logger.debug("Called reset settings in tag")
         """Reset the settings to the values they had when the dialog opened."""
         # Make a copy to avoid changing the original_tags value,
         # which would prevent resetting a second time.

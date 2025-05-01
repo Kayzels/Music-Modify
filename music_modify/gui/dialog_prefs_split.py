@@ -1,7 +1,7 @@
 import logging
 from typing import override
 
-from PySide6.QtWidgets import QDialogButtonBox, QLineEdit, QWidget
+from PySide6.QtWidgets import QLineEdit, QWidget
 
 from music_modify.prefs import prefs
 
@@ -35,13 +35,7 @@ class PrefsSplitDialog(PrefsAbstractDialog, Ui_PrefsSplitDialog):
             )
         )
 
-        self.button_box.button(
-            QDialogButtonBox.StandardButton.RestoreDefaults
-        ).clicked.connect(self.restoreDefaults)
-
-        self.button_box.button(QDialogButtonBox.StandardButton.Reset).clicked.connect(
-            self.resetSettings
-        )
+        self.setButtonBoxConnections()
 
     def _initializeDisplay(self):
         self.line_edit_split_text_entered.setText(prefs.settings.split_text_entered)
@@ -52,7 +46,9 @@ class PrefsSplitDialog(PrefsAbstractDialog, Ui_PrefsSplitDialog):
         """Gets the value a specific setting has been changed to.
         Stores this in the list of settings to change, which will be reflected
         when the dialog is confirmed."""
-        logger.info(f"Called _getSettingChange with {setting_name} and {setting_value}")
+        logger.debug(
+            f"Called _getSettingChange with {setting_name} and {setting_value}"
+        )
         if setting_value == "":
             # Don't want to use empty string for values
             return
@@ -63,14 +59,14 @@ class PrefsSplitDialog(PrefsAbstractDialog, Ui_PrefsSplitDialog):
         else:
             # Remove the value if it's set back to previous one
             self.changed_settings.pop(setting_name, None)
-        logger.info(f"Changed settings is {self.changed_settings}")
+        logger.debug(f"Changed settings is {self.changed_settings}")
 
     @override
     def updateSettings(self):
         """A slot that should be called from the parent widget when the dialog is accepted.
         Changes the values in the settings file to match the ones set in the dialog.
         """
-        logger.info("Called update settings inside split dialog")
+        logger.debug("Called update settings inside split dialog")
         if len(self.changed_settings) > 0:
             for setting_name, setting_value in self.changed_settings.items():
                 setattr(prefs.settings, setting_name, setting_value)
@@ -78,7 +74,7 @@ class PrefsSplitDialog(PrefsAbstractDialog, Ui_PrefsSplitDialog):
 
     @override
     def restoreDefaults(self) -> None:
-        logger.info("Restore defaults called for split")
+        logger.debug("Restore defaults called for split")
 
         split_defaults: dict[QLineEdit, str] = {
             self.line_edit_split_text_entered: prefs.settings.default_split_text_entered,
@@ -96,6 +92,7 @@ class PrefsSplitDialog(PrefsAbstractDialog, Ui_PrefsSplitDialog):
     @override
     def resetSettings(self) -> None:
         """Should reset the settings to the values they had when opening"""
+        logger.debug("Called reset settings in split")
         if len(self.changed_settings) == 0:
             return
 
