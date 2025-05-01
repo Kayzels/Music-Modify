@@ -78,7 +78,7 @@ class Ui_PrefsTagDialog(object):
         self.button_box = QDialogButtonBox(PrefsTagDialog)
         self.button_box.setObjectName(u"button_box")
         self.button_box.setOrientation(Qt.Orientation.Horizontal)
-        self.button_box.setStandardButtons(QDialogButtonBox.StandardButton.Cancel|QDialogButtonBox.StandardButton.Ok|QDialogButtonBox.StandardButton.RestoreDefaults)
+        self.button_box.setStandardButtons(QDialogButtonBox.StandardButton.Cancel|QDialogButtonBox.StandardButton.Ok|QDialogButtonBox.StandardButton.Reset|QDialogButtonBox.StandardButton.RestoreDefaults)
 
         self.verticalLayout_2.addWidget(self.button_box)
 

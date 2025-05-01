@@ -39,7 +39,9 @@ class PrefsSplitDialog(PrefsAbstractDialog, Ui_PrefsSplitDialog):
             QDialogButtonBox.StandardButton.RestoreDefaults
         ).clicked.connect(self.restoreDefaults)
 
-        # TODO: Store values of the settings on entry, to allow reset?
+        self.button_box.button(QDialogButtonBox.StandardButton.Reset).clicked.connect(
+            self.resetSettings
+        )
 
     def _initializeDisplay(self):
         self.line_edit_split_text_entered.setText(prefs.settings.split_text_entered)

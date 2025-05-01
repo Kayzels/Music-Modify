@@ -1,5 +1,6 @@
 # pyright: reportIncompatibleMethodOverride=false, reportCallInDefaultInitializer=false
 
+import copy
 import dataclasses
 import logging
 from typing import override, cast
@@ -174,7 +175,7 @@ class TagModel(QAbstractTableModel):
 
     def setTags(self, tags: list[TagInfo]) -> None:
         """Resets the model and sets the model to have the tags defined in the given list.
-        The list being sent in should be a copy, unless you want to edit the original list."""
+        Creates a copy of the tags list sent in, to avoid modifying the original."""
         self.beginResetModel()
-        self._tags = tags
+        self._tags = copy.deepcopy(tags)
         self.endResetModel()

@@ -1,3 +1,4 @@
+import copy
 import logging
 from typing import override
 
@@ -21,8 +22,8 @@ class PrefsTagDialog(PrefsAbstractDialog, Ui_PrefsTagDialog):
         self.setupUi(self)  # pyright: ignore[reportUnknownMemberType]
         self.setWindowTitle("Edit Tags")
 
-        tags = prefs.settings.info_tags.copy()
-        self.original_tags: list[TagInfo] = tags.copy()
+        tags: list[TagInfo] = copy.deepcopy(prefs.settings.info_tags)
+        self.original_tags: list[TagInfo] = copy.deepcopy(prefs.settings.info_tags)
 
         self.model: TagModel = TagModel(tags)
         self.tag_table.setModel(self.model)
@@ -37,6 +38,10 @@ class PrefsTagDialog(PrefsAbstractDialog, Ui_PrefsTagDialog):
         self.button_box.button(
             QDialogButtonBox.StandardButton.RestoreDefaults
         ).clicked.connect(self.restoreDefaults)
+
+        self.button_box.button(QDialogButtonBox.StandardButton.Reset).clicked.connect(
+            self.resetSettings
+        )
 
     def addTag(self):
         add_dialog = PrefsTagAddDialog(self)
@@ -148,10 +153,12 @@ class PrefsTagDialog(PrefsAbstractDialog, Ui_PrefsTagDialog):
     @override
     def restoreDefaults(self) -> None:
         logger.info("Restore defaults called for tag")
+        # Make a copy to avoid changing the original default settings
         self.model.setTags(prefs.settings.default_tags)
 
     @override
     def resetSettings(self) -> None:
         """Reset the settings to the values they had when the dialog opened."""
-        logger.info("Called reset settings for tags")
+        # Make a copy to avoid changing the original_tags value,
+        # which would prevent resetting a second time.
         self.model.setTags(self.original_tags)
