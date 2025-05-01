@@ -88,7 +88,7 @@ class Ui_PrefsSplitDialog(object):
     # setupUi
 
     def retranslateUi(self, PrefsSplitDialog):
-        PrefsSplitDialog.setWindowTitle(QCoreApplication.translate("PrefsSplitDialog", u"Dialog", None))
+        PrefsSplitDialog.setWindowTitle(QCoreApplication.translate("PrefsSplitDialog", u"Edit Split Characters", None))
 #if QT_CONFIG(tooltip)
         self.label_split_text_entered.setToolTip(QCoreApplication.translate("PrefsSplitDialog", u"<html><head/><body><p>The symbol that should split the data typed in. For example, with it set to be &quot;,&quot;, John Smith, Jane Doe should be understood as two separate values.</p><p><br/></p></body></html>", None))
 #endif // QT_CONFIG(tooltip)
