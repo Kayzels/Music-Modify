@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>AddTagDialog</class>
- <widget class="QDialog" name="AddTagDialog">
+ <class>PrefsTagAddDialog</class>
+ <widget class="QDialog" name="PrefsTagAddDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Add Tag</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
@@ -68,7 +68,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>AddTagDialog</receiver>
+   <receiver>PrefsTagAddDialog</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -84,7 +84,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>AddTagDialog</receiver>
+   <receiver>PrefsTagAddDialog</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

@@ -8,7 +8,7 @@ from music_modify.models import TagModel
 from music_modify.prefs import prefs
 
 from .ui_dialog_prefs_tag import Ui_PrefsTagDialog
-from .dialog_add_tag import AddTagDialog
+from .dialog_prefs_tag_add import PrefsTagAddDialog
 
 logger = logging.getLogger(__name__)
 
@@ -39,7 +39,7 @@ class PrefsTagDialog(QDialog, Ui_PrefsTagDialog):
         ).clicked.connect(self.restoreDefaults)
 
     def addTag(self):
-        add_dialog = AddTagDialog(self)
+        add_dialog = PrefsTagAddDialog(self)
 
         def processDialogResult(result: QDialog.DialogCode):
             if result == QDialog.DialogCode.Accepted:
