@@ -3,7 +3,7 @@ import logging
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QDialog, QWidget
 
-from .dialog_tag import TagDialog
+from .dialog_prefs_tag import TagDialog
 from .dialog_prefs_split import PrefsSplitDialog
 from .ui_dialog_prefs import Ui_PrefsDialog
 

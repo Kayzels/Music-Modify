@@ -7,7 +7,7 @@ from music_modify.custom_types import TagInfo
 from music_modify.models import TagModel
 from music_modify.prefs import prefs
 
-from .ui_dialog_tag import Ui_TagDialog
+from .ui_dialog_prefs_tag import Ui_TagDialog
 from .dialog_add_tag import AddTagDialog
 
 logger = logging.getLogger(__name__)
