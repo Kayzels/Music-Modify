@@ -1,18 +1,17 @@
 import logging
+from typing import override
 
-from PySide6.QtCore import Signal
-from PySide6.QtWidgets import QDialog, QDialogButtonBox, QLineEdit, QWidget
+from PySide6.QtWidgets import QDialogButtonBox, QLineEdit, QWidget
 
 from music_modify.prefs import prefs
 
+from .dialog_prefs_abstract import PrefsAbstractDialog
 from .ui_dialog_prefs_split import Ui_PrefsSplitDialog
 
 logger = logging.getLogger(__name__)
 
 
-class PrefsSplitDialog(QDialog, Ui_PrefsSplitDialog):
-    settings_updated: Signal = Signal()
-
+class PrefsSplitDialog(PrefsAbstractDialog, Ui_PrefsSplitDialog):
     def __init__(self, parent: QWidget | None = None):
         super().__init__(parent)
         self.setupUi(self)  # pyright: ignore[reportUnknownMemberType]
@@ -64,6 +63,7 @@ class PrefsSplitDialog(QDialog, Ui_PrefsSplitDialog):
             self.changed_settings.pop(setting_name, None)
         logger.info(f"Changed settings is {self.changed_settings}")
 
+    @override
     def updateSettings(self):
         """A slot that should be called from the parent widget when the dialog is accepted.
         Changes the values in the settings file to match the ones set in the dialog.
@@ -74,6 +74,7 @@ class PrefsSplitDialog(QDialog, Ui_PrefsSplitDialog):
                 setattr(prefs.settings, setting_name, setting_value)
             self.settings_updated.emit()
 
+    @override
     def restoreDefaults(self) -> None:
         logger.info("Restore defaults called for split")
 
@@ -90,6 +91,7 @@ class PrefsSplitDialog(QDialog, Ui_PrefsSplitDialog):
                 # which is called on every change (not ideal)
                 line_edit.editingFinished.emit()
 
+    @override
     def resetSettings(self) -> None:
         """Should reset the settings to the values they had when opening"""
         if len(self.changed_settings) == 0:

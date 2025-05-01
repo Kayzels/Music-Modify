@@ -1,6 +1,7 @@
 import logging
+from typing import override
 
-from PySide6.QtCore import Qt, Signal
+from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QDialog, QDialogButtonBox, QMessageBox, QWidget
 
 from music_modify.custom_types import TagInfo
@@ -9,13 +10,12 @@ from music_modify.prefs import prefs
 
 from .ui_dialog_prefs_tag import Ui_PrefsTagDialog
 from .dialog_prefs_tag_add import PrefsTagAddDialog
+from .dialog_prefs_abstract import PrefsAbstractDialog
 
 logger = logging.getLogger(__name__)
 
 
-class PrefsTagDialog(QDialog, Ui_PrefsTagDialog):
-    settings_updated: Signal = Signal()
-
+class PrefsTagDialog(PrefsAbstractDialog, Ui_PrefsTagDialog):
     def __init__(self, parent: QWidget | None):
         super().__init__(parent)
         self.setupUi(self)  # pyright: ignore[reportUnknownMemberType]
@@ -136,6 +136,7 @@ class PrefsTagDialog(QDialog, Ui_PrefsTagDialog):
     def showInvalidInputMessage(self, message: str):
         QMessageBox.warning(self.tag_table, "Invalid Input", message)
 
+    @override
     def updateSettings(self) -> None:
         """A slot that should be called from the parent widget when the dialog is accepted.
         Changes the values in the settings file to match the ones set in the dialog.
@@ -144,10 +145,12 @@ class PrefsTagDialog(QDialog, Ui_PrefsTagDialog):
         prefs.settings.info_tags = self.model._tags
         self.settings_updated.emit()
 
+    @override
     def restoreDefaults(self) -> None:
         logger.info("Restore defaults called for tag")
         self.model.setTags(prefs.settings.default_tags)
 
+    @override
     def resetSettings(self) -> None:
         """Reset the settings to the values they had when the dialog opened."""
         logger.info("Called reset settings for tags")

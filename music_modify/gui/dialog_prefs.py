@@ -3,6 +3,7 @@ import logging
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QDialog, QWidget
 
+from .dialog_prefs_abstract import PrefsAbstractDialog
 from .dialog_prefs_tag import PrefsTagDialog
 from .dialog_prefs_split import PrefsSplitDialog
 from .ui_dialog_prefs import Ui_PrefsDialog
@@ -24,9 +25,7 @@ class PrefsDialog(QDialog, Ui_PrefsDialog):
             lambda: self.openEditDialog(PrefsSplitDialog)
         )
 
-    def openEditDialog(
-        self, dialog_type: type[PrefsTagDialog] | type[PrefsSplitDialog]
-    ):
+    def openEditDialog(self, dialog_type: type[PrefsAbstractDialog]):
         dialog = dialog_type(self)
         dialog.setModal(True)
 
@@ -39,8 +38,3 @@ class PrefsDialog(QDialog, Ui_PrefsDialog):
         dialog.finished.connect(processDialogResult)
 
         dialog.show()
-
-        # TODO: Create parent class or interface that can be for both.
-        # They both inherit from QDialog, but they have an extra
-        # signal that's needed: settings_updated
-        # Would also be useful to explicitly say what functions are needed.
