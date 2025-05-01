@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>TagDialog</class>
- <widget class="QDialog" name="TagDialog">
+ <class>PrefsTagDialog</class>
+ <widget class="QDialog" name="PrefsTagDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -101,7 +101,7 @@
   <connection>
    <sender>button_box</sender>
    <signal>accepted()</signal>
-   <receiver>TagDialog</receiver>
+   <receiver>PrefsTagDialog</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -117,7 +117,7 @@
   <connection>
    <sender>button_box</sender>
    <signal>rejected()</signal>
-   <receiver>TagDialog</receiver>
+   <receiver>PrefsTagDialog</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

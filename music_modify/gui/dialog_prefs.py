@@ -3,7 +3,7 @@ import logging
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QDialog, QWidget
 
-from .dialog_prefs_tag import TagDialog
+from .dialog_prefs_tag import PrefsTagDialog
 from .dialog_prefs_split import PrefsSplitDialog
 from .ui_dialog_prefs import Ui_PrefsDialog
 
@@ -17,12 +17,16 @@ class PrefsDialog(QDialog, Ui_PrefsDialog):
         super().__init__(parent)
         self.setupUi(self)  # pyright: ignore[reportUnknownMemberType]
 
-        self.button_edit_tags.clicked.connect(lambda: self.openEditDialog(TagDialog))
+        self.button_edit_tags.clicked.connect(
+            lambda: self.openEditDialog(PrefsTagDialog)
+        )
         self.button_edit_split.clicked.connect(
             lambda: self.openEditDialog(PrefsSplitDialog)
         )
 
-    def openEditDialog(self, dialog_type: type[TagDialog] | type[PrefsSplitDialog]):
+    def openEditDialog(
+        self, dialog_type: type[PrefsTagDialog] | type[PrefsSplitDialog]
+    ):
         dialog = dialog_type(self)
         dialog.setModal(True)
 
