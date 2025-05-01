@@ -1,10 +1,11 @@
 import logging
 
-from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QDialog, QMessageBox, QWidget
+from PySide6.QtCore import Qt, Signal
+from PySide6.QtWidgets import QDialog, QDialogButtonBox, QMessageBox, QWidget
 
 from music_modify.custom_types import TagInfo
 from music_modify.models import TagModel
+from music_modify.prefs import prefs
 
 from .ui_dialog_tag import Ui_TagDialog
 from .dialog_add_tag import AddTagDialog
@@ -13,10 +14,15 @@ logger = logging.getLogger(__name__)
 
 
 class TagDialog(QDialog, Ui_TagDialog):
-    def __init__(self, parent: QWidget | None, tags: list[TagInfo]):
+    settings_updated: Signal = Signal()
+
+    def __init__(self, parent: QWidget | None):
         super().__init__(parent)
         self.setupUi(self)  # pyright: ignore[reportUnknownMemberType]
         self.setWindowTitle("Edit Tags")
+
+        tags = prefs.settings.info_tags.copy()
+        self.original_tags: list[TagInfo] = tags.copy()
 
         self.model: TagModel = TagModel(tags)
         self.tag_table.setModel(self.model)
@@ -27,6 +33,10 @@ class TagDialog(QDialog, Ui_TagDialog):
         self.remove_toolbutton.clicked.connect(self.removeSelectedTags)
         self.up_toolbutton.clicked.connect(self.moveTagsUp)
         self.down_toolbutton.clicked.connect(self.moveTagsDown)
+
+        self.button_box.button(
+            QDialogButtonBox.StandardButton.RestoreDefaults
+        ).clicked.connect(self.restoreDefaults)
 
     def addTag(self):
         add_dialog = AddTagDialog(self)
@@ -125,3 +135,20 @@ class TagDialog(QDialog, Ui_TagDialog):
 
     def showInvalidInputMessage(self, message: str):
         QMessageBox.warning(self.tag_table, "Invalid Input", message)
+
+    def updateSettings(self) -> None:
+        """A slot that should be called from the parent widget when the dialog is accepted.
+        Changes the values in the settings file to match the ones set in the dialog.
+        """
+        logger.info("Called update settings inside tag dialog")
+        prefs.settings.info_tags = self.model._tags
+        self.settings_updated.emit()
+
+    def restoreDefaults(self) -> None:
+        logger.info("Restore defaults called for tag")
+        self.model.setTags(prefs.settings.default_tags)
+
+    def resetSettings(self) -> None:
+        """Reset the settings to the values they had when the dialog opened."""
+        logger.info("Called reset settings for tags")
+        self.model.setTags(self.original_tags)

@@ -171,3 +171,10 @@ class TagModel(QAbstractTableModel):
         )
         self._tags.insert(destination_row, self._tags.pop(source_row))
         self.endMoveRows()
+
+    def setTags(self, tags: list[TagInfo]) -> None:
+        """Resets the model and sets the model to have the tags defined in the given list.
+        The list being sent in should be a copy, unless you want to edit the original list."""
+        self.beginResetModel()
+        self._tags = tags
+        self.endResetModel()

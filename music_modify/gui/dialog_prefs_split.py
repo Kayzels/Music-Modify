@@ -1,9 +1,13 @@
+import logging
+
 from PySide6.QtCore import Signal
-from PySide6.QtWidgets import QDialog, QWidget
+from PySide6.QtWidgets import QDialog, QDialogButtonBox, QLineEdit, QWidget
 
 from music_modify.prefs import prefs
 
 from .ui_dialog_prefs_split import Ui_PrefsSplitDialog
+
+logger = logging.getLogger(__name__)
 
 
 class PrefsSplitDialog(QDialog, Ui_PrefsSplitDialog):
@@ -32,6 +36,10 @@ class PrefsSplitDialog(QDialog, Ui_PrefsSplitDialog):
             )
         )
 
+        self.button_box.button(
+            QDialogButtonBox.StandardButton.RestoreDefaults
+        ).clicked.connect(self.restoreDefaults)
+
         # TODO: Store values of the settings on entry, to allow reset?
 
     def _initializeDisplay(self):
@@ -43,6 +51,7 @@ class PrefsSplitDialog(QDialog, Ui_PrefsSplitDialog):
         """Gets the value a specific setting has been changed to.
         Stores this in the list of settings to change, which will be reflected
         when the dialog is confirmed."""
+        logger.info(f"Called _getSettingChange with {setting_name} and {setting_value}")
         if setting_value == "":
             # Don't want to use empty string for values
             return
@@ -53,41 +62,33 @@ class PrefsSplitDialog(QDialog, Ui_PrefsSplitDialog):
         else:
             # Remove the value if it's set back to previous one
             self.changed_settings.pop(setting_name, None)
-
-    def _updateDisplay(self) -> None:
-        """Update the values inside the line edits.
-        Needed because prefs.settings shouldn't be updated until confirmed,
-        but the value can be changed programmatically."""
-        line_edits = {
-            "split_text_entered": self.line_edit_split_text_entered,
-            "split_values_at": self.line_edit_split_values_at,
-            "split_values_display": self.line_edit_split_values_display,
-        }
-        for name, line_edit in line_edits.items():
-            if name in self.changed_settings:
-                line_edit.setText(self.changed_settings[name])
+        logger.info(f"Changed settings is {self.changed_settings}")
 
     def updateSettings(self):
         """A slot that should be called from the parent widget when the dialog is accepted.
         Changes the values in the settings file to match the ones set in the dialog.
         """
+        logger.info("Called update settings inside split dialog")
         if len(self.changed_settings) > 0:
             for setting_name, setting_value in self.changed_settings.items():
                 setattr(prefs.settings, setting_name, setting_value)
             self.settings_updated.emit()
 
     def restoreDefaults(self) -> None:
-        split_defaults = {
-            "split_text_entered": prefs.settings.default_split_text_entered,
-            "split_values_at": prefs.settings.default_split_values_at,
-            "split_values_display": prefs.settings.default_split_values_display,
-        }
-        for setting_name, setting_value in split_defaults.items():
-            self._getSettingChange(setting_name, setting_value)
+        logger.info("Restore defaults called for split")
 
-        # Change the display to reflect the defaults
-        if len(self.changed_settings) > 0:
-            self._updateDisplay()
+        split_defaults: dict[QLineEdit, str] = {
+            self.line_edit_split_text_entered: prefs.settings.default_split_text_entered,
+            self.line_edit_split_values_at: prefs.settings.default_split_values_at,
+            self.line_edit_split_values_display: prefs.settings.default_split_values_display,
+        }
+
+        for line_edit, text in split_defaults.items():
+            if text != line_edit.text():
+                line_edit.setText(text)
+                # Call this explicitly, otherwise would need to use textChanged slot,
+                # which is called on every change (not ideal)
+                line_edit.editingFinished.emit()
 
     def resetSettings(self) -> None:
         """Should reset the settings to the values they had when opening"""

@@ -17,8 +17,7 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QAbstractButton, QAbstractItemView, QApplication, QDialog,
     QDialogButtonBox, QHBoxLayout, QHeaderView, QSizePolicy,
-    QTableView, QTextEdit, QToolButton, QVBoxLayout,
-    QWidget)
+    QTableView, QToolButton, QVBoxLayout, QWidget)
 
 class Ui_TagDialog(object):
     def setupUi(self, TagDialog):
@@ -76,28 +75,14 @@ class Ui_TagDialog(object):
 
         self.verticalLayout_2.addLayout(self.horizontalLayout)
 
-        self.save_warning_text_edit = QTextEdit(TagDialog)
-        self.save_warning_text_edit.setObjectName(u"save_warning_text_edit")
-        sizePolicy = QSizePolicy(QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.Minimum)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.save_warning_text_edit.sizePolicy().hasHeightForWidth())
-        self.save_warning_text_edit.setSizePolicy(sizePolicy)
-        self.save_warning_text_edit.setMaximumSize(QSize(16777215, 75))
-        self.save_warning_text_edit.setBaseSize(QSize(0, 20))
-        self.save_warning_text_edit.setReadOnly(True)
-
-        self.verticalLayout_2.addWidget(self.save_warning_text_edit)
-
         self.button_box = QDialogButtonBox(TagDialog)
         self.button_box.setObjectName(u"button_box")
         self.button_box.setOrientation(Qt.Orientation.Horizontal)
-        self.button_box.setStandardButtons(QDialogButtonBox.StandardButton.Cancel|QDialogButtonBox.StandardButton.Ok)
+        self.button_box.setStandardButtons(QDialogButtonBox.StandardButton.Cancel|QDialogButtonBox.StandardButton.Ok|QDialogButtonBox.StandardButton.RestoreDefaults)
 
         self.verticalLayout_2.addWidget(self.button_box)
 
         self.verticalLayout_2.setStretch(0, 10)
-        self.verticalLayout_2.setStretch(1, 2)
 
         self.retranslateUi(TagDialog)
         self.button_box.accepted.connect(TagDialog.accept)
@@ -112,13 +97,5 @@ class Ui_TagDialog(object):
         self.add_toolbutton.setText(QCoreApplication.translate("TagDialog", u"Add Tag", None))
         self.remove_toolbutton.setText(QCoreApplication.translate("TagDialog", u"Remove Tag", None))
         self.down_toolbutton.setText(QCoreApplication.translate("TagDialog", u"Move Down", None))
-        self.save_warning_text_edit.setHtml(QCoreApplication.translate("TagDialog", u"<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
-"<html><head><meta name=\"qrichtext\" content=\"1\" /><meta charset=\"utf-8\" /><style type=\"text/css\">\n"
-"p, li { white-space: pre-wrap; }\n"
-"hr { height: 1px; border-width: 0; }\n"
-"li.unchecked::marker { content: \"\\2610\"; }\n"
-"li.checked::marker { content: \"\\2612\"; }\n"
-"</style></head><body style=\" font-family:'Fira Sans'; font-size:10.5pt; font-weight:316; font-style:normal;\">\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">The changes made here will only be applied when OK is clicked in the Preferences Dialog. </p></body></html>", None))
     # retranslateUi
 
