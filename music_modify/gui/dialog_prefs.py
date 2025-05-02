@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 class PrefsDialog(QDialog, Ui_PrefsDialog):
     settings_updated: Signal = Signal()
 
-    def __init__(self, /, parent: QWidget | None = None):
+    def __init__(self, parent: QWidget | None = None):
         super().__init__(parent)
         self.setupUi(self)  # pyright: ignore[reportUnknownMemberType]
 

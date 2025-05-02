@@ -42,7 +42,7 @@ class TagModel(QAbstractTableModel):
 
     @override
     def headerData(
-        self, section: int, orientation: Qt.Orientation, /, role: Qt.ItemDataRole
+        self, section: int, orientation: Qt.Orientation, role: Qt.ItemDataRole
     ) -> str | None:
         if (
             role != Qt.ItemDataRole.DisplayRole
