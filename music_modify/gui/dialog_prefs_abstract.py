@@ -1,9 +1,10 @@
 # pyright: reportImplicitAbstractClass=false
 from abc import ABCMeta, abstractmethod
 import logging
+from typing import Callable, Self
 
 from PySide6.QtCore import Signal, QObject
-from PySide6.QtWidgets import QDialogButtonBox, QWidget, QDialog
+from PySide6.QtWidgets import QDialogButtonBox, QMessageBox, QWidget, QDialog
 
 
 logger = logging.getLogger(__name__)
@@ -17,15 +18,28 @@ class ABCQMeta(ABCMeta, type(QObject)):
 
 class PrefsAbstractDialog(QDialog, metaclass=ABCQMeta):
     settings_updated: Signal = Signal()
-    button_box: QDialogButtonBox
 
     def __init__(self, parent: QWidget | None = None):
         QDialog.__init__(self, parent)
+        if hasattr(self, "setupUi"):
+            self.setupUi: Callable[[Self], None]
+            self.setupUi(self)
+            self._setButtonBoxConnections()
+        else:
+            show_on = self if parent is None else parent
+            message = "Setup Ui function not found when calling abstract init"
+            logger.warning(message)
+            QMessageBox.warning(show_on, "Missing setupUi", message)
 
-    def setButtonBoxConnections(self):
-        """Should always be called at the end of initializing a concrete instance.
-        Creates the connection between the signals from the buttons in the button box
+    def _setButtonBoxConnections(self):
+        """Creates the connection between the signals from the buttons in the button box
         and the slot in the class for that button."""
+        if not hasattr(self, "button_box"):
+            warning = "Button Box not found or invalid after calling _setupUiCore()"
+            logger.warning(warning)
+            QMessageBox.warning(self, "Missing attributes", warning)
+            return
+        self.button_box: QDialogButtonBox
         self.button_box.button(
             QDialogButtonBox.StandardButton.RestoreDefaults
         ).clicked.connect(self.restoreDefaults)

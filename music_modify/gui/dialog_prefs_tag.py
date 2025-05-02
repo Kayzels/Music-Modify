@@ -19,7 +19,6 @@ logger = logging.getLogger(__name__)
 class PrefsTagDialog(PrefsAbstractDialog, Ui_PrefsTagDialog):
     def __init__(self, parent: QWidget | None):
         super().__init__(parent)
-        self.setupUi(self)  # pyright: ignore[reportUnknownMemberType]
         self.setWindowTitle("Edit Tags")
 
         tags: list[TagInfo] = copy.deepcopy(prefs.settings.info_tags)
@@ -34,8 +33,6 @@ class PrefsTagDialog(PrefsAbstractDialog, Ui_PrefsTagDialog):
         self.remove_toolbutton.clicked.connect(self.removeSelectedTags)
         self.up_toolbutton.clicked.connect(self.moveTagsUp)
         self.down_toolbutton.clicked.connect(self.moveTagsDown)
-
-        self.setButtonBoxConnections()
 
     def addTag(self):
         add_dialog = PrefsTagAddDialog(self)

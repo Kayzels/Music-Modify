@@ -14,7 +14,6 @@ logger = logging.getLogger(__name__)
 class PrefsSplitDialog(PrefsAbstractDialog, Ui_PrefsSplitDialog):
     def __init__(self, parent: QWidget | None = None):
         super().__init__(parent)
-        self.setupUi(self)  # pyright: ignore[reportUnknownMemberType]
 
         self.changed_settings: dict[str, str] = {}
         self._initializeDisplay()
@@ -34,8 +33,6 @@ class PrefsSplitDialog(PrefsAbstractDialog, Ui_PrefsSplitDialog):
                 "split_values_at", self.line_edit_split_values_at.text()
             )
         )
-
-        self.setButtonBoxConnections()
 
     def _initializeDisplay(self):
         self.line_edit_split_text_entered.setText(prefs.settings.split_text_entered)
