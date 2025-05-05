@@ -33,7 +33,9 @@ class SongTableModel(QAbstractTableModel):
             return None
 
         if role == Qt.ItemDataRole.DisplayRole:
-            song = self.repository.getSongs()[index.row()]
+            song = self.repository.getSong(index.row())
+            if song is None:
+                return None
             tag_info = song.display_info[index.column()]
             return tag_info
         return None

@@ -15,6 +15,11 @@ class SongRepository(QObject):
     def getSongs(self):
         return self._songs
 
+    def getSong(self, index: int) -> Song | None:
+        if index < 0 or index >= len(self._songs):
+            return None
+        return self._songs[index]
+
     def __len__(self):
         return len(self._songs)
 

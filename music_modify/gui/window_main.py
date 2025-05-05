@@ -293,7 +293,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 QSortFilterProxyModel, self.files_table_view.model()
             ).mapToSource(index)
 
-        song_info = self.songs_repository.getSongs()[index.row()]
+        song_info = self.songs_repository.getSong(index.row())
+        if song_info is None:
+            return
 
         dialog = EditDialog(song_info, parent=self)
         dialog.setModal(True)
