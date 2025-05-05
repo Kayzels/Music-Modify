@@ -25,6 +25,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         super().__init__()
         self.setupUi(self)  # pyright: ignore[reportUnknownMemberType]
 
+        # Create separate QLabel widgets instead of using the statbusbar default ones,
+        # so that they're not overridden when a QStatusTipEvent happens.
+        self.versionMessage: QLabel = QLabel(self)
+        self.statusbar.addWidget(self.versionMessage)
+        self.statusLabel: QLabel = QLabel(self)
+        self.statusbar.addWidget(self.statusLabel)
+
         self.songs_repository: Final[SongRepository] = SongRepository()
         self.songs_model: Final[SongTableModel] = SongTableModel(self.songs_repository)
         self.files_table_view.setModel(self.songs_model)
@@ -178,11 +185,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def updateStatusbarMessage(self):
         num_songs = len(self.songs_repository)
-        message: str = f"{num_songs} songs"
+        # Put the message inside [] so that it's distinct from the version name
+        message: str = f"[{num_songs} songs"
         selected_length = self.getSelectionLength()
         if selected_length > 0:
-            message += f" [{selected_length} selected]"
-        self.statusbar.showMessage(message)
+            message += f", {selected_length} selected"
+        message += "]"
+        self.statusLabel.setText(message)
 
     def removeSelectedFiles(self):
         """Removes the files at the indexes provided by the selectionModel"""
@@ -213,7 +222,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.files_table_view.clearSelection()
 
     def addStatusbarAppMessage(self, appName: str, appVersion: str):
-        self.statusbar.addPermanentWidget(QLabel(f"{appName} {appVersion}"))
+        self.versionMessage.setText(f"{appName} {appVersion}")
 
     def showAboutDialog(self):
         about_dialog = AboutDialog(self)
