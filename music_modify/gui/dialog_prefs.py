@@ -19,13 +19,13 @@ class PrefsDialog(QDialog, Ui_PrefsDialog):
         self.setupUi(self)  # pyright: ignore[reportUnknownMemberType]
 
         self.button_edit_tags.clicked.connect(
-            lambda: self.openEditDialog(PrefsTagDialog)
+            lambda: self.openChildDialog(PrefsTagDialog)
         )
         self.button_edit_split.clicked.connect(
-            lambda: self.openEditDialog(PrefsSplitDialog)
+            lambda: self.openChildDialog(PrefsSplitDialog)
         )
 
-    def openEditDialog(self, dialog_type: type[PrefsAbstractDialog]):
+    def openChildDialog(self, dialog_type: type[PrefsAbstractDialog]):
         dialog = dialog_type(self)
         dialog.setModal(True)
 
