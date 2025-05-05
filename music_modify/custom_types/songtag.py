@@ -4,7 +4,7 @@ import logging
 from typing import Final, override
 
 from mutagen import id3
-from mutagen.id3 import ID3, Frames
+from mutagen.id3 import ID3, Frames, ID3TimeStamp
 
 from .enums import TagType
 
@@ -13,6 +13,17 @@ logger = logging.getLogger(__name__)
 
 class SongTag:
     """Object representing an ID3 tag"""
+
+    KEYS_ALLOW_MULTIPLE_VALUES: set[str] = {
+        "TCOM",  # Composer
+        "TCON",  # Content Type (Genres)
+        "TENC",  # Encoder
+        "TEXT",  # Lyricist
+        "TKWD",  # Keywords
+        "TMOO",  # Mood
+        "TOLY",  # Original Lyricist
+        "TPE4",  # Interpreter/Remixer
+    }
 
     def __init__(self, display_name: str, id3_key: str):
         self._id3_key: Final[str] = id3_key
@@ -43,6 +54,10 @@ class SongTag:
     def frame_type(self) -> TagType:
         return self._frame_type
 
+    @property
+    def allow_multiple(self) -> bool:
+        return self.id3_key in SongTag.KEYS_ALLOW_MULTIPLE_VALUES
+
     @staticmethod
     def _getFrameType(id3_key: str) -> TagType:
         """Depending on the tag, determines the list name of the type of
@@ -68,9 +83,15 @@ class SongTag:
         Returns 2 if the format is [role, person]"""
         return 2 if self.frame_type == TagType.People else 1
 
-    def getTag(self, song: ID3) -> list[str] | list[list[str]] | None:
+    def getTag(
+        self, song: ID3
+    ) -> list[str] | list[ID3TimeStamp] | list[list[str]] | None:
         """Gets the current data for this tag in the sent song.
-        Returns None if tag is not in song, or empty."""
+        Returns None if tag is not in song, or empty.
+        Returns a list of strings if the format is a single string, like for the title,
+        or if it is a list of values, like for the composer
+        Returns a list of list of strings if the format is a group of pairs,
+        like for the involved people list."""
         try:
             # NOTE: Done like this because the frame type changes,
             # and there is no quick way to directly extract the right type.

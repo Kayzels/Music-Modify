@@ -6,9 +6,16 @@ from os import PathLike
 from pathlib import Path
 from typing import Final, cast
 
-from PySide6.QtCore import QModelIndex, QSortFilterProxyModel
+from PySide6.QtCore import QModelIndex, QPoint, QSortFilterProxyModel, Qt
 from PySide6.QtGui import QDragEnterEvent, QDragMoveEvent, QDropEvent
-from PySide6.QtWidgets import QFileDialog, QLabel, QMainWindow, QProgressDialog
+from PySide6.QtWidgets import (
+    QFileDialog,
+    QLabel,
+    QMainWindow,
+    QMenu,
+    QMessageBox,
+    QProgressDialog,
+)
 
 from music_modify.models import SongRepository, SongTableModel
 from music_modify.utils import formatTime, updateTableView
@@ -16,6 +23,7 @@ from music_modify.utils import formatTime, updateTableView
 from .ui_window_main import Ui_MainWindow
 from .dialog_about import AboutDialog
 from .dialog_prefs import PrefsDialog
+from .dialog_edit import EditDialog
 
 logger = logging.getLogger(__name__)
 
@@ -47,6 +55,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         )
         self.songs_repository.songs_updated.connect(self.setFileActionState)
         self.songs_repository.songs_updated.connect(self.updateStatusbarMessage)
+        self.files_table_view.setContextMenuPolicy(
+            Qt.ContextMenuPolicy.CustomContextMenu
+        )
+        self.files_table_view.customContextMenuRequested.connect(
+            self.showCustomContextMenu
+        )
 
         # Drag and Drop
         self.files_table_view.setAcceptDrops(True)
@@ -67,6 +81,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.action_select_none.triggered.connect(self.files_table_view.clearSelection)
         self.action_about.triggered.connect(self.showAboutDialog)
         self.action_preferences.triggered.connect(self.showPrefsDialog)
+        self.action_edit_individual.triggered.connect(self.editSongsIndividual)
+        self.action_edit_bulk.triggered.connect(self.editSongsBulk)
 
         self.setActionState()
         self.updateStatusbarMessage()
@@ -238,3 +254,67 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.songs_repository.refreshDisplay()
         self.songs_model.layoutChanged.emit()
         updateTableView(self.files_table_view, self.songs_repository)
+
+    def editSongsIndividual(self) -> None:
+        """Create a dialog for each song in the selected list (or allow going between with Next and Previous?)
+        that can then edit the information and close."""
+        if self.getSelectionLength() == 0:
+            return
+        if self.getSelectionLength() > 1:
+            QMessageBox.information(
+                self,
+                "Selected multiple",
+                "At the moment, only editing the first file in the selection is supported.",
+            )
+            # TODO:Edit multiple songs individually
+            raise NotImplementedError
+        index = self.files_table_view.selectionModel().selectedIndexes()[0]
+        self.showEditDialog(index)
+
+    def editSongsBulk(self) -> None:
+        """Create a dialog that allows editing the information for each song in the selection."""
+        QMessageBox.information(
+            self,
+            "Not supported yet",
+            "This action isn't available yet, so will do nothing.",
+        )
+        # TODO: Edit songs in bulk
+        raise NotImplementedError
+
+    def showEditDialog(self, index: QModelIndex):
+        # TODO: Update song information if dialog is accepted
+
+        if not index.isValid():
+            logger.info(f"Invalid index when calling show edit dialog: {index}")
+            return
+
+        if isinstance(self.files_table_view.model(), QSortFilterProxyModel):
+            index = cast(
+                QSortFilterProxyModel, self.files_table_view.model()
+            ).mapToSource(index)
+
+        song_info = self.songs_repository.getSongs()[index.row()]
+
+        dialog = EditDialog(song_info, parent=self)
+        dialog.setModal(True)
+        dialog.show()
+
+    def showCustomContextMenu(self, position: QPoint):
+        index = self.files_table_view.indexAt(position)
+        if not index.isValid():
+            logger.info(f"Invalid index when calling custom context menu: {index}")
+            return
+
+        context_menu = QMenu(self)
+
+        # If only one song selected, can only edit individually, don't show bulk, or child menu
+        if self.getSelectionLength() == 1:
+            context_menu.addAction(self.action_edit_individual)
+        else:
+            song_menu = QMenu("Edit Songs")
+            song_menu.addActions(self.menu_edit_songs.actions())  # pyright: ignore[reportUnknownMemberType]
+            context_menu.addMenu(song_menu)
+
+        context_menu.addAction(self.action_remove_selected)
+
+        context_menu.popup(self.files_table_view.viewport().mapToGlobal(position))
