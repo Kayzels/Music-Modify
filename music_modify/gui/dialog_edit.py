@@ -1,31 +1,27 @@
-# pyright: reportPrivateImportUsage=false
+# pyright: reportPrivateImportUsage=false, reportUnusedCallResult=false
+import copy
 import logging
 from typing import cast
 
 from mutagen.id3 import ID3TimeStamp
 
-from PySide6.QtCore import Qt
-from PySide6.QtGui import QIcon
+from PySide6.QtCore import Qt, Slot
 from PySide6.QtWidgets import (
     QDialog,
     QDialogButtonBox,
     QFormLayout,
-    QHBoxLayout,
-    QLineEdit,
-    QListWidget,
-    QListWidgetItem,
     QScrollArea,
-    QTableWidget,
-    QTableWidgetItem,
-    QToolButton,
     QVBoxLayout,
     QWidget,
 )
 
 from music_modify.custom_types import Song, SongTag
-from music_modify.custom_types.enums import TagType
+from music_modify.custom_types.enums import TagType, WidgetType
 from music_modify.prefs import prefs
 from music_modify.utils import mapKey
+
+from .widget_edit import EditWidget
+
 
 logger = logging.getLogger(__name__)
 
@@ -68,7 +64,7 @@ class EditDialog(QDialog):
         self.song_layout: QFormLayout = QFormLayout(self.scroll_widget)
 
         for tag in prefs.settings.all_tags:
-            current_data = tag.getTag(self.song_info.id3)
+            current_data = copy.deepcopy(tag.getTag(self.song_info.id3))
             widget = self._createWidgetType(tag, current_data)
             self.song_layout.addRow(tag.display_name, widget)
 
@@ -83,108 +79,45 @@ class EditDialog(QDialog):
     def _createWidgetType(
         self,
         tag: SongTag,
-        current_data: list[str] | list[ID3TimeStamp] | list[list[str]] | None,
+        data: list[str] | list[ID3TimeStamp] | list[list[str]] | None,
     ) -> QWidget:
-        if current_data is None:
-            return QLineEdit()
+        group: tuple[TagType, bool] = (tag.frame_type, tag.allow_multiple)
 
-        # Check that it's a tag that only allows a single value, put in LineEdit
-        if not tag.allow_multiple and not isinstance(current_data[0], list):
-            current_data = cast(list[str] | list[ID3TimeStamp], current_data)
+        match group:
+            case (TagType.People, _):
+                # Is a people tag, so table with current data
+                widget_type = WidgetType.Table
+            case (_, True):
+                # Allow multiple is true, so list with current data
+                widget_type = WidgetType.List
+                if data is not None:
+                    # Send a copy otherwise when checking if a value is changed,
+                    # it will always be false, because it's comparing the two
+                    # changed values
+                    data = cast(list[str], data).copy()
+            case (_, False):
+                # Only allows a single value, which can be a string, ID3TimeStamp or None.
+                # Show in LineEdit.
+                widget_type = WidgetType.String
+                if data is not None:
+                    data = copy.deepcopy(cast(list[list[str]], data))
+                    # data = cast(list[list[str]], data).copy()
 
-            line_edit = QLineEdit(str(current_data[0]))
-            line_edit.editingFinished.connect(
-                lambda: self._setValueChange(
-                    id3_key=tag.id3_key,
-                    value=line_edit.text().strip()
-                    if line_edit.text().strip() != ""
-                    else None,
-                )
-            )
-            return line_edit
+        widget = EditWidget(self, widget_type, data)
 
-        # Create container for non-LineEdit widgets, so we can add and remove rows, and move them.
-        container_widget = QWidget()
-        container_layout = QHBoxLayout()
-        container_widget.setLayout(container_layout)
-        container_layout.setContentsMargins(0, 0, 0, 0)
+        @Slot(str)
+        @Slot(list)
+        def updateValue(info: str | list[str] | list[list[str]]):
+            logger.info(f"Info is {info}")
+            self._setValueChange(tag.id3_key, info)
 
-        button_layout = QVBoxLayout()
+        # Line updated should only be emitted by the LineEdit, for single values
+        # But group updated emitted when a list widget or table is updated
+        # Either way, we just pass the information through to _setValueChange
+        widget.line_updated.connect(updateValue)
+        widget.group_updated.connect(updateValue)
 
-        up_button = QToolButton(container_widget)
-        up_button.setIcon(QIcon(QIcon.fromTheme(QIcon.ThemeIcon.GoUp)))
-        button_layout.addWidget(up_button)
-        add_button = QToolButton(container_widget)
-        add_button.setIcon(QIcon(QIcon.fromTheme(QIcon.ThemeIcon.ListAdd)))
-        button_layout.addWidget(add_button)
-        remove_button = QToolButton(container_widget)
-        remove_button.setIcon(QIcon(QIcon.fromTheme(QIcon.ThemeIcon.ListRemove)))
-        button_layout.addWidget(remove_button)
-        down_button = QToolButton(container_widget)
-        down_button.setIcon(QIcon(QIcon.fromTheme(QIcon.ThemeIcon.GoDown)))
-        button_layout.addWidget(down_button)
-
-        # A non-people tag that allows multiple values, create a ListWidget
-        if tag.frame_type != TagType.People:
-            current_data = cast(list[str], current_data)
-            list_widget = QListWidget()
-            for val in current_data:
-                item = QListWidgetItem(val)
-                item.setFlags(item.flags() | Qt.ItemFlag.ItemIsEditable)
-                list_widget.addItem(item)
-
-            def setListChanges():
-                # PERF: Need to iterate through because there might be new values.
-                # Is there a way to prevent needing to do this?
-                values: list[str] = []
-                for row in range(list_widget.count()):
-                    item = list_widget.item(row)
-                    values.append(item.text())
-                self._setValueChange(tag.id3_key, values)
-
-            list_widget.itemChanged.connect(setListChanges)
-
-            # TODO: Connect the buttons to slots for list widget
-
-            container_layout.addWidget(list_widget)
-            container_layout.addLayout(button_layout)
-
-            return container_widget
-
-        # If this far, it must be a people list, so put in table.
-        current_data = cast(list[list[str]], current_data)
-        table = QTableWidget()
-        table.setColumnCount(2)  # Role, Person
-        table.setHorizontalHeaderLabels(["Role", "Person"])  # pyright: ignore[reportUnknownMemberType]
-        table.setRowCount(len(current_data))
-
-        def setTableChanges():
-            # PERF: Find way to avoid needing to rebuild the list on each change
-            values: list[list[str]] = []
-            for row in range(table.rowCount()):
-                current_value: list[str] = []
-                for col in range(table.columnCount()):
-                    item = table.item(row, col)
-                    if item is not None:
-                        val = item.text()
-                        current_value.append(val)
-                if len(current_value) > 0:
-                    values.append(current_value)
-            self._setValueChange(tag.id3_key, values)
-
-        for row_count, (role, person) in enumerate(current_data):
-            table.setItem(row_count, 0, QTableWidgetItem(role))
-            table.setItem(row_count, 1, QTableWidgetItem(person))
-        table.resizeColumnsToContents()
-        table.horizontalHeader().setStretchLastSection(True)
-        table.itemChanged.connect(setTableChanges)
-
-        # TODO: Connect the buttons to slots for table widget
-
-        container_layout.addWidget(table)
-        container_layout.addLayout(button_layout)
-
-        return container_widget
+        return widget
 
     def _setValueChange(
         self, id3_key: str, value: str | list[str] | list[list[str]] | None
@@ -196,7 +129,7 @@ class EditDialog(QDialog):
         key = mapKey(id3_key)
         if key is None:
             return
-        tag = key.getTag(self.song_info.id3)
+        tag = copy.deepcopy(key.getTag(self.song_info.id3))
 
         if tag is None:
             if value is None:
@@ -206,6 +139,7 @@ class EditDialog(QDialog):
                 return
 
         self.changed_values[id3_key] = value
+        logger.info(f"Changed values before processing are {self.changed_values}")
 
         if value is None:
             # We've set the value for the id3_key above to None,
@@ -265,3 +199,5 @@ class EditDialog(QDialog):
     def updateSong(self) -> None:
         """Adds the changes to the song, and saves it."""
         raise NotImplementedError
+
+    # TODO: Check whether all the deepcopy's are needed.

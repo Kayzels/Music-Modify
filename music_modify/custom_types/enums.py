@@ -12,3 +12,9 @@ class TagGroup(Enum):
     FileTags = "File Tags"
     StandardTags = "Standard Tags"
     CustomTags = "Custom Tags"
+
+
+class WidgetType(Enum):
+    List = 0
+    Table = 1
+    String = 2
