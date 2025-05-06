@@ -1,10 +1,10 @@
-# pyright: reportUnknownMemberType=false
+# pyright: reportUnknownMemberType=false, reportPrivateImportUsage=false
 
 import logging
 import os
 from typing import cast
 
-from mutagen.id3 import ID3
+from mutagen.id3 import ID3, ID3TimeStamp
 
 from music_modify.prefs import prefs
 
@@ -24,7 +24,7 @@ class Song:
         display_split = prefs.settings.split_values_display
         for column in prefs.settings.table_tags:
             data_string = ""
-            current_data: list[str] | list[list[str]] | None
+            current_data: list[str] | list[ID3TimeStamp] | list[list[str]] | None
             try:
                 current_data = column.getTag(self.id3)
                 if current_data in [[], None]:
