@@ -8,3 +8,7 @@ description = "Music file tag editor"
 license = "GPL-3.0-or-later"
 license-files = ["LICENSE"]
 keywords = ["mp3", "music", "tags"]
+
+[tool.basedpyright]
+reportAny = false
+reportUnusedCallResult = false

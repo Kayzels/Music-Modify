@@ -1,4 +1,5 @@
 # pyright: reportPrivateImportUsage=false
+import copy
 import logging
 from typing import cast
 
@@ -26,6 +27,7 @@ logger = logging.getLogger(__name__)
 class EditWidget(QWidget):
     line_updated: Signal = Signal(str)
     group_updated: Signal = Signal(list)
+    value_reset: Signal = Signal()
 
     def __init__(
         self,
@@ -47,6 +49,10 @@ class EditWidget(QWidget):
         else:
             data = cast(list[str] | list[list[str]], data)
             self.current_data = data
+
+        self.original_data: str | list[str] | list[list[str]] = copy.deepcopy(
+            self.current_data
+        )
 
         self.widget_type: WidgetType = widget_type
 
@@ -131,6 +137,9 @@ class EditWidget(QWidget):
                 new_text = self.main_widget.text()
                 if new_text != self.current_data:
                     self.current_data = new_text
+                    if self._isReset():
+                        self.value_reset.emit()
+                        return
                     self.line_updated.emit(self.current_data)
                     return
             case WidgetType.List:
@@ -141,6 +150,9 @@ class EditWidget(QWidget):
                 new_text = item.text()
                 if new_text != self.current_data[row]:
                     self.current_data[row] = new_text
+                    if self._isReset():
+                        self.value_reset.emit()
+                        return
                     self.group_updated.emit(self.current_data)
                     return
             case WidgetType.Table:
@@ -152,6 +164,9 @@ class EditWidget(QWidget):
                 new_text = item.text()
                 if new_text != self.current_data[row][col]:
                     self.current_data[row][col] = new_text
+                    if self._isReset():
+                        self.value_reset.emit()
+                        return
                     self.group_updated.emit(self.current_data)
                     return
 
@@ -168,3 +183,30 @@ class EditWidget(QWidget):
 
     def _moveRowsDown(self) -> None:
         raise NotImplementedError
+
+    def _isReset(self) -> bool:
+        """Returns whether the value that is being stored is the same as the original value."""
+        match self.widget_type:
+            case WidgetType.String:
+                self.current_data = cast(str, self.current_data)
+                self.original_data = cast(str, self.original_data)
+                return self.current_data == self.original_data
+            case WidgetType.List:
+                self.current_data = cast(list[str], self.current_data)
+                self.original_data = cast(list[str], self.original_data)
+                if len(self.current_data) != len(self.original_data):
+                    return False
+                for i in range(len(self.current_data)):
+                    if self.current_data[i] != self.original_data[i]:
+                        return False
+                return True
+            case WidgetType.Table:
+                self.current_data = cast(list[list[str]], self.current_data)
+                self.original_data = cast(list[list[str]], self.original_data)
+                if len(self.current_data) != len(self.original_data):
+                    return False
+                for i in range(len(self.current_data)):
+                    for j in range(1):
+                        if self.current_data[i][j] != self.original_data[i][j]:
+                            return False
+                return True
