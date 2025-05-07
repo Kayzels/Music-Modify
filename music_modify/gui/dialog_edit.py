@@ -18,9 +18,6 @@ from music_modify.custom_types import Song, SongTag
 from music_modify.gui.widget_edit_factory import EditWidgetFactory
 from music_modify.prefs import prefs
 
-# from .widget_edit import EditWidget
-
-
 logger = logging.getLogger(__name__)
 
 
