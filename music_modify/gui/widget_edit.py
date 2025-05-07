@@ -8,6 +8,7 @@ from mutagen.id3 import ID3TimeStamp
 from PySide6.QtCore import Qt, Signal, Slot
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (
+    QAbstractItemView,
     QHBoxLayout,
     QLineEdit,
     QListWidget,
@@ -19,9 +20,11 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from music_modify.custom_types.enums import WidgetType
+from music_modify.custom_types.enums import Direction, WidgetType
 
 logger = logging.getLogger(__name__)
+
+# TODO: Implement redo/undo
 
 
 class EditWidget(QWidget):
@@ -80,7 +83,7 @@ class EditWidget(QWidget):
         up_button = QToolButton(self)
         up_button.setIcon(QIcon(QIcon.fromTheme(QIcon.ThemeIcon.GoUp)))
         button_layout.addWidget(up_button)
-        up_button.clicked.connect(self._moveRowsUp)
+        up_button.clicked.connect(lambda: self._moveRows(Direction.Up))
 
         add_button = QToolButton(self)
         add_button.setIcon(QIcon(QIcon.fromTheme(QIcon.ThemeIcon.ListAdd)))
@@ -95,7 +98,7 @@ class EditWidget(QWidget):
         down_button = QToolButton(self)
         down_button.setIcon(QIcon(QIcon.fromTheme(QIcon.ThemeIcon.GoDown)))
         button_layout.addWidget(down_button)
-        down_button.clicked.connect(self._moveRowsDown)
+        down_button.clicked.connect(lambda: self._moveRows(Direction.Down))
 
         if widget_type == WidgetType.List:
             self.current_data = cast(list[str], self.current_data)
@@ -104,6 +107,13 @@ class EditWidget(QWidget):
                 item = QListWidgetItem(val)
                 item.setFlags(item.flags() | Qt.ItemFlag.ItemIsEditable)
                 self.main_widget.addItem(item)
+            self.main_widget.setDragDropMode(
+                QAbstractItemView.DragDropMode.InternalMove
+            )
+            self.main_widget.model().rowsMoved.connect(lambda: self._changeValue(None))
+            self.main_widget.setSelectionMode(
+                QAbstractItemView.SelectionMode.ExtendedSelection
+            )
         elif widget_type == WidgetType.Table:
             self.current_data = cast(list[list[str]], self.current_data)
             self.main_widget = QTableWidget()
@@ -137,25 +147,26 @@ class EditWidget(QWidget):
                 new_text = self.main_widget.text()
                 if new_text != self.current_data:
                     self.current_data = new_text
-                    if self._isReset():
-                        self.value_reset.emit()
-                        return
-                    self.line_updated.emit(self.current_data)
+                    self._emitUpdate()
                     return
             case WidgetType.List:
                 self.main_widget = cast(QListWidget, self.main_widget)
                 item = cast(QListWidgetItem, item)
                 self.current_data = cast(list[str], self.current_data)
-                row = self.main_widget.row(item)
-                new_text = item.text()
-                if new_text != self.current_data[row]:
-                    self.current_data[row] = new_text
-                    if self._isReset():
-                        self.value_reset.emit()
-                        return
-                    self.group_updated.emit(self.current_data)
-                    return
+
+                # Need to create the list from scratch,
+                # as not sure what changes have been made:
+                # could be a single line, or lines moved or deleted.
+                self.current_data = [
+                    self.main_widget.item(row).text().strip()
+                    for row in range(self.main_widget.count())
+                    if self.main_widget.item(row).text().strip() != ""
+                ]
+                self._emitUpdate()
+                return
+
             case WidgetType.Table:
+                # TODO: Deal with empty string
                 self.main_widget = cast(QTableWidget, self.main_widget)
                 item = cast(QTableWidgetItem, item)
                 self.current_data = cast(list[list[str]], self.current_data)
@@ -164,25 +175,80 @@ class EditWidget(QWidget):
                 new_text = item.text()
                 if new_text != self.current_data[row][col]:
                     self.current_data[row][col] = new_text
-                    if self._isReset():
-                        self.value_reset.emit()
-                        return
-                    self.group_updated.emit(self.current_data)
+                    self._emitUpdate()
                     return
 
         logger.info("Value not changed")
 
     def _addRow(self) -> None:
-        raise NotImplementedError
+        match self.widget_type:
+            case WidgetType.String:
+                return
+            case WidgetType.List:
+                self.main_widget = cast(QListWidget, self.main_widget)
+                self.current_data = cast(list[str], self.current_data)
+                item = QListWidgetItem("")
+                item.setFlags(item.flags() | Qt.ItemFlag.ItemIsEditable)
+                self.main_widget.addItem(item)
+            case WidgetType.Table:
+                self.main_widget = cast(QTableWidget, self.main_widget)
+                raise NotImplementedError
 
     def _removeRow(self) -> None:
-        raise NotImplementedError
+        match self.widget_type:
+            case WidgetType.String:
+                return
+            case WidgetType.List:
+                self.main_widget = cast(QListWidget, self.main_widget)
+                self.current_data = cast(list[str], self.current_data)
+                row = self.main_widget.currentRow()
+                _ = self.main_widget.takeItem(row)
+                _ = self.current_data.pop(row)
+                self._emitUpdate()
+            case WidgetType.Table:
+                self.main_widget = cast(QTableWidget, self.main_widget)
+                raise NotImplementedError
 
-    def _moveRowsUp(self) -> None:
-        raise NotImplementedError
+    def _moveRows(self, direction: Direction):
+        match self.widget_type:
+            case WidgetType.String:
+                return
+            case WidgetType.List:
+                self.main_widget = cast(QListWidget, self.main_widget)
+                self.current_data = cast(list[str], self.current_data)
 
-    def _moveRowsDown(self) -> None:
-        raise NotImplementedError
+                selected_indexes = self.main_widget.selectedIndexes()
+
+                # No items selected, nothing to move
+                if len(selected_indexes) == 0:
+                    return
+
+                selected_rows = sorted(
+                    [index.row() for index in selected_indexes],
+                    reverse=direction == Direction.Down,
+                )
+
+                match direction:
+                    case Direction.Up:
+                        # Don't move up if first selected item is already at top
+                        if selected_rows[0] == 0:
+                            return
+                        direction_num = -1
+                    case Direction.Down:
+                        # Don't move down if the last selected item is already at the bottom
+                        if selected_rows[0] == self.main_widget.count() - 1:
+                            return
+                        direction_num = 1
+
+                for index in selected_rows:
+                    item = self.main_widget.takeItem(index)
+                    self.main_widget.insertItem(index + direction_num, item)
+                    item.setSelected(True)
+
+                self._changeValue()
+
+            case WidgetType.Table:
+                raise NotImplementedError
 
     def _isReset(self) -> bool:
         """Returns whether the value that is being stored is the same as the original value."""
@@ -194,6 +260,14 @@ class EditWidget(QWidget):
             case WidgetType.List:
                 self.current_data = cast(list[str], self.current_data)
                 self.original_data = cast(list[str], self.original_data)
+
+                # If the other methods worked correctly, there should be no empty strings in current_data
+                if any([val.strip() == "" for val in self.current_data]):
+                    logger.warning("There were empty strings inside current_data")
+                    self.current_data = [
+                        val.strip() for val in self.current_data if val.strip() != ""
+                    ]
+
                 if len(self.current_data) != len(self.original_data):
                     return False
                 for i in range(len(self.current_data)):
@@ -201,6 +275,7 @@ class EditWidget(QWidget):
                         return False
                 return True
             case WidgetType.Table:
+                # TODO: Deal with empty string
                 self.current_data = cast(list[list[str]], self.current_data)
                 self.original_data = cast(list[list[str]], self.original_data)
                 if len(self.current_data) != len(self.original_data):
@@ -210,3 +285,14 @@ class EditWidget(QWidget):
                         if self.current_data[i][j] != self.original_data[i][j]:
                             return False
                 return True
+
+    def _emitUpdate(self):
+        """Emits either line_updated, group_updated, or value_reset, depending on change."""
+        if self._isReset():
+            self.value_reset.emit()
+            return
+        match self.widget_type:
+            case WidgetType.String:
+                self.line_updated.emit(self.current_data)
+            case WidgetType.List | WidgetType.Table:
+                self.group_updated.emit(self.current_data)

@@ -18,3 +18,8 @@ class WidgetType(Enum):
     List = 0
     Table = 1
     String = 2
+
+
+class Direction(Enum):
+    Up = 0
+    Down = 1
