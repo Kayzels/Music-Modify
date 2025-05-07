@@ -83,31 +83,23 @@ class EditDialog(QDialog):
 
         @Slot()
         def updateValue():
+            self.changed_values[tag.id3_key] = widget.value
             logger.info(f"Value is {widget.value}")
-            self._setValueChange(tag.id3_key, widget.value)
+            logger.info(f"Changed values are {self.changed_values}")
+            # self._setValueChange(tag.id3_key, widget.value)
 
         @Slot()
         def clearValue():
-            logger.info(f"Removing value for key {tag.id3_key}")
-            self._removeValueChange(tag.id3_key)
+            self.changed_values.pop(tag.id3_key, None)
+            # self._removeValueChange(tag.id3_key)
+            logger.info(
+                f"Removed value for key {tag.id3_key}, changed values are now {self.changed_values}"
+            )
 
         widget.value_updated.connect(updateValue)
         widget.value_reset.connect(clearValue)
 
         return widget
-
-    def _setValueChange(
-        self, id3_key: str, value: str | list[str] | list[list[str]] | None
-    ) -> None:
-        """Records changes made to values in the song for a specific key."""
-        self.changed_values[id3_key] = value
-        logger.info(f"Changed values are {self.changed_values}")
-
-    def _removeValueChange(self, id3_key: str):
-        self.changed_values.pop(id3_key, None)
-        logger.info(
-            f"Removing value for {id3_key}, changed values are now {self.changed_values}"
-        )
 
     def updateSong(self) -> None:
         """Adds the changes to the song, and saves it."""
