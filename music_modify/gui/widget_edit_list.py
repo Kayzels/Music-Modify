@@ -1,0 +1,136 @@
+# pyright: reportIncompatibleMethodOverride=false
+import copy
+import logging
+from typing import override, cast
+
+from PySide6.QtCore import Qt
+from PySide6.QtWidgets import (
+    QAbstractItemView,
+    QHBoxLayout,
+    QListWidget,
+    QListWidgetItem,
+    QWidget,
+)
+
+from music_modify.custom_types.enums import Direction
+
+from .widget_edit_abstract import EditAbstractWidget
+
+logger = logging.getLogger(__name__)
+
+
+class EditListWidget(EditAbstractWidget):
+    def __init__(self, parent: QWidget, data: list[str] | None):
+        super().__init__(parent, data)
+
+        self.main_widget: QListWidget
+        self._original_data: list[str]
+
+    @override
+    def _initValue(self, data: list[str] | None):
+        if data is None:
+            self.value = []
+        else:
+            self.value = data.copy()
+
+        self._original_data = copy.deepcopy(self.value)
+
+    @override
+    def _setupUi(self):
+        layout = self.layout()
+        if layout is None:
+            logger.info("Didn't create a layout for list widget")
+            return
+        layout = cast(QHBoxLayout, layout)
+
+        self.main_widget = QListWidget()
+        for val in self.value:
+            item = QListWidgetItem(val)
+            item.setFlags(item.flags() | Qt.ItemFlag.ItemIsEditable)
+            self.main_widget.addItem(item)
+        self.main_widget.setDragDropMode(QAbstractItemView.DragDropMode.InternalMove)
+        self.main_widget.model().rowsMoved.connect(self._updateValue)
+        self.main_widget.setSelectionMode(
+            QAbstractItemView.SelectionMode.ExtendedSelection
+        )
+        self.main_widget.itemChanged.connect(self._updateValue)
+
+        layout.addWidget(self.main_widget)
+
+        button_layout = self._createButtons()
+        layout.addLayout(button_layout)
+
+    @override
+    def _isReset(self) -> bool:
+        if len(self.value) != len(self._original_data):
+            return False
+        for i in range(len(self.value)):
+            if self.value[i] != self._original_data[i]:
+                return False
+        return True
+
+    @override
+    def _updateValue(self):
+        self.value = [
+            self.main_widget.item(row).text().strip()
+            for row in range(self.main_widget.count())
+            if self.main_widget.item(row).text().strip() != ""
+        ]
+        self._emitUpdate()
+
+    @override
+    def _addRow(self):
+        item = QListWidgetItem("")
+        item.setFlags(item.flags() | Qt.ItemFlag.ItemIsEditable)
+        self.main_widget.addItem(item)
+
+    @override
+    def _removeRow(self):
+        selected_indexes = self.main_widget.selectedIndexes()
+        if len(selected_indexes) == 0:
+            return
+        selected_rows = sorted(
+            [index.row() for index in selected_indexes], reverse=True
+        )
+        for row in selected_rows:
+            _ = self.main_widget.takeItem(row)
+        self._updateValue()
+
+    @override
+    def _moveRows(self, direction: Direction) -> None:
+        selected_indexes = self.main_widget.selectedIndexes()
+        if len(selected_indexes) == 0:
+            return
+
+        selected_rows = sorted(
+            [index.row() for index in selected_indexes],
+            reverse=direction == Direction.Down,
+        )
+        match direction:
+            case Direction.Up:
+                # Don't move up if first selected item is already at top
+                if selected_rows[0] == 0:
+                    return
+                direction_num = -1
+            case Direction.Down:
+                # Don't move down if the last selected item is already at the bottom
+                if selected_rows[0] == self.main_widget.count() - 1:
+                    return
+                direction_num = 1
+
+        for index in selected_rows:
+            item = self.main_widget.takeItem(index)
+            self.main_widget.insertItem(index + direction_num, item)
+            item.setSelected(True)
+
+        self._updateValue()
+
+    @property
+    @override
+    def value(self) -> list[str]:
+        return self._value
+
+    @value.setter
+    @override
+    def value(self, value: list[str]) -> None:
+        self._value: list[str] = value

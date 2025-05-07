@@ -1,19 +1,20 @@
 # pyright: reportImplicitAbstractClass=false
-from abc import ABCMeta, abstractmethod
+from abc import abstractmethod
 import logging
 from typing import Callable, Self
 
-from PySide6.QtCore import Signal, QObject
+from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QDialogButtonBox, QMessageBox, QWidget, QDialog
 
+from .meta import ABCQMeta
 
 logger = logging.getLogger(__name__)
 
 
 # There is a metaclass conflict between ABC and PySide6.
 # So we need to create a metaclass that inherits both.
-class ABCQMeta(ABCMeta, type(QObject)):
-    pass
+# class ABCQMeta(ABCMeta, type(QObject)):
+#     pass
 
 
 class PrefsAbstractDialog(QDialog, metaclass=ABCQMeta):
