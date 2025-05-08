@@ -2,7 +2,9 @@
 import copy
 import logging
 from typing import override, cast
-from PySide6.QtCore import QItemSelectionModel
+
+from PySide6.QtCore import QItemSelectionModel, Qt, Signal
+from PySide6.QtGui import QDropEvent
 from PySide6.QtWidgets import (
     QAbstractItemView,
     QHBoxLayout,
@@ -18,11 +20,21 @@ from .widget_edit_abstract import EditAbstractWidget
 logger = logging.getLogger(__name__)
 
 
+class _DragTableWidget(QTableWidget):
+    # Needed so that we can emit a signal when it's reordered.
+    rowsReordered: Signal = Signal()
+
+    @override
+    def dropEvent(self, event: QDropEvent) -> None:
+        super().dropEvent(event)
+        self.rowsReordered.emit()
+
+
 class EditTableWidget(EditAbstractWidget):
     def __init__(self, parent: QWidget, data: list[list[str]] | None):
         super().__init__(parent, data)
 
-        self.main_widget: QTableWidget
+        self.main_widget: _DragTableWidget
         self._original_data: list[list[str]]
 
     @override
@@ -41,14 +53,22 @@ class EditTableWidget(EditAbstractWidget):
             logger.info("Layout was None for table widget")
             return
         layout = cast(QHBoxLayout, layout)
-        self.main_widget = QTableWidget()
+        self.main_widget = _DragTableWidget()
         self.main_widget.setColumnCount(2)
         self.main_widget.setHorizontalHeaderLabels(["Role", "Person"])  # pyright: ignore[reportUnknownMemberType]
         self.main_widget.setRowCount(len(self.value))
 
+        # Allow dragging rows up and down
+        # NB: To ensure rows aren't overwritten, need to ensure that ItemIsDropEnabled is unset
+        # for all items
+        self.main_widget.setDragDropMode(QAbstractItemView.DragDropMode.InternalMove)
+        self.main_widget.setDragDropOverwriteMode(False)
+
         for row_count, pair in enumerate(self.value):
             for col_count, value in enumerate(pair):
-                self.main_widget.setItem(row_count, col_count, QTableWidgetItem(value))
+                item = QTableWidgetItem(value)
+                item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsDropEnabled)
+                self.main_widget.setItem(row_count, col_count, item)
         self.main_widget.resizeColumnsToContents()
         self.main_widget.horizontalHeader().setStretchLastSection(True)
 
@@ -59,14 +79,8 @@ class EditTableWidget(EditAbstractWidget):
             QAbstractItemView.SelectionBehavior.SelectRows
         )
 
-        # TODO:Drag and drop rows, don't replace existing but move instead
-        # It works if dropped between the lines, but dropping on top of an existing row
-        # shouldn't remove it.
-
-        # self.main_widget.setDragDropOverwriteMode(False)
-        # self.main_widget.setDragDropMode(QAbstractItemView.DragDropMode.InternalMove)
-
         self.main_widget.itemChanged.connect(self._updateValue)
+        self.main_widget.rowsReordered.connect(self._updateValue)
         layout.addWidget(self.main_widget)
 
         button_layout = self._createButtons()
@@ -103,6 +117,12 @@ class EditTableWidget(EditAbstractWidget):
     @override
     def _addRow(self) -> None:
         self.main_widget.insertRow(self.main_widget.rowCount())
+        # Need to add items here, rather than keeping as None,
+        # to ensure they have the right flags for drag and drop
+        for col in range(self.main_widget.columnCount()):
+            item = QTableWidgetItem("")
+            item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsDropEnabled)
+            self.main_widget.setItem(self.main_widget.rowCount() - 1, col, item)
 
     @override
     def _removeRow(self) -> None:
