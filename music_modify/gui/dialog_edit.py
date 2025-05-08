@@ -4,7 +4,7 @@ import logging
 
 from mutagen.id3 import ID3TimeStamp
 
-from PySide6.QtCore import Qt, Slot
+from PySide6.QtCore import Qt, Slot, Signal
 from PySide6.QtWidgets import (
     QDialog,
     QDialogButtonBox,
@@ -17,11 +17,14 @@ from PySide6.QtWidgets import (
 from music_modify.custom_types import Song, SongTag
 from music_modify.gui.widget_edit_factory import EditWidgetFactory
 from music_modify.prefs import prefs
+from music_modify.utils.tag_utils import mapKey
 
 logger = logging.getLogger(__name__)
 
 
 class EditDialog(QDialog):
+    info_updated: Signal = Signal()
+
     def __init__(self, song_info: Song, parent: QWidget | None = None):
         super().__init__(parent)
         self.song_info: Song = song_info
@@ -31,6 +34,9 @@ class EditDialog(QDialog):
 
         self.button_box.button(QDialogButtonBox.StandardButton.Cancel).clicked.connect(
             self.reject
+        )
+        self.button_box.button(QDialogButtonBox.StandardButton.Ok).clicked.connect(
+            self.accept
         )
 
     def setupUi(self, EditDialog: "EditDialog"):  # pyright: ignore[reportUnusedParameter]
@@ -105,6 +111,25 @@ class EditDialog(QDialog):
 
     def updateSong(self) -> None:
         """Adds the changes to the song, and saves it."""
-        raise NotImplementedError
+        if len(self.changed_values) == 0:
+            return
+        logger.info("Called updateSong")
+        for id3_key, value in self.changed_values.items():
+            tag = mapKey(id3_key)
+            if tag is None:
+                logger.info(f"Unknown id3 key: {id3_key}")
+                continue
+            if value is None:
+                # Remove tag from song
+                logger.info(f"Value was None, so removing key {id3_key}")
+                tag.removeTag(self.song_info.id3)
+                continue
 
-    # TODO: Check whether all the deepcopy's are needed.
+            # Mutagen ID3 frames always store their values in a list,
+            # so need to convert to that format.
+            if isinstance(value, str):
+                value = [value]
+            logger.info(f"Setting tag for {id3_key} to {value}")
+            tag.setTag(self.song_info.id3, value)
+        self.song_info.save()
+        self.info_updated.emit()

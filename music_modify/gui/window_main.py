@@ -9,6 +9,7 @@ from typing import Final, cast
 from PySide6.QtCore import QModelIndex, QPoint, QSortFilterProxyModel, Qt
 from PySide6.QtGui import QDragEnterEvent, QDragMoveEvent, QDropEvent
 from PySide6.QtWidgets import (
+    QDialog,
     QFileDialog,
     QLabel,
     QMainWindow,
@@ -282,8 +283,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         raise NotImplementedError
 
     def showEditDialog(self, index: QModelIndex):
-        # TODO: Update song information if dialog is accepted
-
         if not index.isValid():
             logger.info(f"Invalid index when calling show edit dialog: {index}")
             return
@@ -299,6 +298,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         dialog = EditDialog(song_info, parent=self)
         dialog.setModal(True)
+
+        def processDialogResult(result: QDialog.DialogCode):
+            logger.info("Called process dialog result")
+            if result == QDialog.DialogCode.Accepted:
+                dialog.updateSong()
+
+        dialog.info_updated.connect(self.refreshTable)
+        dialog.finished.connect(processDialogResult)
+
         dialog.show()
 
     def showCustomContextMenu(self, position: QPoint):
