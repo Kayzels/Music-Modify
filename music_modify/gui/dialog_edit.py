@@ -39,6 +39,11 @@ class EditDialog(QDialog):
             self.accept
         )
 
+        # Update the song, but keep the dialog open
+        self.button_box.button(QDialogButtonBox.StandardButton.Apply).clicked.connect(
+            self.updateSong
+        )
+
     def setupUi(self, EditDialog: "EditDialog"):  # pyright: ignore[reportUnusedParameter]
         # The EditDialog parameter is not used,
         # but exists to match the uic generated ones.
@@ -53,8 +58,11 @@ class EditDialog(QDialog):
             QDialogButtonBox.StandardButton.Ok
             | QDialogButtonBox.StandardButton.Cancel
             | QDialogButtonBox.StandardButton.Apply
-            | QDialogButtonBox.StandardButton.Reset
+            # | QDialogButtonBox.StandardButton.Reset
         )
+
+        # TODO: Implement Reset
+        # (Comment out the unused button for now)
 
         self.main_layout.addWidget(self.button_box)
 
@@ -133,3 +141,12 @@ class EditDialog(QDialog):
             tag.setTag(self.song_info.id3, value)
         self.song_info.save()
         self.info_updated.emit()
+
+        # Clear the values: they've been changed in the song,
+        # so don't need to be stored in this list any more
+        self.changed_values = {}
+
+        # TODO: Consider how this impacts refresh and reset
+        # The widgets all contain the current values,
+        # and the original values for the field.
+        # But if it's updated multiple times, reset can go out of sync?

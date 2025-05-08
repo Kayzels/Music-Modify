@@ -300,7 +300,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         dialog.setModal(True)
 
         def processDialogResult(result: QDialog.DialogCode):
-            logger.info("Called process dialog result")
+            logger.debug("Called process dialog result for edit dialog")
             if result == QDialog.DialogCode.Accepted:
                 dialog.updateSong()
 
