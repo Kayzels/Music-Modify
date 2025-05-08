@@ -80,7 +80,12 @@ class EditDialog(QDialog):
 
         @Slot()
         def updateValue():
-            self.changed_values[tag.id3_key] = widget.value
+            # We want to remove values if they are empty,
+            # which is marked by making the changed_value for that key None.
+            value = widget.value
+            if len(value) == 0:
+                value = None
+            self.changed_values[tag.id3_key] = value
             logger.info(f"Value is {widget.value}")
             logger.info(f"Changed values are {self.changed_values}")
             # self._setValueChange(tag.id3_key, widget.value)
