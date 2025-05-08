@@ -2,7 +2,14 @@
 import copy
 import logging
 from typing import override, cast
-from PySide6.QtWidgets import QHBoxLayout, QTableWidget, QTableWidgetItem, QWidget
+from PySide6.QtCore import QItemSelectionModel
+from PySide6.QtWidgets import (
+    QAbstractItemView,
+    QHBoxLayout,
+    QTableWidget,
+    QTableWidgetItem,
+    QWidget,
+)
 
 from music_modify.custom_types.enums import Direction
 
@@ -45,6 +52,20 @@ class EditTableWidget(EditAbstractWidget):
         self.main_widget.resizeColumnsToContents()
         self.main_widget.horizontalHeader().setStretchLastSection(True)
 
+        self.main_widget.setSelectionMode(
+            QAbstractItemView.SelectionMode.ExtendedSelection
+        )
+        self.main_widget.setSelectionBehavior(
+            QAbstractItemView.SelectionBehavior.SelectRows
+        )
+
+        # TODO:Drag and drop rows, don't replace existing but move instead
+        # It works if dropped between the lines, but dropping on top of an existing row
+        # shouldn't remove it.
+
+        # self.main_widget.setDragDropOverwriteMode(False)
+        # self.main_widget.setDragDropMode(QAbstractItemView.DragDropMode.InternalMove)
+
         self.main_widget.itemChanged.connect(self._updateValue)
         layout.addWidget(self.main_widget)
 
@@ -63,7 +84,6 @@ class EditTableWidget(EditAbstractWidget):
 
     @override
     def _updateValue(self) -> None:
-        # TODO: Check, especially regarding empty string
         values: list[list[str]] = []
         for row in range(self.main_widget.rowCount()):
             pair: list[str] = []
@@ -72,22 +92,87 @@ class EditTableWidget(EditAbstractWidget):
                 if item is not None:
                     text = item.text()
                     pair.append(text)
-            if not any([pair[j] == "" for j in range(len(pair))]):
+            if not any([pair[j] == "" for j in range(len(pair))]) and len(pair) == 2:
+                # Don't add while one of the values in the pair is empty
+                # Also need to check for length, because the second item won't exist at first
+                # (so it won't be empty, it just won't be added)
                 values.append(pair)
         self.value = values
         self._emitUpdate()
 
     @override
     def _addRow(self) -> None:
-        raise NotImplementedError
+        self.main_widget.insertRow(self.main_widget.rowCount())
 
     @override
     def _removeRow(self) -> None:
-        raise NotImplementedError
+        selected_indexes = self.main_widget.selectedIndexes()
+        if len(selected_indexes) == 0:
+            return
+
+        # Need to ensure it's unique, but also ordered.
+        # Because a row will appear twice (once for each cell),
+        # but we only want to remove the row once.
+        selected_rows = sorted(
+            list(set([index.row() for index in selected_indexes])), reverse=True
+        )
+        for row in selected_rows:
+            self.main_widget.removeRow(row)
+        self._updateValue()
 
     @override
     def _moveRows(self, direction: Direction) -> None:
-        raise NotImplementedError
+        selected_indexes = self.main_widget.selectedIndexes()
+        if len(selected_indexes) == 0:
+            return
+
+        # Need to ensure it's unique, but also ordered.
+        # Because a row will appear twice (once for each cell),
+        # but we only want to remove the row once.
+        selected_rows = sorted(
+            list(set([index.row() for index in selected_indexes])),
+            reverse=direction == Direction.Down,
+        )
+
+        match direction:
+            case Direction.Up:
+                # Don't move up if first selected item is already a ttop
+                if selected_rows[0] == 0:
+                    return
+                direction_num = -1
+            case Direction.Down:
+                # Don't move down if the last selected item is already at the bottom
+                if selected_rows[0] == self.main_widget.rowCount() - 1:
+                    return
+                direction_num = 1
+
+        for row in selected_rows:
+            items: list[QTableWidgetItem] = []
+            for col in range(self.main_widget.columnCount()):
+                item = self.main_widget.takeItem(row, col)
+                items.append(item)
+            logger.info(f"The row number to be removed is {row}")
+            logger.info(f"The values for items are: {[item.text() for item in items]}")
+            self.main_widget.removeRow(row)
+            self.main_widget.insertRow(row + direction_num)
+            for col, item in enumerate(items):
+                self.main_widget.setItem(row + direction_num, col, item)
+
+        # Select each new row
+        # Doing it this way rather than on the items,
+        # because there were issues with deselection and deletion when set
+        # in the above loop.
+        selection_model = self.main_widget.selectionModel()
+        selection_model.clearSelection()
+        for row in selected_rows:
+            index = self.main_widget.model().index(row + direction_num, 0)
+            selection_model.select(
+                index,
+                QItemSelectionModel.SelectionFlag.Select
+                | QItemSelectionModel.SelectionFlag.Rows,
+            )
+
+        self._updateValue()
 
     @property
     @override
