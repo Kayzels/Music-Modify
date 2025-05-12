@@ -37,9 +37,10 @@ class EditAbstractWidget(QWidget, metaclass=ABCQMeta):
         | EditButton.Down
         | EditButton.Add
         | EditButton.Remove,
-    ) -> QVBoxLayout:
+        layout_type: type[QVBoxLayout | QHBoxLayout] = QVBoxLayout,
+    ) -> QVBoxLayout | QHBoxLayout:
         """Adds buttons for moving rows up and down, adding and deleting rows."""
-        button_layout = QVBoxLayout()
+        button_layout = layout_type()
 
         if buttons & EditButton.Up:
             up_button = QToolButton(self)

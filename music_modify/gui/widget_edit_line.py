@@ -1,11 +1,11 @@
 # pyright: reportIncompatibleMethodOverride=false
 import logging
-from typing import override
+from typing import cast, override
 
-from PySide6.QtWidgets import QLineEdit, QWidget
+from PySide6.QtWidgets import QHBoxLayout, QLineEdit, QWidget
 
 from music_modify.custom_types.aliases import SongLineData
-from music_modify.custom_types.enums import Direction
+from music_modify.custom_types.enums import Direction, EditButton
 
 from .widget_edit_abstract import EditAbstractWidget
 
@@ -34,10 +34,15 @@ class EditLineWidget(EditAbstractWidget):
         if layout is None:
             logger.info("Didn't create a layout for line edit")
             return
+        layout = cast(QHBoxLayout, layout)
 
         self.main_widget = QLineEdit()
         self._displayValue()
         layout.addWidget(self.main_widget)
+        button_layout = self._createButtons(
+            EditButton.Reset | EditButton.Clear, QHBoxLayout
+        )
+        layout.addLayout(button_layout)
         self.main_widget.editingFinished.connect(self._updateValue)
 
     @override
