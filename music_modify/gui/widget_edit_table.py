@@ -10,6 +10,7 @@ from PySide6.QtWidgets import (
     QHBoxLayout,
     QTableWidget,
     QTableWidgetItem,
+    QVBoxLayout,
     QWidget,
 )
 
@@ -78,13 +79,16 @@ class EditTableWidget(EditAbstractWidget):
         self.main_widget.rowsReordered.connect(self._updateValue)
         layout.addWidget(self.main_widget)
 
+        button_layout = QVBoxLayout()
+        layout.addLayout(button_layout)
+
         for button_group in (
             EditButton.Up | EditButton.Down,
             EditButton.Add | EditButton.Remove,
             EditButton.Clear | EditButton.Reset,
         ):
-            child_layout = self._createButtons(button_group)
-            layout.addLayout(child_layout)
+            child_layout = self._createButtons(button_group, QHBoxLayout)
+            button_layout.addLayout(child_layout)
 
     @override
     def _isReset(self) -> bool:

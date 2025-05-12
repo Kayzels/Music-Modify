@@ -9,6 +9,7 @@ from PySide6.QtWidgets import (
     QHBoxLayout,
     QListWidget,
     QListWidgetItem,
+    QVBoxLayout,
     QWidget,
 )
 
@@ -55,13 +56,16 @@ class EditListWidget(EditAbstractWidget):
 
         layout.addWidget(self.main_widget)
 
+        button_layout = QVBoxLayout()
+        layout.addLayout(button_layout)
+
         for button_group in (
             EditButton.Up | EditButton.Down,
             EditButton.Add | EditButton.Remove,
             EditButton.Clear | EditButton.Reset,
         ):
-            child_layout = self._createButtons(button_group)
-            layout.addLayout(child_layout)
+            child_layout = self._createButtons(button_group, QHBoxLayout)
+            button_layout.addLayout(child_layout)
 
     @override
     def _isReset(self) -> bool:
