@@ -74,7 +74,7 @@ class EditAbstractWidget(QWidget, metaclass=ABCQMeta):
 
         if buttons & EditButton.Reset:
             reset_button = QToolButton(self)
-            reset_button.setIcon(QIcon.fromTheme(QIcon.ThemeIcon.DocumentRevert))
+            reset_button.setIcon(QIcon(QIcon.fromTheme(QIcon.ThemeIcon.DocumentRevert)))
             button_layout.addWidget(reset_button)
             reset_button.clicked.connect(self.reset)
 
