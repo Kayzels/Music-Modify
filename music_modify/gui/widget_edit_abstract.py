@@ -1,5 +1,6 @@
 # pyright: reportImplicitAbstractClass=false, reportPrivateImportUsage=false
 from abc import abstractmethod
+import copy
 import logging
 
 from PySide6.QtCore import Signal
@@ -25,11 +26,13 @@ class EditAbstractWidget(QWidget, metaclass=ABCQMeta):
         self._setupUi()
 
     def _setMainLayout(self):
+        """Creates the basic layout for the widget."""
         layout = QHBoxLayout()
         self.setLayout(layout)
         layout.setContentsMargins(0, 0, 0, 0)
 
     def _createButtons(self) -> QVBoxLayout:
+        """Adds buttons for moving rows up and down, adding and deleting rows."""
         button_layout = QVBoxLayout()
 
         up_button = QToolButton(self)
@@ -56,6 +59,7 @@ class EditAbstractWidget(QWidget, metaclass=ABCQMeta):
 
     @abstractmethod
     def _initValue(self, data: SongGroupData) -> None:
+        """Sets the original value that the widget should store."""
         pass
 
     @abstractmethod
@@ -64,6 +68,7 @@ class EditAbstractWidget(QWidget, metaclass=ABCQMeta):
         pass
 
     def _emitUpdate(self) -> None:
+        """Emit a signal indicating whether the data has changed, or been reset."""
         if self._isReset():
             self.value_reset.emit()
         else:
@@ -71,13 +76,27 @@ class EditAbstractWidget(QWidget, metaclass=ABCQMeta):
 
     @abstractmethod
     def _isReset(self) -> bool:
+        """Returns whether the value has been set back to its original state."""
         logger.info("Abstract isReset called")
         pass
 
     @abstractmethod
     def _updateValue(self) -> None:
+        """Updates the value that is stored in the widget, and displayed."""
         logger.info("Abstract updateValue called")
         pass
+
+    @abstractmethod
+    def _displayValue(self) -> None:
+        """Sets the values for the table based on the current value property."""
+        pass
+
+    def reset(self) -> None:
+        """Reset to the originally stored value, before any changes were made."""
+        if not self._isReset():
+            self.value = copy.deepcopy(self.original)
+            self._displayValue()
+            self._emitUpdate()
 
     @abstractmethod
     def _addRow(self) -> None:
@@ -100,3 +119,8 @@ class EditAbstractWidget(QWidget, metaclass=ABCQMeta):
     @value.setter
     def value(self, value: SongEditData):
         self.value = value
+
+    @property
+    @abstractmethod
+    def original(self) -> SongEditData:
+        pass

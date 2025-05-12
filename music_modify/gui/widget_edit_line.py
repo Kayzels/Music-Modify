@@ -1,4 +1,5 @@
 # pyright: reportIncompatibleMethodOverride=false
+import copy
 import logging
 from typing import override
 
@@ -36,13 +37,13 @@ class EditLineWidget(EditAbstractWidget):
             return
 
         self.main_widget = QLineEdit()
-        self.main_widget.setText(self.value)
+        self._displayValue()
         layout.addWidget(self.main_widget)
         self.main_widget.editingFinished.connect(self._updateValue)
 
     @override
     def _isReset(self) -> bool:
-        return self.value == self._original_data
+        return self.value == self.original
 
     @override
     def _updateValue(self) -> None:
@@ -50,6 +51,14 @@ class EditLineWidget(EditAbstractWidget):
         if new_text != self.value:
             self.value = new_text
             self._emitUpdate()
+
+    @override
+    def _displayValue(self) -> None:
+        """Sets the values for the table based on the current value property."""
+        if not hasattr(self, "main_widget"):
+            return
+
+        self.main_widget.setText(self.value)
 
     @override
     def _removeRow(self) -> None:
@@ -72,3 +81,11 @@ class EditLineWidget(EditAbstractWidget):
     @override
     def value(self, value: str):
         self._value: str = value
+
+    @property
+    @override
+    def original(self) -> str:
+        return self._original_data
+
+
+# TODO: Add reset and clear buttons next to the line edit

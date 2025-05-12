@@ -64,13 +64,7 @@ class EditTableWidget(EditAbstractWidget):
         self.main_widget.setDragDropMode(QAbstractItemView.DragDropMode.InternalMove)
         self.main_widget.setDragDropOverwriteMode(False)
 
-        for row_count, pair in enumerate(self.value):
-            for col_count, value in enumerate(pair):
-                item = QTableWidgetItem(value)
-                item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsDropEnabled)
-                self.main_widget.setItem(row_count, col_count, item)
-        self.main_widget.resizeColumnsToContents()
-        self.main_widget.horizontalHeader().setStretchLastSection(True)
+        self._displayValue()
 
         self.main_widget.setSelectionMode(
             QAbstractItemView.SelectionMode.ExtendedSelection
@@ -88,11 +82,11 @@ class EditTableWidget(EditAbstractWidget):
 
     @override
     def _isReset(self) -> bool:
-        if len(self.value) != len(self._original_data):
+        if len(self.value) != len(self.original):
             return False
         for i in range(len(self.value)):
             for j in range(1):
-                if self.value[i][j] != self._original_data[i][j]:
+                if self.value[i][j] != self.original[i][j]:
                     return False
         return True
 
@@ -113,6 +107,29 @@ class EditTableWidget(EditAbstractWidget):
                 values.append(pair)
         self.value = values
         self._emitUpdate()
+
+    @override
+    def _displayValue(self) -> None:
+        """Sets the values for the table based on the current value property."""
+        if not hasattr(self, "main_widget"):
+            return
+
+        self.main_widget.clearContents()
+
+        # In order to prevent itemChanged firing for every change,
+        # block signals until the table is done being populated.
+        self.main_widget.blockSignals(True)
+
+        for row_count, pair in enumerate(self.value):
+            for col_count, value in enumerate(pair):
+                item = QTableWidgetItem(value)
+                item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsDropEnabled)
+                self.main_widget.setItem(row_count, col_count, item)
+        self.main_widget.resizeColumnsToContents()
+        self.main_widget.horizontalHeader().setStretchLastSection(True)
+
+        # Stop blocking signals after the table is populated.
+        self.main_widget.blockSignals(False)
 
     @override
     def _addRow(self) -> None:
@@ -203,3 +220,8 @@ class EditTableWidget(EditAbstractWidget):
     @override
     def value(self, value: list[list[str]]):
         self._value: list[list[str]] = value
+
+    @property
+    @override
+    def original(self) -> list[list[str]]:
+        return self._original_data

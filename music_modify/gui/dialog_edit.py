@@ -15,6 +15,7 @@ from PySide6.QtWidgets import (
 )
 
 from music_modify.custom_types import Song, SongTag
+from music_modify.gui.widget_edit_abstract import EditAbstractWidget
 from music_modify.gui.widget_edit_factory import EditWidgetFactory
 from music_modify.prefs import prefs
 from music_modify.utils.tag_utils import mapKey
@@ -44,6 +45,12 @@ class EditDialog(QDialog):
             self.updateSong
         )
 
+        self.button_box.button(QDialogButtonBox.StandardButton.Reset).clicked.connect(
+            self.resetSong
+        )
+
+        self.song_layout: QFormLayout
+
     def setupUi(self, EditDialog: "EditDialog"):  # pyright: ignore[reportUnusedParameter]
         # The EditDialog parameter is not used,
         # but exists to match the uic generated ones.
@@ -58,11 +65,8 @@ class EditDialog(QDialog):
             QDialogButtonBox.StandardButton.Ok
             | QDialogButtonBox.StandardButton.Cancel
             | QDialogButtonBox.StandardButton.Apply
-            # | QDialogButtonBox.StandardButton.Reset
+            | QDialogButtonBox.StandardButton.Reset
         )
-
-        # TODO: Implement Reset
-        # (Comment out the unused button for now)
 
         self.main_layout.addWidget(self.button_box)
 
@@ -70,12 +74,12 @@ class EditDialog(QDialog):
 
     def _setupSongInfo(self):
         scroll_widget: QWidget = QWidget()
-        song_layout: QFormLayout = QFormLayout(scroll_widget)
+        self.song_layout = QFormLayout(scroll_widget)
 
         for tag in prefs.settings.all_tags:
             current_data = copy.deepcopy(tag.getTag(self.song_info.id3))
             widget = self._createWidgetType(tag, current_data)
-            song_layout.addRow(tag.display_name, widget)
+            self.song_layout.addRow(tag.display_name, widget)
 
         scroll_area: QScrollArea = QScrollArea(self)
         scroll_area.setWidget(scroll_widget)
@@ -102,15 +106,14 @@ class EditDialog(QDialog):
             self.changed_values[tag.id3_key] = value
             logger.info(f"Value is {widget.value}")
             logger.info(f"Changed values are {self.changed_values}")
-            # self._setValueChange(tag.id3_key, widget.value)
 
         @Slot()
         def clearValue():
-            self.changed_values.pop(tag.id3_key, None)
-            # self._removeValueChange(tag.id3_key)
-            logger.info(
-                f"Removed value for key {tag.id3_key}, changed values are now {self.changed_values}"
-            )
+            if tag.id3_key in self.changed_values:
+                self.changed_values.pop(tag.id3_key, None)
+                logger.info(
+                    f"Removed value for key {tag.id3_key}, changed values are now {self.changed_values}"
+                )
 
         widget.value_updated.connect(updateValue)
         widget.value_reset.connect(clearValue)
@@ -150,3 +153,9 @@ class EditDialog(QDialog):
         # The widgets all contain the current values,
         # and the original values for the field.
         # But if it's updated multiple times, reset can go out of sync?
+
+    def resetSong(self) -> None:
+        """Sets the values for the song back to the original ones before the changes occurred."""
+        widgets = self.findChildren(EditAbstractWidget)
+        for widget in widgets:
+            widget.reset()

@@ -44,10 +44,7 @@ class EditListWidget(EditAbstractWidget):
         layout = cast(QHBoxLayout, layout)
 
         self.main_widget = QListWidget()
-        for val in self.value:
-            item = QListWidgetItem(val)
-            item.setFlags(item.flags() | Qt.ItemFlag.ItemIsEditable)
-            self.main_widget.addItem(item)
+        self._displayValue()
         self.main_widget.setDragDropMode(QAbstractItemView.DragDropMode.InternalMove)
         self.main_widget.model().rowsMoved.connect(self._updateValue)
         self.main_widget.setSelectionMode(
@@ -62,10 +59,10 @@ class EditListWidget(EditAbstractWidget):
 
     @override
     def _isReset(self) -> bool:
-        if len(self.value) != len(self._original_data):
+        if len(self.value) != len(self.original):
             return False
         for i in range(len(self.value)):
-            if self.value[i] != self._original_data[i]:
+            if self.value[i] != self.original[i]:
                 return False
         return True
 
@@ -77,6 +74,19 @@ class EditListWidget(EditAbstractWidget):
             if self.main_widget.item(row).text().strip() != ""
         ]
         self._emitUpdate()
+
+    @override
+    def _displayValue(self) -> None:
+        """Set the values for the widget, based on the value property currently set."""
+        if not hasattr(self, "main_widget"):
+            return
+
+        # Remove all current items and rebuild the list.
+        self.main_widget.clear()
+        for val in self.value:
+            item = QListWidgetItem(val)
+            item.setFlags(item.flags() | Qt.ItemFlag.ItemIsEditable)
+            self.main_widget.addItem(item)
 
     @override
     def _addRow(self):
@@ -134,3 +144,8 @@ class EditListWidget(EditAbstractWidget):
     @override
     def value(self, value: list[str]) -> None:
         self._value: list[str] = value
+
+    @property
+    @override
+    def original(self) -> list[str]:
+        return self._original_data
