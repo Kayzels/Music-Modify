@@ -54,6 +54,7 @@ class EditTableWidget(EditAbstractWidget):
             return
         layout = cast(QHBoxLayout, layout)
         self.main_widget = _DragTableWidget()
+        self.main_widget.setMinimumHeight(250)
         self.main_widget.setColumnCount(2)
         self.main_widget.setHorizontalHeaderLabels(["Role", "Person"])  # pyright: ignore[reportUnknownMemberType]
         self.main_widget.setRowCount(len(self.value))

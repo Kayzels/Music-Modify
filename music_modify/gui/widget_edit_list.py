@@ -44,6 +44,7 @@ class EditListWidget(EditAbstractWidget):
         layout = cast(QHBoxLayout, layout)
 
         self.main_widget = QListWidget()
+        self.main_widget.setMinimumHeight(200)
         self._displayValue()
         self.main_widget.setDragDropMode(QAbstractItemView.DragDropMode.InternalMove)
         self.main_widget.model().rowsMoved.connect(self._updateValue)
