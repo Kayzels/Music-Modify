@@ -89,6 +89,10 @@ class EditListWidget(EditAbstractWidget):
             self.main_widget.addItem(item)
 
     @override
+    def _clearValue(self) -> None:
+        self.value = []
+
+    @override
     def _addRow(self):
         item = QListWidgetItem("")
         item.setFlags(item.flags() | Qt.ItemFlag.ItemIsEditable)

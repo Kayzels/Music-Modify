@@ -132,6 +132,10 @@ class EditTableWidget(EditAbstractWidget):
         self.main_widget.blockSignals(False)
 
     @override
+    def _clearValue(self) -> None:
+        self.value = []
+
+    @override
     def _addRow(self) -> None:
         self.main_widget.insertRow(self.main_widget.rowCount())
         # Need to add items here, rather than keeping as None,

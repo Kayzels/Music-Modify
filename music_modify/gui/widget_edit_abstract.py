@@ -65,6 +65,18 @@ class EditAbstractWidget(QWidget, metaclass=ABCQMeta):
             button_layout.addWidget(down_button)
             down_button.clicked.connect(lambda: self._moveRows(Direction.Down))
 
+        if buttons & EditButton.Clear:
+            clear_button = QToolButton(self)
+            clear_button.setIcon(QIcon(QIcon.fromTheme(QIcon.ThemeIcon.EditClear)))
+            button_layout.addWidget(clear_button)
+            clear_button.clicked.connect(self.clear)
+
+        if buttons & EditButton.Reset:
+            reset_button = QToolButton(self)
+            reset_button.setIcon(QIcon.fromTheme(QIcon.ThemeIcon.DocumentRevert))
+            button_layout.addWidget(reset_button)
+            reset_button.clicked.connect(self.reset)
+
         return button_layout
 
     @abstractmethod
@@ -101,12 +113,23 @@ class EditAbstractWidget(QWidget, metaclass=ABCQMeta):
         """Sets the values for the table based on the current value property."""
         pass
 
+    @abstractmethod
+    def _clearValue(self) -> None:
+        """Sets the value to the equivalent empty value."""
+        pass
+
     def reset(self) -> None:
         """Reset to the originally stored value, before any changes were made."""
         if not self._isReset():
             self.value = copy.deepcopy(self.original)
             self._displayValue()
             self._emitUpdate()
+
+    def clear(self) -> None:
+        """Clears the value stored and displayed in the widget."""
+        self._clearValue()
+        self._displayValue()
+        self._emitUpdate()
 
     @abstractmethod
     def _addRow(self) -> None:

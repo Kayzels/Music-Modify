@@ -30,3 +30,5 @@ class EditButton(Flag):
     Down = auto()
     Add = auto()
     Remove = auto()
+    Clear = auto()
+    Reset = auto()

@@ -1,5 +1,4 @@
 # pyright: reportIncompatibleMethodOverride=false
-import copy
 import logging
 from typing import override
 
@@ -59,6 +58,10 @@ class EditLineWidget(EditAbstractWidget):
             return
 
         self.main_widget.setText(self.value)
+
+    @override
+    def _clearValue(self) -> None:
+        self.value = ""
 
     @override
     def _removeRow(self) -> None:
