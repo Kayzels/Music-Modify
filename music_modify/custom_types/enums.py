@@ -1,4 +1,4 @@
-from enum import Enum
+from enum import Enum, Flag, auto
 
 
 class TagType(Enum):
@@ -23,3 +23,10 @@ class WidgetType(Enum):
 class Direction(Enum):
     Up = 0
     Down = 1
+
+
+class EditButton(Flag):
+    Up = auto()
+    Down = auto()
+    Add = auto()
+    Remove = auto()
