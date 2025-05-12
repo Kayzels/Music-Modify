@@ -13,7 +13,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from music_modify.custom_types.enums import Direction
+from music_modify.custom_types.enums import Direction, EditButton
 
 from .widget_edit_abstract import EditAbstractWidget
 
@@ -77,8 +77,13 @@ class EditTableWidget(EditAbstractWidget):
         self.main_widget.rowsReordered.connect(self._updateValue)
         layout.addWidget(self.main_widget)
 
-        button_layout = self._createButtons()
-        layout.addLayout(button_layout)
+        for button_group in (
+            EditButton.Up | EditButton.Down,
+            EditButton.Add | EditButton.Remove,
+            EditButton.Clear | EditButton.Reset,
+        ):
+            child_layout = self._createButtons(button_group)
+            layout.addLayout(child_layout)
 
     @override
     def _isReset(self) -> bool:
