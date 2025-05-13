@@ -1,15 +1,15 @@
 import logging
-from typing import Final, override, cast
+from typing import Final, cast, override
 
 from mutagen import id3
 from mutagen.id3 import ID3, Frames
 
 from .aliases import (
-    SongGroupData,
     SongEditData,
+    SongGroupData,
+    SongLineData,
     SongListData,
     SongTableData,
-    SongLineData,
 )
 from .enums import TagType
 
