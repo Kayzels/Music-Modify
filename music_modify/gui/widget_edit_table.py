@@ -17,7 +17,7 @@ from PySide6.QtWidgets import (
 from music_modify.custom_types.aliases import SongTableData
 from music_modify.custom_types.enums import Direction, EditButton
 
-from .widget_edit_abstract import EditAbstractWidget
+from .widget_edit_abstract_group import EditAbstractGroupWidget
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +32,7 @@ class _DragTableWidget(QTableWidget):
         self.rowsReordered.emit()
 
 
-class EditTableWidget(EditAbstractWidget):
+class EditTableWidget(EditAbstractGroupWidget):
     def __init__(self, parent: QWidget, data: SongTableData | None):
         super().__init__(parent, data)
 

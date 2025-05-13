@@ -5,7 +5,6 @@ from typing import cast, override
 from PySide6.QtWidgets import QHBoxLayout, QLineEdit, QWidget
 
 from music_modify.custom_types.aliases import SongLineData
-from music_modify.custom_types.enums import Direction, EditButton
 
 from .widget_edit_abstract import EditAbstractWidget
 
@@ -39,9 +38,7 @@ class EditLineWidget(EditAbstractWidget):
         self.main_widget = QLineEdit()
         self._displayValue()
         layout.addWidget(self.main_widget)
-        button_layout = self._createButtons(
-            EditButton.Reset | EditButton.Clear, QHBoxLayout
-        )
+        button_layout = self._createButtons()
         layout.addLayout(button_layout)
         self.main_widget.editingFinished.connect(self._updateValue)
 
@@ -67,18 +64,6 @@ class EditLineWidget(EditAbstractWidget):
     @override
     def _clearValue(self) -> None:
         self.value = ""
-
-    @override
-    def _removeRow(self) -> None:
-        return
-
-    @override
-    def _addRow(self) -> None:
-        return
-
-    @override
-    def _moveRows(self, direction: Direction) -> None:
-        return
 
     @property
     @override

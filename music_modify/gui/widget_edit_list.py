@@ -16,12 +16,12 @@ from PySide6.QtWidgets import (
 from music_modify.custom_types.aliases import SongListData
 from music_modify.custom_types.enums import Direction, EditButton
 
-from .widget_edit_abstract import EditAbstractWidget
+from .widget_edit_abstract_group import EditAbstractGroupWidget
 
 logger = logging.getLogger(__name__)
 
 
-class EditListWidget(EditAbstractWidget):
+class EditListWidget(EditAbstractGroupWidget):
     def __init__(self, parent: QWidget, data: SongListData | None):
         super().__init__(parent, data)
 
