@@ -2,7 +2,7 @@
 import copy
 import logging
 
-from PySide6.QtCore import Qt, Slot, Signal
+from PySide6.QtCore import Qt, Signal, Slot
 from PySide6.QtWidgets import (
     QDialog,
     QDialogButtonBox,
@@ -14,10 +14,11 @@ from PySide6.QtWidgets import (
 
 from music_modify.custom_types import Song, SongTag
 from music_modify.custom_types.aliases import SongEditData, SongGroupData
-from music_modify.gui.widget_edit_abstract import EditAbstractWidget
-from music_modify.gui.widget_edit_factory import EditWidgetFactory
+from music_modify.custom_types.utils import mapKey
 from music_modify.prefs import prefs
-from music_modify.utils.tag_utils import mapKey
+
+from .widget_edit_abstract import EditAbstractWidget
+from .widget_edit_factory import EditWidgetFactory
 
 logger = logging.getLogger(__name__)
 
