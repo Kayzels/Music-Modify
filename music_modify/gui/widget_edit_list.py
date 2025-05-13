@@ -13,6 +13,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from music_modify.custom_types.aliases import SongListData
 from music_modify.custom_types.enums import Direction, EditButton
 
 from .widget_edit_abstract import EditAbstractWidget
@@ -21,14 +22,14 @@ logger = logging.getLogger(__name__)
 
 
 class EditListWidget(EditAbstractWidget):
-    def __init__(self, parent: QWidget, data: list[str] | None):
+    def __init__(self, parent: QWidget, data: SongListData | None):
         super().__init__(parent, data)
 
         self.main_widget: QListWidget
-        self._original_data: list[str]
+        self._original_data: SongListData
 
     @override
-    def _initValue(self, data: list[str] | None):
+    def _initValue(self, data: SongListData | None):
         if data is None:
             self.value = []
         else:
@@ -151,15 +152,15 @@ class EditListWidget(EditAbstractWidget):
 
     @property
     @override
-    def value(self) -> list[str]:
+    def value(self) -> SongListData:
         return self._value
 
     @value.setter
     @override
-    def value(self, value: list[str]) -> None:
-        self._value: list[str] = value
+    def value(self, value: SongListData) -> None:
+        self._value: SongListData = value
 
     @property
     @override
-    def original(self) -> list[str]:
+    def original(self) -> SongListData:
         return self._original_data

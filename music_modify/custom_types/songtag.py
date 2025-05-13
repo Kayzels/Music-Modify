@@ -1,11 +1,18 @@
 # pyright: reportPrivateImportUsage=false, reportUnknownVariableType=false, reportUnknownArgumentType=false, reportUnknownMemberType=false
 
 import logging
-from typing import Final, override
+from typing import Final, override, cast
 
 from mutagen import id3
-from mutagen.id3 import ID3, Frames, ID3TimeStamp
+from mutagen.id3 import ID3, Frames
 
+from .aliases import (
+    SongGroupData,
+    SongEditData,
+    SongListData,
+    SongTableData,
+    SongLineData,
+)
 from .enums import TagType
 
 logger = logging.getLogger(__name__)
@@ -70,22 +77,22 @@ class SongTag:
                 tag_frame = getattr(id3, id3_key).__base__
             except AttributeError:
                 return TagType.Text
-        if tag_frame == id3.PairedTextFrame:
-            return TagType.People
-        elif tag_frame in (id3.UrlFrame, id3.UrlFrameU):
-            return TagType.Url
-        elif tag_frame == id3.BinaryFrame:
-            return TagType.Data
-        return TagType.Text
+        match tag_frame:
+            case id3.PairedTextFrame:
+                return TagType.People
+            case id3.UrlFrame | id3.UrlFrameU:
+                return TagType.Url
+            case id3.BinaryFrame:
+                return TagType.Data
+            case _:
+                return TagType.Text
 
     def __len__(self) -> int:
         """Returns 1 if strings will be returned.
         Returns 2 if the format is [role, person]"""
         return 2 if self.frame_type == TagType.People else 1
 
-    def getTag(
-        self, song: ID3
-    ) -> list[str] | list[ID3TimeStamp] | list[list[str]] | None:
+    def getTag(self, song: ID3) -> SongGroupData:
         """Gets the current data for this tag in the sent song.
         Returns None if tag is not in song, or empty.
         Returns a list of strings if the format is a single string, like for the title,
@@ -104,12 +111,16 @@ class SongTag:
             # Happens if trying to get a key from a song that doesn't have it.
             # For example, if a song hasn't got a composer (TCOM) set,
             # this will happen.
+            logger.debug(f"KeyError from song for id3_key {self.id3_key}")
             return None
         except AttributeError:
             # Shouldn't happen: means trying to get the wrong frame type.
+            logger.warning(
+                f"AttributeError when accessing frame type {self.frame_type} from song for id3_key {self.id3_key}"
+            )
             return None
 
-    def setTag(self, song: ID3, values: list[str] | list[list[str]]) -> None:
+    def setTag(self, song: ID3, values: SongGroupData) -> None:
         """Sets the tag for this song to contain the values that are sent."""
         if not self.hasTag(song):
             self.generateFrame(song)
@@ -142,3 +153,19 @@ class SongTag:
         except TypeError:
             # ? Cannot create a tag frame with this key
             logger.warning(f"Cannot create a tag frame with this key: {self.id3_key}")
+
+    def getValue(self, song: ID3) -> SongEditData | None:
+        """Returns the value for the tag in the format useful for editing, based on the type."""
+        song_data = self.getTag(song)
+        if song_data is None:
+            return None
+        match self.frame_type:
+            case TagType.People:
+                song_data = cast(SongTableData, song_data)
+                return song_data
+            case _:
+                song_data = cast(SongLineData | SongListData, song_data)
+                if self.allow_multiple:
+                    return [str(val) for val in song_data]
+                else:
+                    return str(song_data[0])

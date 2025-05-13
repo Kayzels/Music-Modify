@@ -1,8 +1,6 @@
-# pyright: reportPrivateImportUsage=false, reportUnusedCallResult=false
+# pyright: reportUnusedCallResult=false
 import copy
 import logging
-
-from mutagen.id3 import ID3TimeStamp
 
 from PySide6.QtCore import Qt, Slot, Signal
 from PySide6.QtWidgets import (
@@ -15,6 +13,7 @@ from PySide6.QtWidgets import (
 )
 
 from music_modify.custom_types import Song, SongTag
+from music_modify.custom_types.aliases import SongEditData, SongGroupData
 from music_modify.gui.widget_edit_abstract import EditAbstractWidget
 from music_modify.gui.widget_edit_factory import EditWidgetFactory
 from music_modify.prefs import prefs
@@ -31,7 +30,7 @@ class EditDialog(QDialog):
         self.song_info: Song = song_info
         self.setupUi(self)
 
-        self.changed_values: dict[str, str | list[str] | list[list[str]] | None] = {}
+        self.changed_values: dict[str, SongEditData | None] = {}
 
         self.button_box.button(QDialogButtonBox.StandardButton.Cancel).clicked.connect(
             self.reject
@@ -89,11 +88,7 @@ class EditDialog(QDialog):
 
         self.resize(600, 300)
 
-    def _createWidgetType(
-        self,
-        tag: SongTag,
-        data: list[str] | list[ID3TimeStamp] | list[list[str]] | None,
-    ) -> QWidget:
+    def _createWidgetType(self, tag: SongTag, data: SongGroupData) -> QWidget:
         widget = EditWidgetFactory.createWidget(self, tag, data)
 
         @Slot()
@@ -108,15 +103,49 @@ class EditDialog(QDialog):
             logger.info(f"Changed values are {self.changed_values}")
 
         @Slot()
-        def clearValue():
-            if tag.id3_key in self.changed_values:
-                self.changed_values.pop(tag.id3_key, None)
+        def resetValue() -> None:
+            """Clears the value if it's the same as the original, and that value is stored in the song.
+            Otherwise stores the change."""
+            # This is needed because after a user clicks Apply, the value stored in the song
+            # is now no longer the same as the original, so we can't just clear it.
+            value = widget.value
+
+            # Need to get the value inside the song and compare
+            song_value = tag.getValue(self.song_info.id3)
+            if song_value is None and len(value) != 0:
+                # The value in the song was cleared, but we have a value now that isn't
                 logger.info(
-                    f"Removed value for key {tag.id3_key}, changed values are now {self.changed_values}"
+                    f"Value for key {tag.id3_key} previously removed, but being reset now."
                 )
+                self.changed_values[tag.id3_key] = value
+                logger.info(f"Changed values are now {self.changed_values}")
+            elif song_value is None and len(value) == 0:
+                # Same empty value, no need to remember
+                logger.info(
+                    f"Song doesn't store the key {tag.id3_key} and the value for it is being set to empty."
+                )
+                self.changed_values.pop(tag.id3_key, None)
+                logger.info(f"Changed values are now {self.changed_values}")
+            elif song_value != value:
+                # New value than what is stored in the song (same as original value)
+                logger.info(
+                    f"Value stored in song for key {tag.id3_key} is different from the value being reset to, so storing."
+                )
+                if len(value) == 0:
+                    self.changed_values[tag.id3_key] = None
+                else:
+                    self.changed_values[tag.id3_key] = value
+                logger.info(f"Changed values are now {self.changed_values}")
+            else:
+                # Value matches existing song value, remove from change list.
+                logger.info(
+                    f"Value matches the value in the song for {tag.id3_key}, so removing from changed values."
+                )
+                self.changed_values.pop(tag.id3_key, None)
+                logger.info(f"Changed values are now {self.changed_values}")
 
         widget.value_updated.connect(updateValue)
-        widget.value_reset.connect(clearValue)
+        widget.value_reset.connect(resetValue)
 
         return widget
 

@@ -14,6 +14,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from music_modify.custom_types.aliases import SongTableData
 from music_modify.custom_types.enums import Direction, EditButton
 
 from .widget_edit_abstract import EditAbstractWidget
@@ -32,14 +33,14 @@ class _DragTableWidget(QTableWidget):
 
 
 class EditTableWidget(EditAbstractWidget):
-    def __init__(self, parent: QWidget, data: list[list[str]] | None):
+    def __init__(self, parent: QWidget, data: SongTableData | None):
         super().__init__(parent, data)
 
         self.main_widget: _DragTableWidget
-        self._original_data: list[list[str]]
+        self._original_data: SongTableData
 
     @override
-    def _initValue(self, data: list[list[str]] | None):
+    def _initValue(self, data: SongTableData | None):
         if data is None:
             self.value = []
         else:
@@ -102,7 +103,7 @@ class EditTableWidget(EditAbstractWidget):
 
     @override
     def _updateValue(self) -> None:
-        values: list[list[str]] = []
+        values: SongTableData = []
         for row in range(self.main_widget.rowCount()):
             pair: list[str] = []
             for col in range(self.main_widget.columnCount()):
@@ -135,11 +136,14 @@ class EditTableWidget(EditAbstractWidget):
                 item = QTableWidgetItem(value)
                 item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsDropEnabled)
                 self.main_widget.setItem(row_count, col_count, item)
-        self.main_widget.resizeColumnsToContents()
-        self.main_widget.horizontalHeader().setStretchLastSection(True)
 
         # Stop blocking signals after the table is populated.
         self.main_widget.blockSignals(False)
+
+        # Fit the content to the columns, except for the last, which should stretch.
+        for column in range(self.main_widget.columnCount() - 1):
+            self.main_widget.resizeColumnToContents(column)
+        self.main_widget.horizontalHeader().setStretchLastSection(True)
 
     @override
     def _clearValue(self) -> None:
@@ -227,15 +231,15 @@ class EditTableWidget(EditAbstractWidget):
 
     @property
     @override
-    def value(self) -> list[list[str]]:
+    def value(self) -> SongTableData:
         return self._value
 
     @value.setter
     @override
-    def value(self, value: list[list[str]]):
-        self._value: list[list[str]] = value
+    def value(self, value: SongTableData):
+        self._value: SongTableData = value
 
     @property
     @override
-    def original(self) -> list[list[str]]:
+    def original(self) -> SongTableData:
         return self._original_data

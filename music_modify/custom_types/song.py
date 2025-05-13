@@ -4,8 +4,15 @@ import logging
 import os
 from typing import cast
 
-from mutagen.id3 import ID3, ID3TimeStamp
+from mutagen.id3 import ID3
 
+from music_modify.custom_types.aliases import (
+    SongGroupData,
+    SongLineData,
+    SongListData,
+    SongTableData,
+)
+from music_modify.custom_types.enums import TagType
 from music_modify.prefs import prefs
 
 logger = logging.getLogger(__name__)
@@ -24,19 +31,25 @@ class Song:
         display_split = prefs.settings.split_values_display
         for column in prefs.settings.table_tags:
             data_string = ""
-            current_data: list[str] | list[ID3TimeStamp] | list[list[str]] | None
+            current_data: SongGroupData
             try:
                 current_data = column.getTag(self.id3)
                 if current_data in [[], None]:
-                    data_string = "-"
-                elif len(column) == 1:
-                    current_data = cast(list[str], current_data)
+                    data_string = ""
+                elif column.frame_type != TagType.People:
+                    # Single value or list of single values.
+                    current_data = cast(SongLineData | SongListData, current_data)
                     try:
-                        data_string = display_split.join(current_data)
+                        data_string = display_split.join(
+                            [str(val) for val in current_data]
+                        )
                     except TypeError:
-                        data_string = "-"
-                elif len(column) == 2:
-                    current_data = cast(list[list[str]], current_data)
+                        data_string = ""
+                        logger.warning(
+                            f"TypeError when generating columns for {current_data} with type {type(current_data)}"
+                        )
+                else:
+                    current_data = cast(SongTableData, current_data)
                     tag_values: list[str] = []
                     for value in current_data:
                         if len(value) == 2:
@@ -48,7 +61,8 @@ class Song:
                             continue
                     data_string = display_split.join(tag_values)
             except KeyError:
-                data_string = "-"
+                logger.info(f"{self.id3} wasn't a key in the song.")
+                data_string = ""
             info.append(data_string)
         return info
 

@@ -13,14 +13,14 @@ logger = logging.getLogger(__name__)
 
 
 class EditLineWidget(EditAbstractWidget):
-    def __init__(self, parent: QWidget, data: SongLineData):
+    def __init__(self, parent: QWidget, data: SongLineData | None):
         super().__init__(parent, data)
 
         self._original_data: str
         self.main_widget: QLineEdit
 
     @override
-    def _initValue(self, data: SongLineData):
+    def _initValue(self, data: SongLineData | None):
         if data is None or len(data) == 0:
             self.value = ""
         else:
@@ -94,6 +94,3 @@ class EditLineWidget(EditAbstractWidget):
     @override
     def original(self) -> str:
         return self._original_data
-
-
-# TODO: Add reset and clear buttons next to the line edit
