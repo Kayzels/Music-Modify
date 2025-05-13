@@ -7,8 +7,7 @@ from typing import cast
 from mutagen.id3 import ID3
 
 from music_modify.custom_types.aliases import (
-    SongGroupData,
-    SongLineData,
+    SongEditData,
     SongListData,
     SongTableData,
 )
@@ -31,23 +30,15 @@ class Song:
         display_split = prefs.settings.split_values_display
         for column in prefs.settings.table_tags:
             data_string = ""
-            current_data: SongGroupData
             try:
-                current_data = column.getTag(self.id3)
-                if current_data in [[], None]:
+                current_data: SongEditData | None = column.getValue(self.id3)
+                if current_data is None or len(current_data) == 0:
                     data_string = ""
+                elif isinstance(current_data, str):
+                    data_string = current_data
                 elif column.frame_type != TagType.People:
-                    # Single value or list of single values.
-                    current_data = cast(SongLineData | SongListData, current_data)
-                    try:
-                        data_string = display_split.join(
-                            [str(val) for val in current_data]
-                        )
-                    except TypeError:
-                        data_string = ""
-                        logger.warning(
-                            f"TypeError when generating columns for {current_data} with type {type(current_data)}"
-                        )
+                    current_data = cast(SongListData, current_data)
+                    data_string = display_split.join(current_data)
                 else:
                     current_data = cast(SongTableData, current_data)
                     tag_values: list[str] = []
@@ -56,7 +47,7 @@ class Song:
                             tag_values.append(f"{value[0]}:{value[1]}")
                         else:
                             logger.warning(
-                                f"Song column value has an invalid length: {value}"
+                                f"Song column has an invalid length: {value}"
                             )
                             continue
                     data_string = display_split.join(tag_values)
