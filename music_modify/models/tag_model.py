@@ -171,9 +171,17 @@ class TagModel(QAbstractTableModel):
         self._tags.insert(destination_row, self._tags.pop(source_row))
         self.endMoveRows()
 
-    def setTags(self, tags: list[TagInfo]) -> None:
-        """Resets the model and sets the model to have the tags defined in the given list.
-        Creates a copy of the tags list sent in, to avoid modifying the original."""
+    @property
+    def tags(self) -> list[TagInfo]:
+        """The current grouping of tags that are used for editing and displaying song metadata."""
+        return self._tags
+
+    @tags.setter
+    def tags(self, tags: list[TagInfo]) -> None:
+        # Resets the model and sets the model to have the tags defined in the given list.
+        # Creates a copy of the tags list sent in, to avoid modifying the original.
+        # This is needed so that the default value isn't altered,
+        # and to allow multiple resets.
         self.beginResetModel()
         self._tags = copy.deepcopy(tags)
         self.endResetModel()

@@ -57,7 +57,7 @@ class PrefsTagDialog(PrefsAbstractDialog, Ui_PrefsTagDialog):
                     return
                 if any(
                     tag.id3_key == id3_key or tag.display_name == display_name
-                    for tag in self.model._tags
+                    for tag in self.model.tags
                 ):
                     message = (
                         "Tag with this key or display name already exists.\n"
@@ -145,19 +145,16 @@ class PrefsTagDialog(PrefsAbstractDialog, Ui_PrefsTagDialog):
         Changes the values in the settings file to match the ones set in the dialog.
         """
         logger.info("Called update settings inside tag dialog")
-        prefs.settings.info_tags = self.model._tags
+        prefs.settings.info_tags = self.model.tags
         self.settings_updated.emit()
 
     @override
     def restoreDefaults(self) -> None:
         logger.debug("Restore defaults called for tag")
-        # Make a copy to avoid changing the original default settings
-        self.model.setTags(prefs.settings.default_tags)
+        self.model.tags = prefs.settings.default_tags
 
     @override
     def resetSettings(self) -> None:
         logger.debug("Called reset settings in tag")
         """Reset the settings to the values they had when the dialog opened."""
-        # Make a copy to avoid changing the original_tags value,
-        # which would prevent resetting a second time.
-        self.model.setTags(self.original_tags)
+        self.model.tags = self.original_tags
