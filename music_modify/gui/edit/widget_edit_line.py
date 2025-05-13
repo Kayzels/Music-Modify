@@ -9,6 +9,8 @@ logger = logging.getLogger(__name__)
 
 
 class EditLineWidget(EditAbstractWidget):
+    """Displays data in a line edit, used when the value is a single string."""
+
     def __init__(self, parent: QWidget, data: str | None):
         super().__init__(parent, data)
 

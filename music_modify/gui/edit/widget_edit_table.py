@@ -22,7 +22,8 @@ logger = logging.getLogger(__name__)
 
 
 class _DragTableWidget(QTableWidget):
-    # Needed so that we can emit a signal when it's reordered.
+    """Private table class that emits a signal when rows are reordered."""
+
     rowsReordered: Signal = Signal()
 
     @override
@@ -32,6 +33,8 @@ class _DragTableWidget(QTableWidget):
 
 
 class EditTableWidget(EditAbstractGroupWidget):
+    """Displays data in a table, used for People data, which is stored in the form [role, person]."""
+
     def __init__(self, parent: QWidget, data: SongTableData | None):
         super().__init__(parent, data)
 

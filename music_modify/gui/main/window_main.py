@@ -90,10 +90,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.updateStatusbarMessage()
 
     def setActionState(self):
+        """Toggle the state of possible actions, based on program state."""
         self.setFileActionState()
         self.setSelectionActionState()
 
     def setSelectionActionState(self):
+        """Toggle actions related to selection,
+        based on whether any files are selected in the table."""
         self.action_select_all.setEnabled(len(self.songs_repository) > 0)
 
         has_selection = self.getSelectionLength() > 0
@@ -101,10 +104,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.action_remove_selected.setEnabled(has_selection)
 
     def setFileActionState(self):
+        """Toggle actions related to files, based on whether files exist."""
         self.action_clear_files.setEnabled(len(self.songs_repository) > 0)
         self.setSelectionActionState()
 
     def openAddDialog(self, file_mode: QFileDialog.FileMode):
+        """Display a file picker that allows users to select the files (or folders) to edit,
+        based on the file_mode."""
         files_dialog = QFileDialog(self)
         files_dialog.setFileMode(file_mode)
         if file_mode == QFileDialog.FileMode.ExistingFiles:
@@ -119,6 +125,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.addFiles(files_in_folder)
 
     def getFolderFiles(self, folder: str | PathLike[str]) -> list[str]:
+        """Gets all files that are in the folder, or child folders."""
         songs: list[str] = []
         progress_dialog = QProgressDialog(
             "Adding Folders...", "Cancel", 0, 1, parent=self
@@ -134,6 +141,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         return songs
 
     def addFiles(self, files: list[str] | list[PathLike[str]]):
+        """Adds the specified files to the table."""
         start_time = time.time()
         progress_dialog = QProgressDialog(
             "Adding Files...", "Cancel", 0, len(files), parent=self
@@ -155,11 +163,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             if progress_dialog.wasCanceled():
                 break
         progress_dialog.setValue(len(files))
-        # self.action_clear_files.setEnabled(len(self.songs_repository) > 0)
-        # # if len(self.songs_repository) > 0:
-        # #     self.setFilesState(True)
 
     def processTableDragEvent(self, event: QDragEnterEvent | QDragMoveEvent):
+        """Processes dragging data from the tableview, needed for dropping to work."""
         if event.mimeData().hasUrls():
             event.acceptProposedAction()
         else:
@@ -193,15 +199,18 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.addFiles(new_files)
 
     def clearFiles(self):
+        """Remove all files from the model."""
         self.songs_model.layoutAboutToBeChanged.emit()
         self.songs_repository.clearFiles()
         self.files_table_view.clearSelection()
         self.action_clear_files.setEnabled(False)
 
     def getSelectionLength(self) -> int:
+        """Gets the number of rows selected in the table."""
         return len(self.files_table_view.selectionModel().selectedRows())
 
     def updateStatusbarMessage(self):
+        """Display the number of songs and selected songs inside the status bar."""
         num_songs = len(self.songs_repository)
         # Put the message inside [] so that it's distinct from the version name
         message: str = f"[{num_songs} songs"
@@ -215,9 +224,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """Removes the files at the indexes provided by the selectionModel"""
         selectionLength = self.getSelectionLength()
         if selectionLength == 0:
-            # NOTE: This should never need to be checked:
-            # the button is disabled when there's no selection
-            # But keeping the check here in case
+            logger.debug("Called clear selection with a length of 0.")
             return
         if selectionLength == len(self.songs_repository):
             self.songs_repository.clearFiles()
@@ -240,18 +247,22 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.files_table_view.clearSelection()
 
     def addStatusbarAppMessage(self, appName: str, appVersion: str):
+        """Add text for the version of the app to the status bar."""
         self.versionMessage.setText(f"{appName} {appVersion}")
 
     def showAboutDialog(self):
+        """Show an about dialog."""
         about_dialog = AboutDialog(self)
         about_dialog.show()
 
     def showPrefsDialog(self):
+        """Show a preferences dialog."""
         prefs_dialog = PrefsDialog(parent=self)
         prefs_dialog.show()
         prefs_dialog.settings_updated.connect(self.refreshTable)
 
     def refreshTable(self):
+        """Update the display of the table."""
         self.songs_model.layoutAboutToBeChanged.emit()
         self.songs_repository.refreshDisplay()
         self.songs_model.layoutChanged.emit()
@@ -284,6 +295,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         raise NotImplementedError
 
     def showEditDialog(self, index: QModelIndex):
+        """Display an EditDialog for the song referred to by the index."""
         if not index.isValid():
             logger.info(f"Invalid index when calling show edit dialog: {index}")
             return
@@ -311,6 +323,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         dialog.show()
 
     def showCustomContextMenu(self, position: QPoint):
+        """Show a context menu for the selected item in the table."""
         index = self.files_table_view.indexAt(position)
         if not index.isValid():
             logger.info(f"Invalid index when calling custom context menu: {index}")

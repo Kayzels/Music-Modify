@@ -18,6 +18,8 @@ from .widget_edit_table import EditTableWidget
 
 
 class EditWidgetFactory:
+    """Creates widgets displayed on an EditDialog."""
+
     # Having a class here is probably overkill.
     # But it makes it neater when calling, and keeps it in scope.
 
@@ -25,9 +27,7 @@ class EditWidgetFactory:
     def createWidget(
         parent: QWidget, tag: SongTag, data: SongEditData | None
     ) -> EditAbstractWidget:
-        # def createWidget(
-        #     parent: QWidget, tag: SongTag, data: SongGroupData
-        # ) -> EditAbstractWidget:
+        """Creates the required widget based on the tag and data format."""
         if tag.frame_type == TagType.People:
             # Is a people tag, so table with current data
             data = cast(

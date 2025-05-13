@@ -21,6 +21,8 @@ logger = logging.getLogger(__name__)
 
 
 class EditListWidget(EditAbstractGroupWidget):
+    """Displays data in a list widget, with each row being a string."""
+
     def __init__(self, parent: QWidget, data: SongListData | None):
         super().__init__(parent, data)
 

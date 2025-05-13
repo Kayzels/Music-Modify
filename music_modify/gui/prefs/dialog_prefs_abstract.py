@@ -11,6 +11,8 @@ logger = logging.getLogger(__name__)
 
 
 class PrefsAbstractDialog(QDialog, metaclass=ABCQMeta):
+    """An abstract class that specifies the required functionality for all child preference dialogs."""
+
     settings_updated: Signal = Signal()
 
     def __init__(self, parent: QWidget | None = None):

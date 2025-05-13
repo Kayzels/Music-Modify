@@ -12,6 +12,8 @@ logger = logging.getLogger(__name__)
 
 
 class PrefsDialog(QDialog, Ui_PrefsDialog):
+    """A dialog that allows the user to change the settings the program uses."""
+
     settings_updated: Signal = Signal()
 
     def __init__(self, parent: QWidget | None = None):
@@ -26,11 +28,13 @@ class PrefsDialog(QDialog, Ui_PrefsDialog):
         )
 
     def openChildDialog(self, dialog_type: type[PrefsAbstractDialog]):
+        """Opens a dialog of the specified type to allow editing those specific setting groups."""
         dialog = dialog_type(self)
         dialog.setModal(True)
 
         # Process accept result
         def processDialogResult(result: QDialog.DialogCode):
+            """Update the settings stored when the user accepts the child dialog."""
             if result == QDialog.DialogCode.Accepted:
                 dialog.updateSettings()
 

@@ -17,6 +17,8 @@ logger = logging.getLogger(__name__)
 
 
 class PrefsTagDialog(PrefsAbstractDialog, Ui_PrefsTagDialog):
+    """Allows the user to edit the metadata tags that are edited and displayed for songs."""
+
     def __init__(self, parent: QWidget | None):
         super().__init__(parent)
         self.setWindowTitle("Edit Tags")
@@ -35,6 +37,7 @@ class PrefsTagDialog(PrefsAbstractDialog, Ui_PrefsTagDialog):
         self.down_toolbutton.clicked.connect(self.moveTagsDown)
 
     def addTag(self):
+        """Add a new tag to the group of tags that can be used."""
         add_dialog = PrefsTagAddDialog(self)
 
         def processDialogResult(result: QDialog.DialogCode):
@@ -74,6 +77,7 @@ class PrefsTagDialog(PrefsAbstractDialog, Ui_PrefsTagDialog):
         add_dialog.show()
 
     def removeSelectedTags(self):
+        """Remove selected tags from the table and settings."""
         selected_rows = self.tag_table.selectionModel().selectedRows()
 
         if len(selected_rows) == 0:
@@ -109,6 +113,7 @@ class PrefsTagDialog(PrefsAbstractDialog, Ui_PrefsTagDialog):
                 self.model.removeTag(row)
 
     def moveTagsUp(self) -> None:
+        """Moves all selected tags up, which will change their order in the main table."""
         selected_rows = sorted(
             [index.row() for index in self.tag_table.selectionModel().selectedRows()]
         )
@@ -119,6 +124,7 @@ class PrefsTagDialog(PrefsAbstractDialog, Ui_PrefsTagDialog):
             self.model.moveTag(row, row - 1)
 
     def moveTagsDown(self) -> None:
+        """Moves all selected tags down, which will change their order in the main table."""
         selected_rows = sorted(
             [index.row() for index in self.tag_table.selectionModel().selectedRows()],
             reverse=True,
@@ -130,6 +136,7 @@ class PrefsTagDialog(PrefsAbstractDialog, Ui_PrefsTagDialog):
             self.model.moveTag(row, row + 1)
 
     def showInvalidInputMessage(self, message: str):
+        """Displays a message about invalid input."""
         QMessageBox.warning(self.tag_table, "Invalid Input", message)
 
     @override

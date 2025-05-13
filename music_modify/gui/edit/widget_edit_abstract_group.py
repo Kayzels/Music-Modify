@@ -12,6 +12,9 @@ from .widget_edit_abstract import EditAbstractWidget
 
 
 class EditAbstractGroupWidget(EditAbstractWidget, metaclass=ABCQMeta):
+    """Abstract class for widgets displayed on an EditDialog that contain multiple items,
+    which can be displayed in lists or tables."""
+
     def __init__(self, parent: QWidget, data: SongEditData | None):
         super().__init__(parent, data)
 
@@ -57,12 +60,15 @@ class EditAbstractGroupWidget(EditAbstractWidget, metaclass=ABCQMeta):
 
     @abstractmethod
     def _addRow(self) -> None:
+        """Adds a row to the bottom of the widget."""
         pass
 
     @abstractmethod
     def _removeRow(self) -> None:
+        """Removes the selected rows from the widget."""
         pass
 
     @abstractmethod
     def _moveRows(self, direction: Direction) -> None:
+        """Moves the selected rows in the specified direction."""
         pass

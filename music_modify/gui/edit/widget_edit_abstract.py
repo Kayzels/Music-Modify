@@ -14,6 +14,8 @@ logger = logging.getLogger(__name__)
 
 
 class EditAbstractWidget(QWidget, metaclass=ABCQMeta):
+    """An abstract class that defines the desired behaviour for a widget inside an EditDialog."""
+
     value_updated: Signal = Signal()
     value_reset: Signal = Signal()
 
@@ -34,7 +36,7 @@ class EditAbstractWidget(QWidget, metaclass=ABCQMeta):
         buttons: EditButton = EditButton.Reset | EditButton.Clear,
         layout_type: type[QVBoxLayout | QHBoxLayout] = QHBoxLayout,
     ) -> QVBoxLayout | QHBoxLayout:
-        """Adds buttons for moving rows up and down, adding and deleting rows."""
+        """Creates a layout with the designated button types in the desired orientation."""
         button_layout = layout_type()
 
         if buttons & EditButton.Clear:
@@ -58,6 +60,7 @@ class EditAbstractWidget(QWidget, metaclass=ABCQMeta):
 
     @abstractmethod
     def _setupUi(self) -> None:
+        """Sets up the display of the widget."""
         logger.info("Abstract setupUi called")
         pass
 
@@ -106,6 +109,7 @@ class EditAbstractWidget(QWidget, metaclass=ABCQMeta):
     @property
     @abstractmethod
     def value(self) -> SongEditData:
+        """The value displayed and stored inside the widget, depending on the data type."""
         logger.info("Abstract value property called")
         pass
 
@@ -116,4 +120,5 @@ class EditAbstractWidget(QWidget, metaclass=ABCQMeta):
     @property
     @abstractmethod
     def original(self) -> SongEditData:
+        """The original value that was stored inside the widget, before changes."""
         pass

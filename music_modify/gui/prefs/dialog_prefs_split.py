@@ -12,6 +12,9 @@ logger = logging.getLogger(__name__)
 
 
 class PrefsSplitDialog(PrefsAbstractDialog, Ui_PrefsSplitDialog):
+    """Allows the user to edit the values stored in the Split settings section,
+    which have to do with how strings are displayed when there are multiple values."""
+
     def __init__(self, parent: QWidget | None = None):
         super().__init__(parent)
 
@@ -35,6 +38,7 @@ class PrefsSplitDialog(PrefsAbstractDialog, Ui_PrefsSplitDialog):
         )
 
     def _initializeDisplay(self):
+        """Displays the current values for the split settings before the user changes them."""
         self.line_edit_split_text_entered.setText(prefs.settings.split_text_entered)
         self.line_edit_split_values_display.setText(prefs.settings.split_values_display)
         self.line_edit_split_values_at.setText(prefs.settings.split_values_at)

@@ -23,6 +23,8 @@ logger = logging.getLogger(__name__)
 
 
 class EditDialog(QDialog):
+    """Displays all tags for a song, in a format that can be edited."""
+
     info_updated: Signal = Signal()
 
     def __init__(self, song_info: Song, parent: QWidget | None = None):
@@ -51,6 +53,7 @@ class EditDialog(QDialog):
         self.song_layout: QFormLayout
 
     def setupUi(self):
+        """Creates the basic interface for the dialog."""
         self.main_layout: QVBoxLayout = QVBoxLayout(self)
 
         self._setupSongInfo()
@@ -69,6 +72,7 @@ class EditDialog(QDialog):
         self.setLayout(self.main_layout)
 
     def _setupSongInfo(self):
+        """Creates and displays the widgets for each tag in the song."""
         scroll_widget: QWidget = QWidget()
         self.song_layout = QFormLayout(scroll_widget)
 
@@ -87,10 +91,13 @@ class EditDialog(QDialog):
         self.resize(600, 300)
 
     def _createWidgetType(self, tag: SongTag, data: SongEditData | None) -> QWidget:
+        """Creates the widget of the required type based on the tag and data,
+        and links the signals needed for updating and resetting it."""
         widget = EditWidgetFactory.createWidget(self, tag, data)
 
         @Slot()
         def updateValue():
+            """Stores the updated value of the widget."""
             # We want to remove values if they are empty,
             # which is marked by making the changed_value for that key None.
             value = widget.value
@@ -175,11 +182,6 @@ class EditDialog(QDialog):
         # Clear the values: they've been changed in the song,
         # so don't need to be stored in this list any more
         self.changed_values = {}
-
-        # TODO: Consider how this impacts refresh and reset
-        # The widgets all contain the current values,
-        # and the original values for the field.
-        # But if it's updated multiple times, reset can go out of sync?
 
     def resetSong(self) -> None:
         """Sets the values for the song back to the original ones before the changes occurred."""
