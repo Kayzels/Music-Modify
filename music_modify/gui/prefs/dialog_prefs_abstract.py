@@ -6,7 +6,7 @@ from typing import Callable, Self
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QDialogButtonBox, QMessageBox, QWidget, QDialog
 
-from .meta import ABCQMeta
+from music_modify.gui.meta import ABCQMeta
 
 logger = logging.getLogger(__name__)
 

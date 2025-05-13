@@ -18,14 +18,14 @@ from PySide6.QtWidgets import (
     QProgressDialog,
 )
 
+from music_modify.gui.about import AboutDialog
+from music_modify.gui.edit import EditDialog
+from music_modify.gui.prefs import PrefsDialog
+from music_modify.gui.utils import updateTableView
 from music_modify.models import SongRepository, SongTableModel
 from music_modify.utils import formatTime
 
-from .dialog_about import AboutDialog
-from .dialog_edit import EditDialog
-from .dialog_prefs import PrefsDialog
 from .ui_window_main import Ui_MainWindow
-from .utils import updateTableView
 
 logger = logging.getLogger(__name__)
 
