@@ -12,7 +12,7 @@ from PySide6.QtWidgets import (
 )
 
 from music_modify.custom_types import Song, SongTag
-from music_modify.custom_types.aliases import SongEditData, SongGroupData
+from music_modify.custom_types.aliases import SongEditData
 from music_modify.custom_types.utils import mapKey
 from music_modify.prefs import prefs
 
@@ -73,7 +73,8 @@ class EditDialog(QDialog):
         self.song_layout = QFormLayout(scroll_widget)
 
         for tag in prefs.settings.all_tags:
-            current_data = copy.deepcopy(tag.getTag(self.song_info.id3))
+            # Needs to be a copy to avoid editing the tag prematurely.
+            current_data = copy.deepcopy(tag.getValue(self.song_info.id3))
             widget = self._createWidgetType(tag, current_data)
             self.song_layout.addRow(tag.display_name, widget)
 
@@ -85,7 +86,7 @@ class EditDialog(QDialog):
 
         self.resize(600, 300)
 
-    def _createWidgetType(self, tag: SongTag, data: SongGroupData) -> QWidget:
+    def _createWidgetType(self, tag: SongTag, data: SongEditData | None) -> QWidget:
         widget = EditWidgetFactory.createWidget(self, tag, data)
 
         @Slot()

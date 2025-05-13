@@ -4,7 +4,7 @@ from typing import override
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QHBoxLayout, QToolButton, QVBoxLayout, QWidget
 
-from music_modify.custom_types.aliases import SongGroupData
+from music_modify.custom_types.aliases import SongEditData
 from music_modify.custom_types.enums import Direction, EditButton
 from music_modify.gui.meta import ABCQMeta
 
@@ -12,7 +12,7 @@ from .widget_edit_abstract import EditAbstractWidget
 
 
 class EditAbstractGroupWidget(EditAbstractWidget, metaclass=ABCQMeta):
-    def __init__(self, parent: QWidget, data: SongGroupData):
+    def __init__(self, parent: QWidget, data: SongEditData | None):
         super().__init__(parent, data)
 
     @override

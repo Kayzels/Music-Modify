@@ -3,26 +3,24 @@ from typing import cast, override
 
 from PySide6.QtWidgets import QHBoxLayout, QLineEdit, QWidget
 
-from music_modify.custom_types.aliases import SongLineData
-
 from .widget_edit_abstract import EditAbstractWidget
 
 logger = logging.getLogger(__name__)
 
 
 class EditLineWidget(EditAbstractWidget):
-    def __init__(self, parent: QWidget, data: SongLineData | None):
+    def __init__(self, parent: QWidget, data: str | None):
         super().__init__(parent, data)
 
         self._original_data: str
         self.main_widget: QLineEdit
 
     @override
-    def _initValue(self, data: SongLineData | None):
-        if data is None or len(data) == 0:
+    def _initValue(self, data: str | None):
+        if data is None:
             self.value = ""
         else:
-            self.value = str(data[0])
+            self.value = data
 
         self._original_data = self.value
 

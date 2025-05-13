@@ -4,8 +4,7 @@ from typing import cast
 from PySide6.QtWidgets import QWidget
 
 from music_modify.custom_types.aliases import (
-    SongGroupData,
-    SongLineData,
+    SongEditData,
     SongListData,
     SongTableData,
 )
@@ -24,29 +23,29 @@ class EditWidgetFactory:
 
     @staticmethod
     def createWidget(
-        parent: QWidget, tag: SongTag, data: SongGroupData
+        parent: QWidget, tag: SongTag, data: SongEditData | None
     ) -> EditAbstractWidget:
-        group: tuple[TagType, bool] = (tag.frame_type, tag.allow_multiple)
-        match group:
-            case (TagType.People, _):
-                # Is a people tag, so table with current data
-                data = cast(
-                    SongTableData | None,
-                    copy.deepcopy(data) if data is not None else None,
-                )
-                return EditTableWidget(parent, data)
-            case (_, True):
-                # Allow multiple is true, so list with current data
+        # def createWidget(
+        #     parent: QWidget, tag: SongTag, data: SongGroupData
+        # ) -> EditAbstractWidget:
+        if tag.frame_type == TagType.People:
+            # Is a people tag, so table with current data
+            data = cast(
+                SongTableData | None,
+                copy.deepcopy(data) if data is not None else None,
+            )
+            return EditTableWidget(parent, data)
+        elif tag.allow_multiple:
+            # Allow multiple is true, so list with current data
 
-                # Send a copy otherwise when checking if a value is changed,
-                # it will always be false, because it's comparing the two
-                # changed values
-                data = cast(
-                    SongListData | None, data.copy() if data is not None else None
-                )
-                return EditListWidget(parent, data)
-            case (_, False):
-                # Only allows a single value, which can be a string, ID3TimeStamp or None.
-                # Show in LineEdit.
-                data = cast(SongLineData | None, data)
-                return EditLineWidget(parent, data)
+            # Send a copy otherwise when checking if a value is changed,
+            # it will always be false, because it's comparing the two
+            # changed values
+            data = cast(SongListData | None, data)
+            data = data.copy() if data is not None else None
+            return EditListWidget(parent, data)
+        else:
+            # Only allows a single value, which can be a string, ID3TimeStamp or None.
+            # Show in LineEdit.
+            data = cast(str | None, data)
+            return EditLineWidget(parent, data)

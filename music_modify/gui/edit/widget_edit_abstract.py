@@ -6,7 +6,7 @@ from PySide6.QtCore import Signal
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QHBoxLayout, QToolButton, QVBoxLayout, QWidget
 
-from music_modify.custom_types.aliases import SongEditData, SongGroupData
+from music_modify.custom_types.aliases import SongEditData
 from music_modify.custom_types.enums import EditButton
 from music_modify.gui.meta import ABCQMeta
 
@@ -17,7 +17,7 @@ class EditAbstractWidget(QWidget, metaclass=ABCQMeta):
     value_updated: Signal = Signal()
     value_reset: Signal = Signal()
 
-    def __init__(self, parent: QWidget, data: SongGroupData):
+    def __init__(self, parent: QWidget, data: SongEditData | None):
         super().__init__(parent)
         self._initValue(data)
         self._setMainLayout()
@@ -52,7 +52,7 @@ class EditAbstractWidget(QWidget, metaclass=ABCQMeta):
         return button_layout
 
     @abstractmethod
-    def _initValue(self, data: SongGroupData) -> None:
+    def _initValue(self, data: SongEditData | None) -> None:
         """Sets the original value that the widget should store."""
         pass
 
