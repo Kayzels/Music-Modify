@@ -1,4 +1,3 @@
-# pyright: reportUnusedCallResult=false
 import copy
 import logging
 
@@ -29,7 +28,7 @@ class EditDialog(QDialog):
     def __init__(self, song_info: Song, parent: QWidget | None = None):
         super().__init__(parent)
         self.song_info: Song = song_info
-        self.setupUi(self)
+        self.setupUi()
 
         self.changed_values: dict[str, SongEditData | None] = {}
 
@@ -51,10 +50,7 @@ class EditDialog(QDialog):
 
         self.song_layout: QFormLayout
 
-    def setupUi(self, EditDialog: "EditDialog"):  # pyright: ignore[reportUnusedParameter]
-        # The EditDialog parameter is not used,
-        # but exists to match the uic generated ones.
-        # Will make it easier to abstract it later.
+    def setupUi(self):
         self.main_layout: QVBoxLayout = QVBoxLayout(self)
 
         self._setupSongInfo()

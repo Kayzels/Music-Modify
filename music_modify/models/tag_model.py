@@ -1,5 +1,3 @@
-# pyright: reportIncompatibleMethodOverride=false, reportCallInDefaultInitializer=false
-
 import copy
 import dataclasses
 import logging

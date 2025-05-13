@@ -33,7 +33,7 @@ logger = logging.getLogger(__name__)
 class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self):
         super().__init__()
-        self.setupUi(self)  # pyright: ignore[reportUnknownMemberType]
+        self.setupUi(self)
 
         # Create separate QLabel widgets instead of using the statbusbar default ones,
         # so that they're not overridden when a QStatusTipEvent happens.
@@ -323,7 +323,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             context_menu.addAction(self.action_edit_individual)
         else:
             song_menu = QMenu("Edit Songs")
-            song_menu.addActions(self.menu_edit_songs.actions())  # pyright: ignore[reportUnknownMemberType]
+            song_menu.addActions(self.menu_edit_songs.actions())
             context_menu.addMenu(song_menu)
 
         context_menu.addAction(self.action_remove_selected)

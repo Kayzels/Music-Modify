@@ -1,4 +1,3 @@
-# pyright: reportIncompatibleMethodOverride=false
 import copy
 import logging
 from typing import override, cast
@@ -58,7 +57,7 @@ class EditTableWidget(EditAbstractGroupWidget):
         self.main_widget = _DragTableWidget()
         self.main_widget.setMinimumHeight(250)
         self.main_widget.setColumnCount(2)
-        self.main_widget.setHorizontalHeaderLabels(["Role", "Person"])  # pyright: ignore[reportUnknownMemberType]
+        self.main_widget.setHorizontalHeaderLabels(["Role", "Person"])
         self.main_widget.setRowCount(len(self.value))
 
         # Allow dragging rows up and down

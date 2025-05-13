@@ -1,5 +1,3 @@
-# pyright: reportPrivateImportUsage=false, reportUnknownVariableType=false, reportUnknownArgumentType=false, reportUnknownMemberType=false
-
 import logging
 from typing import Final, override, cast
 

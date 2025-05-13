@@ -1,4 +1,3 @@
-# pyright: reportImplicitAbstractClass=false
 from abc import abstractmethod
 from typing import override
 

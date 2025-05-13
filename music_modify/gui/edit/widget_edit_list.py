@@ -1,4 +1,3 @@
-# pyright: reportIncompatibleMethodOverride=false
 import copy
 import logging
 from typing import override, cast

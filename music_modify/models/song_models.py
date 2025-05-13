@@ -1,5 +1,3 @@
-# pyright: reportIncompatibleMethodOverride=false
-
 from typing import Final, override
 
 from PySide6.QtCore import (

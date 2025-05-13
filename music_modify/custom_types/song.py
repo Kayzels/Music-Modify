@@ -1,5 +1,3 @@
-# pyright: reportUnknownMemberType=false, reportPrivateImportUsage=false
-
 import logging
 import os
 

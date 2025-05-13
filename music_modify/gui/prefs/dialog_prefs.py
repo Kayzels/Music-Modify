@@ -16,7 +16,7 @@ class PrefsDialog(QDialog, Ui_PrefsDialog):
 
     def __init__(self, parent: QWidget | None = None):
         super().__init__(parent)
-        self.setupUi(self)  # pyright: ignore[reportUnknownMemberType]
+        self.setupUi(self)
 
         self.button_edit_tags.clicked.connect(
             lambda: self.openChildDialog(PrefsTagDialog)

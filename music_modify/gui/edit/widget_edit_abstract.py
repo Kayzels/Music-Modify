@@ -1,4 +1,3 @@
-# pyright: reportImplicitAbstractClass=false, reportPrivateImportUsage=false
 import copy
 import logging
 from abc import abstractmethod
