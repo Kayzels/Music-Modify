@@ -55,6 +55,7 @@ class EditListWidget(EditAbstractGroupWidget):
             QAbstractItemView.SelectionMode.ExtendedSelection
         )
         self.main_widget.itemChanged.connect(self._updateValue)
+        self.main_widget.setAlternatingRowColors(True)
 
         layout.addWidget(self.main_widget)
 

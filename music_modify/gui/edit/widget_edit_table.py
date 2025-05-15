@@ -6,6 +6,7 @@ from PySide6.QtCore import QItemSelectionModel, Qt, Signal
 from PySide6.QtGui import QDropEvent
 from PySide6.QtWidgets import (
     QAbstractItemView,
+    QFrame,
     QHBoxLayout,
     QTableWidget,
     QTableWidgetItem,
@@ -57,11 +58,26 @@ class EditTableWidget(EditAbstractGroupWidget):
             logger.info("Layout was None for table widget")
             return
         layout = cast(QHBoxLayout, layout)
+
+        # Put the table in a frame so that there are borders,
+        # like the other EditWidgets.
+        frame = QFrame()
+        frame.setFrameShape(QFrame.Shape.Panel)
+        frame.setLineWidth(1)
+        frame_layout = QVBoxLayout()
+        frame_layout.setContentsMargins(0, 0, 0, 0)
+        frame_layout.addWidget(frame)
+        layout.addLayout(frame_layout)
+
         self.main_widget = _DragTableWidget()
         self.main_widget.setMinimumHeight(250)
         self.main_widget.setColumnCount(2)
         self.main_widget.setHorizontalHeaderLabels(["Role", "Person"])
         self.main_widget.setRowCount(len(self.value))
+        self.main_widget.setShowGrid(False)
+        self.main_widget.setAlternatingRowColors(True)
+
+        frame_layout.addWidget(self.main_widget)
 
         # Allow dragging rows up and down
         # NB: To ensure rows aren't overwritten, need to ensure that ItemIsDropEnabled is unset
@@ -80,7 +96,6 @@ class EditTableWidget(EditAbstractGroupWidget):
 
         self.main_widget.itemChanged.connect(self._updateValue)
         self.main_widget.rowsReordered.connect(self._updateValue)
-        layout.addWidget(self.main_widget)
 
         button_layout = QVBoxLayout()
         layout.addLayout(button_layout)

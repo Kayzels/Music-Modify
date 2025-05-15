@@ -29,6 +29,8 @@ class PrefsTagDialog(PrefsAbstractDialog, Ui_PrefsTagDialog):
         self.model: TagModel = TagModel(tags)
         self.tag_table.setModel(self.model)
         self.tag_table.resizeColumnsToContents()
+        self.tag_table.setShowGrid(False)
+        self.tag_table.setAlternatingRowColors(True)
         self.model.invalid_input.connect(self.showInvalidInputMessage)
 
         self.add_toolbutton.clicked.connect(self.addTag)

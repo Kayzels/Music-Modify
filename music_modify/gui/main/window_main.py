@@ -45,6 +45,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.songs_repository: Final[SongRepository] = SongRepository()
         self.songs_model: Final[SongTableModel] = SongTableModel(self.songs_repository)
         self.files_table_view.setModel(self.songs_model)
+        self.files_table_view.setShowGrid(False)
         self.files_table_view.resizeColumnsToContents()
         self.files_table_view.selectionModel().selectionChanged.connect(
             self.updateStatusbarMessage
