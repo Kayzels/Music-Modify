@@ -32,3 +32,8 @@ class EditButton(Flag):
     Remove = auto()
     Clear = auto()
     Reset = auto()
+
+
+class NavDirection(Enum):
+    Next = auto()
+    Previous = auto()

@@ -80,8 +80,8 @@ class EditTableWidget(EditAbstractGroupWidget):
         frame_layout.addWidget(self.main_widget)
 
         # Allow dragging rows up and down
-        # NB: To ensure rows aren't overwritten, need to ensure that ItemIsDropEnabled is unset
-        # for all items
+        # NOTE: To ensure rows aren't overwritten, need to ensure that ItemIsDropEnabled is unset
+        # for all items. (Done in _displayValue)
         self.main_widget.setDragDropMode(QAbstractItemView.DragDropMode.InternalMove)
         self.main_widget.setDragDropOverwriteMode(False)
 
@@ -148,6 +148,8 @@ class EditTableWidget(EditAbstractGroupWidget):
         # block signals until the table is done being populated.
         self.main_widget.blockSignals(True)
 
+        # NOTE: To ensure rows aren't overwritten, need to ensure that ItemIsDropEnabled is unset
+        # for all items
         for row_count, pair in enumerate(self.value):
             for col_count, value in enumerate(pair):
                 item = QTableWidgetItem(value)

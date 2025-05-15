@@ -2,10 +2,12 @@ import copy
 import logging
 
 from PySide6.QtCore import Qt, Signal, Slot
+from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (
     QDialog,
     QDialogButtonBox,
     QFormLayout,
+    QPushButton,
     QScrollArea,
     QVBoxLayout,
     QWidget,
@@ -13,7 +15,10 @@ from PySide6.QtWidgets import (
 
 from music_modify.custom_types import Song, SongTag
 from music_modify.custom_types.aliases import SongEditData
+from music_modify.custom_types.enums import NavDirection
 from music_modify.custom_types.utils import mapKey
+from music_modify.gui.utils import clearLayout
+from music_modify.models.song_repository import SongRepository
 from music_modify.prefs import prefs
 
 from .widget_edit_abstract import EditAbstractWidget
@@ -27,8 +32,24 @@ class EditDialog(QDialog):
 
     info_updated: Signal = Signal()
 
-    def __init__(self, song_info: Song, parent: QWidget | None = None):
+    def __init__(
+        self,
+        parent: QWidget,
+        repository: SongRepository,
+        rows: list[int],
+        current_index: int = 0,
+    ) -> None:
         super().__init__(parent)
+
+        self.rows: list[int] = rows
+        self.current_index: int = current_index
+        self.repository: SongRepository = repository
+
+        song_info = self._getSong()
+        if song_info is None:
+            self.reject()
+            return
+
         self.song_info: Song = song_info
         self.setupUi()
 
@@ -49,6 +70,30 @@ class EditDialog(QDialog):
         self.button_box.button(QDialogButtonBox.StandardButton.Reset).clicked.connect(
             self.resetSong
         )
+
+        # Add before and after buttons if more than one passed through
+        if len(rows) > 1:
+            self.previous_button: QPushButton = QPushButton(
+                QIcon(QIcon.fromTheme(QIcon.ThemeIcon.GoPrevious)), "Previous"
+            )
+            self.previous_button.clicked.connect(
+                lambda: self.showSongInDirection(NavDirection.Previous)
+            )
+            self.button_box.addButton(
+                self.previous_button, QDialogButtonBox.ButtonRole.ActionRole
+            )
+
+            self.next_button: QPushButton = QPushButton(
+                QIcon(QIcon.fromTheme(QIcon.ThemeIcon.GoNext)), "Next"
+            )
+            self.next_button.clicked.connect(
+                lambda: self.showSongInDirection(NavDirection.Next)
+            )
+            self.button_box.addButton(
+                self.next_button, QDialogButtonBox.ButtonRole.ActionRole
+            )
+
+            self._switchButtonState()
 
         self.song_layout: QFormLayout
 
@@ -74,7 +119,13 @@ class EditDialog(QDialog):
     def _setupSongInfo(self):
         """Creates and displays the widgets for each tag in the song."""
         scroll_widget: QWidget = QWidget()
-        self.song_layout = QFormLayout(scroll_widget)
+        if hasattr(self, "song_layout"):
+            clearLayout(self.song_layout)
+            # wlayout = self.layout()
+            # if wlayout is not None:
+            #     clearLayout(wlayout)
+        else:
+            self.song_layout = QFormLayout(scroll_widget)
 
         for tag in prefs.settings.all_tags:
             # Needs to be a copy to avoid editing the tag prematurely.
@@ -82,11 +133,12 @@ class EditDialog(QDialog):
             widget = self._createWidgetType(tag, current_data)
             self.song_layout.addRow(tag.display_name, widget)
 
-        scroll_area: QScrollArea = QScrollArea(self)
-        scroll_area.setWidget(scroll_widget)
-        scroll_area.setWidgetResizable(True)
-        scroll_area.setMinimumHeight(300)
-        self.main_layout.addWidget(scroll_area)
+        if not hasattr(self, "scroll_area"):
+            self.scroll_area: QScrollArea = QScrollArea(self)  # pyright: ignore[reportUninitializedInstanceVariable]
+            self.scroll_area.setWidget(scroll_widget)
+            self.scroll_area.setWidgetResizable(True)
+            self.scroll_area.setMinimumHeight(300)
+            self.main_layout.addWidget(self.scroll_area)
 
         self.resize(600, 300)
 
@@ -104,8 +156,8 @@ class EditDialog(QDialog):
             if len(value) == 0:
                 value = None
             self.changed_values[tag.id3_key] = value
-            logger.info(f"Value is {widget.value}")
-            logger.info(f"Changed values are {self.changed_values}")
+            logger.debug(f"Value is {widget.value}")
+            logger.debug(f"Changed values are {self.changed_values}")
 
         @Slot()
         def resetValue() -> None:
@@ -119,35 +171,35 @@ class EditDialog(QDialog):
             song_value = tag.getValue(self.song_info.id3)
             if song_value is None and len(value) != 0:
                 # The value in the song was cleared, but we have a value now that isn't
-                logger.info(
+                logger.debug(
                     f"Value for key {tag.id3_key} previously removed, but being reset now."
                 )
                 self.changed_values[tag.id3_key] = value
-                logger.info(f"Changed values are now {self.changed_values}")
+                logger.debug(f"Changed values are now {self.changed_values}")
             elif song_value is None and len(value) == 0:
                 # Same empty value, no need to remember
-                logger.info(
+                logger.debug(
                     f"Song doesn't store the key {tag.id3_key} and the value for it is being set to empty."
                 )
                 self.changed_values.pop(tag.id3_key, None)
-                logger.info(f"Changed values are now {self.changed_values}")
+                logger.debug(f"Changed values are now {self.changed_values}")
             elif song_value != value:
                 # New value than what is stored in the song (same as original value)
-                logger.info(
+                logger.debug(
                     f"Value stored in song for key {tag.id3_key} is different from the value being reset to, so storing."
                 )
                 if len(value) == 0:
                     self.changed_values[tag.id3_key] = None
                 else:
                     self.changed_values[tag.id3_key] = value
-                logger.info(f"Changed values are now {self.changed_values}")
+                logger.debug(f"Changed values are now {self.changed_values}")
             else:
                 # Value matches existing song value, remove from change list.
-                logger.info(
+                logger.debug(
                     f"Value matches the value in the song for {tag.id3_key}, so removing from changed values."
                 )
                 self.changed_values.pop(tag.id3_key, None)
-                logger.info(f"Changed values are now {self.changed_values}")
+                logger.debug(f"Changed values are now {self.changed_values}")
 
         widget.value_updated.connect(updateValue)
         widget.value_reset.connect(resetValue)
@@ -158,15 +210,15 @@ class EditDialog(QDialog):
         """Adds the changes to the song, and saves it."""
         if len(self.changed_values) == 0:
             return
-        logger.info("Called updateSong")
+        logger.debug("Called updateSong")
         for id3_key, value in self.changed_values.items():
             tag = mapKey(id3_key)
             if tag is None:
-                logger.info(f"Unknown id3 key: {id3_key}")
+                logger.debug(f"Unknown id3 key: {id3_key}")
                 continue
             if value is None:
                 # Remove tag from song
-                logger.info(f"Value was None, so removing key {id3_key}")
+                logger.debug(f"Value was None, so removing key {id3_key}")
                 tag.removeTag(self.song_info.id3)
                 continue
 
@@ -174,7 +226,7 @@ class EditDialog(QDialog):
             # so need to convert to that format.
             if isinstance(value, str):
                 value = [value]
-            logger.info(f"Setting tag for {id3_key} to {value}")
+            logger.debug(f"Setting tag for {id3_key} to {value}")
             tag.setTag(self.song_info.id3, value)
         self.song_info.save()
         self.info_updated.emit()
@@ -188,3 +240,48 @@ class EditDialog(QDialog):
         widgets = self.findChildren(EditAbstractWidget)
         for widget in widgets:
             widget.reset()
+
+    def _getSong(self) -> Song | None:
+        """Gets the song based on the index of the list of indexes, or None if not valid."""
+        row = self.rows[self.current_index]
+        song_info = self.repository.getSong(row)
+        if song_info is None:
+            logger.warning(f"Couldn't find a song at row number {row}")
+            return
+        return song_info
+
+    def _switchButtonState(self) -> None:
+        """Enable or disable the next and previous buttons based on where we are in the list."""
+        if not hasattr(self, "next_button") or not hasattr(self, "previous_button"):
+            logger.warning("Missing next or previous button in edit dialog")
+            return
+
+        self.previous_button.setEnabled(self.current_index != 0)
+        self.next_button.setEnabled(self.current_index != len(self.rows) - 1)
+
+    def showSongInDirection(self, nav_direction: NavDirection) -> None:
+        """Saves the current changes to the song,
+        and displays the next or previous song from the selection based on the direction."""
+        if (
+            nav_direction == NavDirection.Next
+            and self.current_index == len(self.rows) - 1
+        ) or (nav_direction == NavDirection.Previous and self.current_index == 0):
+            return
+        match nav_direction:
+            case NavDirection.Next:
+                self.current_index += 1
+            case NavDirection.Previous:
+                self.current_index -= 1
+        self.updateSong()
+        logger.debug(f"Called show song in direction with {nav_direction}")
+        song_info = self._getSong()
+        if song_info is None:
+            logger.warning("Invalid song, closing dialog")
+            self.reject()
+            return
+        else:
+            logger.debug("Got a song")
+
+        self.song_info = song_info
+        self._switchButtonState()
+        self._setupSongInfo()

@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QTableView
+from PySide6.QtWidgets import QLayout, QTableView
 
 from music_modify.models import SongRepository
 from music_modify.prefs import prefs
@@ -18,3 +18,15 @@ def updateTableView(table_view: QTableView, repository: SongRepository) -> None:
             table_view.resizeColumnToContents(index)
         else:
             table_view.setColumnWidth(index, PEOPLE_TAG_WIDTH)
+
+
+def clearLayout(layout: QLayout) -> None:
+    """Removes all widgets from the given layout"""
+    while layout.count() > 0:
+        item = layout.takeAt(0)
+        if item.layout() is not None:
+            clearLayout(item.layout())
+        widget = item.widget()
+        if widget is not None:
+            widget.deleteLater()
+        del item

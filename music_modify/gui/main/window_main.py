@@ -270,20 +270,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         updateTableView(self.files_table_view, self.songs_repository)
 
     def editSongsIndividual(self) -> None:
-        """Create a dialog for each song in the selected list (or allow going between with Next and Previous?)
-        that can then edit the information and close."""
+        """Create a dialog that allows going between Next and Previous selected songs,
+        that can edit the information and close."""
         if self.getSelectionLength() == 0:
             return
-        if self.getSelectionLength() > 1:
-            QMessageBox.information(
-                self,
-                "Selected multiple",
-                "At the moment, only editing the first file in the selection is supported.",
-            )
-            # TODO:Edit multiple songs individually
-            raise NotImplementedError
-        index = self.files_table_view.selectionModel().selectedIndexes()[0]
-        self.showEditDialog(index)
+        indexes = self.files_table_view.selectionModel().selectedIndexes()
+        self.showEditDialog(indexes)
 
     def editSongsBulk(self) -> None:
         """Create a dialog that allows editing the information for each song in the selection."""
@@ -295,22 +287,25 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # TODO: Edit songs in bulk
         raise NotImplementedError
 
-    def showEditDialog(self, index: QModelIndex):
-        """Display an EditDialog for the song referred to by the index."""
-        if not index.isValid():
-            logger.info(f"Invalid index when calling show edit dialog: {index}")
-            return
-
+    def showEditDialog(self, indexes: list[QModelIndex]):
+        """Display an EditDialog for the songs referred to by the indexes."""
         if isinstance(self.files_table_view.model(), QSortFilterProxyModel):
-            index = cast(
-                QSortFilterProxyModel, self.files_table_view.model()
-            ).mapToSource(index)
+            indexes = [
+                cast(QSortFilterProxyModel, self.files_table_view.model()).mapToSource(
+                    index
+                )
+                for index in indexes
+            ]
 
-        song_info = self.songs_repository.getSong(index.row())
-        if song_info is None:
-            return
+        # Need to remove duplicates
+        rows = list(set([index.row() for index in indexes if index.isValid()]))
 
-        dialog = EditDialog(song_info, parent=self)
+        dialog = EditDialog(
+            self,
+            repository=self.songs_repository,
+            rows=rows,
+            current_index=0,
+        )
         dialog.setModal(True)
 
         def processDialogResult(result: QDialog.DialogCode):
