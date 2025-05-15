@@ -1,0 +1,11 @@
+{
+  "reportAny": false,
+  "reportUnusedCallResult": false,
+  "reportUnknownMemberType": false,
+  "reportIncompatibleMethodOverride": false,
+  "reportCallInDefaultInitializer": false,
+  "reportPrivateImportUsage": false,
+  "reportUnknownVariableType": false,
+  "reportUnknownArgumentType": false,
+  "reportImplicitAbstractClass": false
+}

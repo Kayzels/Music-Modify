@@ -19,4 +19,3 @@ reportPrivateImportUsage = false
 reportUnknownVariableType = false
 reportUnknownArgumentType = false
 reportImplicitAbstractClass = false
-reportUnusedCallResult = false
