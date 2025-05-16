@@ -4,9 +4,9 @@ import os
 import time
 from os import PathLike
 from pathlib import Path
-from typing import Final, cast
+from typing import Final
 
-from PySide6.QtCore import QModelIndex, QPoint, QSortFilterProxyModel, Qt
+from PySide6.QtCore import QPoint, Qt
 from PySide6.QtGui import QDragEnterEvent, QDragMoveEvent, QDropEvent
 from PySide6.QtWidgets import (
     QDialog,
@@ -21,7 +21,7 @@ from PySide6.QtWidgets import (
 from music_modify.gui.about import AboutDialog
 from music_modify.gui.edit import EditDialog
 from music_modify.gui.prefs import PrefsDialog
-from music_modify.gui.utils import updateTableView
+from music_modify.gui.utils import getSelectedRows, updateTableView
 from music_modify.models import SongRepository, SongTableModel
 from music_modify.utils import formatTime
 
@@ -229,22 +229,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             return
         if selectionLength == len(self.songs_repository):
             self.songs_repository.clearFiles()
-        selection: list[QModelIndex] = (
-            self.files_table_view.selectionModel().selectedRows()
-        )
+            return
 
-        # NOTE: Map to source model if filtering or sorting using a Proxy model is used
-        source_indexes: list[QModelIndex] = [
-            cast(QSortFilterProxyModel, self.files_table_view.model()).mapToSource(
-                index
-            )
-            if isinstance(self.files_table_view.model(), QSortFilterProxyModel)
-            else index
-            for index in selection
-        ]
+        rows = getSelectedRows(self.files_table_view)
 
-        self.songs_repository.removeSongs([index.row() for index in source_indexes])
-
+        self.songs_repository.removeSongs(rows)
         self.files_table_view.clearSelection()
 
     def addStatusbarAppMessage(self, appName: str, appVersion: str):
@@ -274,8 +263,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         that can edit the information and close."""
         if self.getSelectionLength() == 0:
             return
-        indexes = self.files_table_view.selectionModel().selectedIndexes()
-        self.showEditDialog(indexes)
+        self.showEditDialog()
 
     def editSongsBulk(self) -> None:
         """Create a dialog that allows editing the information for each song in the selection."""
@@ -287,18 +275,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # TODO: Edit songs in bulk
         raise NotImplementedError
 
-    def showEditDialog(self, indexes: list[QModelIndex]):
+    def showEditDialog(self):
         """Display an EditDialog for the songs referred to by the indexes."""
-        if isinstance(self.files_table_view.model(), QSortFilterProxyModel):
-            indexes = [
-                cast(QSortFilterProxyModel, self.files_table_view.model()).mapToSource(
-                    index
-                )
-                for index in indexes
-            ]
 
-        # Need to remove duplicates
-        rows = list(set([index.row() for index in indexes if index.isValid()]))
+        # Need to sort the list so that it's not shown in a random order
+        rows = sorted(getSelectedRows(self.files_table_view))
 
         dialog = EditDialog(
             self,
