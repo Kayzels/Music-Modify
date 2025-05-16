@@ -145,6 +145,9 @@ class EditTableWidget(EditAbstractGroupWidget):
 
         self.main_widget.clearContents()
 
+        # Ensure we have enough rows for the data, if a row was deleted before.
+        self.main_widget.setRowCount(len(self.value))
+
         # In order to prevent itemChanged firing for every change,
         # block signals until the table is done being populated.
         self.main_widget.blockSignals(True)
