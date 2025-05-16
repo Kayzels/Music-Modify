@@ -40,6 +40,9 @@ def getSelectedRows(view: QAbstractItemView) -> list[int]:
 
     selected_rows = selection_model.selectedRows()
 
+    if len(selected_rows) == 0:
+        return []
+
     # If the view is sorted or filtered, we need to map to the source.
     if isinstance(model, QSortFilterProxyModel):
         selected_rows = [model.mapToSource(row) for row in selected_rows]

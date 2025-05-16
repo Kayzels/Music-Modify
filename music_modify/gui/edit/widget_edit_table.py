@@ -16,6 +16,7 @@ from PySide6.QtWidgets import (
 
 from music_modify.custom_types.aliases import SongTableData
 from music_modify.custom_types.enums import Direction, EditButton
+from music_modify.gui.utils import getSelectedRows
 
 from .widget_edit_abstract_group import EditAbstractGroupWidget
 
@@ -180,33 +181,23 @@ class EditTableWidget(EditAbstractGroupWidget):
 
     @override
     def _removeRow(self) -> None:
-        selected_indexes = self.main_widget.selectedIndexes()
-        if len(selected_indexes) == 0:
+        selected_rows = sorted(getSelectedRows(self.main_widget), reverse=True)
+
+        if len(selected_rows) == 0:
             return
 
-        # Need to ensure it's unique, but also ordered.
-        # Because a row will appear twice (once for each cell),
-        # but we only want to remove the row once.
-        selected_rows = sorted(
-            list(set([index.row() for index in selected_indexes])), reverse=True
-        )
         for row in selected_rows:
             self.main_widget.removeRow(row)
         self._updateValue()
 
     @override
     def _moveRows(self, direction: Direction) -> None:
-        selected_indexes = self.main_widget.selectedIndexes()
-        if len(selected_indexes) == 0:
-            return
-
-        # Need to ensure it's unique, but also ordered.
-        # Because a row will appear twice (once for each cell),
-        # but we only want to remove the row once.
         selected_rows = sorted(
-            list(set([index.row() for index in selected_indexes])),
-            reverse=direction == Direction.Down,
+            getSelectedRows(self.main_widget), reverse=direction == Direction.Down
         )
+
+        if len(selected_rows) == 0:
+            return
 
         match direction:
             case Direction.Up:

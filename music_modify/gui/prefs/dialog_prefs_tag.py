@@ -6,6 +6,7 @@ from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QDialog, QMessageBox, QWidget
 
 from music_modify.custom_types import TagInfo
+from music_modify.gui.utils import getSelectedRows
 from music_modify.models import TagModel
 from music_modify.prefs import prefs
 
@@ -80,15 +81,14 @@ class PrefsTagDialog(PrefsAbstractDialog, Ui_PrefsTagDialog):
 
     def removeSelectedTags(self):
         """Remove selected tags from the table and settings."""
-        selected_rows = self.tag_table.selectionModel().selectedRows()
+        selected_rows = getSelectedRows(self.tag_table)
 
         if len(selected_rows) == 0:
             return
 
         # Construct warning message
         delete_message = "Are you sure you want to remove the tags with the info:\n"
-        for index in selected_rows:
-            row = index.row()
+        for row in selected_rows:
             for col in range(self.model.columnCount()):
                 header_val = self.model.headerData(
                     col, Qt.Orientation.Horizontal, Qt.ItemDataRole.DisplayRole
@@ -111,14 +111,12 @@ class PrefsTagDialog(PrefsAbstractDialog, Ui_PrefsTagDialog):
 
         # Remove tags if user confirms
         if reply == QMessageBox.StandardButton.Yes:
-            for row in sorted([index.row() for index in selected_rows], reverse=True):
+            for row in sorted(selected_rows, reverse=True):
                 self.model.removeTag(row)
 
     def moveTagsUp(self) -> None:
         """Moves all selected tags up, which will change their order in the main table."""
-        selected_rows = sorted(
-            [index.row() for index in self.tag_table.selectionModel().selectedRows()]
-        )
+        selected_rows = sorted(getSelectedRows(self.tag_table))
         if not selected_rows or selected_rows[0] == 0:
             return  # Can't move the first row up
 
@@ -127,10 +125,7 @@ class PrefsTagDialog(PrefsAbstractDialog, Ui_PrefsTagDialog):
 
     def moveTagsDown(self) -> None:
         """Moves all selected tags down, which will change their order in the main table."""
-        selected_rows = sorted(
-            [index.row() for index in self.tag_table.selectionModel().selectedRows()],
-            reverse=True,
-        )
+        selected_rows = sorted(getSelectedRows(self.tag_table), reverse=True)
         if not selected_rows or selected_rows[0] == self.model.rowCount() - 1:
             return  # Can't move the last row down
 

@@ -14,6 +14,7 @@ from PySide6.QtWidgets import (
 
 from music_modify.custom_types.aliases import SongListData
 from music_modify.custom_types.enums import Direction, EditButton
+from music_modify.gui.utils import getSelectedRows
 
 from .widget_edit_abstract_group import EditAbstractGroupWidget
 
@@ -113,26 +114,22 @@ class EditListWidget(EditAbstractGroupWidget):
 
     @override
     def _removeRow(self):
-        selected_indexes = self.main_widget.selectedIndexes()
-        if len(selected_indexes) == 0:
+        selected_rows = sorted(getSelectedRows(self.main_widget), reverse=True)
+        if len(selected_rows) == 0:
             return
-        selected_rows = sorted(
-            [index.row() for index in selected_indexes], reverse=True
-        )
+
         for row in selected_rows:
             _ = self.main_widget.takeItem(row)
         self._updateValue()
 
     @override
     def _moveRows(self, direction: Direction) -> None:
-        selected_indexes = self.main_widget.selectedIndexes()
-        if len(selected_indexes) == 0:
+        selected_rows = sorted(
+            getSelectedRows(self.main_widget), reverse=direction == Direction.Down
+        )
+        if len(selected_rows) == 0:
             return
 
-        selected_rows = sorted(
-            [index.row() for index in selected_indexes],
-            reverse=direction == Direction.Down,
-        )
         match direction:
             case Direction.Up:
                 # Don't move up if first selected item is already at top
