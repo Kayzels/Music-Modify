@@ -37,12 +37,11 @@ class EditDialog(QDialog):
         parent: QWidget,
         repository: SongRepository,
         rows: list[int],
-        current_index: int = 0,
     ) -> None:
         super().__init__(parent)
 
         self.rows: list[int] = rows
-        self.current_index: int = current_index
+        self.current_index: int = 0
         self.repository: SongRepository = repository
 
         song_info = self._getSong()

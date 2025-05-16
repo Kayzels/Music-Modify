@@ -304,7 +304,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self,
             repository=self.songs_repository,
             rows=rows,
-            current_index=0,
         )
         dialog.setModal(True)
 
