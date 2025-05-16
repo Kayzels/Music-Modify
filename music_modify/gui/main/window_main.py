@@ -14,12 +14,11 @@ from PySide6.QtWidgets import (
     QLabel,
     QMainWindow,
     QMenu,
-    QMessageBox,
     QProgressDialog,
 )
 
 from music_modify.gui.about import AboutDialog
-from music_modify.gui.edit import EditDialog
+from music_modify.gui.edit import EditDialogFactory
 from music_modify.gui.prefs import PrefsDialog
 from music_modify.gui.utils import getSelectedRows, updateTableView
 from music_modify.models import SongRepository, SongTableModel
@@ -84,11 +83,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.action_select_none.triggered.connect(self.files_table_view.clearSelection)
         self.action_about.triggered.connect(self.showAboutDialog)
         self.action_preferences.triggered.connect(self.showPrefsDialog)
-        self.action_edit_individual.triggered.connect(self.editSongsIndividual)
-        self.action_edit_bulk.triggered.connect(self.editSongsBulk)
 
         self.setActionState()
         self.updateStatusbarMessage()
+
+        # Edit Actions
+        self.dialog_factory: EditDialogFactory = EditDialogFactory(
+            self, self.songs_repository
+        )
+        self.action_edit_individual.triggered.connect(self.showEditDialog)
+        self.action_edit_bulk.triggered.connect(lambda: self.showEditDialog(bulk=True))
 
     def setActionState(self):
         """Toggle the state of possible actions, based on program state."""
@@ -258,40 +262,23 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.songs_model.layoutChanged.emit()
         updateTableView(self.files_table_view, self.songs_repository)
 
-    def editSongsIndividual(self) -> None:
-        """Create a dialog that allows going between Next and Previous selected songs,
-        that can edit the information and close."""
-        if self.getSelectionLength() == 0:
-            return
-        self.showEditDialog()
-
-    def editSongsBulk(self) -> None:
-        """Create a dialog that allows editing the information for each song in the selection."""
-        QMessageBox.information(
-            self,
-            "Not supported yet",
-            "This action isn't available yet, so will do nothing.",
-        )
-        # TODO: Edit songs in bulk
-        raise NotImplementedError
-
-    def showEditDialog(self):
-        """Display an EditDialog for the songs referred to by the indexes."""
-
+    def showEditDialog(self, bulk: bool = False) -> None:
+        """Create a dialog that allows editing the information for each song in the selection,
+        either individually with transitions between Next and Previous songs,
+        or in bulk."""
         # Need to sort the list so that it's not shown in a random order
         rows = sorted(getSelectedRows(self.files_table_view))
 
-        dialog = EditDialog(
-            self,
-            repository=self.songs_repository,
-            rows=rows,
-        )
-        dialog.setModal(True)
+        if len(rows) == 0:
+            return
+
+        dialog = self.dialog_factory.get(rows, bulk=bulk)
+        # TODO: Bulk dialog
 
         def processDialogResult(result: QDialog.DialogCode):
             logger.debug("Called process dialog result for edit dialog")
             if result == QDialog.DialogCode.Accepted:
-                dialog.updateSong()
+                dialog.updateSongInfo()
 
         dialog.info_updated.connect(self.refreshTable)
         dialog.finished.connect(processDialogResult)

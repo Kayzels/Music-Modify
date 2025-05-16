@@ -1,10 +1,10 @@
 import copy
 import logging
+from typing import override
 
-from PySide6.QtCore import Qt, Signal, Slot
+from PySide6.QtCore import Qt, Slot
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (
-    QDialog,
     QDialogButtonBox,
     QFormLayout,
     QPushButton,
@@ -21,16 +21,15 @@ from music_modify.gui.utils import clearLayout
 from music_modify.models.song_repository import SongRepository
 from music_modify.prefs import prefs
 
+from .dialog_edit_abstract import EditAbstractDialog
 from .widget_edit_abstract import EditAbstractWidget
 from .widget_edit_factory import EditWidgetFactory
 
 logger = logging.getLogger(__name__)
 
 
-class EditDialog(QDialog):
+class EditDialog(EditAbstractDialog):
     """Displays all tags for a song, in a format that can be edited."""
-
-    info_updated: Signal = Signal()
 
     def __init__(
         self,
@@ -38,11 +37,9 @@ class EditDialog(QDialog):
         repository: SongRepository,
         rows: list[int],
     ) -> None:
-        super().__init__(parent)
+        super().__init__(parent, repository, rows)
 
-        self.rows: list[int] = rows
         self.current_index: int = 0
-        self.repository: SongRepository = repository
 
         song_info = self._getSong()
         if song_info is None:
@@ -53,22 +50,6 @@ class EditDialog(QDialog):
         self.setupUi()
 
         self.changed_values: dict[str, SongEditData | None] = {}
-
-        self.button_box.button(QDialogButtonBox.StandardButton.Cancel).clicked.connect(
-            self.reject
-        )
-        self.button_box.button(QDialogButtonBox.StandardButton.Ok).clicked.connect(
-            self.accept
-        )
-
-        # Update the song, but keep the dialog open
-        self.button_box.button(QDialogButtonBox.StandardButton.Apply).clicked.connect(
-            self.updateSong
-        )
-
-        self.button_box.button(QDialogButtonBox.StandardButton.Reset).clicked.connect(
-            self.resetSong
-        )
 
         # Add before and after buttons if more than one passed through
         if len(rows) > 1:
@@ -96,33 +77,12 @@ class EditDialog(QDialog):
 
         self.song_layout: QFormLayout
 
-    def setupUi(self):
-        """Creates the basic interface for the dialog."""
-        self.main_layout: QVBoxLayout = QVBoxLayout(self)
-
-        self._setupSongInfo()
-
-        self.button_box: QDialogButtonBox = QDialogButtonBox(self)
-        self.button_box.setOrientation(Qt.Orientation.Horizontal)
-        self.button_box.setStandardButtons(
-            QDialogButtonBox.StandardButton.Ok
-            | QDialogButtonBox.StandardButton.Cancel
-            | QDialogButtonBox.StandardButton.Apply
-            | QDialogButtonBox.StandardButton.Reset
-        )
-
-        self.main_layout.addWidget(self.button_box)
-
-        self.setLayout(self.main_layout)
-
+    @override
     def _setupSongInfo(self):
         """Creates and displays the widgets for each tag in the song."""
         scroll_widget: QWidget = QWidget()
         if hasattr(self, "song_layout"):
             clearLayout(self.song_layout)
-            # wlayout = self.layout()
-            # if wlayout is not None:
-            #     clearLayout(wlayout)
         else:
             self.song_layout = QFormLayout(scroll_widget)
 
@@ -133,7 +93,7 @@ class EditDialog(QDialog):
             self.song_layout.addRow(tag.display_name, widget)
 
         if not hasattr(self, "scroll_area"):
-            self.scroll_area: QScrollArea = QScrollArea(self)  # pyright: ignore[reportUninitializedInstanceVariable]
+            self.scroll_area: QScrollArea = QScrollArea(self)
             self.scroll_area.setWidget(scroll_widget)
             self.scroll_area.setWidgetResizable(True)
             self.scroll_area.setMinimumHeight(300)
@@ -205,7 +165,8 @@ class EditDialog(QDialog):
 
         return widget
 
-    def updateSong(self) -> None:
+    @override
+    def updateSongInfo(self) -> None:
         """Adds the changes to the song, and saves it."""
         if len(self.changed_values) == 0:
             return
@@ -234,7 +195,8 @@ class EditDialog(QDialog):
         # so don't need to be stored in this list any more
         self.changed_values = {}
 
-    def resetSong(self) -> None:
+    @override
+    def resetSongInfo(self) -> None:
         """Sets the values for the song back to the original ones before the changes occurred."""
         widgets = self.findChildren(EditAbstractWidget)
         for widget in widgets:
@@ -271,7 +233,7 @@ class EditDialog(QDialog):
                 self.current_index += 1
             case NavDirection.Previous:
                 self.current_index -= 1
-        self.updateSong()
+        self.updateSongInfo()
         logger.debug(f"Called show song in direction with {nav_direction}")
         song_info = self._getSong()
         if song_info is None:

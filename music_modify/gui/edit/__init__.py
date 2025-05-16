@@ -1,3 +1,3 @@
-from .dialog_edit import EditDialog
+from .dialog_edit_factory import EditDialogFactory
 
-__all__ = ["EditDialog"]
+__all__ = ["EditDialogFactory"]
