@@ -247,77 +247,97 @@ class EditBulkPeopleWidget(EditBulkAbstractGroupWidget):
 
         def _performChange(
             song: Song, func: Callable[[list[list[str]]], list[list[str]]]
-        ):
-            nonlocal changes_made
-
+        ) -> bool:
             current_values = _getSongValues(song)
             new_values = func(current_values)
 
             if new_values != current_values:
                 self.tag.setTag(song.id3, new_values)
                 song.save()
-                changes_made = True
+                return True
+            return False
 
         for song in songs:
             # Values in add_table
             if len(add_items) > 0:
-                _performChange(
-                    song,
-                    lambda vals: vals
-                    + [item for item in add_items if item not in vals],
+                changes_made = (
+                    _performChange(
+                        song,
+                        lambda vals: vals
+                        + [item for item in add_items if item not in vals],
+                    )
+                    or changes_made
                 )
 
             # Values in Remove Pair
             if len(remove_pairs) > 0:
-                _performChange(
-                    song,
-                    lambda vals: [
-                        item for item in vals if tuple(item) not in remove_pairs_set
-                    ],
+                changes_made = (
+                    _performChange(
+                        song,
+                        lambda vals: [
+                            item for item in vals if tuple(item) not in remove_pairs_set
+                        ],
+                    )
+                    or changes_made
                 )
 
             # Values in Remove Person
             if len(remove_people) > 0:
-                _performChange(
-                    song,
-                    lambda vals: [
-                        item
-                        for item in vals
-                        if len(item) == 2 and item[1] not in remove_people
-                    ],
+                changes_made = (
+                    _performChange(
+                        song,
+                        lambda vals: [
+                            item
+                            for item in vals
+                            if len(item) == 2 and item[1] not in remove_people
+                        ],
+                    )
+                    or changes_made
                 )
 
             # Values in Remove Role
             if len(remove_roles) > 0:
-                _performChange(
-                    song,
-                    lambda vals: [
-                        item
-                        for item in vals
-                        if len(item) == 2 and item[0] not in remove_roles
-                    ],
+                changes_made = (
+                    _performChange(
+                        song,
+                        lambda vals: [
+                            item
+                            for item in vals
+                            if len(item) == 2 and item[0] not in remove_roles
+                        ],
+                    )
+                    or changes_made
                 )
 
             # Values in Remap People
             if len(map_people) > 0:
-                _performChange(
-                    song,
-                    lambda vals: [
-                        [item[0], people_replacements.get(item[1], item[1])]
-                        for item in vals
-                        if len(item) == 2
-                    ],
+                changes_made = (
+                    _performChange(
+                        song,
+                        lambda vals: [
+                            [item[0], people_replacements.get(item[1], item[1])]
+                            for item in vals
+                            if len(item) == 2
+                        ],
+                    )
+                    or changes_made
                 )
 
             # Values in Remap Roles
             if len(map_roles) > 0:
-                _performChange(
-                    song,
-                    lambda vals: [
-                        [role_replacements.get(item[0], item[0]), item[1]]
-                        for item in vals
-                        if len(item) == 2
-                    ],
+                changes_made = (
+                    _performChange(
+                        song,
+                        lambda vals: [
+                            [role_replacements.get(item[0], item[0]), item[1]]
+                            for item in vals
+                            if len(item) == 2
+                        ],
+                    )
+                    or changes_made
                 )
+
+        if changes_made:
+            self._resetView()
 
         return changes_made
