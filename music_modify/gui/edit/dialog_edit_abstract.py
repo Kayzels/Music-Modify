@@ -33,10 +33,6 @@ class EditAbstractDialog(QDialog, metaclass=ABCQMeta):
     def updateSongInfo(self) -> None:
         pass
 
-    @abstractmethod
-    def resetSongInfo(self) -> None:
-        pass
-
     def _setupButtons(self) -> None:
         self.button_box: QDialogButtonBox = QDialogButtonBox(self)
         self.button_box.setOrientation(Qt.Orientation.Horizontal)
@@ -44,7 +40,6 @@ class EditAbstractDialog(QDialog, metaclass=ABCQMeta):
             QDialogButtonBox.StandardButton.Ok
             | QDialogButtonBox.StandardButton.Cancel
             | QDialogButtonBox.StandardButton.Apply
-            | QDialogButtonBox.StandardButton.Reset
         )
 
         self.button_box.button(QDialogButtonBox.StandardButton.Cancel).clicked.connect(
@@ -57,10 +52,6 @@ class EditAbstractDialog(QDialog, metaclass=ABCQMeta):
         # Update the song, but keep the dialog open
         self.button_box.button(QDialogButtonBox.StandardButton.Apply).clicked.connect(
             self.updateSongInfo
-        )
-
-        self.button_box.button(QDialogButtonBox.StandardButton.Reset).clicked.connect(
-            self.resetSongInfo
         )
 
         self.main_layout.addWidget(self.button_box)

@@ -2,14 +2,13 @@ import copy
 import logging
 from typing import override
 
-from PySide6.QtCore import Qt, Slot
+from PySide6.QtCore import Slot
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (
     QDialogButtonBox,
     QFormLayout,
     QPushButton,
     QScrollArea,
-    QVBoxLayout,
     QWidget,
 )
 
@@ -50,6 +49,12 @@ class EditDialog(EditAbstractDialog):
         self.setupUi()
 
         self.changed_values: dict[str, SongEditData | None] = {}
+
+        # Add reset button here rather than in abstract.
+        self.button_box.addButton(QDialogButtonBox.StandardButton.Reset)
+        self.button_box.button(QDialogButtonBox.StandardButton.Reset).clicked.connect(
+            self.resetSongInfo
+        )
 
         # Add before and after buttons if more than one passed through
         if len(rows) > 1:
@@ -195,7 +200,6 @@ class EditDialog(EditAbstractDialog):
         # so don't need to be stored in this list any more
         self.changed_values = {}
 
-    @override
     def resetSongInfo(self) -> None:
         """Sets the values for the song back to the original ones before the changes occurred."""
         widgets = self.findChildren(EditAbstractWidget)
