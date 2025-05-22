@@ -1,5 +1,7 @@
+from typing import cast
+
 from PySide6.QtCore import QSortFilterProxyModel
-from PySide6.QtWidgets import QAbstractItemView, QLayout, QTableView
+from PySide6.QtWidgets import QAbstractItemView, QLayout, QTableView, QWidget
 
 from music_modify.models import SongRepository
 from music_modify.prefs import prefs
@@ -25,10 +27,10 @@ def clearLayout(layout: QLayout) -> None:
     """Removes all widgets from the given layout"""
     while layout.count() > 0:
         item = layout.takeAt(0)
-        if item.layout() is not None:
+        if cast(QLayout | None, item.layout()) is not None:
             clearLayout(item.layout())
         widget = item.widget()
-        if widget is not None:
+        if cast(QWidget | None, widget) is not None:
             widget.deleteLater()
         del item
 
