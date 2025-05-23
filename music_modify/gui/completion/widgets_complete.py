@@ -500,10 +500,10 @@ class EditWithComplete(EnComboBox):
         cast(LineEdit, self.lineEdit()).selectAll()
 
     @override
-    def setText(self, value: str):
+    def setText(self, text: str):
         edit = cast(LineEdit, self.lineEdit())
         edit.no_popup = True
-        edit.setText(value)
+        edit.setText(text)
         edit.no_popup = False
 
     def home(self, mark: bool = False):

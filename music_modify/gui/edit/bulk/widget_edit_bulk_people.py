@@ -1,123 +1,18 @@
 import logging
-from abc import ABC, abstractmethod
 from typing import Callable, cast, override
 
-from PySide6.QtWidgets import (
-    QFormLayout,
-    QFrame,
-    QHBoxLayout,
-    QTableWidget,
-    QVBoxLayout,
-    QWidget,
-)
+from PySide6.QtWidgets import QFormLayout, QWidget
 
 from music_modify.custom_types import Song, SongTag
 from music_modify.gui.completion import EditWithComplete, createCompletionWidget
-from music_modify.gui.meta import ABCQMeta
+from music_modify.gui.edit.widget_edit_table import EditTableWidget
+from music_modify.utils.list_utils import toPairs
 
 from .widget_edit_bulk_abstract_group import EditBulkAbstractGroupWidget
 
 logger = logging.getLogger(__name__)
 
 PAIR_SEPARATOR = ": "
-
-
-class _AbstractPeopleWidget(QWidget, ABC, metaclass=ABCQMeta):
-    def __init__(self, parent: QWidget):
-        super().__init__(parent)
-
-    @abstractmethod
-    def reset(self):
-        pass
-
-
-class _PeopleTable(_AbstractPeopleWidget):
-    def __init__(self, parent: QWidget, headers: list[str]):
-        super().__init__(parent)
-        self.headers: list[str] = headers
-
-        self.setupUi()
-
-    def setupUi(self):
-        layout = QHBoxLayout()
-        layout.setContentsMargins(0, 0, 0, 0)
-
-        self.setLayout(layout)
-
-        frame = QFrame()
-        frame.setFrameShape(QFrame.Shape.Panel)
-        frame.setLineWidth(1)
-        frame_layout = QVBoxLayout()
-        frame_layout.setContentsMargins(0, 0, 0, 0)
-        frame_layout.addWidget(frame)
-        layout.addLayout(frame_layout)
-
-        self.table: QTableWidget = QTableWidget(1, len(self.headers))
-        self.table.setHorizontalHeaderLabels(self.headers)
-        self.table.setShowGrid(False)
-        self.table.setAlternatingRowColors(True)
-        self.table.horizontalHeader().setStretchLastSection(True)
-
-        frame_layout.addWidget(self.table)
-
-        # TODO: Need a way to add and remove rows
-
-    @property
-    def values(self) -> list[list[str]]:
-        values: list[list[str]] = []
-        for row in range(self.table.rowCount()):
-            first = self.table.item(row, 0)
-            if first is None:
-                continue
-            second = self.table.item(row, 1)
-            if second is None:
-                continue
-            first_text = first.text().strip()
-            second_text = second.text().strip()
-            values.append([first_text, second_text])
-        return values
-
-    @override
-    def reset(self):
-        self.table.clearContents()
-        self.table.setRowCount(1)
-
-
-class _PeopleLine(_AbstractPeopleWidget):
-    def __init__(self, parent: QWidget, data: list[str]):
-        super().__init__(parent)
-
-        self.widget: EditWithComplete = createCompletionWidget(self, tuple(data))
-        self.setupUi()
-
-    def setupUi(self):
-        layout = QHBoxLayout()
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.addWidget(self.widget)
-        self.setLayout(layout)
-
-    @property
-    def items(self) -> tuple[str, ...]:
-        return tuple(self.widget.values)
-
-    @items.setter
-    def items(self, items: tuple[str, ...]):
-        self.widget.updateItemsCache(items)
-
-    @override
-    def reset(self):
-        self.widget.setText("")
-
-    def pairs(self) -> list[list[str]]:
-        values = self.items
-        result: list[list[str]] = []
-        for value in values:
-            if not value.find(PAIR_SEPARATOR):
-                continue
-            parts = value.split(PAIR_SEPARATOR, 1)
-            if len(parts) == 2:
-                result.append(parts)
-        return result
 
 
 class EditBulkPeopleWidget(EditBulkAbstractGroupWidget):
@@ -127,12 +22,12 @@ class EditBulkPeopleWidget(EditBulkAbstractGroupWidget):
         self.items: list[tuple[str, str]] = [(role, person) for role, person in data]
         self.setupUi()
 
-        self.add_widget: _PeopleTable
-        self.remove_pair_widget: _PeopleLine
-        self.remove_role_widget: _PeopleLine
-        self.remove_person_widget: _PeopleLine
-        self.remap_role_widget: _PeopleTable
-        self.remap_person_widget: _PeopleTable
+        self.add_widget: EditTableWidget
+        self.remove_pair_widget: EditWithComplete
+        self.remove_role_widget: EditWithComplete
+        self.remove_person_widget: EditWithComplete
+        self.remap_role_widget: EditTableWidget
+        self.remap_person_widget: EditTableWidget
 
     @override
     def createForm(self) -> QWidget:
@@ -141,48 +36,48 @@ class EditBulkPeopleWidget(EditBulkAbstractGroupWidget):
         form_container.setLayout(form_layout)
         form_layout.setContentsMargins(0, 0, 0, 0)
 
-        self.add_widget = _PeopleTable(self, ["Role", "Person"])
+        self.add_widget = EditTableWidget(self, [])
         form_layout.addRow("Add", self.add_widget)
 
         pairs = list(
             set([f"{role}{PAIR_SEPARATOR}{person}" for (role, person) in self.items])
         )
-        self.remove_pair_widget = _PeopleLine(self, pairs)
+        self.remove_pair_widget = createCompletionWidget(self, tuple(pairs))
         form_layout.addRow("Remove Pair", self.remove_pair_widget)
 
         roles = list(set([role for (role, _) in self.items]))
-        self.remove_role_widget = _PeopleLine(self, roles)
+        self.remove_role_widget = createCompletionWidget(self, tuple(roles))
         form_layout.addRow("Remove Role", self.remove_role_widget)
 
         people = list(set([person for (_, person) in self.items]))
-        self.remove_person_widget = _PeopleLine(self, people)
+        self.remove_person_widget = createCompletionWidget(self, tuple(people))
         form_layout.addRow("Remove Person", self.remove_person_widget)
 
         remap_headers = ["Old", "New"]
-        self.remap_role_widget = _PeopleTable(self, remap_headers)
+        self.remap_role_widget = EditTableWidget(self, [], labels=remap_headers)
         form_layout.addRow("Remap Role", self.remap_role_widget)
 
-        self.remap_person_widget = _PeopleTable(self, remap_headers)
+        self.remap_person_widget = EditTableWidget(self, [], labels=remap_headers)
         form_layout.addRow("Remap Person", self.remap_person_widget)
-
-        # TODO:Table Widget for reordering, with current data
 
         return form_container
 
     @override
     def _resetView(self):
         pairs = list(set([f"{role}: {person}" for (role, person) in self.items]))
-        self.remove_pair_widget.items = tuple(pairs)
+        self.remove_pair_widget.updateItemsCache(tuple(pairs))
 
         roles = list(set([role for (role, _) in self.items]))
-        self.remove_role_widget.items = tuple(roles)
+        self.remove_role_widget.updateItemsCache(tuple(roles))
 
         people = list(set([person for (_, person) in self.items]))
-        self.remove_person_widget.items = tuple(people)
+        self.remove_person_widget.updateItemsCache(tuple(people))
 
-        widgets = self.findChildren(_AbstractPeopleWidget)
+        widgets = self.findChildren(EditWithComplete) + self.findChildren(
+            EditTableWidget
+        )
         for widget in widgets:
-            widget.reset()
+            widget.clear()
 
         self.clear_checkbox.setChecked(False)
         self.group_box.setChecked(False)
@@ -200,12 +95,15 @@ class EditBulkPeopleWidget(EditBulkAbstractGroupWidget):
             return True
 
         # Collect all possible changes
-        add_items: list[list[str]] = self.add_widget.values
-        remove_pairs: list[list[str]] = self.remove_pair_widget.pairs()
-        remove_people: tuple[str, ...] = self.remove_person_widget.items
-        remove_roles: tuple[str, ...] = self.remove_role_widget.items
-        map_people: list[list[str]] = self.remap_person_widget.values
-        map_roles: list[list[str]] = self.remap_role_widget.values
+        add_items: list[list[str]] = self.add_widget.value
+        remove_pairs: set[tuple[str, ...]] = {
+            tuple(pair)
+            for pair in toPairs(self.remove_pair_widget.values, PAIR_SEPARATOR)
+        }
+        remove_people: set[str] = set(self.remove_person_widget.values)
+        remove_roles: set[str] = set(self.remove_role_widget.values)
+        map_people: list[list[str]] = self.remap_person_widget.value
+        map_roles: list[list[str]] = self.remap_role_widget.value
 
         # If any of the above values aren't empty,
         # the user intends to make a change.
@@ -233,9 +131,6 @@ class EditBulkPeopleWidget(EditBulkAbstractGroupWidget):
         # Updated if a refresh is requested.
         changes_made: bool = False
 
-        # For checking removal, use a set of tuple for matching
-        remove_pairs_set: set[tuple[str, ...]] = {tuple(pair) for pair in remove_pairs}
-
         def _getSongValues(song: Song) -> list[list[str]]:
             original_values = self.tag.getValue(song.id3)
             if original_values is None:
@@ -254,6 +149,12 @@ class EditBulkPeopleWidget(EditBulkAbstractGroupWidget):
             if new_values != current_values:
                 self.tag.setTag(song.id3, new_values)
                 song.save()
+
+                # Update items stored as well, for after view is reset
+                new_pairs = [(role, person) for role, person in new_values]
+                for pair in new_pairs:
+                    if pair not in self.items:
+                        self.items.append(pair)
                 return True
             return False
 
@@ -275,7 +176,7 @@ class EditBulkPeopleWidget(EditBulkAbstractGroupWidget):
                     _performChange(
                         song,
                         lambda vals: [
-                            item for item in vals if tuple(item) not in remove_pairs_set
+                            item for item in vals if tuple(item) not in remove_pairs
                         ],
                     )
                     or changes_made

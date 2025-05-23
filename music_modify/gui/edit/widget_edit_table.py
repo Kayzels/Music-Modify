@@ -3,7 +3,7 @@ import logging
 from typing import cast, override
 
 from PySide6.QtCore import QItemSelectionModel, Qt, Signal
-from PySide6.QtGui import QDropEvent
+from PySide6.QtGui import QDropEvent, QResizeEvent
 from PySide6.QtWidgets import (
     QAbstractItemView,
     QBoxLayout,
@@ -34,15 +34,42 @@ class _DragTableWidget(QTableWidget):
         super().dropEvent(event)
         self.rowsReordered.emit()
 
+    @override
+    def resizeEvent(self, event: QResizeEvent) -> None:
+        super().resizeEvent(event)
+        self.adjustColumnWidths()
+
+    def adjustColumnWidths(self, length: int | None = None):
+        if self.rowCount() <= 1 or length == 0:
+            column_width = int(self.width() / self.columnCount())
+            for column in range(self.columnCount() - 1):
+                self.setColumnWidth(column, column_width)
+        else:
+            for column in range(self.columnCount() - 1):
+                self.resizeColumnToContents(column)
+        self.horizontalHeader().setStretchLastSection(True)
+
 
 class EditTableWidget(EditAbstractGroupWidget[SongTableData]):
     """Displays data in a table, used for People data, which is stored in the form [role, person]."""
 
-    def __init__(self, parent: QWidget, data: SongTableData | None):
+    def __init__(
+        self,
+        parent: QWidget,
+        data: SongTableData | None,
+        labels: list[str] | None = None,
+    ):
+        if labels is None:
+            self.labels: list[str] = ["Role", "Person"]
+        else:
+            self.labels = labels
+
         super().__init__(parent, data)
 
         self.main_widget: _DragTableWidget
         self._original_data: SongTableData
+
+        self.main_widget.adjustColumnWidths(len(self.value))
 
     @override
     def _initValue(self, data: SongTableData | None):
@@ -74,7 +101,7 @@ class EditTableWidget(EditAbstractGroupWidget[SongTableData]):
         self.main_widget = _DragTableWidget()
         self.main_widget.setMinimumHeight(250)
         self.main_widget.setColumnCount(2)
-        self.main_widget.setHorizontalHeaderLabels(["Role", "Person"])
+        self.main_widget.setHorizontalHeaderLabels(self.labels)
         self.main_widget.setRowCount(len(self.value))
         self.main_widget.setShowGrid(False)
         self.main_widget.setAlternatingRowColors(True)
@@ -166,10 +193,12 @@ class EditTableWidget(EditAbstractGroupWidget[SongTableData]):
         # Stop blocking signals after the table is populated.
         self.main_widget.blockSignals(False)
 
-        # Fit the content to the columns, except for the last, which should stretch.
-        for column in range(self.main_widget.columnCount() - 1):
-            self.main_widget.resizeColumnToContents(column)
-        self.main_widget.horizontalHeader().setStretchLastSection(True)
+        # Set to proportional if no data, otherwise fit the contents
+        self.main_widget.adjustColumnWidths(len(self.value))
+
+        # Ensure there's always one row available for editing
+        if self.main_widget.rowCount() == 0:
+            self._addRow()
 
     @override
     def _clearValue(self) -> None:
