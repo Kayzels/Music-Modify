@@ -1,5 +1,5 @@
 import logging
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 from typing import Callable, cast, override
 
 from PySide6.QtWidgets import (
@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 PAIR_SEPARATOR = ": "
 
 
-class _AbstractPeopleWidget(QWidget, metaclass=ABCQMeta):
+class _AbstractPeopleWidget(QWidget, ABC, metaclass=ABCQMeta):
     def __init__(self, parent: QWidget):
         super().__init__(parent)
 

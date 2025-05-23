@@ -1,33 +1,37 @@
-from abc import abstractmethod
-from typing import override
+from abc import ABC, abstractmethod
+from typing import override, Generic, TypeVar
 
 from PySide6.QtGui import QIcon
-from PySide6.QtWidgets import QHBoxLayout, QToolButton, QVBoxLayout, QWidget
+from PySide6.QtWidgets import QBoxLayout, QToolButton, QWidget
 
-from music_modify.custom_types.aliases import SongEditData
+from music_modify.custom_types.aliases import SongListData, SongTableData
 from music_modify.custom_types.enums import Direction, EditButton
 from music_modify.gui.meta import ABCQMeta
 
 from .widget_edit_abstract import EditAbstractWidget
 
+ValueG = TypeVar("ValueG", bound=SongListData | SongTableData)
 
-class EditAbstractGroupWidget(EditAbstractWidget, metaclass=ABCQMeta):
+
+class EditAbstractGroupWidget(
+    EditAbstractWidget[ValueG], Generic[ValueG], ABC, metaclass=ABCQMeta
+):
     """Abstract class for widgets displayed on an EditDialog that contain multiple items,
     which can be displayed in lists or tables."""
 
-    def __init__(self, parent: QWidget, data: SongEditData | None):
+    def __init__(self, parent: QWidget, data: ValueG | None):
         super().__init__(parent, data)
 
     @override
-    def _createButtons(
+    def createButtons(
         self,
         buttons: EditButton = EditButton.Up
         | EditButton.Down
         | EditButton.Add
         | EditButton.Remove,
-        layout_type: type[QVBoxLayout | QHBoxLayout] = QVBoxLayout,
-    ) -> QVBoxLayout | QHBoxLayout:
-        button_layout = super()._createButtons(buttons, layout_type)
+        direction: QBoxLayout.Direction = QBoxLayout.Direction.TopToBottom,
+    ) -> QBoxLayout:
+        button_layout = super().createButtons(buttons, direction)
 
         # Group specific widgets should appear before the general ones.
         # So populate from last going forward, with insert

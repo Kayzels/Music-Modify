@@ -8,7 +8,7 @@ from .widget_edit_abstract import EditAbstractWidget
 logger = logging.getLogger(__name__)
 
 
-class EditLineWidget(EditAbstractWidget):
+class EditLineWidget(EditAbstractWidget[str]):
     """Displays data in a line edit, used when the value is a single string."""
 
     def __init__(self, parent: QWidget, data: str | None):
@@ -37,7 +37,7 @@ class EditLineWidget(EditAbstractWidget):
         self.main_widget = QLineEdit()
         self._displayValue()
         layout.addWidget(self.main_widget)
-        button_layout = self._createButtons()
+        button_layout = self.createButtons()
         layout.addLayout(button_layout)
         self.main_widget.editingFinished.connect(self._updateValue)
 

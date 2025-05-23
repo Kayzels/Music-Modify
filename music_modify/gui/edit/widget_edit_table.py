@@ -6,6 +6,7 @@ from PySide6.QtCore import QItemSelectionModel, Qt, Signal
 from PySide6.QtGui import QDropEvent
 from PySide6.QtWidgets import (
     QAbstractItemView,
+    QBoxLayout,
     QFrame,
     QHBoxLayout,
     QTableWidget,
@@ -34,7 +35,7 @@ class _DragTableWidget(QTableWidget):
         self.rowsReordered.emit()
 
 
-class EditTableWidget(EditAbstractGroupWidget):
+class EditTableWidget(EditAbstractGroupWidget[SongTableData]):
     """Displays data in a table, used for People data, which is stored in the form [role, person]."""
 
     def __init__(self, parent: QWidget, data: SongTableData | None):
@@ -106,7 +107,9 @@ class EditTableWidget(EditAbstractGroupWidget):
             EditButton.Add | EditButton.Remove,
             EditButton.Clear | EditButton.Reset,
         ):
-            child_layout = self._createButtons(button_group, QHBoxLayout)
+            child_layout = self.createButtons(
+                button_group, QBoxLayout.Direction.LeftToRight
+            )
             button_layout.addLayout(child_layout)
 
     @override

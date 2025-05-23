@@ -5,6 +5,7 @@ from typing import cast, override
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
     QAbstractItemView,
+    QBoxLayout,
     QHBoxLayout,
     QListWidget,
     QListWidgetItem,
@@ -21,7 +22,7 @@ from .widget_edit_abstract_group import EditAbstractGroupWidget
 logger = logging.getLogger(__name__)
 
 
-class EditListWidget(EditAbstractGroupWidget):
+class EditListWidget(EditAbstractGroupWidget[SongListData]):
     """Displays data in a list widget, with each row being a string."""
 
     def __init__(self, parent: QWidget, data: SongListData | None):
@@ -68,7 +69,9 @@ class EditListWidget(EditAbstractGroupWidget):
             EditButton.Add | EditButton.Remove,
             EditButton.Clear | EditButton.Reset,
         ):
-            child_layout = self._createButtons(button_group, QHBoxLayout)
+            child_layout = self.createButtons(
+                button_group, QBoxLayout.Direction.LeftToRight
+            )
             button_layout.addLayout(child_layout)
 
     @override
