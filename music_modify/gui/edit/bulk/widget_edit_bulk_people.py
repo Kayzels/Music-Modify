@@ -1,18 +1,71 @@
+from collections.abc import Sized
 import logging
-from typing import Callable, cast, override
+from typing import Callable, Generic, TypeVar, cast, override
 
 from PySide6.QtWidgets import QFormLayout, QWidget
 
 from music_modify.custom_types import Song, SongTag
 from music_modify.gui.completion import EditWithComplete, createCompletionWidget
 from music_modify.gui.edit.widget_edit_table import EditTableWidget
-from music_modify.utils.list_utils import toPairs
+from music_modify.utils.list_utils import (
+    remapMatchingSublistPairs,
+    removeMatchingSublistPairs,
+    toPairs,
+    addValues,
+    removePairs,
+)
 
 from .widget_edit_bulk_abstract_group import EditBulkAbstractGroupWidget
 
 logger = logging.getLogger(__name__)
 
 PAIR_SEPARATOR = ": "
+
+L = TypeVar("L", bound=Sized)
+MapFunc = Callable[[L, list[list[str]]], list[list[str]]]
+
+
+class _ActionMapping(Generic[L]):
+    def __init__(self, widget: "EditBulkPeopleWidget", items: L, func: MapFunc[L]):
+        self.widget: "EditBulkPeopleWidget" = widget
+        self.tag: SongTag = self.widget.tag
+        self.items: L = items
+        self.func: MapFunc[L] = func
+
+    def _getSongValues(self, song: Song) -> list[list[str]]:
+        original_values = self.tag.getValue(song.id3)
+        if original_values is None:
+            if not self.tag.hasTag(song.id3):
+                self.tag.generateFrame(song.id3)
+            original_values = []
+        original_values = cast(list[list[str]], original_values)
+        return original_values
+
+    def performChange(self, song: Song) -> bool:
+        if len(self.items) == 0:
+            return False
+        current_values = self._getSongValues(song)
+        new_values = self.func(self.items, current_values)
+
+        if new_values != current_values:
+            self.tag.setTag(song.id3, new_values)
+            song.save()
+
+            new_pairs = [(role, person) for role, person in new_values]
+            for pair in new_pairs:
+                if pair not in self.widget.items:
+                    self.widget.items.append(pair)
+            return True
+        return False
+
+
+# Type Alias to prevent super long in-lay hint
+AllowedActionMapping = (
+    _ActionMapping[list[list[str]]]
+    | _ActionMapping[set[tuple[str, ...]]]
+    | _ActionMapping[set[str]]
+    | _ActionMapping[dict[str, str]]
+)
 
 
 class EditBulkPeopleWidget(EditBulkAbstractGroupWidget):
@@ -82,6 +135,9 @@ class EditBulkPeopleWidget(EditBulkAbstractGroupWidget):
         self.clear_checkbox.setChecked(False)
         self.group_box.setChecked(False)
 
+    def _createActionMapping(self, items: L, func: MapFunc[L]) -> _ActionMapping[L]:
+        return _ActionMapping(self, items, func)
+
     @override
     def updateTag(self, songs: list[Song]) -> bool:
         if not self.group_box.isChecked():
@@ -102,8 +158,13 @@ class EditBulkPeopleWidget(EditBulkAbstractGroupWidget):
         }
         remove_people: set[str] = set(self.remove_person_widget.values)
         remove_roles: set[str] = set(self.remove_role_widget.values)
-        map_people: list[list[str]] = self.remap_person_widget.value
-        map_roles: list[list[str]] = self.remap_role_widget.value
+        # Map to dicts so it's quicker to get the changed values.
+        map_people: dict[str, str] = {
+            old: new for old, new in self.remap_person_widget.value
+        }
+        map_roles: dict[str, str] = {
+            old: new for old, new in self.remap_role_widget.value
+        }
 
         # If any of the above values aren't empty,
         # the user intends to make a change.
@@ -123,120 +184,51 @@ class EditBulkPeopleWidget(EditBulkAbstractGroupWidget):
         if not change_attempted:
             return False
 
-        # Map to dicts so that it's quicker to get the changed values.
-        people_replacements = {old: new for old, new in map_people}
-        role_replacements = {old: new for old, new in map_roles}
-
         # Store whether any change is actually made.
         # Updated if a refresh is requested.
         changes_made: bool = False
 
-        def _getSongValues(song: Song) -> list[list[str]]:
-            original_values = self.tag.getValue(song.id3)
-            if original_values is None:
-                if not self.tag.hasTag(song.id3):
-                    self.tag.generateFrame(song.id3)
-                original_values = []
-            original_values = cast(list[list[str]], original_values)
-            return original_values
+        # Declare the functions explicitly so that it's more readable, compared to lambdas.
+        def _removePeople(
+            remove_values: set[str], original: list[list[str]]
+        ) -> list[list[str]]:
+            if len(remove_values) == 0:
+                return original
+            return removeMatchingSublistPairs(remove_values, original, 1)
 
-        def _performChange(
-            song: Song, func: Callable[[list[list[str]]], list[list[str]]]
-        ) -> bool:
-            current_values = _getSongValues(song)
-            new_values = func(current_values)
+        def _removeRoles(
+            remove_values: set[str], original: list[list[str]]
+        ) -> list[list[str]]:
+            if len(remove_values) == 0:
+                return original
+            return removeMatchingSublistPairs(remove_values, original, 0)
 
-            if new_values != current_values:
-                self.tag.setTag(song.id3, new_values)
-                song.save()
+        def _remapPeople(
+            replacements: dict[str, str], original: list[list[str]]
+        ) -> list[list[str]]:
+            if len(replacements) == 0:
+                return original
+            return remapMatchingSublistPairs(replacements, original, 1)
 
-                # Update items stored as well, for after view is reset
-                new_pairs = [(role, person) for role, person in new_values]
-                for pair in new_pairs:
-                    if pair not in self.items:
-                        self.items.append(pair)
-                return True
-            return False
+        def _remapRoles(
+            replacements: dict[str, str], original: list[list[str]]
+        ) -> list[list[str]]:
+            if len(replacements) == 0:
+                return original
+            return remapMatchingSublistPairs(replacements, original, 0)
+
+        mappings: list[AllowedActionMapping] = [
+            self._createActionMapping(add_items, addValues),
+            self._createActionMapping(remove_pairs, removePairs),
+            self._createActionMapping(remove_people, _removePeople),
+            self._createActionMapping(remove_roles, _removeRoles),
+            self._createActionMapping(map_people, _remapPeople),
+            self._createActionMapping(map_roles, _remapRoles),
+        ]
 
         for song in songs:
-            # Values in add_table
-            if len(add_items) > 0:
-                changes_made = (
-                    _performChange(
-                        song,
-                        lambda vals: vals
-                        + [item for item in add_items if item not in vals],
-                    )
-                    or changes_made
-                )
-
-            # Values in Remove Pair
-            if len(remove_pairs) > 0:
-                changes_made = (
-                    _performChange(
-                        song,
-                        lambda vals: [
-                            item for item in vals if tuple(item) not in remove_pairs
-                        ],
-                    )
-                    or changes_made
-                )
-
-            # Values in Remove Person
-            if len(remove_people) > 0:
-                changes_made = (
-                    _performChange(
-                        song,
-                        lambda vals: [
-                            item
-                            for item in vals
-                            if len(item) == 2 and item[1] not in remove_people
-                        ],
-                    )
-                    or changes_made
-                )
-
-            # Values in Remove Role
-            if len(remove_roles) > 0:
-                changes_made = (
-                    _performChange(
-                        song,
-                        lambda vals: [
-                            item
-                            for item in vals
-                            if len(item) == 2 and item[0] not in remove_roles
-                        ],
-                    )
-                    or changes_made
-                )
-
-            # Values in Remap People
-            if len(map_people) > 0:
-                changes_made = (
-                    _performChange(
-                        song,
-                        lambda vals: [
-                            [item[0], people_replacements.get(item[1], item[1])]
-                            for item in vals
-                            if len(item) == 2
-                        ],
-                    )
-                    or changes_made
-                )
-
-            # Values in Remap Roles
-            if len(map_roles) > 0:
-                changes_made = (
-                    _performChange(
-                        song,
-                        lambda vals: [
-                            [role_replacements.get(item[0], item[0]), item[1]]
-                            for item in vals
-                            if len(item) == 2
-                        ],
-                    )
-                    or changes_made
-                )
+            for mapping in mappings:
+                changes_made = mapping.performChange(song) or changes_made
 
         if changes_made:
             self._resetView()
