@@ -126,7 +126,3 @@ class EditBulkDialog(EditAbstractDialog):
                 song.save()
             self.info_updated.emit()
         return
-
-
-# PERF: Reset after calling Apply, so not doing the change twice?
-# TODO: Should redraw after Apply, to reflect new values

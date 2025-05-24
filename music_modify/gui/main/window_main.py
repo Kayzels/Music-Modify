@@ -273,7 +273,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             return
 
         dialog = self.dialog_factory.get(rows, bulk=bulk)
-        # TODO: Bulk dialog
 
         def processDialogResult(result: QDialog.DialogCode):
             logger.debug("Called process dialog result for edit dialog")
