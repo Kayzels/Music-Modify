@@ -4,11 +4,11 @@ Welcome to Music Modify -- an app designed to allow you to have greater control 
 
 ## Screenshots
 
-[The main dialog with no songs](./docs/main_screen.png)
+![The main dialog with no songs](./docs/main_screen.png)
 
-[The main dialog with songs added](./docs/main_with_songs.png)
+![The main dialog with songs added](./docs/main_with_songs.png)
 
-[Bulk edit dialog](./docs/edit_dialog.png)
+![Bulk edit dialog](./docs/edit_dialog.png)
 
 ## How to Use
 
