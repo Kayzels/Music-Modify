@@ -5,9 +5,28 @@ authors = [
   {name = "Kyzan Hartwig"}
 ]
 description = "Music file tag editor"
+readme = {file = "README.md", content-type = "text/markdown"}
 license = "GPL-3.0-or-later"
 license-files = ["LICENSE"]
 keywords = ["mp3", "music", "tags"]
+dependencies = [
+  "PySide6>=6.9.0",
+  "mutagen>=1.47.0"
+]
+requires-python = ">= 3.13"
+
+[build-system]
+requires = ["setuptools>=80.8"]
+build-backend = "setuptools.build_meta"
+
+[project.scripts]
+music_modify = "music_modify.music_modify:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
 
 [tool.basedpyright]
 reportAny = false
