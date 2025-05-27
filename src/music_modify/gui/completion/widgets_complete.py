@@ -160,21 +160,21 @@ class Completer(QListView):
         return super().mouseMoveEvent(event)
 
     @override
-    def eventFilter(self, object: QObject, event: QEvent, /) -> bool:
+    def eventFilter(self, obj: QObject, event: QEvent, /) -> bool:
         """Redirect keypresses from the popup to the widget."""
         widget = cast(QWidget | None, self.parent())
         if widget is None:
             return False
         etype = event.type()
-        if object is not self:
-            return QObject.eventFilter(self, object, event)
+        if obj is not self:
+            return QObject.eventFilter(self, obj, event)
 
         if etype == QEvent.Type.KeyPress:
             event = cast(QKeyEvent, event)
             try:
                 key = event.key()
             except AttributeError:
-                return QObject.eventFilter(self, object, event)
+                return QObject.eventFilter(self, obj, event)
             if key == Qt.Key.Key_Escape:
                 self.hide()
                 event.accept()
