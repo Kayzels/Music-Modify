@@ -143,7 +143,7 @@ class _Settings:
     @info_tags.setter
     def info_tags(self, value: list[TagInfo]):
         self._table_tags_cache = None  # Invalidate cache
-        return self._setArray("Tags/info_tags", value)
+        self._setArray("Tags/info_tags", value)
 
     def _setArray(self, key: str, vals: list[TagInfo]):
         logger.info(f"Began creating array for {key} with {len(vals)} entries.")
