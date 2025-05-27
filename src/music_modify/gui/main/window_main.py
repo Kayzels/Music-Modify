@@ -245,12 +245,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.versionMessage.setText(f"{appName} {appVersion}")
 
     def showAboutDialog(self):
-        """Show an about dialog."""
+        """Show an AboutDialog."""
         about_dialog = AboutDialog(self)
         about_dialog.show()
 
     def showPrefsDialog(self):
-        """Show a preferences dialog."""
+        """Show a PreferencesDialog."""
         prefs_dialog = PrefsDialog(parent=self)
         prefs_dialog.show()
         prefs_dialog.settings_updated.connect(self.refreshTable)
