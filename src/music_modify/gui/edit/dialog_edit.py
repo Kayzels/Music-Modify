@@ -126,7 +126,7 @@ class EditDialog(EditAbstractDialog):
         @Slot()
         def resetValue() -> None:
             """Clears the value if it's the same as the original, and that value is stored in the song.
-            Otherwise stores the change."""
+            Otherwise, stores the change."""
             # This is needed because after a user clicks Apply, the value stored in the song
             # is now no longer the same as the original, so we can't just clear it.
             value = widget.value
@@ -177,7 +177,7 @@ class EditDialog(EditAbstractDialog):
             return
         logger.debug("Called updateSong")
         for id3_key, value in self.changed_values.items():
-            tag = mapKey(id3_key)
+            tag = mapKey(id3_key, prefs.settings.all_tags)
             if tag is None:
                 logger.debug(f"Unknown id3 key: {id3_key}")
                 continue
@@ -197,7 +197,7 @@ class EditDialog(EditAbstractDialog):
         self.info_updated.emit()
 
         # Clear the values: they've been changed in the song,
-        # so don't need to be stored in this list any more
+        # so don't need to be stored in this list anymore
         self.changed_values = {}
 
     def resetSongInfo(self) -> None:
@@ -212,7 +212,7 @@ class EditDialog(EditAbstractDialog):
         song_info = self.repository.getSong(row)
         if song_info is None:
             logger.warning(f"Couldn't find a song at row number {row}")
-            return
+            return None
         return song_info
 
     def _switchButtonState(self) -> None:
