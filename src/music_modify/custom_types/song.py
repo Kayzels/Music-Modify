@@ -21,9 +21,11 @@ class Song:
     def _generateColumns(self) -> list[str]:
         info: list[str] = []
         for column in prefs.settings.table_tags:
-            data_string = ""
+            data_string: str
             try:
-                data_string = valueToString(column.getValue(self.id3))
+                data_string = valueToString(
+                    column.getValue(self.id3), prefs.settings.split_values_display
+                )
             except KeyError:
                 logger.info(f"{self.id3} wasn't a key in the song.")
                 data_string = ""

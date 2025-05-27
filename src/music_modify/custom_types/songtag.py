@@ -61,6 +61,7 @@ class SongTag:
 
     @property
     def allow_multiple(self) -> bool:
+        # TODO: Consider whether people tags should return True here.
         return self.id3_key in SongTag.KEYS_ALLOW_MULTIPLE_VALUES
 
     @staticmethod
@@ -91,11 +92,11 @@ class SongTag:
         return 2 if self.frame_type == TagType.People else 1
 
     def getTag(self, song: ID3) -> SongGroupData:
-        """Gets the current data for this tag in the sent song.
+        """Gets the current data for this tag in the song sent in.
         Returns None if tag is not in song, or empty.
         Returns a list of strings if the format is a single string, like for the title,
         or if it is a list of values, like for the composer
-        Returns a list of list of strings if the format is a group of pairs,
+        Returns a list of pairs of strings if the format is a group of pairs,
         like for the involved people list."""
         try:
             # NOTE: Done like this because the frame type changes,
