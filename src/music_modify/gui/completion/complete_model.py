@@ -60,7 +60,9 @@ class CompleteModel(QAbstractListModel):
 
     @override
     def data(
-        self, index: QModelIndex | QPersistentModelIndex, role: Qt.ItemDataRole
+        self,
+        index: QModelIndex | QPersistentModelIndex = QModelIndex(),
+        role: Qt.ItemDataRole | int = Qt.ItemDataRole.DisplayRole,
     ) -> str | None:
         if not index.isValid():
             return None
@@ -78,16 +80,20 @@ class CompleteModel(QAbstractListModel):
         if role == Qt.ItemDataRole.UserRole:
             return self.current_items[index.row()]
 
+        return None
+
     def indexForPrefix(self, prefix: str) -> QModelIndex | None:
         for i, item in enumerate(self.current_items):
             if primary_startswith(item, prefix):
                 return self.index(i)
 
+        return None
+
     @override
     def index(
         self,
         row: int,
-        column: int = 0,
+        column: int | None = 0,
         parent: QModelIndex | QPersistentModelIndex = QModelIndex(),
     ) -> QModelIndex:
         return super().index(row, column, parent)

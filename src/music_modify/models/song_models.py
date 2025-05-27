@@ -39,11 +39,15 @@ class SongTableModel(QAbstractTableModel):
         return None
 
     @override
-    def rowCount(self, parent: QModelIndex | QPersistentModelIndex) -> int:
+    def rowCount(
+        self, parent: QModelIndex | QPersistentModelIndex = QModelIndex()
+    ) -> int:
         return len(self.repository)
 
     @override
-    def columnCount(self, parent: QModelIndex | QPersistentModelIndex) -> int:
+    def columnCount(
+        self, parent: QModelIndex | QPersistentModelIndex = QModelIndex()
+    ) -> int:
         if self.rowCount(parent) == 0:
             return 1
             # ? Uses 1 to keep a column for info
@@ -52,7 +56,10 @@ class SongTableModel(QAbstractTableModel):
 
     @override
     def headerData(
-        self, section: int, orientation: Qt.Orientation, role: Qt.ItemDataRole
+        self,
+        section: int,
+        orientation: Qt.Orientation,
+        role: Qt.ItemDataRole | int = Qt.ItemDataRole.DisplayRole,
     ) -> str | None:
         if role == Qt.ItemDataRole.DisplayRole:
             if len(self.repository) == 0:
@@ -76,7 +83,9 @@ class SongTableProxyModel(QSortFilterProxyModel):
         self.selected_rows: list[int] = []
 
     @override
-    def filterAcceptsRow(self, source_row: int, _: QModelIndex) -> bool:
+    def filterAcceptsRow(
+        self, source_row: int, _: QModelIndex | QPersistentModelIndex = QModelIndex()
+    ) -> bool:
         return source_row in self.selected_rows
 
     def changeModelIndexes(self, model_indexes: list[QModelIndex]):
