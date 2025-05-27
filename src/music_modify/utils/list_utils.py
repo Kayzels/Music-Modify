@@ -1,4 +1,5 @@
-from typing import TypeVar
+from typing import TypeVar, cast
+
 
 def getUniqueOrdered(text: str, separator: str) -> list[str]:
     items = [word.strip() for word in text.split(separator)]
@@ -18,7 +19,10 @@ def toPairs(values: list[str], separator: str) -> list[list[str]]:
             result.append(parts)
     return result
 
+
 T = TypeVar("T")
+
+
 def addValues(new: list[T], original: list[T]) -> list[T]:
     return original + [item for item in new if item not in original]
 
@@ -48,18 +52,3 @@ def remapMatchingSublistPairs(
         for item in original
     ]
     # TODO: Don't add item if already present, remove instead
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    V
