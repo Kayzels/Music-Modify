@@ -60,3 +60,13 @@ def valueToString(value: SongEditData | None, display_split: str) -> str:
                 logger.warning(f"Song column has an invalid length: {group}")
                 continue
         return display_split.join(tag_values)
+
+
+def toTag(tag: str | SongTag, tag_list: list[SongTag]) -> SongTag | None:
+    if isinstance(tag, SongTag):
+        return tag
+    else:
+        result = mapKey(tag, tag_list)
+        if result is None:
+            result = mapTag(tag, tag_list)
+        return result
