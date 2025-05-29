@@ -13,14 +13,12 @@ def test_song_init():
     assert song.display_info == info
 
 
-def test_song_init_file():
-    song_path = Path("tests/test_song.mp3").absolute()
+def test_song_init_file(song_path: Path):
     song = Song(song_path)
-    assert song.file == Path("tests/test_song.mp3").absolute()
+    assert song.file == song_path
 
 
-def test_columns_set_updated_removed():
-    song_path = Path("tests/test_song.mp3").absolute()
+def test_columns_set_updated_removed(song_path: Path):
     song = Song(song_path)
     song.setTag("TIT2", ["Some Title"])
     song.setTag("TPE2", ["Some Artist"])

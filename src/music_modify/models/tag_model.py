@@ -40,7 +40,10 @@ class TagModel(QAbstractTableModel):
 
     @override
     def headerData(
-        self, section: int, orientation: Qt.Orientation, role: Qt.ItemDataRole
+        self,
+        section: int,
+        orientation: Qt.Orientation,
+        role: Qt.ItemDataRole | int = Qt.ItemDataRole.DisplayRole,
     ) -> str | None:
         if (
             role != Qt.ItemDataRole.DisplayRole
@@ -53,7 +56,9 @@ class TagModel(QAbstractTableModel):
 
     @override
     def data(
-        self, index: QModelIndex | QPersistentModelIndex, role: Qt.ItemDataRole
+        self,
+        index: QModelIndex | QPersistentModelIndex,
+        role: Qt.ItemDataRole | int = Qt.ItemDataRole.DisplayRole,
     ) -> str | Qt.CheckState | None:
         if not index.isValid():
             return None
@@ -101,7 +106,7 @@ class TagModel(QAbstractTableModel):
         self,
         index: QModelIndex | QPersistentModelIndex,
         value: str | int,
-        role: Qt.ItemDataRole,
+        role: Qt.ItemDataRole | int = Qt.ItemDataRole.EditRole,
     ) -> bool:
         if not index.isValid():
             return False

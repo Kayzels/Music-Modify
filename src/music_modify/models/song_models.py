@@ -25,7 +25,7 @@ class SongTableModel(QAbstractTableModel):
     def data(
         self,
         index: QModelIndex | QPersistentModelIndex,
-        role: int = Qt.ItemDataRole.DisplayRole,
+        role: Qt.ItemDataRole | int = Qt.ItemDataRole.DisplayRole,
     ) -> str | None:
         if not index.isValid():
             return None
@@ -67,10 +67,15 @@ class SongTableModel(QAbstractTableModel):
                     return SongTableModel.empty_message
                 if orientation == Qt.Orientation.Vertical:
                     return None
-            if orientation == Qt.Orientation.Horizontal:
+            if orientation == Qt.Orientation.Horizontal and section < len(
+                prefs.settings.table_tags
+            ):
                 return prefs.settings.table_tags[section].display_name
-            elif orientation == Qt.Orientation.Vertical:
+            elif orientation == Qt.Orientation.Vertical and section < len(
+                self.repository
+            ):
                 return f"{section + 1}"
+            return None
         return None
 
 
