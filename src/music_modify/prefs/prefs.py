@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 @final
-class _Settings:
+class Settings:
     def __init__(self, settings: QSettings | None = None):
         logger.info("In init method for Settings object")
         self._settings: QSettings = (
@@ -32,7 +32,7 @@ class _Settings:
         John Smith, Jane Doe should be understood as two separate values."""
         return str(
             self._settings.value(
-                "Split/split_text_entered", _Settings.default_split_text_entered
+                "Split/split_text_entered", Settings.default_split_text_entered
             )
         )
 
@@ -49,7 +49,7 @@ class _Settings:
         """
         return str(
             self._settings.value(
-                "Split/split_values_display", _Settings.default_split_values_display
+                "Split/split_values_display", Settings.default_split_values_display
             )
         )
 
@@ -65,7 +65,7 @@ class _Settings:
         """
         return str(
             self._settings.value(
-                "Split/split_values_at", _Settings.default_split_values_at
+                "Split/split_values_at", Settings.default_split_values_at
             )
         )
 
@@ -184,15 +184,15 @@ class _Settings:
     def _initializeDefaults(self):
         logger.info("Called initialise defaults")
         if not self._settings.contains("Split/split_text_entered"):
-            self.split_text_entered = _Settings.default_split_text_entered
+            self.split_text_entered = Settings.default_split_text_entered
         else:
             logger.info("Split text entered already set")
         if not self._settings.contains("Split/split_values_display"):
-            self.split_values_display = _Settings.default_split_values_display
+            self.split_values_display = Settings.default_split_values_display
         else:
             logger.info("Split values display already set")
         if not self._settings.contains("Split/split_values_at"):
-            self.split_values_at = _Settings.default_split_values_at
+            self.split_values_at = Settings.default_split_values_at
         else:
             logger.info("Split values at already set")
 
@@ -201,21 +201,21 @@ class _Settings:
 
         if not self._settings.contains("Tags/info_tags") and size == 0:
             logger.info("Setting info tags")
-            self.info_tags = _Settings.default_tags
+            self.info_tags = Settings.default_tags
         else:
             logger.info("Info Tags already set")
 
     def resetSplit(self) -> None:
         """Reset the value for the split preferences back to default"""
         logger.info("Called reset split")
-        self.split_text_entered = _Settings.default_split_text_entered
-        self.split_values_at = _Settings.default_split_values_at
-        self.split_values_display = _Settings.default_split_values_display
+        self.split_text_entered = Settings.default_split_text_entered
+        self.split_values_at = Settings.default_split_values_at
+        self.split_values_display = Settings.default_split_values_display
 
     def resetTags(self) -> None:
         """Reset the value for the tag list back to default"""
         logger.info("Called reset tags")
-        self.info_tags = _Settings.default_tags
+        self.info_tags = Settings.default_tags
 
 
-settings = _Settings()
+settings = Settings()
