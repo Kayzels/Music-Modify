@@ -37,8 +37,6 @@ class PrefsSplitDialog(PrefsAbstractDialog, Ui_PrefsSplitDialog):
             )
         )
 
-        self.accepted.connect(self.updateSettings)
-
     def _initializeDisplay(self):
         """Displays the current values for the split settings before the user changes them."""
         self.line_edit_split_text_entered.setText(prefs.settings.split_text_entered)

@@ -26,6 +26,7 @@ class PrefsAbstractDialog(QDialog, ABC, metaclass=ABCQMeta):
             message = "Setup Ui function not found when calling abstract init"
             logger.warning(message)
             QMessageBox.warning(show_on, "Missing setupUi", message)
+        self.accepted.connect(self.updateSettings)
 
     def _setButtonBoxConnections(self):
         """Creates the connection between the signals from the buttons in the button box

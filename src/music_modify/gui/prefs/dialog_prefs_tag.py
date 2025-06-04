@@ -39,8 +39,6 @@ class PrefsTagDialog(PrefsAbstractDialog, Ui_PrefsTagDialog):
         self.up_toolbutton.clicked.connect(self.moveTagsUp)
         self.down_toolbutton.clicked.connect(self.moveTagsDown)
 
-        self.accepted.connect(self.updateSettings)
-
     def addTag(self):
         """Add a new tag to the group of tags that can be used."""
         add_dialog = PrefsTagAddDialog(self)

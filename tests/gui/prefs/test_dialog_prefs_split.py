@@ -104,7 +104,7 @@ def test_prefsSplitDialog_updateSettings(
     split_dialog.line_edit_split_values_at.setText("--")
     split_dialog.line_edit_split_values_at.editingFinished.emit()
 
-    split_dialog.updateSettings()
+    split_dialog.accept()
     assert temp_settings.split_text_entered == "++"
     assert temp_settings.split_values_display == ".."
     assert temp_settings.split_values_at == "--"
