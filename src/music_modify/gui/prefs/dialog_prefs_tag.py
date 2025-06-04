@@ -3,7 +3,7 @@ import logging
 from typing import override
 
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QDialog, QMessageBox, QWidget
+from PySide6.QtWidgets import QMessageBox, QWidget
 
 from music_modify.custom_types import TagInfo
 from music_modify.gui.utils import getSelectedRows
@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 class PrefsTagDialog(PrefsAbstractDialog, Ui_PrefsTagDialog):
     """Allows the user to edit the metadata tags that are edited and displayed for songs."""
 
-    def __init__(self, parent: QWidget | None):
+    def __init__(self, parent: QWidget | None = None):
         super().__init__(parent)
         self.setWindowTitle("Edit Tags")
 
@@ -39,44 +39,12 @@ class PrefsTagDialog(PrefsAbstractDialog, Ui_PrefsTagDialog):
         self.up_toolbutton.clicked.connect(self.moveTagsUp)
         self.down_toolbutton.clicked.connect(self.moveTagsDown)
 
+        self.accepted.connect(self.updateSettings)
+
     def addTag(self):
         """Add a new tag to the group of tags that can be used."""
         add_dialog = PrefsTagAddDialog(self)
-
-        def processDialogResult(result: QDialog.DialogCode):
-            if result == QDialog.DialogCode.Accepted:
-                id3_key = add_dialog.id3_line_edit.text().strip()
-                display_name = add_dialog.display_name_line_edit.text().strip()
-                show_in_table = add_dialog.show_checkbox.isChecked()
-                if not id3_key or not display_name:
-                    message = (
-                        "Tried to create a tag without display name or key.\n"
-                        f"ID3 Key: {id3_key}\n"
-                        f"Display Name: {display_name}\n"
-                        f"Show in Table: {show_in_table}"
-                    )
-                    logger.warning(message)
-                    QMessageBox.warning(self, "Missing Info", message)
-                    return
-                if any(
-                    tag.id3_key == id3_key or tag.display_name == display_name
-                    for tag in self.model.tags
-                ):
-                    message = (
-                        "Tag with this key or display name already exists.\n"
-                        f"ID3 Key: {id3_key}\n"
-                        f"Display Name: {display_name}\n"
-                        f"Show in Table: {show_in_table}\n"
-                        "You can edit the existing display name, "
-                        "or remove the tag if you want a different key with the same display name."
-                    )
-                    logger.warning(message)
-                    QMessageBox.warning(self, "Tag Exists", message)
-                    return
-
-                self.model.addTag(id3_key, display_name, show_in_table)
-
-        add_dialog.finished.connect(processDialogResult)
+        add_dialog.accepted.connect(lambda: add_dialog.addToModel(self.model))
         add_dialog.show()
 
     def removeSelectedTags(self):

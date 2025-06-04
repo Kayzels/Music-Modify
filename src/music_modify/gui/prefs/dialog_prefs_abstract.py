@@ -1,4 +1,4 @@
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 import logging
 from typing import Callable, Self
 
@@ -10,7 +10,7 @@ from music_modify.gui.meta import ABCQMeta
 logger = logging.getLogger(__name__)
 
 
-class PrefsAbstractDialog(QDialog, metaclass=ABCQMeta):
+class PrefsAbstractDialog(QDialog, ABC, metaclass=ABCQMeta):
     """An abstract class that specifies the required functionality for all child preference dialogs."""
 
     settings_updated: Signal = Signal()

@@ -32,13 +32,6 @@ class PrefsDialog(QDialog, Ui_PrefsDialog):
         dialog = dialog_type(self)
         dialog.setModal(True)
 
-        # Process accept result
-        def processDialogResult(result: QDialog.DialogCode):
-            """Update the settings stored when the user accepts the child dialog."""
-            if result == QDialog.DialogCode.Accepted:
-                dialog.updateSettings()
-
         dialog.settings_updated.connect(lambda: self.settings_updated.emit())
-        dialog.finished.connect(processDialogResult)
 
         dialog.show()
