@@ -218,6 +218,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def updateStatusbarMessage(self):
         """Display the number of songs and selected songs inside the status bar."""
         num_songs = len(self.songs_repository)
+        if num_songs == 0:
+            self.statusLabel.setText("")
+            return
         # Put the message inside [] so that it's distinct from the version name
         message: str = f"[{num_songs} songs"
         selected_length = self.getSelectionLength()

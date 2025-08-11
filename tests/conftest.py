@@ -21,6 +21,9 @@ def song_paths() -> list[PathLike[str]]:
         Path("tests/assets/test_song_3.mp3").absolute(),
     ]
 
+@pytest.fixture
+def asset_folder() -> PathLike[str]:
+    return Path("tests/assets/").absolute()
 
 @pytest.fixture
 def temp_settings():
