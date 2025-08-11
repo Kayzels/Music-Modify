@@ -1,6 +1,8 @@
+# pyright: reportIncompatibleMethodOverride=false
+
 import copy
 import logging
-from typing import override
+from typing import override, Self
 
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QMessageBox, QWidget
@@ -38,6 +40,10 @@ class PrefsTagDialog(PrefsAbstractDialog, Ui_PrefsTagDialog):
         self.remove_toolbutton.clicked.connect(self.removeSelectedTags)
         self.up_toolbutton.clicked.connect(self.moveTagsUp)
         self.down_toolbutton.clicked.connect(self.moveTagsDown)
+
+    @override
+    def setupUi(self, dialog: Self):
+        Ui_PrefsTagDialog.setupUi(self, dialog)
 
     def addTag(self):
         """Add a new tag to the group of tags that can be used."""

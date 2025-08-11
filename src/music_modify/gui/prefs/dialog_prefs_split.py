@@ -1,5 +1,7 @@
+# pyright: reportIncompatibleMethodOverride=false
+
 import logging
-from typing import override
+from typing import override, Self
 
 from PySide6.QtWidgets import QLineEdit, QWidget
 
@@ -36,6 +38,10 @@ class PrefsSplitDialog(PrefsAbstractDialog, Ui_PrefsSplitDialog):
                 "split_values_at", self.line_edit_split_values_at.text()
             )
         )
+
+    @override
+    def setupUi(self, dialog: Self):
+        Ui_PrefsSplitDialog.setupUi(self, dialog)
 
     def _initializeDisplay(self):
         """Displays the current values for the split settings before the user changes them."""
