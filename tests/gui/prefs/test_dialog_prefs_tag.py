@@ -37,6 +37,7 @@ def _selectRows(dialog: PrefsTagDialog, rows: list[int]):
     selection_model = dialog.tag_table.selectionModel()
     selection_model.clearSelection()
     for row in rows:
+        # noinspection PyTypeChecker
         selection_model.select(
             model.index(row, 0),
             QItemSelectionModel.SelectionFlag.Select
@@ -194,7 +195,7 @@ def test_PrefsTagDialog_moveTagsDown(
     dialog.down_toolbutton.click()
     assert model.tags == tags
 
-    # With second row selected, should swap second and thrid
+    # With second row selected, should swap second and third
     _selectRows(dialog, [1])
     dialog.down_toolbutton.click()
     val = tags.pop(1)

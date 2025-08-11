@@ -129,6 +129,7 @@ class EditTableWidget(EditAbstractGroupWidget[SongTableData]):
         button_layout = QVBoxLayout()
         layout.addLayout(button_layout)
 
+        # noinspection PyTypeChecker
         for button_group in (
             EditButton.Up | EditButton.Down,
             EditButton.Add | EditButton.Remove,
@@ -267,6 +268,7 @@ class EditTableWidget(EditAbstractGroupWidget[SongTableData]):
         selection_model.clearSelection()
         for row in selected_rows:
             index = self.main_widget.model().index(row + direction_num, 0)
+            # noinspection PyTypeChecker
             selection_model.select(
                 index,
                 QItemSelectionModel.SelectionFlag.Select
@@ -283,6 +285,7 @@ class EditTableWidget(EditAbstractGroupWidget[SongTableData]):
     @value.setter
     @override
     def value(self, value: SongTableData):
+        # noinspection PyAttributeOutsideInit
         self._value: SongTableData = value
 
     @property

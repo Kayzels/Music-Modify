@@ -36,6 +36,7 @@ class EditAbstractDialog(QDialog, ABC, metaclass=ABCQMeta):
     def _setupButtons(self) -> None:
         self.button_box: QDialogButtonBox = QDialogButtonBox(self)
         self.button_box.setOrientation(Qt.Orientation.Horizontal)
+        # noinspection PyTypeChecker
         self.button_box.setStandardButtons(
             QDialogButtonBox.StandardButton.Ok
             | QDialogButtonBox.StandardButton.Cancel

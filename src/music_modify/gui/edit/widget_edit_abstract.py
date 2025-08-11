@@ -36,7 +36,6 @@ class EditAbstractWidget(QWidget, Generic[ValueT], ABC, metaclass=ABCQMeta):
     @abstractmethod
     def _setupUi(self) -> None:
         """Sets up the display of the widget."""
-        logger.info("Abstract setupUi called")
         pass
 
     @abstractmethod
@@ -58,14 +57,12 @@ class EditAbstractWidget(QWidget, Generic[ValueT], ABC, metaclass=ABCQMeta):
     @abstractmethod
     def _isReset(self) -> bool:
         """Returns whether the value has been set back to its original state."""
-        logger.info("Abstract isReset called")
         pass
 
     @property
     @abstractmethod
     def value(self) -> ValueT:
         """The value displayed and stored inside the widget, depending on the data type."""
-        logger.info("Abstract value property called")
         pass
 
     @value.setter
@@ -91,6 +88,7 @@ class EditAbstractWidget(QWidget, Generic[ValueT], ABC, metaclass=ABCQMeta):
             self._displayValue()
             self._emitUpdate()
 
+    # noinspection PyTypeChecker
     def createButtons(
         self,
         buttons: EditButton = EditButton.Reset | EditButton.Clear,

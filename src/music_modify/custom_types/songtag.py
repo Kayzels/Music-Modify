@@ -163,6 +163,7 @@ class SongTag:
                 song_data = cast(SongTableData, song_data)
                 return song_data
             case _:
+                # noinspection PyTypeHints
                 song_data = cast(SongLineData | SongListData, song_data)
                 if self.allow_multiple:
                     return [str(val) for val in song_data]

@@ -12,6 +12,7 @@ from pytestqt.qtbot import QtBot  # pyright: ignore[reportMissingTypeStubs]
 from music_modify.gui.utils import clearLayout, getSelectedRows
 
 
+# noinspection PyTypeChecker
 def test_getSelectedRows(qtbot: QtBot):
     table = QTableWidget(4, 2)
     qtbot.addWidget(table)

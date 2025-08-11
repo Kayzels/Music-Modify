@@ -22,6 +22,7 @@ class EditAbstractGroupWidget(
     def __init__(self, parent: QWidget, data: ValueG | None):
         super().__init__(parent, data)
 
+    # noinspection PyTypeChecker
     @override
     def createButtons(
         self,

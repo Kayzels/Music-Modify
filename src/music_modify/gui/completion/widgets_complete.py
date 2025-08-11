@@ -427,7 +427,8 @@ class EnComboBox(QComboBox):
         return str(self.currentText())
 
     def setText(self, text: str):
-        idx = self.findText(
+        # noinspection PyTypeChecker
+        idx: int = self.findText(
             text, Qt.MatchFlag.MatchCaseSensitive | Qt.MatchFlag.MatchFixedString
         )
         if idx == -1:
@@ -444,6 +445,7 @@ class EditWithComplete(EnComboBox):
 
         self.setLineEdit(LineEdit(self, completer_widget=self, multiple=multiple))
         cast(LineEdit, self.lineEdit()).item_selected.connect(self.item_selected)
+        # noinspection PyTypeChecker
         self.setCompleter(None)  # pyright: ignore[reportArgumentType]
         self.eat_focus_out: bool = True
         self.installEventFilter(self)

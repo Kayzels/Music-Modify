@@ -64,6 +64,7 @@ class EditListWidget(EditAbstractGroupWidget[SongListData]):
         button_layout = QVBoxLayout()
         layout.addLayout(button_layout)
 
+        # noinspection PyTypeChecker
         for button_group in (
             EditButton.Up | EditButton.Down,
             EditButton.Add | EditButton.Remove,

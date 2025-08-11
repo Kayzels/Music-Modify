@@ -1,3 +1,4 @@
+# noinspection PyProtectedMember
 from mutagen.id3 import ID3TimeStamp
 
 SongData = str | ID3TimeStamp | list[str] | list[list[str]] | None
