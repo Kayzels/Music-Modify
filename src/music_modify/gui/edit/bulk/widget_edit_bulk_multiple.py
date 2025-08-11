@@ -19,7 +19,8 @@ logger = logging.getLogger(__name__)
 
 
 class _MultipleLineEdit(QLineEdit):
-    def __init__(self, value: str, parent: QWidget | None = None, *args: list[Any]):  # pyright: ignore[reportExplicitAny]
+    def __init__(self, value: str, parent: QWidget | None = None, *args: Any):  # pyright: ignore[reportExplicitAny]
+        # noinspection PyArgumentList
         super().__init__(value, parent, *args)
 
     @property

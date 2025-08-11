@@ -234,6 +234,7 @@ class EditTableWidget(EditAbstractGroupWidget[SongTableData]):
         if len(selected_rows) == 0:
             return
 
+        direction_num = 1
         match direction:
             case Direction.Up:
                 # Don't move up if first selected item is already a ttop

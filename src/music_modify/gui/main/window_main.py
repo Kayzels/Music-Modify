@@ -169,7 +169,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 break
         progress_dialog.setValue(len(files))
 
-    def processTableDragEvent(self, event: QDragEnterEvent | QDragMoveEvent):
+    @staticmethod
+    def processTableDragEvent(event: QDragEnterEvent | QDragMoveEvent):
         """Processes dragging data from the tableview, needed for dropping to work."""
         if event.mimeData().hasUrls():
             event.acceptProposedAction()

@@ -52,7 +52,8 @@ class EditBulkLineWidget(EditBulkAbstractWidget):
             lambda state: self._checkboxStateChanged(state, self.apply_checkbox)  # pyright: ignore[reportUnknownLambdaType]
         )
 
-    def _checkboxStateChanged(self, state: Qt.CheckState, other: QCheckBox) -> None:
+    @staticmethod
+    def _checkboxStateChanged(state: Qt.CheckState, other: QCheckBox) -> None:
         """When Apply is checked, uncheck Clear, and vice versa."""
         if state == Qt.CheckState.Checked.value:
             other.setChecked(False)

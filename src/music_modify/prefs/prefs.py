@@ -11,10 +11,10 @@ logger = logging.getLogger(__name__)
 
 @final
 class Settings:
-    def __init__(self, settings: QSettings | None = None):
+    def __init__(self, new_settings: QSettings | None = None):
         logger.info("In init method for Settings object")
         self._settings: QSettings = (
-            QSettings("Kayzels", "Music Modify") if settings is None else settings
+            QSettings("Kayzels", "Music Modify") if new_settings is None else new_settings
         )
 
         # Store in a cache to prevent needing to call getArray on every cell

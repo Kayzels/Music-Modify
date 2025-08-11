@@ -22,7 +22,8 @@ class MockPrefsTagAddDialog(QObject):
     def show(self):
         self.accepted.emit()
 
-    def addToModel(self, model: TagModel):
+    @staticmethod
+    def addToModel(model: TagModel):
         id3_key = _testTagInfo.id3_key
         display_name = _testTagInfo.display_name
         show_in_table = _testTagInfo.show_in_table

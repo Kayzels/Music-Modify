@@ -522,16 +522,16 @@ class EditWithComplete(EnComboBox):
         super().clear()
 
     @override
-    def eventFilter(self, object: QObject, event: QEvent) -> bool:
+    def eventFilter(self, obj: QObject, event: QEvent) -> bool:
         try:
             completer = cast(LineEdit, self.lineEdit()).mcompleter
         except AttributeError:
             return False
         etype = event.type()
-        if self.eat_focus_out and self is object and etype == QEvent.Type.FocusOut:
+        if self.eat_focus_out and self is obj and etype == QEvent.Type.FocusOut:
             if completer.isVisible():
                 return True
-        return super().eventFilter(object, event)
+        return super().eventFilter(obj, event)
 
     @property
     def values(self) -> list[str]:

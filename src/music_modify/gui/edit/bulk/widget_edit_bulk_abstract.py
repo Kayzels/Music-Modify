@@ -1,4 +1,4 @@
-from abc import abstractmethod
+from abc import abstractmethod, ABC
 import logging
 
 from PySide6.QtWidgets import QWidget
@@ -9,7 +9,7 @@ from music_modify.gui.meta import ABCQMeta
 logger = logging.getLogger(__name__)
 
 
-class EditBulkAbstractWidget(QWidget, metaclass=ABCQMeta):
+class EditBulkAbstractWidget(QWidget, ABC, metaclass=ABCQMeta):
     def __init__(self, parent: QWidget, tag: SongTag):
         super().__init__(parent)
 

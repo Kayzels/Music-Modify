@@ -1,4 +1,4 @@
-from abc import abstractmethod
+from abc import abstractmethod, ABC
 from typing import override
 
 from PySide6.QtCore import Qt
@@ -8,7 +8,7 @@ from music_modify.custom_types import SongTag
 from .widget_edit_bulk_abstract import EditBulkAbstractWidget
 
 
-class EditBulkAbstractGroupWidget(EditBulkAbstractWidget):
+class EditBulkAbstractGroupWidget(EditBulkAbstractWidget, ABC):
     def __init__(self, parent: QWidget, tag: SongTag):
         super().__init__(parent, tag)
 

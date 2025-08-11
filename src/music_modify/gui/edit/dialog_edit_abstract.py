@@ -1,4 +1,4 @@
-from abc import abstractmethod
+from abc import abstractmethod, ABC
 from PySide6.QtCore import Signal, Qt
 from PySide6.QtWidgets import QDialog, QDialogButtonBox, QVBoxLayout, QWidget
 
@@ -6,7 +6,7 @@ from music_modify.gui.meta import ABCQMeta
 from music_modify.models.song_repository import SongRepository
 
 
-class EditAbstractDialog(QDialog, metaclass=ABCQMeta):
+class EditAbstractDialog(QDialog, ABC, metaclass=ABCQMeta):
     info_updated: Signal = Signal()
 
     def __init__(self, parent: QWidget, repository: SongRepository, rows: list[int]):

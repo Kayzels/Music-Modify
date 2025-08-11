@@ -43,7 +43,7 @@ class PrefsTagAddDialog(QDialog, Ui_PrefsTagAddDialog):
             logger.warning(message)
             QMessageBox.warning(self, "Tag Exists", message)
             return None
-        return (id3_key, display_name, show_in_table)
+        return id3_key, display_name, show_in_table
 
     def addToModel(self, model: TagModel):
         tag = self._getValidTag(model)
