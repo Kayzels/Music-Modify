@@ -1,3 +1,6 @@
+"""Utility module for SongTags specifically.
+Not part of the general utils, as that leads to an import cycle."""
+
 import logging
 from typing import cast
 
@@ -32,9 +35,9 @@ def mapOptionalTag(
     If the tag is None, gets the tag from the optional name.
 
     Args:
-    -----
-    tag_name: str - Display name of the tag to get
-    optional_name: str - Display name of the tag to get if the original tag doesn't exist
+        tag_name: Display name of the tag to get
+        optional_name: Display name of the tag to get if the original tag
+            doesn't exist
     """
     tag = mapTag(tag_name, tag_list)
     if tag is None:
@@ -43,6 +46,10 @@ def mapOptionalTag(
 
 
 def valueToString(value: SongEditData | None, display_split: str) -> str:
+    """Converts data from a specific tag into a string representation.
+
+    Uses `display_split` as the separator if there are multiple values,
+    when `value` is a list."""
     if value is None or len(value) == 0:
         return ""
     elif isinstance(value, str):
@@ -63,6 +70,9 @@ def valueToString(value: SongEditData | None, display_split: str) -> str:
 
 
 def toTag(tag: str | SongTag, tag_list: list[SongTag]) -> SongTag | None:
+    """Generate a SongTag from a string, first searching for the id3 key,
+    and then the display name. If it cannot be found, returns None.
+    """
     if isinstance(tag, SongTag):
         return tag
     else:

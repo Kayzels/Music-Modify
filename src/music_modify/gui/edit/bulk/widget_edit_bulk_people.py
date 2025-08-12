@@ -1,3 +1,6 @@
+"""Moduole that contains the widget that is used for bulk editing data,
+when the tag contains (role, person) pairs."""
+
 from collections.abc import Sized
 import logging
 from typing import Callable, Generic, TypeVar, cast, override
@@ -8,11 +11,11 @@ from music_modify.custom_types import Song, SongTag
 from music_modify.gui.completion import EditWithComplete, createCompletionWidget
 from music_modify.gui.edit.widget_edit_table import EditTableWidget
 from music_modify.utils.list_utils import (
+    addValues,
     remapMatchingSublistPairs,
     removeMatchingSublistPairs,
-    toPairs,
-    addValues,
     removePairs,
+    toPairs,
 )
 
 from .widget_edit_bulk_abstract_group import EditBulkAbstractGroupWidget
@@ -20,19 +23,37 @@ from .widget_edit_bulk_abstract_group import EditBulkAbstractGroupWidget
 logger = logging.getLogger(__name__)
 
 PAIR_SEPARATOR = ": "
+ROLE_INDEX = 0
+PEOPLE_INDEX = 1
 
 L = TypeVar("L", bound=Sized)
 MapFunc = Callable[[L, list[list[str]]], list[list[str]]]
 
 
 class _ActionMapping(Generic[L]):
-    def __init__(self, widget: "EditBulkPeopleWidget", items: L, func: MapFunc[L]):
+    """Private class that is used to define a function that should
+    transform the data stored in a tag, in some way."""
+
+    def __init__(
+        self, widget: "EditBulkPeopleWidget", items: L, func: MapFunc[L]
+    ) -> None:
+        """
+        Args:
+            widget: Widget that displays the data that should be mapped
+            items: Any data structure that is used by `func` to transform the data
+            func: A function that transforms a list of pairs, using `items`
+        """
         self.widget: "EditBulkPeopleWidget" = widget
+        "The widget that displays the data"
         self.tag: SongTag = self.widget.tag
+        "The tag that the data should be edited for."
         self.items: L = items
+        "Any data structure that is used to transform a pair"
         self.func: MapFunc[L] = func
+        "Function that uses `items` to transform a pair into a new pair"
 
     def _getSongValues(self, song: Song) -> list[list[str]]:
+        """Get the values stored for the song, for the tag."""
         original_values = self.tag.getValue(song.id3)
         if original_values is None:
             if not self.tag.hasTag(song.id3):
@@ -42,6 +63,11 @@ class _ActionMapping(Generic[L]):
         return original_values
 
     def performChange(self, song: Song) -> bool:
+        """Call `func` on the data for the tag in the specified `song`.
+
+        Args:
+            song: The `Song` that contains the data that should be changed.
+        """
         if len(self.items) == 0:
             return False
         current_values = self._getSongValues(song)
@@ -51,7 +77,9 @@ class _ActionMapping(Generic[L]):
             self.tag.setTag(song.id3, new_values)
             song.save()
 
-            new_pairs = [(role, person) for role, person in new_values]
+            new_pairs: list[tuple[str, str]] = [
+                (role, person) for role, person in new_values
+            ]
             for pair in new_pairs:
                 if pair not in self.widget.items:
                     self.widget.items.append(pair)
@@ -69,7 +97,7 @@ AllowedActionMapping = (
 
 
 class EditBulkPeopleWidget(EditBulkAbstractGroupWidget):
-    def __init__(self, parent: QWidget, data: list[list[str]], tag: SongTag):
+    def __init__(self, parent: QWidget, data: list[list[str]], tag: SongTag) -> None:
         super().__init__(parent, tag)
 
         self.items: list[tuple[str, str]] = [(role, person) for role, person in data]
@@ -95,29 +123,41 @@ class EditBulkPeopleWidget(EditBulkAbstractGroupWidget):
         pairs = list(
             set([f"{role}{PAIR_SEPARATOR}{person}" for (role, person) in self.items])
         )
-        self.remove_pair_widget = createCompletionWidget(self, tuple(pairs))
+        self.remove_pair_widget = createCompletionWidget(
+            parent=self, items=tuple(pairs)
+        )
         form_layout.addRow("Remove Pair", self.remove_pair_widget)
 
         roles = list(set([role for (role, _) in self.items]))
-        self.remove_role_widget = createCompletionWidget(self, tuple(roles))
+        self.remove_role_widget = createCompletionWidget(
+            parent=self, items=tuple(roles)
+        )
         form_layout.addRow("Remove Role", self.remove_role_widget)
 
         people = list(set([person for (_, person) in self.items]))
-        self.remove_person_widget = createCompletionWidget(self, tuple(people))
+        self.remove_person_widget = createCompletionWidget(
+            parent=self, items=tuple(people)
+        )
         form_layout.addRow("Remove Person", self.remove_person_widget)
 
         remap_headers = ["Old", "New"]
-        self.remap_role_widget = EditTableWidget(self, [], labels=remap_headers)
+        self.remap_role_widget = EditTableWidget(
+            parent=self, data=[], labels=remap_headers
+        )
         form_layout.addRow("Remap Role", self.remap_role_widget)
 
-        self.remap_person_widget = EditTableWidget(self, [], labels=remap_headers)
+        self.remap_person_widget = EditTableWidget(
+            parent=self, data=[], labels=remap_headers
+        )
         form_layout.addRow("Remap Person", self.remap_person_widget)
 
         return form_container
 
     @override
     def _resetView(self):
-        pairs = list(set([f"{role}: {person}" for (role, person) in self.items]))
+        pairs: list[str] = list(
+            set([f"{role}: {person}" for (role, person) in self.items])
+        )
         self.remove_pair_widget.updateItemsCache(tuple(pairs))
 
         roles = list(set([role for (role, _) in self.items]))
@@ -126,9 +166,9 @@ class EditBulkPeopleWidget(EditBulkAbstractGroupWidget):
         people = list(set([person for (_, person) in self.items]))
         self.remove_person_widget.updateItemsCache(tuple(people))
 
-        widgets = self.findChildren(EditWithComplete) + self.findChildren(
-            EditTableWidget
-        )
+        widgets: list[EditTableWidget | EditWithComplete] = self.findChildren(
+            EditWithComplete
+        ) + self.findChildren(EditTableWidget)
         for widget in widgets:
             widget.clear()
 
@@ -136,6 +176,7 @@ class EditBulkPeopleWidget(EditBulkAbstractGroupWidget):
         self.group_box.setChecked(False)
 
     def _createActionMapping(self, items: L, func: MapFunc[L]) -> _ActionMapping[L]:
+        """Creates a mapping based on the items sent, and the function"""
         return _ActionMapping(self, items, func)
 
     @override
@@ -154,7 +195,9 @@ class EditBulkPeopleWidget(EditBulkAbstractGroupWidget):
         add_items: list[list[str]] = self.add_widget.value
         remove_pairs: set[tuple[str, ...]] = {
             tuple(pair)
-            for pair in toPairs(self.remove_pair_widget.values, PAIR_SEPARATOR)
+            for pair in toPairs(
+                values=self.remove_pair_widget.values, separator=PAIR_SEPARATOR
+            )
         }
         remove_people: set[str] = set(self.remove_person_widget.values)
         remove_roles: set[str] = set(self.remove_role_widget.values)
@@ -188,34 +231,45 @@ class EditBulkPeopleWidget(EditBulkAbstractGroupWidget):
         # Updated if a refresh is requested.
         changes_made: bool = False
 
-        # Declare the functions explicitly so that it's more readable, compared to lambdas.
+        # Declare the functions explicitly so that it's more readable,
+        # compared to lambdas.
         def _removePeople(
             remove_values: set[str], original: list[list[str]]
         ) -> list[list[str]]:
+            """Remove any string that appears in `remove_values` from the list,
+            when that string appears in the people index."""
             if len(remove_values) == 0:
                 return original
-            return removeMatchingSublistPairs(remove_values, original, 1)
+            return removeMatchingSublistPairs(
+                remove_values, original, index=PEOPLE_INDEX
+            )
 
         def _removeRoles(
             remove_values: set[str], original: list[list[str]]
         ) -> list[list[str]]:
+            """Remove any string that appears in `remove_values` from the list,
+            when that string appears in the roles index."""
             if len(remove_values) == 0:
                 return original
-            return removeMatchingSublistPairs(remove_values, original, 0)
+            return removeMatchingSublistPairs(remove_values, original, index=ROLE_INDEX)
 
         def _remapPeople(
             replacements: dict[str, str], original: list[list[str]]
         ) -> list[list[str]]:
+            """Remap any string that appears as a key in `replacements` from the list,
+            when that string appears in the people index."""
             if len(replacements) == 0:
                 return original
-            return remapMatchingSublistPairs(replacements, original, 1)
+            return remapMatchingSublistPairs(replacements, original, index=PEOPLE_INDEX)
 
         def _remapRoles(
             replacements: dict[str, str], original: list[list[str]]
         ) -> list[list[str]]:
+            """Remap any string that appears as a key in `replacements` from the list,
+            when that string appears in the roles index."""
             if len(replacements) == 0:
                 return original
-            return remapMatchingSublistPairs(replacements, original, 0)
+            return remapMatchingSublistPairs(replacements, original, index=ROLE_INDEX)
 
         mappings: list[AllowedActionMapping] = [
             self._createActionMapping(add_items, addValues),

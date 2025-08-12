@@ -1,3 +1,5 @@
+"""Module that defines a dialog that allows editing the metadata for a song."""
+
 import copy
 import logging
 from typing import override
@@ -39,6 +41,7 @@ class EditDialog(EditAbstractDialog):
         super().__init__(parent, repository, rows)
 
         self.current_index: int = 0
+        "The index of this specific song in the song repository"
 
         song_info = self._getSong()
         if song_info is None:
@@ -125,10 +128,12 @@ class EditDialog(EditAbstractDialog):
 
         @Slot()
         def resetValue() -> None:
-            """Clears the value if it's the same as the original, and that value is stored in the song.
+            """Clears the value if it's the same as the original,
+            and that value is stored in the song.
             Otherwise, stores the change."""
-            # This is needed because after a user clicks Apply, the value stored in the song
-            # is now no longer the same as the original, so we can't just clear it.
+            # This is needed because after a user clicks Apply,
+            # the value stored in the song is now no longer the same as the original,
+            # so we can't just clear it.
             value = widget.value
 
             # Need to get the value inside the song and compare
@@ -136,21 +141,30 @@ class EditDialog(EditAbstractDialog):
             if song_value is None and len(value) != 0:
                 # The value in the song was cleared, but we have a value now that isn't
                 logger.debug(
-                    f"Value for key {tag.id3_key} previously removed, but being reset now."
+                    (
+                        f"Value for key {tag.id3_key} previously removed, "
+                        "but being reset now."
+                    )
                 )
                 self.changed_values[tag.id3_key] = value
                 logger.debug(f"Changed values are now {self.changed_values}")
             elif song_value is None and len(value) == 0:
                 # Same empty value, no need to remember
                 logger.debug(
-                    f"Song doesn't store the key {tag.id3_key} and the value for it is being set to empty."
+                    (
+                        f"Song doesn't store the key {tag.id3_key} "
+                        "and the value for it is being set to empty."
+                    )
                 )
                 self.changed_values.pop(tag.id3_key, None)
                 logger.debug(f"Changed values are now {self.changed_values}")
             elif song_value != value:
                 # New value than what is stored in the song (same as original value)
                 logger.debug(
-                    f"Value stored in song for key {tag.id3_key} is different from the value being reset to, so storing."
+                    (
+                        f"Value stored in song for key {tag.id3_key} "
+                        "is different from the value being reset to, so storing."
+                    )
                 )
                 if len(value) == 0:
                     self.changed_values[tag.id3_key] = None
@@ -160,7 +174,10 @@ class EditDialog(EditAbstractDialog):
             else:
                 # Value matches existing song value, remove from change list.
                 logger.debug(
-                    f"Value matches the value in the song for {tag.id3_key}, so removing from changed values."
+                    (
+                        f"Value matches the value in the song for {tag.id3_key}, "
+                        "so removing from changed values."
+                    )
                 )
                 self.changed_values.pop(tag.id3_key, None)
                 logger.debug(f"Changed values are now {self.changed_values}")
@@ -201,13 +218,17 @@ class EditDialog(EditAbstractDialog):
         self.changed_values = {}
 
     def resetSongInfo(self) -> None:
-        """Sets the values for the song back to the original ones before the changes occurred."""
+        """Sets the values for the song back to the original ones
+        before the changes occurred.
+        """
         widgets = self.findChildren(EditAbstractWidget)
         for widget in widgets:
             widget.reset()
 
     def _getSong(self) -> Song | None:
-        """Gets the song based on the index of the list of indexes, or None if not valid."""
+        """Gets the song based on the index of the list of indexes,
+        or None if not valid.
+        """
         row = self.rows[self.current_index]
         song_info = self.repository.getSong(row)
         if song_info is None:
@@ -216,7 +237,9 @@ class EditDialog(EditAbstractDialog):
         return song_info
 
     def _switchButtonState(self) -> None:
-        """Enable or disable the next and previous buttons based on where we are in the list."""
+        """Enable or disable the next and previous buttons based on
+        where we are in the list.
+        """
         if not hasattr(self, "next_button") or not hasattr(self, "previous_button"):
             logger.warning("Missing next or previous button in edit dialog")
             return
@@ -226,7 +249,9 @@ class EditDialog(EditAbstractDialog):
 
     def showSongInDirection(self, nav_direction: NavDirection) -> None:
         """Saves the current changes to the song,
-        and displays the next or previous song from the selection based on the direction."""
+        and displays the next or previous song from the selection
+        based on the direction.
+        """
         if (
             nav_direction == NavDirection.Next
             and self.current_index == len(self.rows) - 1

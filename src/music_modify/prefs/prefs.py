@@ -1,3 +1,7 @@
+"""Module that defines the `Settings` class,
+and creates the global `settings` object.
+"""
+
 import logging
 from typing import final
 
@@ -11,10 +15,16 @@ logger = logging.getLogger(__name__)
 
 @final
 class Settings:
+    """Wrapper for QSettings that provides easier access to defined setting keys."""
+
     def __init__(self, new_settings: QSettings | None = None):
         logger.info("In init method for Settings object")
         self._settings: QSettings = (
-            QSettings("Kayzels", "Music Modify") if new_settings is None else new_settings
+            # PERF: Is there a way to get this from the QApplication,
+            # rather than setting it twice?
+            QSettings("Kayzels", "Music Modify")
+            if new_settings is None
+            else new_settings
         )
 
         # Store in a cache to prevent needing to call getArray on every cell
@@ -119,6 +129,7 @@ class Settings:
         TagInfo(display_name="Keywords", id3_key="TXXX:KEYWORDS"),
         TagInfo(display_name="Tempo", id3_key="TXXX:TEMPO"),
     ]
+    "Default values for known tags, if there are no user changes."
 
     @property
     def table_tags(self) -> list[SongTag]:
@@ -133,6 +144,10 @@ class Settings:
 
     @property
     def all_tags(self) -> list[SongTag]:
+        """`SongTag` version of the tags that are stored in settings.
+        Used when a `SongTag` specifically needs to be checked,
+        but the majority of the time, we can use `info_tags` instead,
+        using `TagInfo` objects."""
         return [
             SongTag(display_name=tag.display_name, id3_key=tag.id3_key)
             for tag in self.info_tags
@@ -140,6 +155,8 @@ class Settings:
 
     @property
     def info_tags(self) -> list[TagInfo]:
+        """`TagInfo` version of the tags that are stored in settings.
+        Use `all_tags` if needing `SongTag` objects."""
         return self._getArray("Tags/info_tags")
 
     @info_tags.setter
@@ -148,6 +165,10 @@ class Settings:
         self._setArray("Tags/info_tags", value)
 
     def _setArray(self, key: str, vals: list[TagInfo]):
+        """Set the QSettings array based on the list of TagInfo.
+
+        Writes the settings file in QSettings array form,
+        which then needs to be converted into a list to be usable in Python."""
         logger.info(f"Began creating array for {key} with {len(vals)} entries.")
 
         self._settings.beginGroup(key)
@@ -163,6 +184,8 @@ class Settings:
         self._settings.endArray()
 
     def _getArray(self, key: str) -> list[TagInfo]:
+        """Convert the stored QSettings array for the specific key
+        into a list of tags that can be used in Python."""
         size = self._settings.beginReadArray(key)
         tags: list[TagInfo] = []
         for i in range(size):
@@ -182,6 +205,7 @@ class Settings:
         return tags
 
     def _initializeDefaults(self):
+        """Set the default values for all settings, if they aren't already set."""
         logger.info("Called initialise defaults")
         if not self._settings.contains("Split/split_text_entered"):
             self.split_text_entered = Settings.default_split_text_entered

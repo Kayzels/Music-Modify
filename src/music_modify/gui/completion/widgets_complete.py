@@ -1,5 +1,7 @@
+"""Module that defines the widgets that are used for text completion."""
+
 # Adapted from https://github.com/kovidgoyal/calibre/blob/master/src/calibre/gui2/complete2.py
-#
+
 # TODO: Don't allow multiple values that are the same
 
 from typing import cast, override

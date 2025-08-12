@@ -1,19 +1,27 @@
+"""Module that defines the model that is used for completion
+in widgets, when entering text."""
+
 # Adapted from https://github.com/kovidgoyal/calibre/blob/master/src/calibre/gui2/complete2.py
 
 from typing import override
+
 from PySide6.QtCore import QAbstractListModel, QModelIndex, QPersistentModelIndex, Qt
 from PySide6.QtWidgets import QWidget
 
 
 def primary_contains(word: str, key: str) -> bool:
+    """Function that checks whether `key` appears in `word`."""
     return key in word
 
 
 def primary_startswith(word: str, key: str) -> bool:
+    """Function that checks whether `key` is at the start of `word`."""
     return word.startswith(key)
 
 
 class CompleteModel(QAbstractListModel):
+    """Model that is used for text completion suggestions."""
+
     def __init__(
         self, parent: QWidget | None = None, strip_completion_entries: bool = True
     ):
@@ -25,6 +33,7 @@ class CompleteModel(QAbstractListModel):
         self.current_prefix: str = ""
 
     def setItems(self, items: tuple[str, ...]):
+        """Sets the items that should be used as suggestions when typing."""
         if self.strip_completion_entries:
             item_gen = (str(x).strip() for x in items if x)
         else:
@@ -36,6 +45,7 @@ class CompleteModel(QAbstractListModel):
         self.endResetModel()
 
     def setCompletionPrefix(self, prefix: str):
+        """Sets the text that should be used as a filter for completion suggestions."""
         old_prefix = self.current_prefix
         self.current_prefix = prefix
         if prefix == old_prefix:
@@ -83,6 +93,7 @@ class CompleteModel(QAbstractListModel):
         return None
 
     def indexForPrefix(self, prefix: str) -> QModelIndex | None:
+        """Gets the index of the first item that starts with the given string."""
         for i, item in enumerate(self.current_items):
             if primary_startswith(item, prefix):
                 return self.index(i)

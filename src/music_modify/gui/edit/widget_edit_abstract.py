@@ -1,6 +1,10 @@
+"""Module that defines an abstract class, that is used to
+define the general behaviour of a widget inside an EditDialog.
+"""
+
+from abc import ABC, abstractmethod
 import copy
 import logging
-from abc import ABC, abstractmethod
 from typing import Generic, TypeVar
 
 from PySide6.QtCore import Signal
@@ -17,10 +21,15 @@ ValueT = TypeVar("ValueT", bound=SongEditData)
 
 
 class EditAbstractWidget(QWidget, Generic[ValueT], ABC, metaclass=ABCQMeta):
-    """An abstract class that defines the desired behaviour for a widget inside an EditDialog."""
+    """An abstract class that defines the desired behaviour for a widget
+    inside an EditDialog.
+    """
 
     value_updated: Signal = Signal()
+    "Signal that indicates that a value has changed to a new value."
     value_reset: Signal = Signal()
+    """Signal that indicates that  a value has been set back to the value
+    it had when the widget was initialised."""
 
     def __init__(self, parent: QWidget, data: ValueT | None = None):
         super().__init__(parent)
@@ -62,7 +71,9 @@ class EditAbstractWidget(QWidget, Generic[ValueT], ABC, metaclass=ABCQMeta):
     @property
     @abstractmethod
     def value(self) -> ValueT:
-        """The value displayed and stored inside the widget, depending on the data type."""
+        """The value displayed and stored inside the widget,
+        depending on the data type.
+        """
         pass
 
     @value.setter
@@ -94,7 +105,13 @@ class EditAbstractWidget(QWidget, Generic[ValueT], ABC, metaclass=ABCQMeta):
         buttons: EditButton = EditButton.Reset | EditButton.Clear,
         direction: QBoxLayout.Direction = QBoxLayout.Direction.LeftToRight,
     ) -> QBoxLayout:
-        """Creates a layout with the designated button types in the desired orientation."""
+        """Creates a layout with the designated button types
+        in the desired orientation.
+
+        Args:
+            buttons: The set of button types that should be displayed
+            direction: Whether the buttons should be arranged vertically or horizontally
+        """
         button_layout = QBoxLayout(direction)
 
         if buttons & EditButton.Clear:

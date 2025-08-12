@@ -1,3 +1,6 @@
+"""Module that defines the widget that is used
+to display (role, person) pairs."""
+
 import copy
 import logging
 from typing import cast, override
@@ -9,6 +12,7 @@ from PySide6.QtWidgets import (
     QBoxLayout,
     QFrame,
     QHBoxLayout,
+    QLayout,
     QTableWidget,
     QTableWidgetItem,
     QVBoxLayout,
@@ -16,7 +20,7 @@ from PySide6.QtWidgets import (
 )
 
 from music_modify.custom_types.aliases import SongTableData
-from music_modify.custom_types.enums import Direction, EditButton
+from music_modify.custom_types.enums import EditButton, RowDirection
 from music_modify.gui.utils import getSelectedRows
 
 from .widget_edit_abstract_group import EditAbstractGroupWidget
@@ -40,6 +44,9 @@ class _DragTableWidget(QTableWidget):
         self.adjustColumnWidths()
 
     def adjustColumnWidths(self, length: int | None = None):
+        """Adjusts the widths of the table to the specified length,
+        except for the last column, which is stretched.
+        """
         if self.rowCount() <= 1 or length == 0:
             column_width = int(self.width() / self.columnCount())
             for column in range(self.columnCount() - 1):
@@ -51,14 +58,22 @@ class _DragTableWidget(QTableWidget):
 
 
 class EditTableWidget(EditAbstractGroupWidget[SongTableData]):
-    """Displays data in a table, used for People data, which is stored in the form [role, person]."""
+    """Displays data in a table, used for People data,
+    which is stored in the form [role, person].
+    """
 
     def __init__(
         self,
         parent: QWidget,
         data: SongTableData | None,
         labels: list[str] | None = None,
-    ):
+    ) -> None:
+        """
+        Args:
+            parent: The widget that should own this widget
+            data: The information currently present for the tag
+            labels (optional): The headings that the table should have
+        """
         if labels is None:
             self.labels: list[str] = ["Role", "Person"]
         else:
@@ -81,8 +96,8 @@ class EditTableWidget(EditAbstractGroupWidget[SongTableData]):
         self._original_data = copy.deepcopy(self.value)
 
     @override
-    def _setupUi(self):
-        layout = self.layout()
+    def _setupUi(self) -> None:
+        layout: QLayout | None = self.layout()
         if layout is None:
             logger.info("Layout was None for table widget")
             return
@@ -109,7 +124,8 @@ class EditTableWidget(EditAbstractGroupWidget[SongTableData]):
         frame_layout.addWidget(self.main_widget)
 
         # Allow dragging rows up and down
-        # NOTE: To ensure rows aren't overwritten, need to ensure that ItemIsDropEnabled is unset
+        # NOTE: To ensure rows aren't overwritten,
+        # need to ensure that ItemIsDropEnabled is unset
         # for all items. (Done in _displayValue)
         self.main_widget.setDragDropMode(QAbstractItemView.DragDropMode.InternalMove)
         self.main_widget.setDragDropOverwriteMode(False)
@@ -162,7 +178,8 @@ class EditTableWidget(EditAbstractGroupWidget[SongTableData]):
                     pair.append(text)
             if not any([pair[j] == "" for j in range(len(pair))]) and len(pair) == 2:
                 # Don't add while one of the values in the pair is empty
-                # Also need to check for length, because the second item won't exist at first
+                # Also need to check for length,
+                # because the second item won't exist at first
                 # (so it won't be empty, it just won't be added)
                 values.append(pair)
         self.value = values
@@ -183,7 +200,8 @@ class EditTableWidget(EditAbstractGroupWidget[SongTableData]):
         # block signals until the table is done being populated.
         self.main_widget.blockSignals(True)
 
-        # NOTE: To ensure rows aren't overwritten, need to ensure that ItemIsDropEnabled is unset
+        # NOTE: To ensure rows aren't overwritten,
+        # need to ensure that ItemIsDropEnabled is unset
         # for all items
         for row_count, pair in enumerate(self.value):
             for col_count, value in enumerate(pair):
@@ -217,7 +235,9 @@ class EditTableWidget(EditAbstractGroupWidget[SongTableData]):
 
     @override
     def _removeRow(self) -> None:
-        selected_rows = sorted(getSelectedRows(self.main_widget), reverse=True)
+        selected_rows: list[int] = sorted(
+            getSelectedRows(self.main_widget), reverse=True
+        )
 
         if len(selected_rows) == 0:
             return
@@ -227,9 +247,9 @@ class EditTableWidget(EditAbstractGroupWidget[SongTableData]):
         self._updateValue()
 
     @override
-    def _moveRows(self, direction: Direction) -> None:
-        selected_rows = sorted(
-            getSelectedRows(self.main_widget), reverse=direction == Direction.Down
+    def _moveRows(self, direction: RowDirection) -> None:
+        selected_rows: list[int] = sorted(
+            getSelectedRows(self.main_widget), reverse=direction == RowDirection.Down
         )
 
         if len(selected_rows) == 0:
@@ -237,12 +257,12 @@ class EditTableWidget(EditAbstractGroupWidget[SongTableData]):
 
         direction_num = 1
         match direction:
-            case Direction.Up:
-                # Don't move up if first selected item is already a ttop
+            case RowDirection.Up:
+                # Don't move up if first selected item is already at top
                 if selected_rows[0] == 0:
                     return
                 direction_num = -1
-            case Direction.Down:
+            case RowDirection.Down:
                 # Don't move down if the last selected item is already at the bottom
                 if selected_rows[0] == self.main_widget.rowCount() - 1:
                     return
@@ -284,7 +304,7 @@ class EditTableWidget(EditAbstractGroupWidget[SongTableData]):
 
     @value.setter
     @override
-    def value(self, value: SongTableData):
+    def value(self, value: SongTableData) -> None:
         # noinspection PyAttributeOutsideInit
         self._value: SongTableData = value
 

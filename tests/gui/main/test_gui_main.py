@@ -111,13 +111,6 @@ def test_removeSelectedFiles_Action(qtbot: QtBot, song_paths: list[PathLike[str]
     assert not window.action_select_none.isEnabled()
 
 
-def test_addStatusbarAppMessage(qtbot: QtBot):
-    window = MainWindow()
-    qtbot.addWidget(window)
-    window.addStatusbarAppMessage("App Name", "1")
-    assert window.versionMessage.text() == "App Name 1"
-
-
 def test_updateStatusbarMessage(qtbot: QtBot, song_paths: list[PathLike[str]]):
     window = MainWindow()
     qtbot.addWidget(window)

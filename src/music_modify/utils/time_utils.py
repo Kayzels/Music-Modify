@@ -1,3 +1,5 @@
+"""Module for utilities related to working with datetime values."""
+
 import datetime
 import re
 
@@ -42,4 +44,3 @@ def formatTime(time_to_format: datetime.timedelta, decimal_places: int = 2) -> s
             parts.append(f"{int(mins)} mins")
     parts.append(f"{seconds} seconds")
     return ", ".join(parts)
-

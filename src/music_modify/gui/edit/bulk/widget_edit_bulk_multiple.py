@@ -1,3 +1,6 @@
+"""Module that contains the widget that is used for bulk editing data,
+when the tag can contain multiple values, but these values are not pairs."""
+
 import logging
 from typing import Any, cast, override
 
@@ -19,17 +22,24 @@ logger = logging.getLogger(__name__)
 
 
 class _MultipleLineEdit(QLineEdit):
-    def __init__(self, value: str, parent: QWidget | None = None, *args: Any):  # pyright: ignore[reportExplicitAny]
+    """Private class that stores a list of strings, but displays a single string."""
+
+    def __init__(self, value: str, parent: QWidget | None = None, *args: Any) -> None:  # pyright: ignore[reportExplicitAny]
         # noinspection PyArgumentList
         super().__init__(value, parent, *args)
 
     @property
     def items(self) -> list[str]:
+        """The list of strings that is displayed."""
         text = self.text()
         return getUniqueOrdered(text, prefs.settings.split_text_entered)
 
 
 class EditBulkMultipleWidget(EditBulkAbstractGroupWidget):
+    """Widget that is used for bulk editing data,
+    when the tag can contain multiple values,
+    but these values are not pairs."""
+
     def __init__(self, parent: QWidget, data: set[str], tag: SongTag):
         super().__init__(parent, tag)
 
@@ -53,7 +63,9 @@ class EditBulkMultipleWidget(EditBulkAbstractGroupWidget):
         form_layout.addRow("Add", add_layout)
 
         remove_layout = QHBoxLayout()
-        self.remove_line = createCompletionWidget(self, self.items, multiple=True)
+        self.remove_line = createCompletionWidget(
+            parent=self, items=self.items, multiple=True
+        )
         remove_layout.addWidget(self.remove_line)
         form_layout.addRow("Remove", remove_layout)
 

@@ -1,3 +1,6 @@
+"""Module that contains the metaclass that works with abstract classes
+and PySide6."""
+
 from abc import ABCMeta
 
 from PySide6.QtCore import QObject

@@ -1,3 +1,6 @@
+"""Module that defines the `Song` object, that manages the metadata
+for an mp3 file."""
+
 import logging
 import os
 
@@ -6,8 +9,8 @@ from mutagen.id3 import ID3
 from music_modify.prefs import prefs
 
 from .aliases import SongEditData, SongGroupData
-from .utils import toTag, valueToString
 from .songtag import SongTag
+from .utils import toTag, valueToString
 
 logger = logging.getLogger(__name__)
 
@@ -17,18 +20,24 @@ class Song:
 
     def __init__(self, file: str | os.PathLike[str] | None = None):
         self.file: str | os.PathLike[str] | None = file
+        "The file on disk that this `Song` object represents."
         self.id3: ID3 = ID3()
+        "The metadata structure and values stored in the song."
         if file is not None:
             self.load(file)
         self.display_info: list[str] = self._generateColumns()
+        "The displayed values for the tags that are present in the song."
 
     def _generateColumns(self) -> list[str]:
+        """Generate the display values for the columns that should be shown in the
+        table."""
         info: list[str] = []
         for column in prefs.settings.table_tags:
             data_string: str
             try:
                 data_string = valueToString(
-                    self.getValue(column), prefs.settings.split_values_display
+                    value=self.getValue(column),
+                    display_split=prefs.settings.split_values_display,
                 )
             except KeyError:
                 logger.info(f"{self.id3} wasn't a key in the song.")
@@ -37,34 +46,45 @@ class Song:
         return info
 
     def updateInfo(self):
+        """Update the displayed values, so that they are in sync with what is stored
+        in the file."""
         self.display_info = self._generateColumns()
 
     def save(self):
+        """Save the changed values for the song, and refresh the display."""
         self.id3.save(v2_version=4)
         self.updateInfo()
 
     def load(self, file: str | os.PathLike[str]):
+        """Load the metadata from this specific file."""
         self.file = file
         self.id3.load(file)
 
     def setTag(self, tag: str | SongTag, value: SongGroupData):
+        """Set the tag within the file to have the value specified."""
         found_tag = toTag(tag, prefs.settings.all_tags)
         if found_tag is not None:
             found_tag.setTag(self.id3, value)
 
     def getValue(self, tag: str | SongTag) -> SongEditData | None:
+        """Return the value stored in the song for that specific tag,
+        or `None`, if the tag is not present."""
         found_tag = toTag(tag, prefs.settings.all_tags)
         if found_tag is None:
             return None
         return found_tag.getValue(self.id3)
 
     def removeTag(self, tag: str | SongTag) -> None:
+        """Remove the tag from the stored metadata for a song,
+        if it exists."""
         found_tag = toTag(tag, prefs.settings.all_tags)
         if found_tag is None:
             return
         found_tag.removeTag(self.id3)
 
     def hasTag(self, tag: str | SongTag) -> bool:
+        """Returns `True` if the specified tag is defined within the metadata
+        for the song."""
         found_tag = toTag(tag, prefs.settings.all_tags)
         if found_tag is None:
             return False

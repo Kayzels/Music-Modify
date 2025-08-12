@@ -1,3 +1,6 @@
+"""Module that defines the dialog that allows
+editing the tags of multiple songs at the same time."""
+
 import copy
 import logging
 from typing import cast, override
@@ -29,6 +32,7 @@ class EditBulkDialog(EditAbstractDialog):
     """A dialog that allows editing the tags of multiple songs at the same time."""
 
     info_updated: Signal = Signal()
+    "Signal that should be emitted whenever data changes in any of the fields."
 
     def __init__(
         self, parent: QWidget, repository: SongRepository, rows: list[int]
@@ -38,6 +42,7 @@ class EditBulkDialog(EditAbstractDialog):
         self.songs: list[Song] = [
             song for index in rows if (song := repository.getSong(index)) is not None
         ]
+        "The list of song objects that should be changed."
 
         self.setWindowTitle(f"Bulk editing {len(self.songs)} songs")
 

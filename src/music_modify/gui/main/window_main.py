@@ -1,14 +1,17 @@
+"""Module that defines the main user interface."""
+
 import datetime
 import logging
 import os
-import time
 from os import PathLike
 from pathlib import Path
+import time
 from typing import Final
 
 from PySide6.QtCore import QPoint, Qt
 from PySide6.QtGui import QDragEnterEvent, QDragMoveEvent, QDropEvent
 from PySide6.QtWidgets import (
+    QApplication,
     QDialog,
     QFileDialog,
     QLabel,
@@ -30,19 +33,25 @@ logger = logging.getLogger(__name__)
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):
-    def __init__(self):
+    """Main interface window for managing song metadata"""
+
+    def __init__(self) -> None:
         super().__init__()
         self.setupUi(self)
 
         # Create separate QLabel widgets instead of using the statbusbar default ones,
         # so that they're not overridden when a QStatusTipEvent happens.
         self.versionMessage: QLabel = QLabel(self)
+        "Label that contains the text for the current app version"
         self.statusbar.addWidget(self.versionMessage)
         self.statusLabel: QLabel = QLabel(self)
+        "Label that contains information about how many songs are present and selected"
         self.statusbar.addWidget(self.statusLabel)
 
         self.songs_repository: Final[SongRepository] = SongRepository()
+        "Repository that stores the songs being managed"
         self.songs_model: Final[SongTableModel] = SongTableModel(self.songs_repository)
+        "Model that links between the song repository and the display of the metadata"
         self.files_table_view.setModel(self.songs_model)
         self.files_table_view.setShowGrid(False)
         self.files_table_view.resizeColumnsToContents()
@@ -91,15 +100,18 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.dialog_factory: EditDialogFactory = EditDialogFactory(
             self, self.songs_repository
         )
+        "Factory for generating the right type of EditDialog, based on selection"
         self.action_edit_individual.triggered.connect(self.showEditDialog)
         self.action_edit_bulk.triggered.connect(lambda: self.showEditDialog(bulk=True))
 
-    def setActionState(self):
+        self.addStatusbarAppMessage()
+
+    def setActionState(self) -> None:
         """Toggle the state of possible actions, based on program state."""
         self.setFileActionState()
         self.setSelectionActionState()
 
-    def setSelectionActionState(self):
+    def setSelectionActionState(self) -> None:
         """Toggle actions related to selection,
         based on whether any files are selected in the table."""
         self.action_select_all.setEnabled(len(self.songs_repository) > 0)
@@ -108,14 +120,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.action_select_none.setEnabled(has_selection)
         self.action_remove_selected.setEnabled(has_selection)
 
-    def setFileActionState(self):
+    def setFileActionState(self) -> None:
         """Toggle actions related to files, based on whether files exist."""
         self.action_clear_files.setEnabled(len(self.songs_repository) > 0)
         self.setSelectionActionState()
 
-    def openAddDialog(self, file_mode: QFileDialog.FileMode):
-        """Display a file picker that allows users to select the files (or folders) to edit,
-        based on the file_mode."""
+    def openAddDialog(self, file_mode: QFileDialog.FileMode) -> None:
+        """Display a file picker that allows users to select the files (or folders)
+        to edit, based on the file_mode.
+        """
         files_dialog = QFileDialog(self)
         files_dialog.setFileMode(file_mode)
         if file_mode == QFileDialog.FileMode.ExistingFiles:
@@ -130,7 +143,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.addFiles(files_in_folder)
 
     def getFolderFiles(self, folder: str | PathLike[str]) -> list[str]:
-        """Gets all files that are in the folder, or child folders."""
+        """Gets all files that are in the folder, or child folders.
+
+        Args:
+            folder: Directory to check for files.
+
+        """
         songs: list[str] = []
         progress_dialog = QProgressDialog(
             "Adding Folders...", "Cancel", 0, 1, parent=self
@@ -145,8 +163,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         progress_dialog.setValue(1)
         return songs
 
-    def addFiles(self, files: list[str] | list[PathLike[str]]):
-        """Adds the specified files to the table."""
+    def addFiles(self, files: list[str] | list[PathLike[str]]) -> None:
+        """Adds the specified files to the table.
+
+        Args:
+            files: List of files that should be added.
+
+        """
         start_time = time.time()
         progress_dialog = QProgressDialog(
             "Adding Files...", "Cancel", 0, len(files), parent=self
@@ -170,8 +193,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         progress_dialog.setValue(len(files))
 
     @staticmethod
-    def processTableDragEvent(event: QDragEnterEvent | QDragMoveEvent):
-        """Processes dragging data from the tableview, needed for dropping to work."""
+    def processTableDragEvent(event: QDragEnterEvent | QDragMoveEvent) -> None:
+        """Processes dragging data from the tableview, needed for dropping to work.
+
+        Args:
+            event: The drag event that should be processed.
+        """
         if event.mimeData().hasUrls():
             event.acceptProposedAction()
         else:
@@ -179,14 +206,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 f"Unsupported mimedata when drag/dropping: {event.mimeData()}"
             )
 
-    def processTableDropEvents(self, event: QDropEvent):
+    def processTableDropEvents(self, event: QDropEvent) -> None:
         """Processes the mimedata dropped on the tableview.
 
+        Args:
+            event: The drop event that should be processed.
+
         Information
-        ___________
-        If the mimedata is not a list of urls, rejects.
-        Determines whether the url is a file or folder,
-        and then adds to the table."""
+            If the mimedata is not a list of urls, rejects.
+            Determines whether the url is a file or folder,
+            and then adds to the table.
+        """
         files: list[str] | list[os.PathLike[str]] = []
         folders: list[str] | list[os.PathLike[str]] = []
         for url in event.mimeData().urls():
@@ -204,7 +234,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 new_files.extend(self.getFolderFiles(folder))
             self.addFiles(new_files)
 
-    def clearFiles(self):
+    def clearFiles(self) -> None:
         """Remove all files from the model."""
         self.songs_model.layoutAboutToBeChanged.emit()
         self.songs_repository.clearFiles()
@@ -215,7 +245,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """Gets the number of rows selected in the table."""
         return len(self.files_table_view.selectionModel().selectedRows())
 
-    def updateStatusbarMessage(self):
+    def updateStatusbarMessage(self) -> None:
         """Display the number of songs and selected songs inside the status bar."""
         num_songs = len(self.songs_repository)
         if num_songs == 0:
@@ -229,7 +259,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         message += "]"
         self.statusLabel.setText(message)
 
-    def removeSelectedFiles(self):
+    def removeSelectedFiles(self) -> None:
         """Removes the files at the indexes provided by the selectionModel"""
         selectionLength = self.getSelectionLength()
         if selectionLength == 0:
@@ -244,22 +274,27 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.songs_repository.removeSongs(rows)
         self.files_table_view.clearSelection()
 
-    def addStatusbarAppMessage(self, appName: str, appVersion: str):
+    def addStatusbarAppMessage(self) -> None:
         """Add text for the version of the app to the status bar."""
-        self.versionMessage.setText(f"{appName} {appVersion}")
+        app = QApplication.instance()
+        if app is None:
+            return
+        app_name = app.applicationName()
+        app_version = app.applicationVersion()
+        self.versionMessage.setText(f"{app_name} {app_version}")
 
-    def showAboutDialog(self):
+    def showAboutDialog(self) -> None:
         """Show an AboutDialog."""
         about_dialog = AboutDialog(self)
         about_dialog.show()
 
-    def showPrefsDialog(self):
+    def showPrefsDialog(self) -> None:
         """Show a PreferencesDialog."""
         prefs_dialog = PrefsDialog(parent=self)
         prefs_dialog.show()
         prefs_dialog.settings_updated.connect(self.refreshTable)
 
-    def refreshTable(self):
+    def refreshTable(self) -> None:
         """Update the display of the table."""
         self.songs_model.layoutAboutToBeChanged.emit()
         self.songs_repository.refreshDisplay()
@@ -267,9 +302,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         updateTableView(self.files_table_view, self.songs_repository)
 
     def showEditDialog(self, bulk: bool = False) -> None:
-        """Create a dialog that allows editing the information for each song in the selection,
-        either individually with transitions between Next and Previous songs,
-        or in bulk."""
+        """Create a dialog that allows editing the information for each song
+        in the selection, either individually with transitions between
+        Next and Previous songs, or in bulk.
+
+        Args:
+            bulk: Whether the information should be edited in bulk. Default False"""
         # Need to sort the list so that it's not shown in a random order
         rows = sorted(getSelectedRows(self.files_table_view))
 
@@ -278,7 +316,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         dialog = self.dialog_factory.get(rows, bulk=bulk)
 
-        def processDialogResult(result: QDialog.DialogCode):
+        def processDialogResult(result: QDialog.DialogCode) -> None:
             logger.debug("Called process dialog result for edit dialog")
             if result == QDialog.DialogCode.Accepted:
                 dialog.updateSongInfo()
@@ -288,8 +326,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         dialog.show()
 
-    def showCustomContextMenu(self, position: QPoint):
-        """Show a context menu for the selected item in the table."""
+    def showCustomContextMenu(self, position: QPoint) -> None:
+        """Show a context menu for the selected item in the table.
+
+        Args:
+            position: The mouse position when the user right clicks.
+        """
         index = self.files_table_view.indexAt(position)
         if not index.isValid():
             logger.info(f"Invalid index when calling custom context menu: {index}")
@@ -297,7 +339,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         context_menu = QMenu(self)
 
-        # If only one song selected, can only edit individually, don't show bulk, or child menu
+        # If only one song selected, can only edit individually,
+        # so don't show bulk, or child menu
         if self.getSelectionLength() == 1:
             context_menu.addAction(self.action_edit_individual)
         else:

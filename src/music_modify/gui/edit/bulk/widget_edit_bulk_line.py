@@ -1,3 +1,6 @@
+"""Module that contains the widget that is used for bulk editing
+single value keys."""
+
 import logging
 from typing import override
 
@@ -17,6 +20,8 @@ logger = logging.getLogger(__name__)
 
 
 class EditBulkLineWidget(EditBulkAbstractWidget):
+    """Widget used for bulk editing single value keys."""
+
     def __init__(
         self, parent: QWidget, data: set[str], tag: SongTag, in_all: bool = False
     ) -> None:
@@ -25,7 +30,10 @@ class EditBulkLineWidget(EditBulkAbstractWidget):
         self.items: tuple[str, ...] = tuple(data)
 
         self.main_widget: EditWithComplete = createCompletionWidget(
-            self, self.items, multiple=False, initial=self.items[0] if in_all else ""
+            self,
+            items=self.items,
+            multiple=False,
+            initial=self.items[0] if in_all else "",
         )
 
         self.setupUi()

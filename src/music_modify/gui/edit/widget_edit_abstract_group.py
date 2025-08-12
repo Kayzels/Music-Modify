@@ -1,11 +1,15 @@
+"""Module that defines the abstract class used for widgets
+in an EditDialog that display groups of values,
+rather than a single value."""
+
 from abc import ABC, abstractmethod
-from typing import override, Generic, TypeVar
+from typing import Generic, TypeVar, override
 
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QBoxLayout, QToolButton, QWidget
 
 from music_modify.custom_types.aliases import SongListData, SongTableData
-from music_modify.custom_types.enums import Direction, EditButton
+from music_modify.custom_types.enums import EditButton, RowDirection
 from music_modify.gui.meta import ABCQMeta
 
 from .widget_edit_abstract import EditAbstractWidget
@@ -16,8 +20,9 @@ ValueG = TypeVar("ValueG", bound=SongListData | SongTableData)
 class EditAbstractGroupWidget(
     EditAbstractWidget[ValueG], Generic[ValueG], ABC, metaclass=ABCQMeta
 ):
-    """Abstract class for widgets displayed on an EditDialog that contain multiple items,
-    which can be displayed in lists or tables."""
+    """Abstract class for widgets displayed on an EditDialog
+    that contain multiple items, which can be displayed in lists or tables.
+    """
 
     def __init__(self, parent: QWidget, data: ValueG | None):
         super().__init__(parent, data)
@@ -41,7 +46,7 @@ class EditAbstractGroupWidget(
             down_button = QToolButton(self)
             down_button.setIcon(QIcon(QIcon.fromTheme(QIcon.ThemeIcon.GoDown)))
             button_layout.insertWidget(0, down_button)
-            down_button.clicked.connect(lambda: self._moveRows(Direction.Down))
+            down_button.clicked.connect(lambda: self._moveRows(RowDirection.Down))
 
         if buttons & EditButton.Remove:
             remove_button = QToolButton(self)
@@ -59,7 +64,7 @@ class EditAbstractGroupWidget(
             up_button = QToolButton(self)
             up_button.setIcon(QIcon(QIcon.fromTheme(QIcon.ThemeIcon.GoUp)))
             button_layout.insertWidget(0, up_button)
-            up_button.clicked.connect(lambda: self._moveRows(Direction.Up))
+            up_button.clicked.connect(lambda: self._moveRows(RowDirection.Up))
 
         return button_layout
 
@@ -74,6 +79,6 @@ class EditAbstractGroupWidget(
         pass
 
     @abstractmethod
-    def _moveRows(self, direction: Direction) -> None:
+    def _moveRows(self, direction: RowDirection) -> None:
         """Moves the selected rows in the specified direction."""
         pass

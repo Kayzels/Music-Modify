@@ -1,7 +1,10 @@
+"""Module that defines the dialog used to let the user change
+how multiple values should be entered, and displayed."""
+
 # pyright: reportIncompatibleMethodOverride=false
 
 import logging
-from typing import override, Self
+from typing import Self, override
 
 from PySide6.QtWidgets import QLineEdit, QWidget
 
@@ -21,6 +24,8 @@ class PrefsSplitDialog(PrefsAbstractDialog, Ui_PrefsSplitDialog):
         super().__init__(parent)
 
         self.changed_settings: dict[str, str] = {}
+        """Stores the name of the setting that has been changed,
+        with its new value. An empty dict implies that nothing has changed."""
         self._initializeDisplay()
 
         self.line_edit_split_text_entered.editingFinished.connect(
@@ -44,7 +49,9 @@ class PrefsSplitDialog(PrefsAbstractDialog, Ui_PrefsSplitDialog):
         Ui_PrefsSplitDialog.setupUi(self, dialog)
 
     def _initializeDisplay(self):
-        """Displays the current values for the split settings before the user changes them."""
+        """Displays the current values for the split settings
+        before the user changes them.
+        """
         self.line_edit_split_text_entered.setText(prefs.settings.split_text_entered)
         self.line_edit_split_values_display.setText(prefs.settings.split_values_display)
         self.line_edit_split_values_at.setText(prefs.settings.split_values_at)
@@ -52,7 +59,12 @@ class PrefsSplitDialog(PrefsAbstractDialog, Ui_PrefsSplitDialog):
     def _getSettingChange(self, setting_name: str, setting_value: str):
         """Gets the value a specific setting has been changed to.
         Stores this in the list of settings to change, which will be reflected
-        when the dialog is confirmed."""
+        when the dialog is confirmed.
+
+        Args:
+            setting_name: The name of the setting to change
+            setting_value: The new value that the setting should be set to
+        """
         logger.debug(
             f"Called _getSettingChange with {setting_name} and {setting_value}"
         )
@@ -70,7 +82,8 @@ class PrefsSplitDialog(PrefsAbstractDialog, Ui_PrefsSplitDialog):
 
     @override
     def updateSettings(self):
-        """A slot that should be called from the parent widget when the dialog is accepted.
+        """A slot that should be called from the parent widget when
+        the dialog is accepted.
         Changes the values in the settings file to match the ones set in the dialog.
         """
         logger.debug("Called update settings inside split dialog")
@@ -84,9 +97,9 @@ class PrefsSplitDialog(PrefsAbstractDialog, Ui_PrefsSplitDialog):
         logger.debug("Restore defaults called for split")
 
         split_defaults: dict[QLineEdit, str] = {
-            self.line_edit_split_text_entered: prefs.settings.default_split_text_entered,
+            self.line_edit_split_text_entered: prefs.settings.default_split_text_entered,  # noqa: E501
             self.line_edit_split_values_at: prefs.settings.default_split_values_at,
-            self.line_edit_split_values_display: prefs.settings.default_split_values_display,
+            self.line_edit_split_values_display: prefs.settings.default_split_values_display,  # noqa: E501
         }
 
         for line_edit, text in split_defaults.items():
@@ -98,7 +111,6 @@ class PrefsSplitDialog(PrefsAbstractDialog, Ui_PrefsSplitDialog):
 
     @override
     def resetSettings(self) -> None:
-        """Should reset the settings to the values they had when opening"""
         logger.debug("Called reset settings in split")
         if len(self.changed_settings) == 0:
             return

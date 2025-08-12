@@ -1,3 +1,5 @@
+"""Entry point for running Music Modify."""
+
 import logging
 import sys
 
@@ -20,7 +22,6 @@ def main():
     app.setApplicationVersion("2.0.0")
 
     window = MainWindow()
-    window.addStatusbarAppMessage(app.applicationName(), app.applicationVersion())
     window.show()
     sys.exit(app.exec())
 

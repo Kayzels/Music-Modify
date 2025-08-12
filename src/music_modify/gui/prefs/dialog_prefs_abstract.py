@@ -1,9 +1,12 @@
+"""Module that defines an abstract class for defining the shared functionality
+of all preference dialogs."""
+
 from abc import ABC, abstractmethod
 import logging
 from typing import Self
 
 from PySide6.QtCore import Signal
-from PySide6.QtWidgets import QDialogButtonBox, QMessageBox, QWidget, QDialog
+from PySide6.QtWidgets import QDialog, QDialogButtonBox, QMessageBox, QWidget
 
 from music_modify.gui.meta import ABCQMeta
 
@@ -11,12 +14,16 @@ logger = logging.getLogger(__name__)
 
 
 class PrefsAbstractDialog(QDialog, ABC, metaclass=ABCQMeta):
-    """An abstract class that specifies the required functionality for all child preference dialogs."""
+    """An abstract class that specifies the required functionality for all
+    child preference dialogs.
+    """
 
     settings_updated: Signal = Signal()
+    "Signal that is emitted whenever any setting is changed."
 
     @abstractmethod
     def setupUi(self, dialog: Self):
+        """Set up the display of the dialog."""
         pass
 
     def __init__(self, parent: QWidget | None = None):
@@ -44,7 +51,8 @@ class PrefsAbstractDialog(QDialog, ABC, metaclass=ABCQMeta):
 
     @abstractmethod
     def updateSettings(self) -> None:
-        """A slot that should be called from the parent widget when the dialog is accepted.
+        """A slot that should be called from the parent widget
+        when the dialog is accepted.
         Changes the values in the settings file to match the ones set in the dialog.
         """
         pass

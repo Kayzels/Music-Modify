@@ -1,8 +1,11 @@
+"""Module that defines the dialog that configures which tags should be editable
+and displayed."""
+
 # pyright: reportIncompatibleMethodOverride=false
 
 import copy
 import logging
-from typing import override, Self
+from typing import Self, override
 
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QMessageBox, QWidget
@@ -12,15 +15,17 @@ from music_modify.gui.utils import getSelectedRows
 from music_modify.models import TagModel
 from music_modify.prefs import prefs
 
-from .ui_dialog_prefs_tag import Ui_PrefsTagDialog
-from .dialog_prefs_tag_add import PrefsTagAddDialog
 from .dialog_prefs_abstract import PrefsAbstractDialog
+from .dialog_prefs_tag_add import PrefsTagAddDialog
+from .ui_dialog_prefs_tag import Ui_PrefsTagDialog
 
 logger = logging.getLogger(__name__)
 
 
 class PrefsTagDialog(PrefsAbstractDialog, Ui_PrefsTagDialog):
-    """Allows the user to edit the metadata tags that are edited and displayed for songs."""
+    """Allows the user to edit the metadata tags that are edited
+    and displayed for songs.
+    """
 
     def __init__(self, parent: QWidget | None = None):
         super().__init__(parent)
@@ -87,7 +92,9 @@ class PrefsTagDialog(PrefsAbstractDialog, Ui_PrefsTagDialog):
                 self.model.removeTag(row)
 
     def moveTagsUp(self) -> None:
-        """Moves all selected tags up, which will change their order in the main table."""
+        """Moves all selected tags up, which will change their order
+        in the main table.
+        """
         selected_rows = sorted(getSelectedRows(self.tag_table))
         if not selected_rows or selected_rows[0] == 0:
             return  # Can't move the first row up
@@ -96,7 +103,9 @@ class PrefsTagDialog(PrefsAbstractDialog, Ui_PrefsTagDialog):
             self.model.moveTag(row, row - 1)
 
     def moveTagsDown(self) -> None:
-        """Moves all selected tags down, which will change their order in the main table."""
+        """Moves all selected tags down, which will change their order
+        in the main table.
+        """
         selected_rows = sorted(getSelectedRows(self.tag_table), reverse=True)
         if not selected_rows or selected_rows[0] == self.model.rowCount() - 1:
             return  # Can't move the last row down
@@ -110,7 +119,8 @@ class PrefsTagDialog(PrefsAbstractDialog, Ui_PrefsTagDialog):
 
     @override
     def updateSettings(self) -> None:
-        """A slot that should be called from the parent widget when the dialog is accepted.
+        """A slot that should be called from the parent widget
+        when the dialog is accepted.
         Changes the values in the settings file to match the ones set in the dialog.
         """
         logger.info("Called update settings inside tag dialog")

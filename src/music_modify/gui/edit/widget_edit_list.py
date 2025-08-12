@@ -1,3 +1,6 @@
+"""Module that defines the widget that is used
+when lists of single values are contained for a tag."""
+
 import copy
 import logging
 from typing import cast, override
@@ -7,6 +10,7 @@ from PySide6.QtWidgets import (
     QAbstractItemView,
     QBoxLayout,
     QHBoxLayout,
+    QLayout,
     QListWidget,
     QListWidgetItem,
     QVBoxLayout,
@@ -14,7 +18,7 @@ from PySide6.QtWidgets import (
 )
 
 from music_modify.custom_types.aliases import SongListData
-from music_modify.custom_types.enums import Direction, EditButton
+from music_modify.custom_types.enums import EditButton, RowDirection
 from music_modify.gui.utils import getSelectedRows
 
 from .widget_edit_abstract_group import EditAbstractGroupWidget
@@ -25,14 +29,14 @@ logger = logging.getLogger(__name__)
 class EditListWidget(EditAbstractGroupWidget[SongListData]):
     """Displays data in a list widget, with each row being a string."""
 
-    def __init__(self, parent: QWidget, data: SongListData | None):
+    def __init__(self, parent: QWidget, data: SongListData | None) -> None:
         super().__init__(parent, data)
 
         self.main_widget: QListWidget
         self._original_data: SongListData
 
     @override
-    def _initValue(self, data: SongListData | None):
+    def _initValue(self, data: SongListData | None) -> None:
         if data is None:
             self.value = []
         else:
@@ -41,8 +45,8 @@ class EditListWidget(EditAbstractGroupWidget[SongListData]):
         self._original_data = copy.deepcopy(self.value)
 
     @override
-    def _setupUi(self):
-        layout = self.layout()
+    def _setupUi(self) -> None:
+        layout: QLayout | None = self.layout()
         if layout is None:
             logger.info("Didn't create a layout for list widget")
             return
@@ -85,7 +89,7 @@ class EditListWidget(EditAbstractGroupWidget[SongListData]):
         return True
 
     @override
-    def _updateValue(self):
+    def _updateValue(self) -> None:
         self.value = [
             self.main_widget.item(row).text().strip()
             for row in range(self.main_widget.count())
@@ -95,7 +99,6 @@ class EditListWidget(EditAbstractGroupWidget[SongListData]):
 
     @override
     def _displayValue(self) -> None:
-        """Set the values for the widget, based on the value property currently set."""
         if not hasattr(self, "main_widget"):
             return
 
@@ -111,14 +114,16 @@ class EditListWidget(EditAbstractGroupWidget[SongListData]):
         self.value = []
 
     @override
-    def _addRow(self):
+    def _addRow(self) -> None:
         item = QListWidgetItem("")
         item.setFlags(item.flags() | Qt.ItemFlag.ItemIsEditable)
         self.main_widget.addItem(item)
 
     @override
-    def _removeRow(self):
-        selected_rows = sorted(getSelectedRows(self.main_widget), reverse=True)
+    def _removeRow(self) -> None:
+        selected_rows: list[int] = sorted(
+            getSelectedRows(self.main_widget), reverse=True
+        )
         if len(selected_rows) == 0:
             return
 
@@ -127,21 +132,21 @@ class EditListWidget(EditAbstractGroupWidget[SongListData]):
         self._updateValue()
 
     @override
-    def _moveRows(self, direction: Direction) -> None:
-        selected_rows = sorted(
-            getSelectedRows(self.main_widget), reverse=direction == Direction.Down
+    def _moveRows(self, direction: RowDirection) -> None:
+        selected_rows: list[int] = sorted(
+            getSelectedRows(self.main_widget), reverse=direction == RowDirection.Down
         )
         if len(selected_rows) == 0:
             return
 
         direction_num = 1
         match direction:
-            case Direction.Up:
+            case RowDirection.Up:
                 # Don't move up if first selected item is already at top
                 if selected_rows[0] == 0:
                     return
                 direction_num = -1
-            case Direction.Down:
+            case RowDirection.Down:
                 # Don't move down if the last selected item is already at the bottom
                 if selected_rows[0] == self.main_widget.count() - 1:
                     return

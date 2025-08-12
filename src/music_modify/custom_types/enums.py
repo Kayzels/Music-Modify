@@ -1,31 +1,28 @@
+"""Module that defines enum values used generally."""
+
 from enum import Enum, Flag, auto
 
 
 class TagType(Enum):
+    """The form of data that a specific tag contains."""
+
     Text = "text"
     People = "people"
     Data = "data"
     Url = "url"
 
 
-class TagGroup(Enum):
-    FileTags = "File Tags"
-    StandardTags = "Standard Tags"
-    CustomTags = "Custom Tags"
+class RowDirection(Enum):
+    """Direction that a row should move, when a button is clicked."""
 
-
-class WidgetType(Enum):
-    List = 0
-    Table = 1
-    String = 2
-
-
-class Direction(Enum):
     Up = 0
     Down = 1
 
 
 class EditButton(Flag):
+    """The buttons that can possibly appear in an EditWidget,
+    depending on its type."""
+
     Up = auto()
     Down = auto()
     Add = auto()
@@ -35,5 +32,7 @@ class EditButton(Flag):
 
 
 class NavDirection(Enum):
+    """The direction the user goes to navigate through the stack."""
+
     Next = auto()
     Previous = auto()

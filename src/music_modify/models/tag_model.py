@@ -1,3 +1,6 @@
+"""Module that defines a `TagModel`, that defines which frames in a song
+should be displayed and editable."""
+
 import copy
 import dataclasses
 import logging
@@ -17,10 +20,14 @@ from music_modify.utils import tableHeader
 logger = logging.getLogger(__name__)
 
 TAG_MODEL_COLUMNS = [field.name for field in dataclasses.fields(TagInfo)]
+"List of display names for the tags that should be managed."
 
 
 class TagModel(QAbstractTableModel):
+    """Stores the information about the different tags that should be displayed."""
+
     invalid_input: Signal = Signal(str)
+    "Signal that is emitted when a user enters invalid input."
 
     def __init__(self, tags: list[TagInfo]):
         super().__init__()
@@ -146,17 +153,27 @@ class TagModel(QAbstractTableModel):
         return False
 
     def addTag(self, id3_key: str, display_name: str, show_in_table: bool = False):
+        """Add a Tag with the given information to the model.
+
+        Args:
+            id3_key: The frame in the song that this tag refers to
+            display_name: The human-readable name for the id3 key
+            show_in_table: Whether this tag should be displayed in the main table,
+                or just stored.
+        """
         new_tag: TagInfo = TagInfo(id3_key, display_name, show_in_table)
         self.beginInsertRows(QModelIndex(), len(self._tags), len(self._tags))
         self._tags.append(new_tag)
         self.endInsertRows()
 
     def removeTag(self, row: int):
+        """Remove the tag at the specific row from the model."""
         self.beginRemoveRows(QModelIndex(), row, row)
         del self._tags[row]
         self.endRemoveRows()
 
     def moveTag(self, source_row: int, destination_row: int):
+        """Move the tag information at the source row to the destination row."""
         if (
             source_row < 0
             or destination_row < 0
@@ -178,12 +195,14 @@ class TagModel(QAbstractTableModel):
 
     @property
     def tags(self) -> list[TagInfo]:
-        """The current grouping of tags that are used for editing and displaying song metadata."""
+        """The current grouping of tags that are used for editing
+        and displaying song metadata.
+        """
         return self._tags
 
     @tags.setter
     def tags(self, tags: list[TagInfo]) -> None:
-        # Resets the model and sets the model to have the tags defined in the given list.
+        # Resets the model and sets it to have the tags defined in the given list.
         # Creates a copy of the tags list sent in, to avoid modifying the original.
         # This is needed so that the default value isn't altered,
         # and to allow multiple resets.

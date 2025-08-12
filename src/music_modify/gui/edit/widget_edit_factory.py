@@ -1,5 +1,8 @@
+"""Module that defines a class for generating widgets
+for editing metadata, based on the format of the data."""
+
 import copy
-from typing import cast
+from typing import TypeVar, cast
 
 from PySide6.QtWidgets import QWidget
 
@@ -16,6 +19,8 @@ from .widget_edit_line import EditLineWidget
 from .widget_edit_list import EditListWidget
 from .widget_edit_table import EditTableWidget
 
+ValueT = TypeVar("ValueT", bound=SongEditData)
+
 
 class EditWidgetFactory:
     """Creates widgets displayed on an EditDialog."""
@@ -26,8 +31,18 @@ class EditWidgetFactory:
     @staticmethod
     def createWidget(
         parent: QWidget, tag: SongTag, data: SongEditData | None
-    ) -> EditAbstractWidget:
-        """Creates the required widget based on the tag and data format."""
+    ) -> (
+        EditAbstractWidget[SongListData]
+        | EditAbstractWidget[SongTableData]
+        | EditAbstractWidget[str]
+    ):
+        """Creates the required widget based on the tag and data format.
+
+        Args:
+            parent: Widget that the created widget should be owned by.
+            tag: Holds the format that the data should take, and other information.
+            data: The actual value that the tag currently stores.
+        """
         if tag.frame_type == TagType.People:
             # Is a people tag, so table with current data
             data = cast(

@@ -1,3 +1,6 @@
+"""Module that defines a `SongTag` object,
+which is used to represent an ID3 tag."""
+
 import logging
 from typing import Final, cast, override
 
@@ -29,6 +32,8 @@ class SongTag:
         "TOLY",  # Original Lyricist
         "TPE4",  # Interpreter/Remixer
     }
+    """Hardcoded list of keys that store a list of strings,
+    rather than a single value."""
 
     def __init__(self, display_name: str, id3_key: str):
         self._id3_key: Final[str] = id3_key
@@ -49,18 +54,24 @@ class SongTag:
 
     @property
     def id3_key(self) -> str:
+        """The string value used to know which frame is being referenced
+        in a song."""
         return self._id3_key
 
     @property
     def display_name(self) -> str:
+        """The display name for the specific tag."""
         return self._display_name
 
     @property
     def frame_type(self) -> TagType:
+        """The kind of metadata that the tag will store."""
         return self._frame_type
 
     @property
     def allow_multiple(self) -> bool:
+        """Whether this specific tag stores a list of values (`True`),
+        or a single value (`False`)."""
         # TODO: Consider whether people tags should return True here.
         return self.id3_key in SongTag.KEYS_ALLOW_MULTIPLE_VALUES
 
@@ -115,7 +126,10 @@ class SongTag:
         except AttributeError:
             # Shouldn't happen: means trying to get the wrong frame type.
             logger.warning(
-                f"AttributeError when accessing frame type {self.frame_type} from song for id3_key {self.id3_key}"
+                (
+                    f"AttributeError when accessing frame type {self.frame_type}"
+                    f" from song for id3_key {self.id3_key}"
+                )
             )
             return None
 
@@ -154,7 +168,9 @@ class SongTag:
             logger.warning(f"Cannot create a tag frame with this key: {self.id3_key}")
 
     def getValue(self, song: ID3) -> SongEditData | None:
-        """Returns the value for the tag in the format useful for editing, based on the type."""
+        """Returns the value for the tag in the format useful for editing,
+        based on the type.
+        """
         song_data = self.getTag(song)
         if song_data is None:
             return None

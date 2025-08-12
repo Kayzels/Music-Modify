@@ -1,3 +1,7 @@
+"""Module that governs how the metadata related to songs should be managed.
+
+Defines a `SongTableModel` and a `SongTableProxyModel`."""
+
 from typing import Final, override
 
 from PySide6.QtCore import (
@@ -14,6 +18,13 @@ from .song_repository import SongRepository
 
 
 class SongTableModel(QAbstractTableModel):
+    """Model that stores the extracted metadata from the song files.
+
+    Attributes:
+        empty_message: The message to display when there are no songs.
+        repository: The repository that stores the actual songs.
+    """
+
     empty_message: Final[str] = "Files will show here when added. Drag files here."
 
     def __init__(self, repository: SongRepository):

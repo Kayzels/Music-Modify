@@ -1,7 +1,10 @@
+"""Module that defines a widget that is used to edit metadata
+that is can be contained in a single line (i.e. a single value)."""
+
 import logging
 from typing import cast, override
 
-from PySide6.QtWidgets import QHBoxLayout, QLineEdit, QWidget
+from PySide6.QtWidgets import QHBoxLayout, QLayout, QLineEdit, QWidget
 
 from .widget_edit_abstract import EditAbstractWidget
 
@@ -11,14 +14,14 @@ logger = logging.getLogger(__name__)
 class EditLineWidget(EditAbstractWidget[str]):
     """Displays data in a line edit, used when the value is a single string."""
 
-    def __init__(self, parent: QWidget, data: str | None):
+    def __init__(self, parent: QWidget, data: str | None) -> None:
         super().__init__(parent, data)
 
         self._original_data: str
         self.main_widget: QLineEdit
 
     @override
-    def _initValue(self, data: str | None):
+    def _initValue(self, data: str | None) -> None:
         if data is None:
             self.value = ""
         else:
@@ -28,7 +31,7 @@ class EditLineWidget(EditAbstractWidget[str]):
 
     @override
     def _setupUi(self) -> None:
-        layout = self.layout()
+        layout: QLayout | None = self.layout()
         if layout is None:
             logger.info("Didn't create a layout for line edit")
             return
@@ -47,7 +50,7 @@ class EditLineWidget(EditAbstractWidget[str]):
 
     @override
     def _updateValue(self) -> None:
-        new_text = self.main_widget.text()
+        new_text: str = self.main_widget.text()
         if new_text != self.value:
             self.value = new_text
             self._emitUpdate()

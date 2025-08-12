@@ -1,6 +1,6 @@
+from datetime import datetime
 import logging
 import platform
-from datetime import datetime
 
 import mutagen
 import PySide6  # pyright: ignore[reportMissingTypeStubs]
@@ -13,6 +13,9 @@ logger = logging.getLogger(__name__)
 
 
 class AboutDialog(QDialog, Ui_AboutDialog):
+    """Dialog that displays the meta information about the app,
+    such as the name, version, and tools used."""
+
     def __init__(self, parent: QWidget | None = None):
         QDialog.__init__(self, parent)
         self.setupUi(self)
@@ -22,6 +25,7 @@ class AboutDialog(QDialog, Ui_AboutDialog):
 
     @staticmethod
     def generateText() -> str:
+        """Constructs the html content that should be displayed in the dialog"""
         instance: QCoreApplication | None = QApplication.instance()
         if instance is None:
             logger.warning("Application instance was None when calling generateText")

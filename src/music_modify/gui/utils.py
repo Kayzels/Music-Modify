@@ -1,3 +1,6 @@
+"""Module that contains utility functions that are specific to GUI management,
+but that are used in multiple places."""
+
 from typing import cast
 
 from PySide6.QtCore import QSortFilterProxyModel
@@ -12,7 +15,7 @@ PEOPLE_TAG_WIDTH = 150
 def updateTableView(table_view: QTableView, repository: SongRepository) -> None:
     """Updates the appearance of the table view.
     Sets the column widths to the max for tags with one field,
-    and the column width to PEOPLE_TAG_WIDTH for tags with multiple fields."""
+    and the column width to `PEOPLE_TAG_WIDTH` for tags with multiple fields."""
     if len(repository) == 0:
         return
 
