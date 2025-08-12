@@ -8,6 +8,7 @@ from typing import Callable, Generic, TypeVar, cast, override
 from PySide6.QtWidgets import QFormLayout, QWidget
 
 from music_modify.custom_types import Song, SongTag
+from music_modify.custom_types.enums import PairIndex
 from music_modify.gui.completion import EditWithComplete, createCompletionWidget
 from music_modify.gui.edit.widget_edit_table import EditTableWidget
 from music_modify.utils.list_utils import (
@@ -23,8 +24,6 @@ from .widget_edit_bulk_abstract_group import EditBulkAbstractGroupWidget
 logger = logging.getLogger(__name__)
 
 PAIR_SEPARATOR = ": "
-ROLE_INDEX = 0
-PEOPLE_INDEX = 1
 
 L = TypeVar("L", bound=Sized)
 MapFunc = Callable[[L, list[list[str]]], list[list[str]]]
@@ -241,7 +240,7 @@ class EditBulkPeopleWidget(EditBulkAbstractGroupWidget):
             if len(remove_values) == 0:
                 return original
             return removeMatchingSublistPairs(
-                remove_values, original, index=PEOPLE_INDEX
+                remove_values, original, index=PairIndex.Person.value
             )
 
         def _removeRoles(
@@ -251,7 +250,9 @@ class EditBulkPeopleWidget(EditBulkAbstractGroupWidget):
             when that string appears in the roles index."""
             if len(remove_values) == 0:
                 return original
-            return removeMatchingSublistPairs(remove_values, original, index=ROLE_INDEX)
+            return removeMatchingSublistPairs(
+                remove_values, original, index=PairIndex.Role.value
+            )
 
         def _remapPeople(
             replacements: dict[str, str], original: list[list[str]]
@@ -260,7 +261,9 @@ class EditBulkPeopleWidget(EditBulkAbstractGroupWidget):
             when that string appears in the people index."""
             if len(replacements) == 0:
                 return original
-            return remapMatchingSublistPairs(replacements, original, index=PEOPLE_INDEX)
+            return remapMatchingSublistPairs(
+                replacements, original, index=PairIndex.Person.value
+            )
 
         def _remapRoles(
             replacements: dict[str, str], original: list[list[str]]
@@ -269,7 +272,9 @@ class EditBulkPeopleWidget(EditBulkAbstractGroupWidget):
             when that string appears in the roles index."""
             if len(replacements) == 0:
                 return original
-            return remapMatchingSublistPairs(replacements, original, index=ROLE_INDEX)
+            return remapMatchingSublistPairs(
+                replacements, original, index=PairIndex.Role.value
+            )
 
         mappings: list[AllowedActionMapping] = [
             self._createActionMapping(add_items, addValues),

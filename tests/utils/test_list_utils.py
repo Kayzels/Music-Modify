@@ -1,10 +1,11 @@
+from music_modify.custom_types.enums import PairIndex
 from music_modify.utils.list_utils import (
-    getUniqueOrdered,
-    toPairs,
     addValues,
-    removePairs,
-    removeMatchingSublistPairs,
+    getUniqueOrdered,
     remapMatchingSublistPairs,
+    removeMatchingSublistPairs,
+    removePairs,
+    toPairs,
 )
 
 
@@ -49,11 +50,11 @@ def test_removeMatchingSublistPairs():
         ["role2", "Person3"],
         ["role3", "Person2"],
     ]
-    assert removeMatchingSublistPairs(roles, original, 0) == [
+    assert removeMatchingSublistPairs(roles, original, PairIndex.Role.value) == [
         ["role2", "Person3"],
         ["role3", "Person2"],
     ]
-    assert removeMatchingSublistPairs(people, original, 1) == [
+    assert removeMatchingSublistPairs(people, original, PairIndex.Person.value) == [
         ["role1", "Person1"],
         ["role2", "Person3"],
     ]
@@ -68,16 +69,19 @@ def test_remapMatchingSublistPairs():
         ["role2", "Person3"],
         ["role3", "Person2"],
     ]
-    assert remapMatchingSublistPairs(role_replacements, original, 0) == [
+    assert remapMatchingSublistPairs(
+        role_replacements, original, PairIndex.Role.value
+    ) == [
         ["role_new", "Person1"],
         ["role_new", "Person2"],
         ["role2", "Person3"],
         ["role3", "Person2"],
     ]
-    assert remapMatchingSublistPairs(people_replacements, original, 1) == [
+    assert remapMatchingSublistPairs(
+        people_replacements, original, PairIndex.Person.value
+    ) == [
         ["role1", "Person_New"],
         ["role1", "Another_Person"],
         ["role2", "Person3"],
         ["role3", "Another_Person"],
     ]
-

@@ -36,3 +36,10 @@ class NavDirection(Enum):
 
     Next = auto()
     Previous = auto()
+
+
+class PairIndex(Enum):
+    """Index for People and Roles, rather than hardcoding this everywhere"""
+
+    Role = 0
+    Person = 1
