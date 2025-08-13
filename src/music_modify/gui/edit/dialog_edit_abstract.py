@@ -18,7 +18,9 @@ class EditAbstractDialog(QDialog, ABC, metaclass=ABCQMeta):
     """Signal that is emitted whenever any value being displayed
     for the song is changed."""
 
-    def __init__(self, parent: QWidget, repository: SongRepository, rows: list[int]):
+    def __init__(
+        self, parent: QWidget, repository: SongRepository, rows: list[int]
+    ) -> None:
         super().__init__(parent)
 
         self.setModal(True)

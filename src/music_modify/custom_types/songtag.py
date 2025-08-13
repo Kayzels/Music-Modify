@@ -35,7 +35,7 @@ class SongTag:
     """Hardcoded list of keys that store a list of strings,
     rather than a single value."""
 
-    def __init__(self, display_name: str, id3_key: str):
+    def __init__(self, display_name: str, id3_key: str) -> None:
         self._id3_key: Final[str] = id3_key
         self._display_name: Final[str] = display_name
         self._frame_type: Final[TagType] = SongTag._getFrameType(id3_key)

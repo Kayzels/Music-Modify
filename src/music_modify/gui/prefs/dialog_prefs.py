@@ -19,7 +19,7 @@ class PrefsDialog(QDialog, Ui_PrefsDialog):
     settings_updated: Signal = Signal()
     "Signal that is emitted whenever any setting is changed."
 
-    def __init__(self, parent: QWidget | None = None):
+    def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self.setupUi(self)
 
@@ -30,7 +30,7 @@ class PrefsDialog(QDialog, Ui_PrefsDialog):
             lambda: self.openChildDialog(PrefsSplitDialog)
         )
 
-    def openChildDialog(self, dialog_type: type[PrefsAbstractDialog]):
+    def openChildDialog(self, dialog_type: type[PrefsAbstractDialog]) -> None:
         """Opens a dialog of the specified type to allow editing
         those specific setting groups.
 

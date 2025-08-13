@@ -21,6 +21,12 @@ from .widget_edit_table import EditTableWidget
 
 ValueT = TypeVar("ValueT", bound=SongEditData)
 
+EditAbstractWidgetType = (
+    EditAbstractWidget[SongListData]
+    | EditAbstractWidget[SongTableData]
+    | EditAbstractWidget[str]
+)
+
 
 class EditWidgetFactory:
     """Creates widgets displayed on an EditDialog."""
@@ -31,11 +37,7 @@ class EditWidgetFactory:
     @staticmethod
     def createWidget(
         parent: QWidget, tag: SongTag, data: SongEditData | None
-    ) -> (
-        EditAbstractWidget[SongListData]
-        | EditAbstractWidget[SongTableData]
-        | EditAbstractWidget[str]
-    ):
+    ) -> EditAbstractWidgetType:
         """Creates the required widget based on the tag and data format.
 
         Args:

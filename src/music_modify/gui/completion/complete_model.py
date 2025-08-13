@@ -24,7 +24,7 @@ class CompleteModel(QAbstractListModel):
 
     def __init__(
         self, parent: QWidget | None = None, strip_completion_entries: bool = True
-    ):
+    ) -> None:
         super().__init__(parent)
 
         self.strip_completion_entries: bool = strip_completion_entries
@@ -32,7 +32,7 @@ class CompleteModel(QAbstractListModel):
         self.current_items: tuple[str, ...] = ()
         self.current_prefix: str = ""
 
-    def setItems(self, items: tuple[str, ...]):
+    def setItems(self, items: tuple[str, ...]) -> None:
         """Sets the items that should be used as suggestions when typing."""
         if self.strip_completion_entries:
             item_gen = (str(x).strip() for x in items if x)
@@ -44,7 +44,7 @@ class CompleteModel(QAbstractListModel):
         self.current_prefix = ""
         self.endResetModel()
 
-    def setCompletionPrefix(self, prefix: str):
+    def setCompletionPrefix(self, prefix: str) -> None:
         """Sets the text that should be used as a filter for completion suggestions."""
         old_prefix = self.current_prefix
         self.current_prefix = prefix

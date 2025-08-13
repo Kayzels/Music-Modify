@@ -2,6 +2,7 @@
 
 import logging
 import sys
+from typing import Never
 
 from PySide6.QtWidgets import QApplication
 
@@ -15,7 +16,7 @@ logging.basicConfig(
 logger = logging.getLogger()
 
 
-def main():
+def main() -> Never:
     app = QApplication(sys.argv)
     app.setOrganizationName("Kayzels")
     app.setApplicationName("Music Modify")

@@ -22,18 +22,18 @@ class PrefsAbstractDialog(QDialog, ABC, metaclass=ABCQMeta):
     "Signal that is emitted whenever any setting is changed."
 
     @abstractmethod
-    def setupUi(self, dialog: Self):
+    def setupUi(self, dialog: Self) -> None:
         """Set up the display of the dialog."""
         pass
 
-    def __init__(self, parent: QWidget | None = None):
+    def __init__(self, parent: QWidget | None = None) -> None:
         self.button_box: QDialogButtonBox | None = None
         QDialog.__init__(self, parent)
         self.setupUi(self)
         self._setButtonBoxConnections()
         self.accepted.connect(self.updateSettings)
 
-    def _setButtonBoxConnections(self):
+    def _setButtonBoxConnections(self) -> None:
         """Creates the connection between the signals from the buttons in the button box
         and the slot in the class for that button."""
         if not self.button_box:

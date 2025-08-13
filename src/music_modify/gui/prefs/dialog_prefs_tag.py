@@ -27,7 +27,7 @@ class PrefsTagDialog(PrefsAbstractDialog, Ui_PrefsTagDialog):
     and displayed for songs.
     """
 
-    def __init__(self, parent: QWidget | None = None):
+    def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self.setWindowTitle("Edit Tags")
 
@@ -47,16 +47,16 @@ class PrefsTagDialog(PrefsAbstractDialog, Ui_PrefsTagDialog):
         self.down_toolbutton.clicked.connect(self.moveTagsDown)
 
     @override
-    def setupUi(self, dialog: Self):
+    def setupUi(self, dialog: Self) -> None:
         Ui_PrefsTagDialog.setupUi(self, dialog)
 
-    def addTag(self):
+    def addTag(self) -> None:
         """Add a new tag to the group of tags that can be used."""
         add_dialog = PrefsTagAddDialog(self)
         add_dialog.accepted.connect(lambda: add_dialog.addToModel(self.model))
         add_dialog.show()
 
-    def removeSelectedTags(self):
+    def removeSelectedTags(self) -> None:
         """Remove selected tags from the table and settings."""
         selected_rows = getSelectedRows(self.tag_table)
 
@@ -113,7 +113,7 @@ class PrefsTagDialog(PrefsAbstractDialog, Ui_PrefsTagDialog):
         for row in selected_rows:
             self.model.moveTag(row, row + 1)
 
-    def showInvalidInputMessage(self, message: str):
+    def showInvalidInputMessage(self, message: str) -> None:
         """Displays a message about invalid input."""
         QMessageBox.warning(self.tag_table, "Invalid Input", message)
 

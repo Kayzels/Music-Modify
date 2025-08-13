@@ -16,11 +16,11 @@ class SongRepository(QObject):
     songs_updated: Signal = Signal()
     "Signal that is emitted whenever songs are added or removed."
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self._songs: list[Song] = []
 
-    def getSongs(self):
+    def getSongs(self) -> list[Song]:
         """Returns the list of songs the repository manages."""
         return self._songs
 
@@ -33,26 +33,26 @@ class SongRepository(QObject):
     def __getitem__(self, index: int) -> Song | None:
         return self.getSong(index)
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self._songs)
 
-    def addFile(self, file: str | PathLike[str]):
+    def addFile(self, file: str | PathLike[str]) -> None:
         """Add file to the list of songs, if not already present."""
         if not any(song.file == file for song in self._songs):
             self._songs.append(Song(file))
             self.songs_updated.emit()
 
-    def addFiles(self, files: list[str] | list[PathLike[str]]):
+    def addFiles(self, files: list[str] | list[PathLike[str]]) -> None:
         """Adds the list of files to the repository."""
         for file in files:
             self.addFile(file)
 
-    def clearFiles(self):
+    def clearFiles(self) -> None:
         """Remove all songs from the repository."""
         self._songs.clear()
         self.songs_updated.emit()
 
-    def removeSongs(self, indexes: list[int]):
+    def removeSongs(self, indexes: list[int]) -> None:
         """Remove the songs at the specific indexes from the repository."""
         if not indexes:
             return
@@ -63,7 +63,7 @@ class SongRepository(QObject):
             self._songs.pop(index)
         self.songs_updated.emit()
 
-    def refreshDisplay(self):
+    def refreshDisplay(self) -> None:
         """Updates the information being displayed for each song in the repository.
         Should be called after any metadata is updated, to keep the view in sync.
         """

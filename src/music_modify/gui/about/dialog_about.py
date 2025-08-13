@@ -16,7 +16,7 @@ class AboutDialog(QDialog, Ui_AboutDialog):
     """Dialog that displays the meta information about the app,
     such as the name, version, and tools used."""
 
-    def __init__(self, parent: QWidget | None = None):
+    def __init__(self, parent: QWidget | None = None) -> None:
         QDialog.__init__(self, parent)
         self.setupUi(self)
         text = self.generateText()

@@ -31,7 +31,7 @@ class EditAbstractWidget(QWidget, Generic[ValueT], ABC, metaclass=ABCQMeta):
     """Signal that indicates that  a value has been set back to the value
     it had when the widget was initialised."""
 
-    def __init__(self, parent: QWidget, data: ValueT | None = None):
+    def __init__(self, parent: QWidget, data: ValueT | None = None) -> None:
         super().__init__(parent)
         self._initValue(data)
         self._setMainLayout()
@@ -77,7 +77,7 @@ class EditAbstractWidget(QWidget, Generic[ValueT], ABC, metaclass=ABCQMeta):
         pass
 
     @value.setter
-    def value(self, value: ValueT):
+    def value(self, value: ValueT) -> None:
         self.value = value
 
     @property
@@ -128,7 +128,7 @@ class EditAbstractWidget(QWidget, Generic[ValueT], ABC, metaclass=ABCQMeta):
 
         return button_layout
 
-    def _setMainLayout(self):
+    def _setMainLayout(self) -> None:
         """Creates the basic layout for the widget."""
         layout = QHBoxLayout()
         self.setLayout(layout)

@@ -153,7 +153,7 @@ class EditBulkPeopleWidget(EditBulkAbstractGroupWidget):
         return form_container
 
     @override
-    def _resetView(self):
+    def _resetView(self) -> None:
         pairs: list[str] = list(
             set([f"{role}: {person}" for (role, person) in self.items])
         )

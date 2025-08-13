@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 class EditBulkAbstractWidget(QWidget, ABC, metaclass=ABCQMeta):
-    def __init__(self, parent: QWidget, tag: SongTag):
+    def __init__(self, parent: QWidget, tag: SongTag) -> None:
         super().__init__(parent)
 
         self._tag: SongTag = tag

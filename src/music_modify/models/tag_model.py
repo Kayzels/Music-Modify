@@ -29,7 +29,7 @@ class TagModel(QAbstractTableModel):
     invalid_input: Signal = Signal(str)
     "Signal that is emitted when a user enters invalid input."
 
-    def __init__(self, tags: list[TagInfo]):
+    def __init__(self, tags: list[TagInfo]) -> None:
         super().__init__()
         self._tags: list[TagInfo] = tags
 
@@ -152,7 +152,9 @@ class TagModel(QAbstractTableModel):
 
         return False
 
-    def addTag(self, id3_key: str, display_name: str, show_in_table: bool = False):
+    def addTag(
+        self, id3_key: str, display_name: str, show_in_table: bool = False
+    ) -> None:
         """Add a Tag with the given information to the model.
 
         Args:
@@ -166,13 +168,13 @@ class TagModel(QAbstractTableModel):
         self._tags.append(new_tag)
         self.endInsertRows()
 
-    def removeTag(self, row: int):
+    def removeTag(self, row: int) -> None:
         """Remove the tag at the specific row from the model."""
         self.beginRemoveRows(QModelIndex(), row, row)
         del self._tags[row]
         self.endRemoveRows()
 
-    def moveTag(self, source_row: int, destination_row: int):
+    def moveTag(self, source_row: int, destination_row: int) -> None:
         """Move the tag information at the source row to the destination row."""
         if (
             source_row < 0

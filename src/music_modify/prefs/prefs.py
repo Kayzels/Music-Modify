@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 class Settings:
     """Wrapper for QSettings that provides easier access to defined setting keys."""
 
-    def __init__(self, new_settings: QSettings | None = None):
+    def __init__(self, new_settings: QSettings | None = None) -> None:
         logger.info("In init method for Settings object")
         self._settings: QSettings = (
             # PERF: Is there a way to get this from the QApplication,
@@ -47,7 +47,7 @@ class Settings:
         )
 
     @split_text_entered.setter
-    def split_text_entered(self, value: str):
+    def split_text_entered(self, value: str) -> None:
         self._settings.setValue("Split/split_text_entered", value)
 
     @property
@@ -64,7 +64,7 @@ class Settings:
         )
 
     @split_values_display.setter
-    def split_values_display(self, value: str):
+    def split_values_display(self, value: str) -> None:
         self._settings.setValue("Split/split_values_display", value)
 
     @property
@@ -80,7 +80,7 @@ class Settings:
         )
 
     @split_values_at.setter
-    def split_values_at(self, value: str):
+    def split_values_at(self, value: str) -> None:
         self._settings.setValue("Split/split_values_at", value)
 
     default_tags: list[TagInfo] = [
@@ -160,11 +160,11 @@ class Settings:
         return self._getArray("Tags/info_tags")
 
     @info_tags.setter
-    def info_tags(self, value: list[TagInfo]):
+    def info_tags(self, value: list[TagInfo]) -> None:
         self._table_tags_cache = None  # Invalidate cache
         self._setArray("Tags/info_tags", value)
 
-    def _setArray(self, key: str, vals: list[TagInfo]):
+    def _setArray(self, key: str, vals: list[TagInfo]) -> None:
         """Set the QSettings array based on the list of TagInfo.
 
         Writes the settings file in QSettings array form,
@@ -204,7 +204,7 @@ class Settings:
         self._settings.endArray()
         return tags
 
-    def _initializeDefaults(self):
+    def _initializeDefaults(self) -> None:
         """Set the default values for all settings, if they aren't already set."""
         logger.info("Called initialise defaults")
         if not self._settings.contains("Split/split_text_entered"):

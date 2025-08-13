@@ -74,7 +74,7 @@ class EditLineWidget(EditAbstractWidget[str]):
 
     @value.setter
     @override
-    def value(self, value: str):
+    def value(self, value: str) -> None:
         self._value: str = value
 
     @property

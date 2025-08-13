@@ -19,7 +19,7 @@ class MockPrefsTagAddDialog(QObject):
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
 
-    def show(self):
+    def show(self) -> None:
         self.accepted.emit()
 
     @staticmethod

@@ -24,7 +24,7 @@ class EditAbstractGroupWidget(
     that contain multiple items, which can be displayed in lists or tables.
     """
 
-    def __init__(self, parent: QWidget, data: ValueG | None):
+    def __init__(self, parent: QWidget, data: ValueG | None) -> None:
         super().__init__(parent, data)
 
     # noinspection PyTypeChecker

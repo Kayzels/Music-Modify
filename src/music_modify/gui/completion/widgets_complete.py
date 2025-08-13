@@ -14,6 +14,7 @@ from PySide6.QtCore import (
     Qt,
     QTimer,
     Signal,
+    SignalInstance,
     Slot,
 )
 from PySide6.QtGui import QKeyEvent, QMouseEvent
@@ -46,7 +47,7 @@ class Completer(QListView):
         completer_widget: QWidget,
         max_visible_items: int = 7,
         strip_completion_entries: bool = True,
-    ):
+    ) -> None:
         super().__init__(completer_widget)
 
         self.disable_popup: bool = False
@@ -67,28 +68,28 @@ class Completer(QListView):
         self.tab_accepts_uncompleted_text: bool = True
 
     @override
-    def hide(self):
+    def hide(self) -> None:
         self.setCurrentIndex(QModelIndex())
         QListView.hide(self)
 
-    def itemChosen(self, index: QModelIndex):
+    def itemChosen(self, index: QModelIndex) -> None:
         if not self.isVisible():
             return
         self.hide()
         text = self.model().data(index, Qt.ItemDataRole.UserRole)
         self.item_selected.emit(str(text))
 
-    def setItems(self, items: tuple[str, ...]):
+    def setItems(self, items: tuple[str, ...]) -> None:
         cast(CompleteModel, self.model()).setItems(items)
         if self.isVisible():
             self.relayout_needed.emit()
 
-    def setCompletionPrefix(self, prefix: str):
+    def setCompletionPrefix(self, prefix: str) -> None:
         cast(CompleteModel, self.model()).setCompletionPrefix(prefix)
         if self.isVisible():
             self.relayout_needed.emit()
 
-    def nextMatch(self, direction: NavDirection = NavDirection.Next):
+    def nextMatch(self, direction: NavDirection = NavDirection.Next) -> None:
         current = self.currentIndex()
         if current.isValid():
             row = current.row()
@@ -99,13 +100,13 @@ class Completer(QListView):
         index = cast(CompleteModel, self.model()).index(row % self.model().rowCount())
         self.setCurrentIndex(index)
 
-    def scrollToItem(self, text: str | None):
+    def scrollToItem(self, text: str | None) -> None:
         if text:
             index = cast(CompleteModel, self.model()).indexForPrefix(text)
             if index is not None and index.isValid():
                 self.setCurrentIndex(index)
 
-    def popup(self, select_first: bool = True):
+    def popup(self, select_first: bool = True) -> None:
         if self.disable_popup:
             return
 
@@ -262,7 +263,7 @@ class LineEdit(QLineEdit):
         completer_widget: QWidget | None = None,
         strip_completion_entries: bool = True,
         multiple: bool = True,
-    ):
+    ) -> None:
         super().__init__(parent)
         self.setClearButtonEnabled(True)
 
@@ -287,25 +288,25 @@ class LineEdit(QLineEdit):
         self.add_separator: bool = True
 
     @property
-    def all_items(self):
+    def all_items(self) -> tuple[str, ...]:
         return cast(CompleteModel, self.mcompleter.model()).all_items
 
     @all_items.setter
-    def all_items(self, items: tuple[str, ...]):
+    def all_items(self, items: tuple[str, ...]) -> None:
         cast(CompleteModel, self.mcompleter.model()).setItems(items)
 
     @property
-    def disable_popup(self):
+    def disable_popup(self) -> bool:
         return self.mcompleter.disable_popup
 
     @disable_popup.setter
-    def disable_popup(self, val: bool):
+    def disable_popup(self, val: bool) -> None:
         self.mcompleter.disable_popup = bool(val)
 
-    def setElideMode(self, val: Qt.TextElideMode):
+    def setElideMode(self, val: Qt.TextElideMode) -> None:
         self.mcompleter.setTextElideMode(val)
 
-    def updateItemsCache(self, items: tuple[str, ...]):
+    def updateItemsCache(self, items: tuple[str, ...]) -> None:
         self.all_items = items
 
     @override
@@ -330,7 +331,7 @@ class LineEdit(QLineEdit):
         self,
         show_all: bool = False,
         select_first: bool = True,
-    ):
+    ) -> None:
         orig: str | None = None
         if show_all:
             orig = cast(CompleteModel, self.mcompleter.model()).current_prefix
@@ -416,7 +417,7 @@ class EnComboBox(QComboBox):
 
     Limits added text to those not already in the line edit."""
 
-    def __init__(self, parent: QWidget):
+    def __init__(self, parent: QWidget) -> None:
         super().__init__(parent)
         self.setLineEdit(QLineEdit(self))
         completer = self.completer()
@@ -427,7 +428,7 @@ class EnComboBox(QComboBox):
     def text(self) -> str:
         return str(self.currentText())
 
-    def setText(self, text: str):
+    def setText(self, text: str) -> None:
         # noinspection PyTypeChecker
         idx: int = self.findText(
             text, Qt.MatchFlag.MatchCaseSensitive | Qt.MatchFlag.MatchFixedString
@@ -441,7 +442,7 @@ class EnComboBox(QComboBox):
 class EditWithComplete(EnComboBox):
     item_selected: Signal = Signal(str)
 
-    def __init__(self, parent: QWidget, multiple: bool = True):
+    def __init__(self, parent: QWidget, multiple: bool = True) -> None:
         super().__init__(parent)
 
         self.setLineEdit(LineEdit(self, completer_widget=self, multiple=multiple))
@@ -463,10 +464,10 @@ class EditWithComplete(EnComboBox):
         finally:
             self.disable_popup = orig
 
-    def updateItemsCache(self, items: tuple[str, ...]):
+    def updateItemsCache(self, items: tuple[str, ...]) -> None:
         cast(LineEdit, self.lineEdit()).updateItemsCache(items)
 
-    def showInitialValue(self, value: str):
+    def showInitialValue(self, value: str) -> None:
         value = str(value) if value else ""
         self.setText(value)
         self.selectAll()
@@ -480,14 +481,14 @@ class EditWithComplete(EnComboBox):
         cast(LineEdit, self.lineEdit()).all_items = items
 
     @property
-    def disable_popup(self):
+    def disable_popup(self) -> bool:
         return cast(LineEdit, self.lineEdit()).disable_popup
 
     @disable_popup.setter
-    def disable_popup(self, val: bool):
+    def disable_popup(self, val: bool) -> None:
         cast(LineEdit, self.lineEdit()).disable_popup = bool(val)
 
-    def setElideMode(self, val: Qt.TextElideMode):
+    def setElideMode(self, val: Qt.TextElideMode) -> None:
         cast(LineEdit, self.lineEdit()).setElideMode(val)
 
     @override
@@ -495,32 +496,32 @@ class EditWithComplete(EnComboBox):
         return cast(LineEdit, self.lineEdit()).text()
 
     @override
-    def setCurrentText(self, text: str):
+    def setCurrentText(self, text: str) -> None:
         self.setText(text)
         self.selectAll()
 
-    def selectAll(self):
+    def selectAll(self) -> None:
         cast(LineEdit, self.lineEdit()).selectAll()
 
     @override
-    def setText(self, text: str):
+    def setText(self, text: str) -> None:
         edit = cast(LineEdit, self.lineEdit())
         edit.no_popup = True
         edit.setText(text)
         edit.no_popup = False
 
-    def home(self, mark: bool = False):
+    def home(self, mark: bool = False) -> None:
         cast(LineEdit, self.lineEdit()).home(mark)
 
-    def setCursorPosition(self, v: int):
+    def setCursorPosition(self, v: int) -> None:
         cast(LineEdit, self.lineEdit()).setCursorPosition(v)
 
     @property
-    def textChanged(self):
+    def textChanged(self) -> SignalInstance:
         return cast(LineEdit, self.lineEdit()).textChanged
 
     @override
-    def clear(self):
+    def clear(self) -> None:
         cast(LineEdit, self.lineEdit()).clear()
         super().clear()
 
@@ -542,11 +543,11 @@ class EditWithComplete(EnComboBox):
         return getUniqueOrdered(text, prefs.settings.split_text_entered)
 
     @values.setter
-    def values(self, values: list[str]):
+    def values(self, values: list[str]) -> None:
         self.updateItemsCache(tuple(values))
 
 
-def testWidgets():
+def testWidgets() -> int:
     from PySide6.QtWidgets import QDialog, QVBoxLayout
 
     d = QDialog()

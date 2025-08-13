@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 class Song:
     """Object representing data about an mp3 file"""
 
-    def __init__(self, file: str | os.PathLike[str] | None = None):
+    def __init__(self, file: str | os.PathLike[str] | None = None) -> None:
         self.file: str | os.PathLike[str] | None = file
         "The file on disk that this `Song` object represents."
         self.id3: ID3 = ID3()
@@ -45,22 +45,22 @@ class Song:
             info.append(data_string)
         return info
 
-    def updateInfo(self):
+    def updateInfo(self) -> None:
         """Update the displayed values, so that they are in sync with what is stored
         in the file."""
         self.display_info = self._generateColumns()
 
-    def save(self):
+    def save(self) -> None:
         """Save the changed values for the song, and refresh the display."""
         self.id3.save(v2_version=4)
         self.updateInfo()
 
-    def load(self, file: str | os.PathLike[str]):
+    def load(self, file: str | os.PathLike[str]) -> None:
         """Load the metadata from this specific file."""
         self.file = file
         self.id3.load(file)
 
-    def setTag(self, tag: str | SongTag, value: SongGroupData):
+    def setTag(self, tag: str | SongTag, value: SongGroupData) -> None:
         """Set the tag within the file to have the value specified."""
         found_tag = toTag(tag, prefs.settings.all_tags)
         if found_tag is not None:

@@ -27,7 +27,7 @@ class SongTableModel(QAbstractTableModel):
 
     empty_message: Final[str] = "Files will show here when added. Drag files here."
 
-    def __init__(self, repository: SongRepository):
+    def __init__(self, repository: SongRepository) -> None:
         super().__init__()
         self.repository: SongRepository = repository
         self.repository.songs_updated.connect(self.layoutChanged.emit)
@@ -93,7 +93,7 @@ class SongTableModel(QAbstractTableModel):
 class SongTableProxyModel(QSortFilterProxyModel):
     """Model used to show selected songs being edited"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.model_indexes: list[QModelIndex] = []
         self.selected_rows: list[int] = []
@@ -104,7 +104,7 @@ class SongTableProxyModel(QSortFilterProxyModel):
     ) -> bool:
         return source_row in self.selected_rows
 
-    def changeModelIndexes(self, model_indexes: list[QModelIndex]):
+    def changeModelIndexes(self, model_indexes: list[QModelIndex]) -> None:
         self.model_indexes = model_indexes
         self.selected_rows = [model_index.row() for model_index in self.model_indexes]
         self.invalidateFilter()

@@ -43,7 +43,7 @@ class _DragTableWidget(QTableWidget):
         super().resizeEvent(event)
         self.adjustColumnWidths()
 
-    def adjustColumnWidths(self, length: int | None = None):
+    def adjustColumnWidths(self, length: int | None = None) -> None:
         """Adjusts the widths of the table to the specified length,
         except for the last column, which is stretched.
         """
@@ -87,7 +87,7 @@ class EditTableWidget(EditAbstractGroupWidget[SongTableData]):
         self.main_widget.adjustColumnWidths(len(self.value))
 
     @override
-    def _initValue(self, data: SongTableData | None):
+    def _initValue(self, data: SongTableData | None) -> None:
         if data is None:
             self.value = []
         else:

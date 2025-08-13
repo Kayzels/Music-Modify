@@ -24,7 +24,7 @@ from music_modify.prefs import prefs
 
 from .dialog_edit_abstract import EditAbstractDialog
 from .widget_edit_abstract import EditAbstractWidget
-from .widget_edit_factory import EditWidgetFactory
+from .widget_edit_factory import EditAbstractWidgetType, EditWidgetFactory
 
 logger = logging.getLogger(__name__)
 
@@ -86,7 +86,7 @@ class EditDialog(EditAbstractDialog):
         self.song_layout: QFormLayout
 
     @override
-    def _setupSongInfo(self):
+    def _setupSongInfo(self) -> None:
         """Creates and displays the widgets for each tag in the song."""
         scroll_widget: QWidget = QWidget()
         if hasattr(self, "song_layout"):
@@ -112,10 +112,10 @@ class EditDialog(EditAbstractDialog):
     def _createWidgetType(self, tag: SongTag, data: SongEditData | None) -> QWidget:
         """Creates the widget of the required type based on the tag and data,
         and links the signals needed for updating and resetting it."""
-        widget = EditWidgetFactory.createWidget(self, tag, data)
+        widget: EditAbstractWidgetType = EditWidgetFactory.createWidget(self, tag, data)
 
         @Slot()
-        def updateValue():
+        def updateValue() -> None:
             """Stores the updated value of the widget."""
             # We want to remove values if they are empty,
             # which is marked by making the changed_value for that key None.

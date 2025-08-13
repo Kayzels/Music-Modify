@@ -2,7 +2,7 @@
 when the tag can contain multiple values, but these values are not pairs."""
 
 import logging
-from typing import Any, cast, override
+from typing import Unpack, cast, override
 
 from PySide6.QtWidgets import (
     QFormLayout,
@@ -12,6 +12,7 @@ from PySide6.QtWidgets import (
 )
 
 from music_modify.custom_types import Song, SongTag
+from music_modify.custom_types.qt_types import QLineEditArgs
 from music_modify.gui.completion import EditWithComplete, createCompletionWidget
 from music_modify.prefs import prefs
 from music_modify.utils import getUniqueOrdered
@@ -24,9 +25,10 @@ logger = logging.getLogger(__name__)
 class _MultipleLineEdit(QLineEdit):
     """Private class that stores a list of strings, but displays a single string."""
 
-    def __init__(self, value: str, parent: QWidget | None = None, *args: Any) -> None:  # pyright: ignore[reportExplicitAny]
-        # noinspection PyArgumentList
-        super().__init__(value, parent, *args)
+    def __init__(
+        self, value: str, parent: QWidget | None = None, **kwargs: Unpack[QLineEditArgs]
+    ) -> None:
+        super().__init__(value, parent, **kwargs)
 
     @property
     def items(self) -> list[str]:
@@ -40,7 +42,7 @@ class EditBulkMultipleWidget(EditBulkAbstractGroupWidget):
     when the tag can contain multiple values,
     but these values are not pairs."""
 
-    def __init__(self, parent: QWidget, data: set[str], tag: SongTag):
+    def __init__(self, parent: QWidget, data: set[str], tag: SongTag) -> None:
         super().__init__(parent, tag)
 
         self.items: tuple[str, ...] = tuple(data)
@@ -72,7 +74,7 @@ class EditBulkMultipleWidget(EditBulkAbstractGroupWidget):
         return form_container
 
     @override
-    def _resetView(self):
+    def _resetView(self) -> None:
         self.add_line.setText("")
         self.remove_line.setText("")
         self.remove_line.updateItemsCache(self.items)
