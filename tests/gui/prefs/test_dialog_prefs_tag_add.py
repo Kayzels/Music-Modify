@@ -1,6 +1,5 @@
 from PySide6.QtWidgets import QMessageBox
 import pytest
-from pytest import MonkeyPatch
 from pytestqt.qtbot import QtBot
 
 from music_modify.custom_types import TagInfo
@@ -21,7 +20,7 @@ def model(tags: list[TagInfo]) -> TagModel:
     return TagModel(tags)
 
 
-def createDialog(qtbot: QtBot, monkeypatch: MonkeyPatch) -> PrefsTagAddDialog:
+def createDialog(qtbot: QtBot, monkeypatch: pytest.MonkeyPatch) -> PrefsTagAddDialog:
     dialog = PrefsTagAddDialog()
     qtbot.addWidget(dialog)
 
@@ -45,7 +44,7 @@ def test_PrefsTagAddDialog_init(qtbot: QtBot) -> None:
 
 def test_addToModel_missing_text(
     qtbot: QtBot,
-    monkeypatch: MonkeyPatch,
+    monkeypatch: pytest.MonkeyPatch,
     model: TagModel,
 ) -> None:
     dialog = createDialog(qtbot, monkeypatch)
@@ -57,7 +56,7 @@ def test_addToModel_missing_text(
 
 def test_addToModel_already_id3(
     qtbot: QtBot,
-    monkeypatch: MonkeyPatch,
+    monkeypatch: pytest.MonkeyPatch,
     model: TagModel,
 ) -> None:
     dialog = createDialog(qtbot, monkeypatch)
@@ -72,7 +71,7 @@ def test_addToModel_already_id3(
 
 def test_addToModel_already_display(
     qtbot: QtBot,
-    monkeypatch: MonkeyPatch,
+    monkeypatch: pytest.MonkeyPatch,
     model: TagModel,
 ) -> None:
     dialog = createDialog(qtbot, monkeypatch)
@@ -86,7 +85,7 @@ def test_addToModel_already_display(
 
 def test_addToModel_new(
     qtbot: QtBot,
-    monkeypatch: MonkeyPatch,
+    monkeypatch: pytest.MonkeyPatch,
     model: TagModel,
 ) -> None:
     dialog = createDialog(qtbot, monkeypatch)

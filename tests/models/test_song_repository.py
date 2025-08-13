@@ -15,7 +15,8 @@ def test_add_single(song_path: Path) -> None:
     repo = SongRepository()
     repo.addFile(song_path)
     assert len(repo) == 1
-    assert (song := repo.getSong(0)) is not None and song.file == song_path
+    assert (song := repo.getSong(0)) is not None
+    assert song.file == song_path
 
 
 def test_add_multiple(song_paths: list[PathLike[str]]) -> None:
@@ -23,7 +24,8 @@ def test_add_multiple(song_paths: list[PathLike[str]]) -> None:
     repo.addFiles(song_paths)
     assert len(repo) == len(song_paths)
     for i in range(len(repo)):
-        assert (song := repo.getSong(i)) is not None and song.file == song_paths[i]
+        assert (song := repo.getSong(i)) is not None
+        assert song.file == song_paths[i]
 
 
 def test_reject_duplicates(song_paths: list[PathLike[str]]) -> None:
@@ -45,11 +47,13 @@ def test_remove_single(song_paths: list[PathLike[str]]) -> None:
     repo = SongRepository()
     repo.addFiles(song_paths)
     repo.removeSongs([0])
-    assert (song := repo.getSong(0)) is not None and song.file == song_paths[1]
+    assert (song := repo.getSong(0)) is not None
+    assert song.file == song_paths[1]
 
 
 def test_remove_multiple(song_paths: list[PathLike[str]]) -> None:
     repo = SongRepository()
     repo.addFiles(song_paths)
     repo.removeSongs([0, 1])
-    assert (song := repo.getSong(0)) is not None and song.file == song_paths[2]
+    assert (song := repo.getSong(0)) is not None
+    assert song.file == song_paths[2]

@@ -21,21 +21,24 @@ def tags() -> list[SongTag]:
 
 def test_mapTag(tags: list[SongTag]) -> None:
     result1: SongTag | None = mapTag("Track", tags)
-    assert result1 is not None and result1.display_name == "Track"
+    assert result1 is not None
+    assert result1.display_name == "Track"
     result2: SongTag | None = mapTag("Album", tags)
     assert result2 is None
 
 
 def test_mapKey(tags: list[SongTag]) -> None:
     result1: SongTag | None = mapKey("TIT2", tags)
-    assert result1 is not None and result1.display_name == "Title"
+    assert result1 is not None
+    assert result1.display_name == "Title"
     result2: SongTag | None = mapKey("TIT3", tags)
     assert result2 is None
 
 
 def test_mapOptionalTag(tags: list[SongTag]) -> None:
     result1: SongTag | None = mapOptionalTag("Sort Artist", "Artist", tags)
-    assert result1 is not None and result1.display_name == "Artist"
+    assert result1 is not None
+    assert result1.display_name == "Artist"
     result2: SongTag | None = mapOptionalTag("Label", "Publisher", tags)
     assert result2 is None
 
@@ -52,8 +55,10 @@ def test_valueToString() -> None:
 
 def test_toTag(tags: list[SongTag]) -> None:
     result1: SongTag | None = toTag("TIT2", tags)
-    assert result1 is not None and result1.id3_key == "TIT2"
+    assert result1 is not None
+    assert result1.id3_key == "TIT2"
     result2: SongTag | None = toTag("Artist", tags)
-    assert result2 is not None and result2.display_name == "Artist"
+    assert result2 is not None
+    assert result2.display_name == "Artist"
     result3: SongTag | None = toTag("TIPL", tags)
     assert result3 is None

@@ -2,7 +2,7 @@ import copy
 
 from PySide6.QtCore import QItemSelectionModel, QObject, Signal
 from PySide6.QtWidgets import QDialogButtonBox, QMessageBox, QWidget
-from pytest import MonkeyPatch
+import pytest
 from pytestqt.qtbot import QtBot
 
 from music_modify.custom_types.tag_info import TagInfo
@@ -49,7 +49,7 @@ def _selectRows(dialog: PrefsTagDialog, rows: list[int]) -> None:
 
 def _createDialog(
     qtbot: QtBot,
-    monkeypatch: MonkeyPatch,
+    monkeypatch: pytest.MonkeyPatch,
     temp_settings: prefs_module.Settings,
 ) -> PrefsTagDialog:
     _patchDialogs(monkeypatch, temp_settings)
@@ -59,7 +59,7 @@ def _createDialog(
 
 
 def _patchDialogs(
-    monkeypatch: MonkeyPatch,
+    monkeypatch: pytest.MonkeyPatch,
     temp_settings: prefs_module.Settings,
 ) -> None:
     monkeypatch.setattr(prefs_module, "settings", temp_settings)
@@ -106,7 +106,7 @@ def _makeChanges(dialog: PrefsTagDialog) -> list[TagInfo]:
 
 def test_PrefsTagDialog_init(
     qtbot: QtBot,
-    monkeypatch: MonkeyPatch,
+    monkeypatch: pytest.MonkeyPatch,
     temp_settings: prefs_module.Settings,
 ) -> None:
     dialog = _createDialog(qtbot, monkeypatch, temp_settings)
@@ -115,7 +115,7 @@ def test_PrefsTagDialog_init(
 
 def test_PrefsTagDialog_addTag(
     qtbot: QtBot,
-    monkeypatch: MonkeyPatch,
+    monkeypatch: pytest.MonkeyPatch,
     temp_settings: prefs_module.Settings,
 ) -> None:
     dialog = _createDialog(qtbot, monkeypatch, temp_settings)
@@ -130,7 +130,7 @@ def test_PrefsTagDialog_addTag(
 
 def test_PrefsTagDialog_removeSelectedTags(
     qtbot: QtBot,
-    monkeypatch: MonkeyPatch,
+    monkeypatch: pytest.MonkeyPatch,
     temp_settings: prefs_module.Settings,
 ) -> None:
     dialog = _createDialog(qtbot, monkeypatch, temp_settings)
@@ -160,7 +160,7 @@ def test_PrefsTagDialog_removeSelectedTags(
 
 def test_PrefsTagDialog_moveTagsUp(
     qtbot: QtBot,
-    monkeypatch: MonkeyPatch,
+    monkeypatch: pytest.MonkeyPatch,
     temp_settings: prefs_module.Settings,
 ) -> None:
     dialog = _createDialog(qtbot, monkeypatch, temp_settings)
@@ -194,7 +194,7 @@ def test_PrefsTagDialog_moveTagsUp(
 
 def test_PrefsTagDialog_moveTagsDown(
     qtbot: QtBot,
-    monkeypatch: MonkeyPatch,
+    monkeypatch: pytest.MonkeyPatch,
     temp_settings: prefs_module.Settings,
 ) -> None:
     dialog = _createDialog(qtbot, monkeypatch, temp_settings)
@@ -228,7 +228,7 @@ def test_PrefsTagDialog_moveTagsDown(
 
 def test_PrefsTagDialog_updateSettings(
     qtbot: QtBot,
-    monkeypatch: MonkeyPatch,
+    monkeypatch: pytest.MonkeyPatch,
     temp_settings: prefs_module.Settings,
 ) -> None:
     dialog = _createDialog(qtbot, monkeypatch, temp_settings)
@@ -245,7 +245,7 @@ def test_PrefsTagDialog_updateSettings(
 
 def test_PrefsTagDialog_restoreDefaults(
     qtbot: QtBot,
-    monkeypatch: MonkeyPatch,
+    monkeypatch: pytest.MonkeyPatch,
     temp_settings: prefs_module.Settings,
 ) -> None:
     dialog = _createDialog(qtbot, monkeypatch, temp_settings)
@@ -261,7 +261,7 @@ def test_PrefsTagDialog_restoreDefaults(
 
 def test_PrefsTagDialog_resetSettings(
     qtbot: QtBot,
-    monkeypatch: MonkeyPatch,
+    monkeypatch: pytest.MonkeyPatch,
     temp_settings: prefs_module.Settings,
 ) -> None:
     dialog1 = _createDialog(qtbot, monkeypatch, temp_settings)
@@ -293,7 +293,7 @@ def test_PrefsTagDialog_resetSettings(
 
 def test_PrefsTagDialog_restore_then_reset(
     qtbot: QtBot,
-    monkeypatch: MonkeyPatch,
+    monkeypatch: pytest.MonkeyPatch,
     temp_settings: prefs_module.Settings,
 ) -> None:
     dialog1 = _createDialog(qtbot, monkeypatch, temp_settings)

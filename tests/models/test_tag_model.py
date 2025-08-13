@@ -83,7 +83,7 @@ def test_setData(model: TagModel) -> None:
     cols = [i for i, column in enumerate(TAG_MODEL_COLUMNS) if column == "id3_key"]
     if len(cols) != 1:
         # Failed to find the right column, so something is wrong
-        assert False
+        pytest.fail("Zero or more than one columns found.")
     id3_index = model.index(0, cols[0])
     id3_val = "TRCK"
     assert model.setData(id3_index, id3_val, Qt.ItemDataRole.EditRole)
@@ -97,7 +97,7 @@ def test_setData(model: TagModel) -> None:
         i for i, column in enumerate(TAG_MODEL_COLUMNS) if column == "show_in_table"
     ]
     if len(cols) != 1:
-        assert False
+        pytest.fail("Zero or more than one columns found.")
     check_index = model.index(0, cols[0])
     check_val: int = Qt.CheckState.Unchecked.value
     assert model.setData(check_index, check_val, Qt.ItemDataRole.CheckStateRole)

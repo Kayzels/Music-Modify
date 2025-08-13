@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import QDialogButtonBox
-from pytest import MonkeyPatch
+import pytest
 from pytestqt.qtbot import QtBot
 
 from music_modify.gui.prefs.dialog_prefs_split import PrefsSplitDialog
@@ -8,7 +8,7 @@ import music_modify.prefs.prefs as prefs_module
 
 def test_prefsSplitDialog_init(
     qtbot: QtBot,
-    monkeypatch: MonkeyPatch,
+    monkeypatch: pytest.MonkeyPatch,
     temp_settings: prefs_module.Settings,
 ) -> None:
     monkeypatch.setattr(prefs_module, "settings", temp_settings)
@@ -30,7 +30,7 @@ def test_prefsSplitDialog_init(
 
 def test_prefsSplitDialog_line_edit_single(
     qtbot: QtBot,
-    monkeypatch: MonkeyPatch,
+    monkeypatch: pytest.MonkeyPatch,
     temp_settings: prefs_module.Settings,
 ) -> None:
     monkeypatch.setattr(prefs_module, "settings", temp_settings)
@@ -50,7 +50,7 @@ def test_prefsSplitDialog_line_edit_single(
 
 def test_prefsSplitDialog_line_edit_multiple(
     qtbot: QtBot,
-    monkeypatch: MonkeyPatch,
+    monkeypatch: pytest.MonkeyPatch,
     temp_settings: prefs_module.Settings,
 ) -> None:
     monkeypatch.setattr(prefs_module, "settings", temp_settings)
@@ -98,7 +98,7 @@ def test_prefsSplitDialog_line_edit_multiple(
 
 def test_prefsSplitDialog_updateSettings(
     qtbot: QtBot,
-    monkeypatch: MonkeyPatch,
+    monkeypatch: pytest.MonkeyPatch,
     temp_settings: prefs_module.Settings,
 ) -> None:
     monkeypatch.setattr(prefs_module, "settings", temp_settings)
@@ -120,7 +120,7 @@ def test_prefsSplitDialog_updateSettings(
 
 def test_prefsSplitDialog_restoreDefaults(
     qtbot: QtBot,
-    monkeypatch: MonkeyPatch,
+    monkeypatch: pytest.MonkeyPatch,
     temp_settings: prefs_module.Settings,
 ) -> None:
     monkeypatch.setattr(prefs_module, "settings", temp_settings)
@@ -155,7 +155,7 @@ def test_prefsSplitDialog_restoreDefaults(
 
 def test_prefsSplitDialog_resetSettings(
     qtbot: QtBot,
-    monkeypatch: MonkeyPatch,
+    monkeypatch: pytest.MonkeyPatch,
     temp_settings: prefs_module.Settings,
 ) -> None:
     monkeypatch.setattr(prefs_module, "settings", temp_settings)
