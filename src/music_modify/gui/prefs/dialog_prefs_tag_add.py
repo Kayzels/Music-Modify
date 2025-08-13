@@ -1,6 +1,7 @@
 """Module that defines the dialog that allows a user to add a new tag"""
 
 import logging
+from typing import TypedDict
 
 from PySide6.QtWidgets import QDialog, QMessageBox, QWidget
 
@@ -11,6 +12,12 @@ from .ui_dialog_prefs_tag_add import Ui_PrefsTagAddDialog
 logger = logging.getLogger(__name__)
 
 
+class _TagDict(TypedDict):
+    id3_key: str
+    display_name: str
+    show_in_table: bool
+
+
 class PrefsTagAddDialog(QDialog, Ui_PrefsTagAddDialog):
     """Dialog that allows a user to add a new tag to the list of tags."""
 
@@ -18,7 +25,7 @@ class PrefsTagAddDialog(QDialog, Ui_PrefsTagAddDialog):
         super().__init__(parent)
         self.setupUi(self)
 
-    def _getValidTag(self, model: TagModel) -> tuple[str, str, bool] | None:
+    def _getValidTag(self, model: TagModel) -> _TagDict | None:
         """Gets the details for a tag, if that tag isn't already defined.
         If the tag already exists, returns `None`.
 
@@ -58,7 +65,11 @@ class PrefsTagAddDialog(QDialog, Ui_PrefsTagAddDialog):
             logger.warning(message)
             QMessageBox.warning(self, "Tag Exists", message)
             return None
-        return id3_key, display_name, show_in_table
+        return {
+            "id3_key": id3_key,
+            "display_name": display_name,
+            "show_in_table": show_in_table,
+        }
 
     def addToModel(self, model: TagModel) -> None:
         """Adds the created tag to the model, if it is valid.
@@ -69,4 +80,4 @@ class PrefsTagAddDialog(QDialog, Ui_PrefsTagAddDialog):
         tag = self._getValidTag(model)
         if tag is None:
             return
-        model.addTag(*tag)
+        model.addTag(**tag)

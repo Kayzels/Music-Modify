@@ -23,7 +23,7 @@ class EditBulkLineWidget(EditBulkAbstractWidget):
     """Widget used for bulk editing single value keys."""
 
     def __init__(
-        self, parent: QWidget, data: set[str], tag: SongTag, in_all: bool = False
+        self, parent: QWidget, data: set[str], tag: SongTag, *, in_all: bool = False
     ) -> None:
         super().__init__(parent, tag)
 

@@ -301,7 +301,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.songs_model.layoutChanged.emit()
         updateTableView(self.files_table_view, self.songs_repository)
 
-    def showEditDialog(self, bulk: bool = False) -> None:
+    def showEditDialog(self, *, bulk: bool = False) -> None:
         """Create a dialog that allows editing the information for each song
         in the selection, either individually with transitions between
         Next and Previous songs, or in bulk.

@@ -198,7 +198,7 @@ class EditTableWidget(EditAbstractGroupWidget[SongTableData]):
 
         # In order to prevent itemChanged firing for every change,
         # block signals until the table is done being populated.
-        self.main_widget.blockSignals(True)
+        self.main_widget.blockSignals(True)  # noqa: FBT003
 
         # NOTE: To ensure rows aren't overwritten,
         # need to ensure that ItemIsDropEnabled is unset
@@ -210,7 +210,7 @@ class EditTableWidget(EditAbstractGroupWidget[SongTableData]):
                 self.main_widget.setItem(row_count, col_count, item)
 
         # Stop blocking signals after the table is populated.
-        self.main_widget.blockSignals(False)
+        self.main_widget.blockSignals(False)  # noqa: FBT003
 
         # Set to proportional if no data, otherwise fit the contents
         self.main_widget.adjustColumnWidths(len(self.value))

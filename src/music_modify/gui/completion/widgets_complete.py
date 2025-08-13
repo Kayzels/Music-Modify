@@ -46,6 +46,7 @@ class Completer(QListView):
         self,
         completer_widget: QWidget,
         max_visible_items: int = 7,
+        *,
         strip_completion_entries: bool = True,
     ) -> None:
         super().__init__(completer_widget)
@@ -106,7 +107,7 @@ class Completer(QListView):
             if index is not None and index.isValid():
                 self.setCurrentIndex(index)
 
-    def popup(self, select_first: bool = True) -> None:
+    def popup(self, *, select_first: bool = True) -> None:
         if self.disable_popup:
             return
 
@@ -261,6 +262,7 @@ class LineEdit(QLineEdit):
         self,
         parent: QWidget | None = None,
         completer_widget: QWidget | None = None,
+        *,
         strip_completion_entries: bool = True,
         multiple: bool = True,
     ) -> None:
@@ -329,6 +331,7 @@ class LineEdit(QLineEdit):
 
     def complete(
         self,
+        *,
         show_all: bool = False,
         select_first: bool = True,
     ) -> None:
@@ -442,7 +445,7 @@ class EnComboBox(QComboBox):
 class EditWithComplete(EnComboBox):
     item_selected: Signal = Signal(str)
 
-    def __init__(self, parent: QWidget, multiple: bool = True) -> None:
+    def __init__(self, parent: QWidget, *, multiple: bool = True) -> None:
         super().__init__(parent)
 
         self.setLineEdit(LineEdit(self, completer_widget=self, multiple=multiple))
@@ -510,7 +513,7 @@ class EditWithComplete(EnComboBox):
         edit.setText(text)
         edit.no_popup = False
 
-    def home(self, mark: bool = False) -> None:
+    def home(self, *, mark: bool = False) -> None:
         cast(LineEdit, self.lineEdit()).home(mark)
 
     def setCursorPosition(self, v: int) -> None:

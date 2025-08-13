@@ -153,7 +153,7 @@ class TagModel(QAbstractTableModel):
         return False
 
     def addTag(
-        self, id3_key: str, display_name: str, show_in_table: bool = False
+        self, *, id3_key: str, display_name: str, show_in_table: bool = False
     ) -> None:
         """Add a Tag with the given information to the model.
 
@@ -163,7 +163,9 @@ class TagModel(QAbstractTableModel):
             show_in_table: Whether this tag should be displayed in the main table,
                 or just stored.
         """
-        new_tag: TagInfo = TagInfo(id3_key, display_name, show_in_table)
+        new_tag: TagInfo = TagInfo(
+            id3_key=id3_key, display_name=display_name, show_in_table=show_in_table
+        )
         self.beginInsertRows(QModelIndex(), len(self._tags), len(self._tags))
         self._tags.append(new_tag)
         self.endInsertRows()

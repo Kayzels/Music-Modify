@@ -24,7 +24,7 @@ class EditDialogFactory:
         self.repository: SongRepository = repository
         "The list of songs that the app is managing"
 
-    def get(self, rows: list[int], bulk: bool = False) -> EditAbstractDialog:
+    def get(self, rows: list[int], *, bulk: bool = False) -> EditAbstractDialog:
         """Generates a dialog based on whether multiple files should be edited,
         and populates it with the song metadata that should be editable.
 
