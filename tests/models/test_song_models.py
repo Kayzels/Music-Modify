@@ -1,11 +1,13 @@
 from os import PathLike
 from pathlib import Path
+
 from PySide6.QtCore import Qt
+
 from music_modify.models import SongRepository, SongTableModel
 from music_modify.prefs import prefs
 
 
-def test_init():
+def test_init() -> None:
     repo = SongRepository()
     model = SongTableModel(repo)
     assert model.rowCount() == 0
@@ -16,7 +18,7 @@ def test_init():
     )
 
 
-def test_add(song_path: Path):
+def test_add(song_path: Path) -> None:
     repo = SongRepository()
     model = SongTableModel(repo)
     repo.addFile(song_path)
@@ -24,7 +26,7 @@ def test_add(song_path: Path):
     assert model.columnCount() == len(prefs.settings.table_tags)
 
 
-def test_headers(song_paths: list[PathLike[str]]):
+def test_headers(song_paths: list[PathLike[str]]) -> None:
     repo = SongRepository()
     model = SongTableModel(repo)
     repo.addFiles(song_paths)
@@ -60,7 +62,7 @@ def test_headers(song_paths: list[PathLike[str]]):
     )
 
 
-def test_data(song_paths: list[PathLike[str]]):
+def test_data(song_paths: list[PathLike[str]]) -> None:
     repo = SongRepository()
     model = SongTableModel(repo)
     repo.addFiles(song_paths)

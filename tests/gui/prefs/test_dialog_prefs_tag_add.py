@@ -1,7 +1,7 @@
-import pytest
 from PySide6.QtWidgets import QMessageBox
+import pytest
 from pytest import MonkeyPatch
-from pytestqt.qtbot import QtBot  # pyright: ignore[reportMissingTypeStubs]
+from pytestqt.qtbot import QtBot
 
 from music_modify.custom_types import TagInfo
 from music_modify.gui.prefs.dialog_prefs_tag_add import PrefsTagAddDialog
@@ -34,7 +34,7 @@ def createDialog(qtbot: QtBot, monkeypatch: MonkeyPatch) -> PrefsTagAddDialog:
     return dialog
 
 
-def test_PrefsTagAddDialog_init(qtbot: QtBot):
+def test_PrefsTagAddDialog_init(qtbot: QtBot) -> None:
     dialog = PrefsTagAddDialog()
     qtbot.addWidget(dialog)
 
@@ -45,7 +45,7 @@ def test_PrefsTagAddDialog_init(qtbot: QtBot):
 
 def test_addToModel_missing_text(
     qtbot: QtBot, monkeypatch: MonkeyPatch, model: TagModel
-):
+) -> None:
     dialog = createDialog(qtbot, monkeypatch)
 
     before_len = model.rowCount()
@@ -55,7 +55,7 @@ def test_addToModel_missing_text(
 
 def test_addToModel_already_id3(
     qtbot: QtBot, monkeypatch: MonkeyPatch, model: TagModel
-):
+) -> None:
     dialog = createDialog(qtbot, monkeypatch)
 
     dialog.id3_line_edit.setText("TIT2")
@@ -68,7 +68,7 @@ def test_addToModel_already_id3(
 
 def test_addToModel_already_display(
     qtbot: QtBot, monkeypatch: MonkeyPatch, model: TagModel
-):
+) -> None:
     dialog = createDialog(qtbot, monkeypatch)
     dialog.id3_line_edit.setText("TIT1")
     dialog.display_name_line_edit.setText("Title")
@@ -78,7 +78,9 @@ def test_addToModel_already_display(
     assert model.rowCount() == before_len
 
 
-def test_addToModel_new(qtbot: QtBot, monkeypatch: MonkeyPatch, model: TagModel):
+def test_addToModel_new(
+    qtbot: QtBot, monkeypatch: MonkeyPatch, model: TagModel
+) -> None:
     dialog = createDialog(qtbot, monkeypatch)
     dialog.id3_line_edit.setText("TRCK")
     dialog.display_name_line_edit.setText("Track")

@@ -1,25 +1,25 @@
 from os import PathLike
 
-from pytestqt.qtbot import QtBot  # pyright: ignore[reportMissingTypeStubs]
+from pytestqt.qtbot import QtBot
 
 from music_modify.gui import MainWindow
 
 
-def test_getFolderFiles(qtbot: QtBot, asset_folder: PathLike[str]):
+def test_getFolderFiles(qtbot: QtBot, asset_folder: PathLike[str]) -> None:
     window = MainWindow()
     qtbot.addWidget(window)
     files = window.getFolderFiles(asset_folder)
     assert len(files) == 3
 
 
-def test_addFiles(qtbot: QtBot, song_paths: list[PathLike[str]]):
+def test_addFiles(qtbot: QtBot, song_paths: list[PathLike[str]]) -> None:
     window = MainWindow()
     qtbot.addWidget(window)
     window.addFiles(song_paths)
     assert window.files_table_view.model().rowCount() == 3
 
 
-def test_clearFiles(qtbot: QtBot, song_paths: list[PathLike[str]]):
+def test_clearFiles(qtbot: QtBot, song_paths: list[PathLike[str]]) -> None:
     window = MainWindow()
     qtbot.addWidget(window)
     window.addFiles(song_paths)
@@ -28,7 +28,7 @@ def test_clearFiles(qtbot: QtBot, song_paths: list[PathLike[str]]):
     assert window.files_table_view.model().rowCount() == 0
 
 
-def test_clearFiles_Action(qtbot: QtBot, song_paths: list[PathLike[str]]):
+def test_clearFiles_Action(qtbot: QtBot, song_paths: list[PathLike[str]]) -> None:
     window = MainWindow()
     qtbot.addWidget(window)
     window.addFiles(song_paths)
@@ -37,7 +37,7 @@ def test_clearFiles_Action(qtbot: QtBot, song_paths: list[PathLike[str]]):
     assert window.files_table_view.model().rowCount() == 0
 
 
-def test_setFileActionState(qtbot: QtBot, song_paths: list[PathLike[str]]):
+def test_setFileActionState(qtbot: QtBot, song_paths: list[PathLike[str]]) -> None:
     window = MainWindow()
     qtbot.addWidget(window)
     assert not window.action_clear_files.isEnabled()
@@ -49,7 +49,7 @@ def test_setFileActionState(qtbot: QtBot, song_paths: list[PathLike[str]]):
     assert not window.action_clear_files.isEnabled()
 
 
-def test_setSelectionActionState(qtbot: QtBot, song_paths: list[PathLike[str]]):
+def test_setSelectionActionState(qtbot: QtBot, song_paths: list[PathLike[str]]) -> None:
     window = MainWindow()
     qtbot.addWidget(window)
     window.addFiles(song_paths)
@@ -65,7 +65,7 @@ def test_setSelectionActionState(qtbot: QtBot, song_paths: list[PathLike[str]]):
     assert not window.action_select_all.isEnabled()
 
 
-def test_selectAll_Action(qtbot: QtBot, song_paths: list[PathLike[str]]):
+def test_selectAll_Action(qtbot: QtBot, song_paths: list[PathLike[str]]) -> None:
     window = MainWindow()
     qtbot.addWidget(window)
     window.addFiles(song_paths)
@@ -74,7 +74,7 @@ def test_selectAll_Action(qtbot: QtBot, song_paths: list[PathLike[str]]):
     assert window.getSelectionLength() == 3
 
 
-def test_selectNone_Action(qtbot: QtBot, song_paths: list[PathLike[str]]):
+def test_selectNone_Action(qtbot: QtBot, song_paths: list[PathLike[str]]) -> None:
     window = MainWindow()
     qtbot.addWidget(window)
     window.addFiles(song_paths)
@@ -85,7 +85,7 @@ def test_selectNone_Action(qtbot: QtBot, song_paths: list[PathLike[str]]):
     assert window.getSelectionLength() == 0
 
 
-def test_removeSelectedFiles(qtbot: QtBot, song_paths: list[PathLike[str]]):
+def test_removeSelectedFiles(qtbot: QtBot, song_paths: list[PathLike[str]]) -> None:
     window = MainWindow()
     qtbot.addWidget(window)
     window.addFiles(song_paths)
@@ -98,7 +98,9 @@ def test_removeSelectedFiles(qtbot: QtBot, song_paths: list[PathLike[str]]):
     assert not window.action_select_none.isEnabled()
 
 
-def test_removeSelectedFiles_Action(qtbot: QtBot, song_paths: list[PathLike[str]]):
+def test_removeSelectedFiles_Action(
+    qtbot: QtBot, song_paths: list[PathLike[str]]
+) -> None:
     window = MainWindow()
     qtbot.addWidget(window)
     window.addFiles(song_paths)
@@ -111,7 +113,7 @@ def test_removeSelectedFiles_Action(qtbot: QtBot, song_paths: list[PathLike[str]
     assert not window.action_select_none.isEnabled()
 
 
-def test_updateStatusbarMessage(qtbot: QtBot, song_paths: list[PathLike[str]]):
+def test_updateStatusbarMessage(qtbot: QtBot, song_paths: list[PathLike[str]]) -> None:
     window = MainWindow()
     qtbot.addWidget(window)
     assert window.statusLabel.text() == ""

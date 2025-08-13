@@ -1,24 +1,25 @@
 import logging
 from pathlib import Path
+
 from music_modify.custom_types import Song
 from music_modify.prefs import prefs
 
 logger = logging.getLogger(__name__)
 
 
-def test_song_init():
+def test_song_init() -> None:
     song = Song()
     assert song.file is None
-    info = ["" for _ in range(len(prefs.settings.table_tags))]
+    info: list[str] = ["" for _ in range(len(prefs.settings.table_tags))]
     assert song.display_info == info
 
 
-def test_song_init_file(song_path: Path):
+def test_song_init_file(song_path: Path) -> None:
     song = Song(song_path)
     assert song.file == song_path
 
 
-def test_columns_set_updated_removed(song_path: Path):
+def test_columns_set_updated_removed(song_path: Path) -> None:
     song = Song(song_path)
     song.setTag("TIT2", ["Some Title"])
     song.setTag("TPE2", ["Some Artist"])

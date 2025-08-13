@@ -3,12 +3,12 @@ import copy
 from PySide6.QtCore import QItemSelectionModel, QObject, Signal
 from PySide6.QtWidgets import QDialogButtonBox, QMessageBox, QWidget
 from pytest import MonkeyPatch
-from pytestqt.qtbot import QtBot  # pyright: ignore[reportMissingTypeStubs]
+from pytestqt.qtbot import QtBot
 
-import music_modify.prefs.prefs as prefs_module
 from music_modify.custom_types.tag_info import TagInfo
 from music_modify.gui.prefs.dialog_prefs_tag import PrefsTagDialog
 from music_modify.models.tag_model import TagModel
+import music_modify.prefs.prefs as prefs_module
 
 _testTagInfo = TagInfo(id3_key="TEST", display_name="Test Display", show_in_table=True)
 
@@ -16,14 +16,14 @@ _testTagInfo = TagInfo(id3_key="TEST", display_name="Test Display", show_in_tabl
 class MockPrefsTagAddDialog(QObject):
     accepted: Signal = Signal()
 
-    def __init__(self, parent: QWidget | None = None):
+    def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
 
     def show(self):
         self.accepted.emit()
 
     @staticmethod
-    def addToModel(model: TagModel):
+    def addToModel(model: TagModel) -> None:
         id3_key = _testTagInfo.id3_key
         display_name = _testTagInfo.display_name
         show_in_table = _testTagInfo.show_in_table
@@ -32,7 +32,7 @@ class MockPrefsTagAddDialog(QObject):
         )
 
 
-def _selectRows(dialog: PrefsTagDialog, rows: list[int]):
+def _selectRows(dialog: PrefsTagDialog, rows: list[int]) -> None:
     model = dialog.tag_table.model()
     selection_model = dialog.tag_table.selectionModel()
     selection_model.clearSelection()
@@ -54,7 +54,9 @@ def _createDialog(
     return dialog
 
 
-def _patchDialogs(monkeypatch: MonkeyPatch, temp_settings: prefs_module.Settings):
+def _patchDialogs(
+    monkeypatch: MonkeyPatch, temp_settings: prefs_module.Settings
+) -> None:
     monkeypatch.setattr(prefs_module, "settings", temp_settings)
     monkeypatch.setattr(
         QMessageBox,
@@ -70,7 +72,7 @@ def _patchDialogs(monkeypatch: MonkeyPatch, temp_settings: prefs_module.Settings
 
 def _makeChanges(dialog: PrefsTagDialog) -> list[TagInfo]:
     model = dialog.model
-    tags = copy.deepcopy(model.tags)
+    tags: list[TagInfo] = copy.deepcopy(model.tags)
 
     # Add row at end
     dialog.add_toolbutton.click()
@@ -100,14 +102,14 @@ def _makeChanges(dialog: PrefsTagDialog) -> list[TagInfo]:
 
 def test_PrefsTagDialog_init(
     qtbot: QtBot, monkeypatch: MonkeyPatch, temp_settings: prefs_module.Settings
-):
+) -> None:
     dialog = _createDialog(qtbot, monkeypatch, temp_settings)
     assert dialog.tag_table.model().rowCount() == len(temp_settings.info_tags)
 
 
 def test_PrefsTagDialog_addTag(
     qtbot: QtBot, monkeypatch: MonkeyPatch, temp_settings: prefs_module.Settings
-):
+) -> None:
     dialog = _createDialog(qtbot, monkeypatch, temp_settings)
     model = dialog.model
     before_len = model.rowCount()
@@ -120,11 +122,11 @@ def test_PrefsTagDialog_addTag(
 
 def test_PrefsTagDialog_removeSelectedTags(
     qtbot: QtBot, monkeypatch: MonkeyPatch, temp_settings: prefs_module.Settings
-):
+) -> None:
     dialog = _createDialog(qtbot, monkeypatch, temp_settings)
     model = dialog.model
 
-    tags = copy.deepcopy(model.tags)
+    tags: list[TagInfo] = copy.deepcopy(model.tags)
 
     # With nothing selected, should do nothing
     before_len = model.rowCount()
@@ -149,10 +151,10 @@ def test_PrefsTagDialog_removeSelectedTags(
 
 def test_PrefsTagDialog_moveTagsUp(
     qtbot: QtBot, monkeypatch: MonkeyPatch, temp_settings: prefs_module.Settings
-):
+) -> None:
     dialog = _createDialog(qtbot, monkeypatch, temp_settings)
     model = dialog.model
-    tags = copy.deepcopy(model.tags)
+    tags: list[TagInfo] = copy.deepcopy(model.tags)
 
     # With nothing selected, should do nothing
     dialog.up_toolbutton.click()
@@ -166,7 +168,7 @@ def test_PrefsTagDialog_moveTagsUp(
     # With second row selected, should swap first and second
     _selectRows(dialog, [1])
     dialog.up_toolbutton.click()
-    val = tags.pop(1)
+    val: TagInfo = tags.pop(1)
     tags.insert(0, val)
     assert model.tags == tags
 
@@ -181,10 +183,10 @@ def test_PrefsTagDialog_moveTagsUp(
 
 def test_PrefsTagDialog_moveTagsDown(
     qtbot: QtBot, monkeypatch: MonkeyPatch, temp_settings: prefs_module.Settings
-):
+) -> None:
     dialog = _createDialog(qtbot, monkeypatch, temp_settings)
     model = dialog.model
-    tags = copy.deepcopy(model.tags)
+    tags: list[TagInfo] = copy.deepcopy(model.tags)
 
     # With nothing selected, should do nothing
     dialog.down_toolbutton.click()
@@ -198,7 +200,7 @@ def test_PrefsTagDialog_moveTagsDown(
     # With second row selected, should swap second and third
     _selectRows(dialog, [1])
     dialog.down_toolbutton.click()
-    val = tags.pop(1)
+    val: TagInfo = tags.pop(1)
     tags.insert(2, val)
     assert model.tags == tags
 
@@ -213,10 +215,10 @@ def test_PrefsTagDialog_moveTagsDown(
 
 def test_PrefsTagDialog_updateSettings(
     qtbot: QtBot, monkeypatch: MonkeyPatch, temp_settings: prefs_module.Settings
-):
+) -> None:
     dialog = _createDialog(qtbot, monkeypatch, temp_settings)
-    orig_tags = copy.deepcopy(dialog.model.tags)
-    tags = _makeChanges(dialog)
+    orig_tags: list[TagInfo] = copy.deepcopy(dialog.model.tags)
+    tags: list[TagInfo] = _makeChanges(dialog)
     dialog.accept()
 
     assert temp_settings.info_tags == dialog.model.tags
@@ -228,9 +230,10 @@ def test_PrefsTagDialog_updateSettings(
 
 def test_PrefsTagDialog_restoreDefaults(
     qtbot: QtBot, monkeypatch: MonkeyPatch, temp_settings: prefs_module.Settings
-):
+) -> None:
     dialog = _createDialog(qtbot, monkeypatch, temp_settings)
-    tags = _makeChanges(dialog)
+    tags: list[TagInfo] = _makeChanges(dialog)
+    assert dialog.button_box is not None
     restore_button = dialog.button_box.button(
         QDialogButtonBox.StandardButton.RestoreDefaults
     )
@@ -241,10 +244,10 @@ def test_PrefsTagDialog_restoreDefaults(
 
 def test_PrefsTagDialog_resetSettings(
     qtbot: QtBot, monkeypatch: MonkeyPatch, temp_settings: prefs_module.Settings
-):
+) -> None:
     dialog1 = _createDialog(qtbot, monkeypatch, temp_settings)
     model1 = dialog1.model
-    tags1 = copy.deepcopy(model1.tags)
+    tags1: list[TagInfo] = copy.deepcopy(model1.tags)
     rows_to_remove = [2, 4]
     _selectRows(dialog1, rows_to_remove)
     dialog1.remove_toolbutton.click()
@@ -254,14 +257,15 @@ def test_PrefsTagDialog_resetSettings(
 
     dialog2 = _createDialog(qtbot, monkeypatch, temp_settings)
     model2 = dialog2.model
-    tags2 = copy.deepcopy(model2.tags)
+    tags2: list[TagInfo] = copy.deepcopy(model2.tags)
     assert tags1 != model2.tags
     assert model2.tags == model1.tags
 
-    changed_tags = _makeChanges(dialog2)
+    changed_tags: list[TagInfo] = _makeChanges(dialog2)
     assert changed_tags != tags2
     assert changed_tags == model2.tags
 
+    assert dialog2.button_box is not None
     reset_button = dialog2.button_box.button(QDialogButtonBox.StandardButton.Reset)
     reset_button.click()
     assert model2.tags != changed_tags
@@ -270,10 +274,10 @@ def test_PrefsTagDialog_resetSettings(
 
 def test_PrefsTagDialog_restore_then_reset(
     qtbot: QtBot, monkeypatch: MonkeyPatch, temp_settings: prefs_module.Settings
-):
+) -> None:
     dialog1 = _createDialog(qtbot, monkeypatch, temp_settings)
     model1 = dialog1.model
-    tags1 = copy.deepcopy(model1.tags)
+    tags1: list[TagInfo] = copy.deepcopy(model1.tags)
     rows_to_remove = [2, 4]
     _selectRows(dialog1, rows_to_remove)
     dialog1.remove_toolbutton.click()
@@ -283,14 +287,15 @@ def test_PrefsTagDialog_restore_then_reset(
 
     dialog2 = _createDialog(qtbot, monkeypatch, temp_settings)
     model2 = dialog2.model
-    tags2 = copy.deepcopy(model2.tags)
+    tags2: list[TagInfo] = copy.deepcopy(model2.tags)
     assert tags1 != model2.tags
     assert model2.tags == model1.tags
 
-    changed_tags = _makeChanges(dialog2)
+    changed_tags: list[TagInfo] = _makeChanges(dialog2)
     assert changed_tags != tags2
     assert changed_tags == model2.tags
 
+    assert dialog2.button_box is not None
     restore_button = dialog2.button_box.button(
         QDialogButtonBox.StandardButton.RestoreDefaults
     )

@@ -1,8 +1,10 @@
-import pytest
+from typing import Literal
+
 from PySide6.QtCore import Qt
+import pytest
 
 from music_modify.custom_types import TagInfo
-from music_modify.models.tag_model import TagModel, TAG_MODEL_COLUMNS
+from music_modify.models.tag_model import TAG_MODEL_COLUMNS, TagModel
 from music_modify.utils.string_utils import tableHeader
 
 
@@ -19,31 +21,42 @@ def model(tags: list[TagInfo]) -> TagModel:
     return TagModel(tags)
 
 
-def test_size(model: TagModel, tags: list[TagInfo]):
+def test_size(model: TagModel, tags: list[TagInfo]) -> None:
     assert model.rowCount() == len(tags)
     assert model.columnCount() == len(TAG_MODEL_COLUMNS)
     assert model.tags == tags
 
 
-def test_headers(model: TagModel):
+def test_headers(model: TagModel) -> None:
     for col in range(len(TAG_MODEL_COLUMNS)):
-        check_val = tableHeader(TAG_MODEL_COLUMNS[col])
+        check_val: str = tableHeader(TAG_MODEL_COLUMNS[col])
         assert (
             model.headerData(
-                col, Qt.Orientation.Horizontal, Qt.ItemDataRole.DisplayRole
+                section=col,
+                orientation=Qt.Orientation.Horizontal,
+                role=Qt.ItemDataRole.DisplayRole,
             )
             == check_val
         )
     assert (
-        model.headerData(0, Qt.Orientation.Vertical, Qt.ItemDataRole.DisplayRole)
+        model.headerData(
+            section=0,
+            orientation=Qt.Orientation.Vertical,
+            role=Qt.ItemDataRole.DisplayRole,
+        )
         is None
     )
     assert (
-        model.headerData(0, Qt.Orientation.Horizontal, Qt.ItemDataRole.EditRole) is None
+        model.headerData(
+            section=0,
+            orientation=Qt.Orientation.Horizontal,
+            role=Qt.ItemDataRole.EditRole,
+        )
+        is None
     )
 
 
-def test_data(model: TagModel, tags: list[TagInfo]):
+def test_data(model: TagModel, tags: list[TagInfo]) -> None:
     # Should be title, but the index for column might change.
     # Depends on TAG_MODEL_COLUMNS
 
@@ -51,7 +64,7 @@ def test_data(model: TagModel, tags: list[TagInfo]):
         # Only need to test one row, no need to iterate through tags
         index = model.index(0, i)
         field = TAG_MODEL_COLUMNS[i]
-        role = (
+        role: Literal[Qt.ItemDataRole.DisplayRole, Qt.ItemDataRole.CheckStateRole] = (
             Qt.ItemDataRole.DisplayRole
             if field != "show_in_table"
             else Qt.ItemDataRole.CheckStateRole
@@ -65,7 +78,7 @@ def test_data(model: TagModel, tags: list[TagInfo]):
     assert model.data(index, Qt.ItemDataRole.DisplayRole) is None
 
 
-def test_setData(model: TagModel):
+def test_setData(model: TagModel) -> None:
     # Check setting strings first
     cols = [i for i, column in enumerate(TAG_MODEL_COLUMNS) if column == "id3_key"]
     if len(cols) != 1:
@@ -94,7 +107,7 @@ def test_setData(model: TagModel):
     ]
 
 
-def test_addTag(model: TagModel):
+def test_addTag(model: TagModel) -> None:
     model.addTag(id3_key="TRCK", display_name="Track", show_in_table=True)
     assert model.tags == [
         TagInfo(id3_key="TIT2", display_name="Title", show_in_table=True),
@@ -103,14 +116,14 @@ def test_addTag(model: TagModel):
     ]
 
 
-def test_removeTag(model: TagModel):
+def test_removeTag(model: TagModel) -> None:
     model.removeTag(1)
     assert model.tags == [
         TagInfo(id3_key="TIT2", display_name="Title", show_in_table=True),
     ]
 
 
-def test_moveTag(model: TagModel):
+def test_moveTag(model: TagModel) -> None:
     model.moveTag(0, 1)
     assert model.tags == [
         TagInfo(id3_key="TPE2", display_name="Artist", show_in_table=False),

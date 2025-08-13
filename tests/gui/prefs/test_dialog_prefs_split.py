@@ -1,6 +1,6 @@
-from pytestqt.qtbot import QtBot  # pyright: ignore[reportMissingTypeStubs]
-from pytest import MonkeyPatch
 from PySide6.QtWidgets import QDialogButtonBox
+from pytest import MonkeyPatch
+from pytestqt.qtbot import QtBot
 
 from music_modify.gui.prefs.dialog_prefs_split import PrefsSplitDialog
 import music_modify.prefs.prefs as prefs_module
@@ -8,7 +8,7 @@ import music_modify.prefs.prefs as prefs_module
 
 def test_prefsSplitDialog_init(
     qtbot: QtBot, monkeypatch: MonkeyPatch, temp_settings: prefs_module.Settings
-):
+) -> None:
     monkeypatch.setattr(prefs_module, "settings", temp_settings)
     split_dialog = PrefsSplitDialog()
     qtbot.addWidget(split_dialog)
@@ -28,7 +28,7 @@ def test_prefsSplitDialog_init(
 
 def test_prefsSplitDialog_line_edit_single(
     qtbot: QtBot, monkeypatch: MonkeyPatch, temp_settings: prefs_module.Settings
-):
+) -> None:
     monkeypatch.setattr(prefs_module, "settings", temp_settings)
     split_dialog = PrefsSplitDialog()
     qtbot.addWidget(split_dialog)
@@ -46,7 +46,7 @@ def test_prefsSplitDialog_line_edit_single(
 
 def test_prefsSplitDialog_line_edit_multiple(
     qtbot: QtBot, monkeypatch: MonkeyPatch, temp_settings: prefs_module.Settings
-):
+) -> None:
     monkeypatch.setattr(prefs_module, "settings", temp_settings)
     split_dialog = PrefsSplitDialog()
     qtbot.addWidget(split_dialog)
@@ -92,7 +92,7 @@ def test_prefsSplitDialog_line_edit_multiple(
 
 def test_prefsSplitDialog_updateSettings(
     qtbot: QtBot, monkeypatch: MonkeyPatch, temp_settings: prefs_module.Settings
-):
+) -> None:
     monkeypatch.setattr(prefs_module, "settings", temp_settings)
     split_dialog = PrefsSplitDialog()
     qtbot.addWidget(split_dialog)
@@ -112,7 +112,7 @@ def test_prefsSplitDialog_updateSettings(
 
 def test_prefsSplitDialog_restoreDefaults(
     qtbot: QtBot, monkeypatch: MonkeyPatch, temp_settings: prefs_module.Settings
-):
+) -> None:
     monkeypatch.setattr(prefs_module, "settings", temp_settings)
     split_dialog = PrefsSplitDialog()
     qtbot.addWidget(split_dialog)
@@ -124,6 +124,7 @@ def test_prefsSplitDialog_restoreDefaults(
     split_dialog.line_edit_split_values_at.setText("--")
     split_dialog.line_edit_split_values_at.editingFinished.emit()
 
+    assert split_dialog.button_box is not None
     restore_button = split_dialog.button_box.button(
         QDialogButtonBox.StandardButton.RestoreDefaults
     )
@@ -144,7 +145,7 @@ def test_prefsSplitDialog_restoreDefaults(
 
 def test_prefsSplitDialog_resetSettings(
     qtbot: QtBot, monkeypatch: MonkeyPatch, temp_settings: prefs_module.Settings
-):
+) -> None:
     monkeypatch.setattr(prefs_module, "settings", temp_settings)
     temp_settings.split_text_entered = "::"
     temp_settings.split_values_display = "::"
@@ -163,6 +164,7 @@ def test_prefsSplitDialog_resetSettings(
     split_dialog.line_edit_split_values_at.setText("--")
     split_dialog.line_edit_split_values_at.editingFinished.emit()
 
+    assert split_dialog.button_box is not None
     reset_button = split_dialog.button_box.button(QDialogButtonBox.StandardButton.Reset)
     reset_button.click()
     assert split_dialog.line_edit_split_text_entered.text() == "::"

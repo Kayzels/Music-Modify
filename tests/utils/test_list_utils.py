@@ -9,19 +9,19 @@ from music_modify.utils.list_utils import (
 )
 
 
-def test_getUniqueOrdered():
+def test_getUniqueOrdered() -> None:
     text = "First, Second, Third, First"
     separator = ","
     assert getUniqueOrdered(text, separator) == ["First", "Second", "Third"]
 
 
-def test_toPairs():
-    values = ["role1: Person1", "role2: Person2"]
+def test_toPairs() -> None:
+    values: list[str] = ["role1: Person1", "role2: Person2"]
     separator = ": "
     assert toPairs(values, separator) == [["role1", "Person1"], ["role2", "Person2"]]
 
 
-def test_addValues():
+def test_addValues() -> None:
     original = ["Value 1", "Value 2", "Value 3"]
     new = ["Value 3", "Value 4"]
     assert addValues(new, original) == ["Value 1", "Value 2", "Value 3", "Value 4"]
@@ -35,13 +35,13 @@ def test_addValues():
     ]
 
 
-def test_removePairs():
+def test_removePairs() -> None:
     pairs = {("role1", "Person1"), ("role2", "Person2")}
     original = [["role1", "Person1"], ["role2", "Person2"], ["role3", "Person3"]]
     assert removePairs(pairs, original) == [["role3", "Person3"]]
 
 
-def test_removeMatchingSublistPairs():
+def test_removeMatchingSublistPairs() -> None:
     roles = {"role1"}
     people = {"Person2"}
     original = [
@@ -60,7 +60,7 @@ def test_removeMatchingSublistPairs():
     ]
 
 
-def test_remapMatchingSublistPairs():
+def test_remapMatchingSublistPairs() -> None:
     role_replacements = {"role1": "role_new"}
     people_replacements = {"Person1": "Person_New", "Person2": "Another_Person"}
     original = [

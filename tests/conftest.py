@@ -1,10 +1,13 @@
+from collections.abc import Generator
 import os
 from os import PathLike
 from pathlib import Path
 import tempfile
+from typing import Any
 
-import pytest
 from PySide6.QtCore import QSettings
+import pytest
+
 from music_modify.prefs.prefs import Settings
 
 
@@ -21,12 +24,14 @@ def song_paths() -> list[PathLike[str]]:
         Path("tests/assets/test_song_3.mp3").absolute(),
     ]
 
+
 @pytest.fixture
 def asset_folder() -> PathLike[str]:
     return Path("tests/assets/").absolute()
 
+
 @pytest.fixture
-def temp_settings():
+def temp_settings() -> Generator[Settings, Any, None]:  # pyright: ignore[reportExplicitAny]
     # Create a temp file and keep it until the fixture is done
     fd, path = tempfile.mkstemp()
     os.close(fd)

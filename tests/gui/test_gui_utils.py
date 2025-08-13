@@ -7,13 +7,13 @@ from PySide6.QtWidgets import (
     QTableWidget,
     QWidget,
 )
-from pytestqt.qtbot import QtBot  # pyright: ignore[reportMissingTypeStubs]
+from pytestqt.qtbot import QtBot
 
 from music_modify.gui.utils import clearLayout, getSelectedRows
 
 
 # noinspection PyTypeChecker
-def test_getSelectedRows(qtbot: QtBot):
+def test_getSelectedRows(qtbot: QtBot) -> None:
     table = QTableWidget(4, 2)
     qtbot.addWidget(table)
     table.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
@@ -64,7 +64,7 @@ def test_getSelectedRows(qtbot: QtBot):
     assert getSelectedRows(table) == [1, 3]
 
 
-def test_clearLayout(qtbot: QtBot):
+def test_clearLayout(qtbot: QtBot) -> None:
     widget1 = QWidget()
     layout1 = QHBoxLayout()
     widget2 = QLineEdit("This is some text")
