@@ -135,7 +135,6 @@ def test_PrefsTagDialog_removeSelectedTags(
 
     # Select the first row and remove
     _selectRows(dialog, [0])
-    # dialog.tag_table.selectRow(0)
     dialog.remove_toolbutton.click()
     tags.pop(0)
     assert model.tags == tags

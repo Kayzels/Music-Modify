@@ -43,7 +43,7 @@ target-version = "py313"
 docstring-code-format = true
 
 [tool.ruff.lint]
-select = ["E", "F"]
+select = ["E", "F", "ERA"]
 
 [tool.ruff.lint.pycodestyle]
 max-doc-length = 88

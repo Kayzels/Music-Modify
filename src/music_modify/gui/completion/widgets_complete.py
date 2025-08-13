@@ -96,7 +96,6 @@ class Completer(QListView):
             row = self.model().rowCount() if direction == NavDirection.Previous else -1
         row = row + (-1 if direction == NavDirection.Previous else 1)
 
-        # index = self.model().index(row % self.model().rowCount())
         index = cast(CompleteModel, self.model()).index(row % self.model().rowCount())
         self.setCurrentIndex(index)
 
@@ -550,7 +549,6 @@ class EditWithComplete(EnComboBox):
 def testWidgets():
     from PySide6.QtWidgets import QDialog, QVBoxLayout
 
-    # app = QApplication([])
     d = QDialog()
     d.setLayout(QVBoxLayout())
     edit = EditWithComplete(d)
