@@ -84,10 +84,7 @@ class EditListWidget(EditAbstractGroupWidget[SongListData]):
     def _isReset(self) -> bool:
         if len(self.value) != len(self.original):
             return False
-        for i in range(len(self.value)):
-            if self.value[i] != self.original[i]:
-                return False
-        return True
+        return all(self.value[i] == self.original[i] for i in range(len(self.value)))
 
     @override
     def _updateValue(self) -> None:

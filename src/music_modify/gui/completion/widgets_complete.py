@@ -378,10 +378,7 @@ class LineEdit(QLineEdit):
         before_text = sep.join(before_text.split(sep)[:-1]).rstrip()
         if before_text:
             before_text += sep + " "
-        if self.add_separator or after_text:
-            completed_text = text + sep + " "
-        else:
-            completed_text = text
+        completed_text = text + sep + " " if self.add_separator or after_text else text
         return before_text + completed_text, after_text
 
     @Slot(str)
@@ -540,9 +537,13 @@ class EditWithComplete(EnComboBox):
         except AttributeError:
             return False
         etype = event.type()
-        if self.eat_focus_out and self is obj and etype == QEvent.Type.FocusOut:
-            if completer.isVisible():
-                return True
+        if (
+            self.eat_focus_out
+            and self is obj
+            and etype == QEvent.Type.FocusOut
+            and completer.isVisible()
+        ):
+            return True
         return super().eventFilter(obj, event)
 
     @property

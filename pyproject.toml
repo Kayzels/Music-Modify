@@ -58,7 +58,8 @@ select = [
   "PYI",
   "PT",
   "Q",
-  "RET"
+  "RET",
+  "SIM",
 ]
 
 [tool.ruff.lint.per-file-ignores]

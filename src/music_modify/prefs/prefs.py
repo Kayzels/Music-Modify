@@ -195,8 +195,7 @@ class Settings:
             self._settings.setArrayIndex(i)
             display_name: str = str(self._settings.value("display_name"))
             id3_key: str = str(self._settings.value("id3_key"))
-            show_str: str = self._settings.value("show_in_table")
-            show_in_table: bool = True if show_str == "True" else False
+            show_in_table: bool = self._settings.value("show_in_table") == "True"
             tags.append(
                 TagInfo(
                     display_name=display_name,
