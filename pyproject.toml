@@ -55,6 +55,7 @@ select = [
   "C4",
   "LOG",
   "PIE",
+  "PYI",
 ]
 
 [tool.ruff.lint.per-file-ignores]
