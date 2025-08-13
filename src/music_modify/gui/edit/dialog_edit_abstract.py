@@ -46,12 +46,10 @@ class EditAbstractDialog(QDialog, ABC, metaclass=ABCQMeta):
     @abstractmethod
     def _setupSongInfo(self) -> None:
         """Set up the display of the information for the songs."""
-        pass
 
     @abstractmethod
     def updateSongInfo(self) -> None:
         """Update the data being stored in the song(s)."""
-        pass
 
     def _setupButtons(self) -> None:
         """Add the buttons to the interface."""

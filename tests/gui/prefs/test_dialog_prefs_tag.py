@@ -72,7 +72,6 @@ def _patchDialogs(
         "music_modify.gui.prefs.dialog_prefs_tag.PrefsTagAddDialog",
         MockPrefsTagAddDialog,
     )
-    pass
 
 
 def _makeChanges(dialog: PrefsTagDialog) -> list[TagInfo]:

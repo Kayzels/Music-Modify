@@ -21,7 +21,6 @@ class EditBulkAbstractWidget(QWidget, ABC, metaclass=ABCQMeta):
     @abstractmethod
     def setupUi(self) -> None:
         """Creates the display of the widget."""
-        pass
 
     @abstractmethod
     def updateTag(self, songs: list[Song]) -> bool:
@@ -33,7 +32,6 @@ class EditBulkAbstractWidget(QWidget, ABC, metaclass=ABCQMeta):
         Returns:
             True if the songs were successfully updated, else False.
         """
-        pass
 
     @property
     def tag(self) -> SongTag:

@@ -24,7 +24,6 @@ class PrefsAbstractDialog(QDialog, ABC, metaclass=ABCQMeta):
     @abstractmethod
     def setupUi(self, dialog: Self) -> None:
         """Set up the display of the dialog."""
-        pass
 
     def __init__(self, parent: QWidget | None = None) -> None:
         self.button_box: QDialogButtonBox | None = None
@@ -55,16 +54,11 @@ class PrefsAbstractDialog(QDialog, ABC, metaclass=ABCQMeta):
         when the dialog is accepted.
         Changes the values in the settings file to match the ones set in the dialog.
         """
-        pass
 
     @abstractmethod
     def restoreDefaults(self) -> None:
         """Change the settings back to the original default values."""
-        logger.debug("Called restore defaults in abstract")
-        pass
 
     @abstractmethod
     def resetSettings(self) -> None:
         """Reset the settings to the values they had when the dialog opened."""
-        logger.debug("Called reset settings in abstract")
-        pass

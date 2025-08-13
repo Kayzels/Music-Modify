@@ -40,33 +40,26 @@ class EditAbstractWidget(QWidget, Generic[ValueT], ABC, metaclass=ABCQMeta):
     @abstractmethod
     def _initValue(self, data: ValueT | None) -> None:
         """Sets the original value that the widget should store."""
-        pass
 
     @abstractmethod
     def _setupUi(self) -> None:
         """Sets up the display of the widget."""
-        pass
 
     @abstractmethod
     def _displayValue(self) -> None:
         """Sets the values for the table based on the current value property."""
-        pass
 
     @abstractmethod
     def _updateValue(self) -> None:
         """Updates the value that is stored in the widget, and displayed."""
-        logger.info("Abstract updateValue called")
-        pass
 
     @abstractmethod
     def _clearValue(self) -> None:
         """Sets the value to the equivalent empty value."""
-        pass
 
     @abstractmethod
     def _isReset(self) -> bool:
         """Returns whether the value has been set back to its original state."""
-        pass
 
     @property
     @abstractmethod
@@ -74,7 +67,6 @@ class EditAbstractWidget(QWidget, Generic[ValueT], ABC, metaclass=ABCQMeta):
         """The value displayed and stored inside the widget,
         depending on the data type.
         """
-        pass
 
     @value.setter
     def value(self, value: ValueT) -> None:
@@ -84,7 +76,6 @@ class EditAbstractWidget(QWidget, Generic[ValueT], ABC, metaclass=ABCQMeta):
     @abstractmethod
     def original(self) -> ValueT:
         """The original value that was stored inside the widget, before changes."""
-        pass
 
     def clear(self) -> None:
         """Clears the value stored and displayed in the widget."""

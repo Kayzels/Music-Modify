@@ -48,7 +48,6 @@ class EditBulkAbstractGroupWidget(EditBulkAbstractWidget, ABC):
     @abstractmethod
     def createForm(self) -> QWidget:
         """Creates the form layout that holds the widgets needed."""
-        pass
 
     def _toggleClearState(self, state: Qt.CheckState) -> None:
         """Toggle whether the data should be cleared on confirm, or not."""
@@ -57,4 +56,3 @@ class EditBulkAbstractGroupWidget(EditBulkAbstractWidget, ABC):
     @abstractmethod
     def _resetView(self) -> None:
         """Resets the display to be the same as it was on initialisation."""
-        pass

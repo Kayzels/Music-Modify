@@ -42,7 +42,20 @@ target-version = "py313"
 docstring-code-format = true
 
 [tool.ruff.lint]
-select = ["E", "F", "ERA", "ANN", "S", "FBT", "B", "A", "COM", "C4"]
+select = [
+  "E",
+  "F",
+  "ERA",
+  "ANN",
+  "S",
+  "FBT",
+  "B",
+  "A",
+  "COM",
+  "C4",
+  "LOG",
+  "PIE",
+]
 
 [tool.ruff.lint.per-file-ignores]
 "test*.py" = ["S101", "B011"]

@@ -74,14 +74,11 @@ class EditAbstractGroupWidget(
     @abstractmethod
     def _addRow(self) -> None:
         """Adds a row to the bottom of the widget."""
-        pass
 
     @abstractmethod
     def _removeRow(self) -> None:
         """Removes the selected rows from the widget."""
-        pass
 
     @abstractmethod
     def _moveRows(self, direction: RowDirection) -> None:
         """Moves the selected rows in the specified direction."""
-        pass
