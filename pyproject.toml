@@ -27,7 +27,6 @@ where = ["src"]
 reportAny = false
 reportUnusedCallResult = false
 reportUnknownMemberType = false
-reportCallInDefaultInitializer = false
 reportPrivateImportUsage = false
 reportUnknownVariableType = false
 reportUnknownArgumentType = false
@@ -43,10 +42,11 @@ target-version = "py313"
 docstring-code-format = true
 
 [tool.ruff.lint]
-select = ["E", "F", "ERA", "ANN", "S", "FBT"]
+select = ["E", "F", "ERA", "ANN", "S", "FBT", "B", "A", "COM", "C4"]
 
 [tool.ruff.lint.per-file-ignores]
-"test*.py" = ["S101"]
+"test*.py" = ["S101", "B011"]
+"**.pyi" = ["A", "COM812"]
 
 [tool.ruff.lint.pycodestyle]
 max-doc-length = 88

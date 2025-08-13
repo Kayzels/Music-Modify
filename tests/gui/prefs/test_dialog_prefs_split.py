@@ -7,7 +7,9 @@ import music_modify.prefs.prefs as prefs_module
 
 
 def test_prefsSplitDialog_init(
-    qtbot: QtBot, monkeypatch: MonkeyPatch, temp_settings: prefs_module.Settings
+    qtbot: QtBot,
+    monkeypatch: MonkeyPatch,
+    temp_settings: prefs_module.Settings,
 ) -> None:
     monkeypatch.setattr(prefs_module, "settings", temp_settings)
     split_dialog = PrefsSplitDialog()
@@ -27,7 +29,9 @@ def test_prefsSplitDialog_init(
 
 
 def test_prefsSplitDialog_line_edit_single(
-    qtbot: QtBot, monkeypatch: MonkeyPatch, temp_settings: prefs_module.Settings
+    qtbot: QtBot,
+    monkeypatch: MonkeyPatch,
+    temp_settings: prefs_module.Settings,
 ) -> None:
     monkeypatch.setattr(prefs_module, "settings", temp_settings)
     split_dialog = PrefsSplitDialog()
@@ -38,14 +42,16 @@ def test_prefsSplitDialog_line_edit_single(
     assert split_dialog.changed_settings == {"split_text_entered": "++"}
 
     split_dialog.line_edit_split_text_entered.setText(
-        temp_settings.default_split_text_entered
+        temp_settings.default_split_text_entered,
     )
     split_dialog.line_edit_split_text_entered.editingFinished.emit()
     assert split_dialog.changed_settings == {}
 
 
 def test_prefsSplitDialog_line_edit_multiple(
-    qtbot: QtBot, monkeypatch: MonkeyPatch, temp_settings: prefs_module.Settings
+    qtbot: QtBot,
+    monkeypatch: MonkeyPatch,
+    temp_settings: prefs_module.Settings,
 ) -> None:
     monkeypatch.setattr(prefs_module, "settings", temp_settings)
     split_dialog = PrefsSplitDialog()
@@ -69,7 +75,7 @@ def test_prefsSplitDialog_line_edit_multiple(
     }
 
     split_dialog.line_edit_split_text_entered.setText(
-        temp_settings.default_split_text_entered
+        temp_settings.default_split_text_entered,
     )
     split_dialog.line_edit_split_text_entered.editingFinished.emit()
     assert split_dialog.changed_settings == {
@@ -77,21 +83,23 @@ def test_prefsSplitDialog_line_edit_multiple(
         "split_values_at": "--",
     }
     split_dialog.line_edit_split_values_at.setText(
-        temp_settings.default_split_values_at
+        temp_settings.default_split_values_at,
     )
     split_dialog.line_edit_split_values_at.editingFinished.emit()
     assert split_dialog.changed_settings == {
         "split_values_display": "..",
     }
     split_dialog.line_edit_split_values_display.setText(
-        temp_settings.default_split_values_display
+        temp_settings.default_split_values_display,
     )
     split_dialog.line_edit_split_values_display.editingFinished.emit()
     assert split_dialog.changed_settings == {}
 
 
 def test_prefsSplitDialog_updateSettings(
-    qtbot: QtBot, monkeypatch: MonkeyPatch, temp_settings: prefs_module.Settings
+    qtbot: QtBot,
+    monkeypatch: MonkeyPatch,
+    temp_settings: prefs_module.Settings,
 ) -> None:
     monkeypatch.setattr(prefs_module, "settings", temp_settings)
     split_dialog = PrefsSplitDialog()
@@ -111,7 +119,9 @@ def test_prefsSplitDialog_updateSettings(
 
 
 def test_prefsSplitDialog_restoreDefaults(
-    qtbot: QtBot, monkeypatch: MonkeyPatch, temp_settings: prefs_module.Settings
+    qtbot: QtBot,
+    monkeypatch: MonkeyPatch,
+    temp_settings: prefs_module.Settings,
 ) -> None:
     monkeypatch.setattr(prefs_module, "settings", temp_settings)
     split_dialog = PrefsSplitDialog()
@@ -126,7 +136,7 @@ def test_prefsSplitDialog_restoreDefaults(
 
     assert split_dialog.button_box is not None
     restore_button = split_dialog.button_box.button(
-        QDialogButtonBox.StandardButton.RestoreDefaults
+        QDialogButtonBox.StandardButton.RestoreDefaults,
     )
     restore_button.click()
     assert (
@@ -144,7 +154,9 @@ def test_prefsSplitDialog_restoreDefaults(
 
 
 def test_prefsSplitDialog_resetSettings(
-    qtbot: QtBot, monkeypatch: MonkeyPatch, temp_settings: prefs_module.Settings
+    qtbot: QtBot,
+    monkeypatch: MonkeyPatch,
+    temp_settings: prefs_module.Settings,
 ) -> None:
     monkeypatch.setattr(prefs_module, "settings", temp_settings)
     temp_settings.split_text_entered = "::"

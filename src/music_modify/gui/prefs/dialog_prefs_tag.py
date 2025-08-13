@@ -68,7 +68,9 @@ class PrefsTagDialog(PrefsAbstractDialog, Ui_PrefsTagDialog):
         for row in selected_rows:
             for col in range(self.model.columnCount()):
                 header_val = self.model.headerData(
-                    col, Qt.Orientation.Horizontal, Qt.ItemDataRole.DisplayRole
+                    col,
+                    Qt.Orientation.Horizontal,
+                    Qt.ItemDataRole.DisplayRole,
                 )
                 cell_index = self.model.index(row, col)
                 data = self.model.data(cell_index, Qt.ItemDataRole.DisplayRole)

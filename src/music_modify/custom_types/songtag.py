@@ -81,7 +81,7 @@ class SongTag:
         data that is stored.
         This is needed to extract the correct type of data from the tag later."""
         if "TXXX" in id3_key:
-            tag_frame = getattr(id3, "TXXX").__base__
+            tag_frame = id3.TXXX.__base__
         else:
             try:
                 tag_frame = getattr(id3, id3_key).__base__
@@ -129,7 +129,7 @@ class SongTag:
                 (
                     f"AttributeError when accessing frame type {self.frame_type}"
                     f" from song for id3_key {self.id3_key}"
-                )
+                ),
             )
             return None
 

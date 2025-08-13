@@ -23,7 +23,12 @@ class EditBulkLineWidget(EditBulkAbstractWidget):
     """Widget used for bulk editing single value keys."""
 
     def __init__(
-        self, parent: QWidget, data: set[str], tag: SongTag, *, in_all: bool = False
+        self,
+        parent: QWidget,
+        data: set[str],
+        tag: SongTag,
+        *,
+        in_all: bool = False,
     ) -> None:
         super().__init__(parent, tag)
 
@@ -54,10 +59,10 @@ class EditBulkLineWidget(EditBulkAbstractWidget):
         # Ensure the two checkboxes are mutually exclusive.
         # Needs to be done manually, to ensure deselection is possible.
         self.apply_checkbox.stateChanged.connect(
-            lambda state: self._checkboxStateChanged(state, self.clear_checkbox)  # pyright: ignore[reportUnknownLambdaType]
+            lambda state: self._checkboxStateChanged(state, self.clear_checkbox),  # pyright: ignore[reportUnknownLambdaType]
         )
         self.clear_checkbox.stateChanged.connect(
-            lambda state: self._checkboxStateChanged(state, self.apply_checkbox)  # pyright: ignore[reportUnknownLambdaType]
+            lambda state: self._checkboxStateChanged(state, self.apply_checkbox),  # pyright: ignore[reportUnknownLambdaType]
         )
 
     @staticmethod

@@ -60,7 +60,9 @@ class Completer(QListView):
         self.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
         self.setUniformItemSizes(True)
         self.setAlternatingRowColors(True)
-        self.setModel(CompleteModel(self, strip_completion_entries))
+        self.setModel(
+            CompleteModel(self, strip_completion_entries=strip_completion_entries),
+        )
         self.setMouseTracking(True)
         self.activated.connect(self.itemChosen)
         self.pressed.connect(self.itemChosen)
@@ -214,7 +216,7 @@ class Completer(QListView):
                 self.nextMatch(
                     direction=NavDirection.Previous
                     if key == Qt.Key.Key_Up
-                    else NavDirection.Next
+                    else NavDirection.Next,
                 )
                 event.accept()
                 return True
@@ -229,7 +231,7 @@ class Completer(QListView):
             etype == QEvent.Type.MouseButtonPress
             and hasattr(event, "globalPos")
             and not self.rect().contains(
-                self.mapFromGlobal(cast(QMouseEvent, event).globalPos())
+                self.mapFromGlobal(cast(QMouseEvent, event).globalPos()),
             )
         ):
             event = cast(QMouseEvent, event)
@@ -273,13 +275,16 @@ class LineEdit(QLineEdit):
         completer_widget = self if completer_widget is None else completer_widget
 
         self.mcompleter: Completer = Completer(
-            completer_widget, strip_completion_entries=strip_completion_entries
+            completer_widget,
+            strip_completion_entries=strip_completion_entries,
         )
         self.mcompleter.item_selected.connect(
-            self.completionSelected, type=Qt.ConnectionType.QueuedConnection
+            self.completionSelected,
+            type=Qt.ConnectionType.QueuedConnection,
         )
         self.mcompleter.apply_current_text.connect(
-            self.applyCurrentText, type=Qt.ConnectionType.QueuedConnection
+            self.applyCurrentText,
+            type=Qt.ConnectionType.QueuedConnection,
         )
         self.mcompleter.relayout_needed.connect(self.relayout)
         self.mcompleter.setFocusProxy(completer_widget)
@@ -434,7 +439,8 @@ class EnComboBox(QComboBox):
     def setText(self, text: str) -> None:
         # noinspection PyTypeChecker
         idx: int = self.findText(
-            text, Qt.MatchFlag.MatchCaseSensitive | Qt.MatchFlag.MatchFixedString
+            text,
+            Qt.MatchFlag.MatchCaseSensitive | Qt.MatchFlag.MatchFixedString,
         )
         if idx == -1:
             self.insertItem(0, text)

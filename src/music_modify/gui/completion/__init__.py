@@ -8,7 +8,11 @@ from .widgets_complete import EditWithComplete
 
 
 def createCompletionWidget(
-    parent: QWidget, items: tuple[str, ...], *, multiple: bool = True, initial: str = ""
+    parent: QWidget,
+    items: tuple[str, ...],
+    *,
+    multiple: bool = True,
+    initial: str = "",
 ) -> EditWithComplete:
     """
     Creates a widget for showing completion suggestions,
@@ -23,7 +27,7 @@ def createCompletionWidget(
     Returns:
         EditWithComplete: The configured completion widget.
     """
-    widget = EditWithComplete(parent, multiple)
+    widget = EditWithComplete(parent, multiple=multiple)
     widget.updateItemsCache(items)
     widget.showInitialValue(initial)
     return widget

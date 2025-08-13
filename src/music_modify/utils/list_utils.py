@@ -44,14 +44,17 @@ def addValues(new: list[T], original: list[T]) -> list[T]:
 
 
 def removePairs(
-    pairs: set[tuple[str, ...]], original: list[list[str]]
+    pairs: set[tuple[str, ...]],
+    original: list[list[str]],
 ) -> list[list[str]]:
     """Remove any pairs from `pairs` that appear in the `original` list."""
     return [item for item in original if tuple(item) not in pairs]
 
 
 def removeMatchingSublistPairs(
-    remove_values: set[str], original: list[list[str]], index: int
+    remove_values: set[str],
+    original: list[list[str]],
+    index: int,
 ) -> list[list[str]]:
     """Remove any pairs that appear in `remove_values` that contain
     any values that appear in `original` specifically at that index.
@@ -67,7 +70,9 @@ def removeMatchingSublistPairs(
 
 
 def remapMatchingSublistPairs(
-    replacements: dict[str, str], original: list[list[str]], index: int
+    replacements: dict[str, str],
+    original: list[list[str]],
+    index: int,
 ) -> list[list[str]]:
     """Use the `replacements` dict to change the values that appear in `original`
     at the specified `index`, if the values appear in the list at that point.

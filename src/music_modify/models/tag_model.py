@@ -14,7 +14,7 @@ from PySide6.QtCore import (
     Signal,
 )
 
-from music_modify.custom_types import TagInfo
+from music_modify.custom_types import TagInfo, qt_types
 from music_modify.utils import tableHeader
 
 logger = logging.getLogger(__name__)
@@ -35,13 +35,15 @@ class TagModel(QAbstractTableModel):
 
     @override
     def rowCount(
-        self, parent: QModelIndex | QPersistentModelIndex = QModelIndex()
+        self,
+        parent: QModelIndex | QPersistentModelIndex = qt_types.Q_MODEL_INDEX,
     ) -> int:
         return len(self._tags)
 
     @override
     def columnCount(
-        self, parent: QModelIndex | QPersistentModelIndex = QModelIndex()
+        self,
+        parent: QModelIndex | QPersistentModelIndex = qt_types.Q_MODEL_INDEX,
     ) -> int:
         return len(TAG_MODEL_COLUMNS)
 
@@ -132,7 +134,7 @@ class TagModel(QAbstractTableModel):
                 getattr(tag, field) for i, tag in enumerate(self._tags) if i != row
             ):
                 self.invalid_input.emit(
-                    f"{tableHeader(field)} with {value} already exists."
+                    f"{tableHeader(field)} with {value} already exists.",
                 )
                 return False
 
@@ -153,7 +155,11 @@ class TagModel(QAbstractTableModel):
         return False
 
     def addTag(
-        self, *, id3_key: str, display_name: str, show_in_table: bool = False
+        self,
+        *,
+        id3_key: str,
+        display_name: str,
+        show_in_table: bool = False,
     ) -> None:
         """Add a Tag with the given information to the model.
 
@@ -164,7 +170,9 @@ class TagModel(QAbstractTableModel):
                 or just stored.
         """
         new_tag: TagInfo = TagInfo(
-            id3_key=id3_key, display_name=display_name, show_in_table=show_in_table
+            id3_key=id3_key,
+            display_name=display_name,
+            show_in_table=show_in_table,
         )
         self.beginInsertRows(QModelIndex(), len(self._tags), len(self._tags))
         self._tags.append(new_tag)

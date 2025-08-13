@@ -42,8 +42,9 @@ class Settings:
         John Smith, Jane Doe should be understood as two separate values."""
         return str(
             self._settings.value(
-                "Split/split_text_entered", Settings.default_split_text_entered
-            )
+                "Split/split_text_entered",
+                Settings.default_split_text_entered,
+            ),
         )
 
     @split_text_entered.setter
@@ -59,8 +60,9 @@ class Settings:
         """
         return str(
             self._settings.value(
-                "Split/split_values_display", Settings.default_split_values_display
-            )
+                "Split/split_values_display",
+                Settings.default_split_values_display,
+            ),
         )
 
     @split_values_display.setter
@@ -75,8 +77,9 @@ class Settings:
         """
         return str(
             self._settings.value(
-                "Split/split_values_at", Settings.default_split_values_at
-            )
+                "Split/split_values_at",
+                Settings.default_split_values_at,
+            ),
         )
 
     @split_values_at.setter
@@ -199,7 +202,7 @@ class Settings:
                     display_name=display_name,
                     id3_key=id3_key,
                     show_in_table=show_in_table,
-                )
+                ),
             )
         self._settings.endArray()
         return tags

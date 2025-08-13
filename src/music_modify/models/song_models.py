@@ -12,6 +12,7 @@ from PySide6.QtCore import (
     Qt,
 )
 
+from music_modify.custom_types import qt_types
 from music_modify.prefs import prefs
 
 from .song_repository import SongRepository
@@ -51,13 +52,15 @@ class SongTableModel(QAbstractTableModel):
 
     @override
     def rowCount(
-        self, parent: QModelIndex | QPersistentModelIndex = QModelIndex()
+        self,
+        parent: QModelIndex | QPersistentModelIndex = qt_types.Q_MODEL_INDEX,
     ) -> int:
         return len(self.repository)
 
     @override
     def columnCount(
-        self, parent: QModelIndex | QPersistentModelIndex = QModelIndex()
+        self,
+        parent: QModelIndex | QPersistentModelIndex = qt_types.Q_MODEL_INDEX,
     ) -> int:
         if self.rowCount(parent) == 0:
             return 1
@@ -79,11 +82,11 @@ class SongTableModel(QAbstractTableModel):
                 if orientation == Qt.Orientation.Vertical:
                     return None
             if orientation == Qt.Orientation.Horizontal and section < len(
-                prefs.settings.table_tags
+                prefs.settings.table_tags,
             ):
                 return prefs.settings.table_tags[section].display_name
             elif orientation == Qt.Orientation.Vertical and section < len(
-                self.repository
+                self.repository,
             ):
                 return f"{section + 1}"
             return None
@@ -100,7 +103,9 @@ class SongTableProxyModel(QSortFilterProxyModel):
 
     @override
     def filterAcceptsRow(
-        self, source_row: int, _: QModelIndex | QPersistentModelIndex = QModelIndex()
+        self,
+        source_row: int,
+        _: QModelIndex | QPersistentModelIndex = qt_types.Q_MODEL_INDEX,
     ) -> bool:
         return source_row in self.selected_rows
 

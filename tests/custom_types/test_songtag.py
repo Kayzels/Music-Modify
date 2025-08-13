@@ -44,7 +44,9 @@ def test_display_name(single_tag: SongTag) -> None:
 
 
 def test_frame_type(
-    single_tag: SongTag, multiple_tag: SongTag, people_tag: SongTag
+    single_tag: SongTag,
+    multiple_tag: SongTag,
+    people_tag: SongTag,
 ) -> None:
     assert single_tag.frame_type == TagType.Text
     assert multiple_tag.frame_type == TagType.Text
@@ -52,7 +54,9 @@ def test_frame_type(
 
 
 def test_allow_multiple(
-    single_tag: SongTag, multiple_tag: SongTag, people_tag: SongTag
+    single_tag: SongTag,
+    multiple_tag: SongTag,
+    people_tag: SongTag,
 ) -> None:
     assert not single_tag.allow_multiple
     assert multiple_tag.allow_multiple
@@ -66,7 +70,9 @@ def test_len(single_tag: SongTag, multiple_tag: SongTag, people_tag: SongTag) ->
 
 
 def test_hasTag(
-    single_tag: SongTag, multiple_tag: SongTag, people_tag: SongTag
+    single_tag: SongTag,
+    multiple_tag: SongTag,
+    people_tag: SongTag,
 ) -> None:
     song = ID3()
     assert not single_tag.hasTag(song)
@@ -108,7 +114,9 @@ def test_removeTag(single_tag: SongTag, single_value: list[str]) -> None:
 
 
 def test_getTag(
-    single_tag: SongTag, multiple_tag: SongTag, single_value: list[str]
+    single_tag: SongTag,
+    multiple_tag: SongTag,
+    single_value: list[str],
 ) -> None:
     song = ID3()
     assert not single_tag.hasTag(song)

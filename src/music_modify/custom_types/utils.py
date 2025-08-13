@@ -29,7 +29,9 @@ def mapKey(id3_key: str, tag_list: list[SongTag]) -> SongTag | None:
 
 
 def mapOptionalTag(
-    tag_name: str, optional_name: str, tag_list: list[SongTag]
+    tag_name: str,
+    optional_name: str,
+    tag_list: list[SongTag],
 ) -> SongTag | None:
     """Gets the tag from the given tag name.
     If the tag is None, gets the tag from the optional name.

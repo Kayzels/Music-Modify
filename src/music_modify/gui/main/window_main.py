@@ -56,21 +56,21 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.files_table_view.setShowGrid(False)
         self.files_table_view.resizeColumnsToContents()
         self.files_table_view.selectionModel().selectionChanged.connect(
-            self.updateStatusbarMessage
+            self.updateStatusbarMessage,
         )
         self.files_table_view.selectionModel().selectionChanged.connect(
-            self.setSelectionActionState
+            self.setSelectionActionState,
         )
         self.songs_repository.songs_updated.connect(
-            lambda: updateTableView(self.files_table_view, self.songs_repository)
+            lambda: updateTableView(self.files_table_view, self.songs_repository),
         )
         self.songs_repository.songs_updated.connect(self.setFileActionState)
         self.songs_repository.songs_updated.connect(self.updateStatusbarMessage)
         self.files_table_view.setContextMenuPolicy(
-            Qt.ContextMenuPolicy.CustomContextMenu
+            Qt.ContextMenuPolicy.CustomContextMenu,
         )
         self.files_table_view.customContextMenuRequested.connect(
-            self.showCustomContextMenu
+            self.showCustomContextMenu,
         )
 
         # Drag and Drop
@@ -81,10 +81,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # Actions
         self.action_add_files.triggered.connect(
-            lambda: self.openAddDialog(QFileDialog.FileMode.ExistingFiles)
+            lambda: self.openAddDialog(QFileDialog.FileMode.ExistingFiles),
         )
         self.action_add_folder.triggered.connect(
-            lambda: self.openAddDialog(QFileDialog.FileMode.Directory)
+            lambda: self.openAddDialog(QFileDialog.FileMode.Directory),
         )
         self.action_clear_files.triggered.connect(self.clearFiles)
         self.action_remove_selected.triggered.connect(self.removeSelectedFiles)
@@ -98,7 +98,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # Edit Actions
         self.dialog_factory: EditDialogFactory = EditDialogFactory(
-            self, self.songs_repository
+            self,
+            self.songs_repository,
         )
         "Factory for generating the right type of EditDialog, based on selection"
         self.action_edit_individual.triggered.connect(self.showEditDialog)
@@ -151,7 +152,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """
         songs: list[str] = []
         progress_dialog = QProgressDialog(
-            "Adding Folders...", "Cancel", 0, 1, parent=self
+            "Adding Folders...",
+            "Cancel",
+            0,
+            1,
+            parent=self,
         )
         for folder_name, _, files in os.walk(folder):
             for file in files:
@@ -172,7 +177,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """
         start_time = time.time()
         progress_dialog = QProgressDialog(
-            "Adding Files...", "Cancel", 0, len(files), parent=self
+            "Adding Files...",
+            "Cancel",
+            0,
+            len(files),
+            parent=self,
         )
         progress_dialog.setModal(True)
         progress_dialog.setMinimumDuration(2)
@@ -203,7 +212,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             event.acceptProposedAction()
         else:
             logger.warning(
-                f"Unsupported mimedata when drag/dropping: {event.mimeData()}"
+                f"Unsupported mimedata when drag/dropping: {event.mimeData()}",
             )
 
     def processTableDropEvents(self, event: QDropEvent) -> None:

@@ -35,7 +35,10 @@ class EditBulkDialog(EditAbstractDialog):
     "Signal that should be emitted whenever data changes in any of the fields."
 
     def __init__(
-        self, parent: QWidget, repository: SongRepository, rows: list[int]
+        self,
+        parent: QWidget,
+        repository: SongRepository,
+        rows: list[int],
     ) -> None:
         super().__init__(parent, repository, rows)
 

@@ -26,7 +26,10 @@ class _MultipleLineEdit(QLineEdit):
     """Private class that stores a list of strings, but displays a single string."""
 
     def __init__(
-        self, value: str, parent: QWidget | None = None, **kwargs: Unpack[QLineEditArgs]
+        self,
+        value: str,
+        parent: QWidget | None = None,
+        **kwargs: Unpack[QLineEditArgs],
     ) -> None:
         super().__init__(value, parent, **kwargs)
 
@@ -66,7 +69,9 @@ class EditBulkMultipleWidget(EditBulkAbstractGroupWidget):
 
         remove_layout = QHBoxLayout()
         self.remove_line = createCompletionWidget(
-            parent=self, items=self.items, multiple=True
+            parent=self,
+            items=self.items,
+            multiple=True,
         )
         remove_layout.addWidget(self.remove_line)
         form_layout.addRow("Remove", remove_layout)

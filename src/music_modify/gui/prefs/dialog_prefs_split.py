@@ -30,18 +30,21 @@ class PrefsSplitDialog(PrefsAbstractDialog, Ui_PrefsSplitDialog):
 
         self.line_edit_split_text_entered.editingFinished.connect(
             lambda: self._getSettingChange(
-                "split_text_entered", self.line_edit_split_text_entered.text()
-            )
+                "split_text_entered",
+                self.line_edit_split_text_entered.text(),
+            ),
         )
         self.line_edit_split_values_display.editingFinished.connect(
             lambda: self._getSettingChange(
-                "split_values_display", self.line_edit_split_values_display.text()
-            )
+                "split_values_display",
+                self.line_edit_split_values_display.text(),
+            ),
         )
         self.line_edit_split_values_at.editingFinished.connect(
             lambda: self._getSettingChange(
-                "split_values_at", self.line_edit_split_values_at.text()
-            )
+                "split_values_at",
+                self.line_edit_split_values_at.text(),
+            ),
         )
 
     @override
@@ -66,7 +69,7 @@ class PrefsSplitDialog(PrefsAbstractDialog, Ui_PrefsSplitDialog):
             setting_value: The new value that the setting should be set to
         """
         logger.debug(
-            f"Called _getSettingChange with {setting_name} and {setting_value}"
+            f"Called _getSettingChange with {setting_name} and {setting_value}",
         )
         if setting_value == "":
             # Don't want to use empty string for values

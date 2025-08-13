@@ -58,7 +58,7 @@ class EditListWidget(EditAbstractGroupWidget[SongListData]):
         self.main_widget.setDragDropMode(QAbstractItemView.DragDropMode.InternalMove)
         self.main_widget.model().rowsMoved.connect(self._updateValue)
         self.main_widget.setSelectionMode(
-            QAbstractItemView.SelectionMode.ExtendedSelection
+            QAbstractItemView.SelectionMode.ExtendedSelection,
         )
         self.main_widget.itemChanged.connect(self._updateValue)
         self.main_widget.setAlternatingRowColors(True)
@@ -75,7 +75,8 @@ class EditListWidget(EditAbstractGroupWidget[SongListData]):
             EditButton.Clear | EditButton.Reset,
         ):
             child_layout = self.createButtons(
-                button_group, QBoxLayout.Direction.LeftToRight
+                button_group,
+                QBoxLayout.Direction.LeftToRight,
             )
             button_layout.addLayout(child_layout)
 
@@ -122,7 +123,8 @@ class EditListWidget(EditAbstractGroupWidget[SongListData]):
     @override
     def _removeRow(self) -> None:
         selected_rows: list[int] = sorted(
-            getSelectedRows(self.main_widget), reverse=True
+            getSelectedRows(self.main_widget),
+            reverse=True,
         )
         if len(selected_rows) == 0:
             return
@@ -134,7 +136,8 @@ class EditListWidget(EditAbstractGroupWidget[SongListData]):
     @override
     def _moveRows(self, direction: RowDirection) -> None:
         selected_rows: list[int] = sorted(
-            getSelectedRows(self.main_widget), reverse=direction == RowDirection.Down
+            getSelectedRows(self.main_widget),
+            reverse=direction == RowDirection.Down,
         )
         if len(selected_rows) == 0:
             return

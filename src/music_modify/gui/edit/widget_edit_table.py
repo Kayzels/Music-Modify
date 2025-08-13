@@ -133,10 +133,10 @@ class EditTableWidget(EditAbstractGroupWidget[SongTableData]):
         self._displayValue()
 
         self.main_widget.setSelectionMode(
-            QAbstractItemView.SelectionMode.ExtendedSelection
+            QAbstractItemView.SelectionMode.ExtendedSelection,
         )
         self.main_widget.setSelectionBehavior(
-            QAbstractItemView.SelectionBehavior.SelectRows
+            QAbstractItemView.SelectionBehavior.SelectRows,
         )
 
         self.main_widget.itemChanged.connect(self._updateValue)
@@ -152,7 +152,8 @@ class EditTableWidget(EditAbstractGroupWidget[SongTableData]):
             EditButton.Clear | EditButton.Reset,
         ):
             child_layout = self.createButtons(
-                button_group, QBoxLayout.Direction.LeftToRight
+                button_group,
+                QBoxLayout.Direction.LeftToRight,
             )
             button_layout.addLayout(child_layout)
 
@@ -176,7 +177,7 @@ class EditTableWidget(EditAbstractGroupWidget[SongTableData]):
                 if item is not None:
                     text = item.text()
                     pair.append(text)
-            if not any([pair[j] == "" for j in range(len(pair))]) and len(pair) == 2:
+            if not any(pair[j] == "" for j in range(len(pair))) and len(pair) == 2:
                 # Don't add while one of the values in the pair is empty
                 # Also need to check for length,
                 # because the second item won't exist at first
@@ -236,7 +237,8 @@ class EditTableWidget(EditAbstractGroupWidget[SongTableData]):
     @override
     def _removeRow(self) -> None:
         selected_rows: list[int] = sorted(
-            getSelectedRows(self.main_widget), reverse=True
+            getSelectedRows(self.main_widget),
+            reverse=True,
         )
 
         if len(selected_rows) == 0:
@@ -249,7 +251,8 @@ class EditTableWidget(EditAbstractGroupWidget[SongTableData]):
     @override
     def _moveRows(self, direction: RowDirection) -> None:
         selected_rows: list[int] = sorted(
-            getSelectedRows(self.main_widget), reverse=direction == RowDirection.Down
+            getSelectedRows(self.main_widget),
+            reverse=direction == RowDirection.Down,
         )
 
         if len(selected_rows) == 0:

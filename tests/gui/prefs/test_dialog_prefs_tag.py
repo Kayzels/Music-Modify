@@ -28,7 +28,9 @@ class MockPrefsTagAddDialog(QObject):
         display_name = _testTagInfo.display_name
         show_in_table = _testTagInfo.show_in_table
         model.addTag(
-            id3_key=id3_key, display_name=display_name, show_in_table=show_in_table
+            id3_key=id3_key,
+            display_name=display_name,
+            show_in_table=show_in_table,
         )
 
 
@@ -46,7 +48,9 @@ def _selectRows(dialog: PrefsTagDialog, rows: list[int]) -> None:
 
 
 def _createDialog(
-    qtbot: QtBot, monkeypatch: MonkeyPatch, temp_settings: prefs_module.Settings
+    qtbot: QtBot,
+    monkeypatch: MonkeyPatch,
+    temp_settings: prefs_module.Settings,
 ) -> PrefsTagDialog:
     _patchDialogs(monkeypatch, temp_settings)
     dialog = PrefsTagDialog()
@@ -55,7 +59,8 @@ def _createDialog(
 
 
 def _patchDialogs(
-    monkeypatch: MonkeyPatch, temp_settings: prefs_module.Settings
+    monkeypatch: MonkeyPatch,
+    temp_settings: prefs_module.Settings,
 ) -> None:
     monkeypatch.setattr(prefs_module, "settings", temp_settings)
     monkeypatch.setattr(
@@ -101,14 +106,18 @@ def _makeChanges(dialog: PrefsTagDialog) -> list[TagInfo]:
 
 
 def test_PrefsTagDialog_init(
-    qtbot: QtBot, monkeypatch: MonkeyPatch, temp_settings: prefs_module.Settings
+    qtbot: QtBot,
+    monkeypatch: MonkeyPatch,
+    temp_settings: prefs_module.Settings,
 ) -> None:
     dialog = _createDialog(qtbot, monkeypatch, temp_settings)
     assert dialog.tag_table.model().rowCount() == len(temp_settings.info_tags)
 
 
 def test_PrefsTagDialog_addTag(
-    qtbot: QtBot, monkeypatch: MonkeyPatch, temp_settings: prefs_module.Settings
+    qtbot: QtBot,
+    monkeypatch: MonkeyPatch,
+    temp_settings: prefs_module.Settings,
 ) -> None:
     dialog = _createDialog(qtbot, monkeypatch, temp_settings)
     model = dialog.model
@@ -121,7 +130,9 @@ def test_PrefsTagDialog_addTag(
 
 
 def test_PrefsTagDialog_removeSelectedTags(
-    qtbot: QtBot, monkeypatch: MonkeyPatch, temp_settings: prefs_module.Settings
+    qtbot: QtBot,
+    monkeypatch: MonkeyPatch,
+    temp_settings: prefs_module.Settings,
 ) -> None:
     dialog = _createDialog(qtbot, monkeypatch, temp_settings)
     model = dialog.model
@@ -149,7 +160,9 @@ def test_PrefsTagDialog_removeSelectedTags(
 
 
 def test_PrefsTagDialog_moveTagsUp(
-    qtbot: QtBot, monkeypatch: MonkeyPatch, temp_settings: prefs_module.Settings
+    qtbot: QtBot,
+    monkeypatch: MonkeyPatch,
+    temp_settings: prefs_module.Settings,
 ) -> None:
     dialog = _createDialog(qtbot, monkeypatch, temp_settings)
     model = dialog.model
@@ -181,7 +194,9 @@ def test_PrefsTagDialog_moveTagsUp(
 
 
 def test_PrefsTagDialog_moveTagsDown(
-    qtbot: QtBot, monkeypatch: MonkeyPatch, temp_settings: prefs_module.Settings
+    qtbot: QtBot,
+    monkeypatch: MonkeyPatch,
+    temp_settings: prefs_module.Settings,
 ) -> None:
     dialog = _createDialog(qtbot, monkeypatch, temp_settings)
     model = dialog.model
@@ -213,7 +228,9 @@ def test_PrefsTagDialog_moveTagsDown(
 
 
 def test_PrefsTagDialog_updateSettings(
-    qtbot: QtBot, monkeypatch: MonkeyPatch, temp_settings: prefs_module.Settings
+    qtbot: QtBot,
+    monkeypatch: MonkeyPatch,
+    temp_settings: prefs_module.Settings,
 ) -> None:
     dialog = _createDialog(qtbot, monkeypatch, temp_settings)
     orig_tags: list[TagInfo] = copy.deepcopy(dialog.model.tags)
@@ -228,13 +245,15 @@ def test_PrefsTagDialog_updateSettings(
 
 
 def test_PrefsTagDialog_restoreDefaults(
-    qtbot: QtBot, monkeypatch: MonkeyPatch, temp_settings: prefs_module.Settings
+    qtbot: QtBot,
+    monkeypatch: MonkeyPatch,
+    temp_settings: prefs_module.Settings,
 ) -> None:
     dialog = _createDialog(qtbot, monkeypatch, temp_settings)
     tags: list[TagInfo] = _makeChanges(dialog)
     assert dialog.button_box is not None
     restore_button = dialog.button_box.button(
-        QDialogButtonBox.StandardButton.RestoreDefaults
+        QDialogButtonBox.StandardButton.RestoreDefaults,
     )
     restore_button.click()
     assert tags != dialog.model.tags
@@ -242,7 +261,9 @@ def test_PrefsTagDialog_restoreDefaults(
 
 
 def test_PrefsTagDialog_resetSettings(
-    qtbot: QtBot, monkeypatch: MonkeyPatch, temp_settings: prefs_module.Settings
+    qtbot: QtBot,
+    monkeypatch: MonkeyPatch,
+    temp_settings: prefs_module.Settings,
 ) -> None:
     dialog1 = _createDialog(qtbot, monkeypatch, temp_settings)
     model1 = dialog1.model
@@ -272,7 +293,9 @@ def test_PrefsTagDialog_resetSettings(
 
 
 def test_PrefsTagDialog_restore_then_reset(
-    qtbot: QtBot, monkeypatch: MonkeyPatch, temp_settings: prefs_module.Settings
+    qtbot: QtBot,
+    monkeypatch: MonkeyPatch,
+    temp_settings: prefs_module.Settings,
 ) -> None:
     dialog1 = _createDialog(qtbot, monkeypatch, temp_settings)
     model1 = dialog1.model
@@ -296,7 +319,7 @@ def test_PrefsTagDialog_restore_then_reset(
 
     assert dialog2.button_box is not None
     restore_button = dialog2.button_box.button(
-        QDialogButtonBox.StandardButton.RestoreDefaults
+        QDialogButtonBox.StandardButton.RestoreDefaults,
     )
     restore_button.click()
     assert dialog2.model.tags == temp_settings.default_tags

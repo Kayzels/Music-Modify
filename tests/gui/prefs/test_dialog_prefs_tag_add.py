@@ -44,7 +44,9 @@ def test_PrefsTagAddDialog_init(qtbot: QtBot) -> None:
 
 
 def test_addToModel_missing_text(
-    qtbot: QtBot, monkeypatch: MonkeyPatch, model: TagModel
+    qtbot: QtBot,
+    monkeypatch: MonkeyPatch,
+    model: TagModel,
 ) -> None:
     dialog = createDialog(qtbot, monkeypatch)
 
@@ -54,7 +56,9 @@ def test_addToModel_missing_text(
 
 
 def test_addToModel_already_id3(
-    qtbot: QtBot, monkeypatch: MonkeyPatch, model: TagModel
+    qtbot: QtBot,
+    monkeypatch: MonkeyPatch,
+    model: TagModel,
 ) -> None:
     dialog = createDialog(qtbot, monkeypatch)
 
@@ -67,7 +71,9 @@ def test_addToModel_already_id3(
 
 
 def test_addToModel_already_display(
-    qtbot: QtBot, monkeypatch: MonkeyPatch, model: TagModel
+    qtbot: QtBot,
+    monkeypatch: MonkeyPatch,
+    model: TagModel,
 ) -> None:
     dialog = createDialog(qtbot, monkeypatch)
     dialog.id3_line_edit.setText("TIT1")
@@ -79,7 +85,9 @@ def test_addToModel_already_display(
 
 
 def test_addToModel_new(
-    qtbot: QtBot, monkeypatch: MonkeyPatch, model: TagModel
+    qtbot: QtBot,
+    monkeypatch: MonkeyPatch,
+    model: TagModel,
 ) -> None:
     dialog = createDialog(qtbot, monkeypatch)
     dialog.id3_line_edit.setText("TRCK")

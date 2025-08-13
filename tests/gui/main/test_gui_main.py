@@ -99,7 +99,8 @@ def test_removeSelectedFiles(qtbot: QtBot, song_paths: list[PathLike[str]]) -> N
 
 
 def test_removeSelectedFiles_Action(
-    qtbot: QtBot, song_paths: list[PathLike[str]]
+    qtbot: QtBot,
+    song_paths: list[PathLike[str]],
 ) -> None:
     window = MainWindow()
     qtbot.addWidget(window)

@@ -70,7 +70,9 @@ def test_remapMatchingSublistPairs() -> None:
         ["role3", "Person2"],
     ]
     assert remapMatchingSublistPairs(
-        role_replacements, original, PairIndex.Role.value
+        role_replacements,
+        original,
+        PairIndex.Role.value,
     ) == [
         ["role_new", "Person1"],
         ["role_new", "Person2"],
@@ -78,7 +80,9 @@ def test_remapMatchingSublistPairs() -> None:
         ["role3", "Person2"],
     ]
     assert remapMatchingSublistPairs(
-        people_replacements, original, PairIndex.Person.value
+        people_replacements,
+        original,
+        PairIndex.Person.value,
     ) == [
         ["role1", "Person_New"],
         ["role1", "Another_Person"],

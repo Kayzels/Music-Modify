@@ -36,7 +36,9 @@ class EditWidgetFactory:
 
     @staticmethod
     def createWidget(
-        parent: QWidget, tag: SongTag, data: SongEditData | None
+        parent: QWidget,
+        tag: SongTag,
+        data: SongEditData | None,
     ) -> EditAbstractWidgetType:
         """Creates the required widget based on the tag and data format.
 

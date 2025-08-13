@@ -56,29 +56,33 @@ class EditDialog(EditAbstractDialog):
         # Add reset button here rather than in abstract.
         self.button_box.addButton(QDialogButtonBox.StandardButton.Reset)
         self.button_box.button(QDialogButtonBox.StandardButton.Reset).clicked.connect(
-            self.resetSongInfo
+            self.resetSongInfo,
         )
 
         # Add before and after buttons if more than one passed through
         if len(rows) > 1:
             self.previous_button: QPushButton = QPushButton(
-                QIcon(QIcon.fromTheme(QIcon.ThemeIcon.GoPrevious)), "Previous"
+                QIcon(QIcon.fromTheme(QIcon.ThemeIcon.GoPrevious)),
+                "Previous",
             )
             self.previous_button.clicked.connect(
-                lambda: self.showSongInDirection(NavDirection.Previous)
+                lambda: self.showSongInDirection(NavDirection.Previous),
             )
             self.button_box.addButton(
-                self.previous_button, QDialogButtonBox.ButtonRole.ActionRole
+                self.previous_button,
+                QDialogButtonBox.ButtonRole.ActionRole,
             )
 
             self.next_button: QPushButton = QPushButton(
-                QIcon(QIcon.fromTheme(QIcon.ThemeIcon.GoNext)), "Next"
+                QIcon(QIcon.fromTheme(QIcon.ThemeIcon.GoNext)),
+                "Next",
             )
             self.next_button.clicked.connect(
-                lambda: self.showSongInDirection(NavDirection.Next)
+                lambda: self.showSongInDirection(NavDirection.Next),
             )
             self.button_box.addButton(
-                self.next_button, QDialogButtonBox.ButtonRole.ActionRole
+                self.next_button,
+                QDialogButtonBox.ButtonRole.ActionRole,
             )
 
             self._switchButtonState()
@@ -144,7 +148,7 @@ class EditDialog(EditAbstractDialog):
                     (
                         f"Value for key {tag.id3_key} previously removed, "
                         "but being reset now."
-                    )
+                    ),
                 )
                 self.changed_values[tag.id3_key] = value
                 logger.debug(f"Changed values are now {self.changed_values}")
@@ -154,7 +158,7 @@ class EditDialog(EditAbstractDialog):
                     (
                         f"Song doesn't store the key {tag.id3_key} "
                         "and the value for it is being set to empty."
-                    )
+                    ),
                 )
                 self.changed_values.pop(tag.id3_key, None)
                 logger.debug(f"Changed values are now {self.changed_values}")
@@ -164,7 +168,7 @@ class EditDialog(EditAbstractDialog):
                     (
                         f"Value stored in song for key {tag.id3_key} "
                         "is different from the value being reset to, so storing."
-                    )
+                    ),
                 )
                 if len(value) == 0:
                     self.changed_values[tag.id3_key] = None
@@ -177,7 +181,7 @@ class EditDialog(EditAbstractDialog):
                     (
                         f"Value matches the value in the song for {tag.id3_key}, "
                         "so removing from changed values."
-                    )
+                    ),
                 )
                 self.changed_values.pop(tag.id3_key, None)
                 logger.debug(f"Changed values are now {self.changed_values}")

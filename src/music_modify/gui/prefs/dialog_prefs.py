@@ -24,10 +24,10 @@ class PrefsDialog(QDialog, Ui_PrefsDialog):
         self.setupUi(self)
 
         self.button_edit_tags.clicked.connect(
-            lambda: self.openChildDialog(PrefsTagDialog)
+            lambda: self.openChildDialog(PrefsTagDialog),
         )
         self.button_edit_split.clicked.connect(
-            lambda: self.openChildDialog(PrefsSplitDialog)
+            lambda: self.openChildDialog(PrefsSplitDialog),
         )
 
     def openChildDialog(self, dialog_type: type[PrefsAbstractDialog]) -> None:

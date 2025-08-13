@@ -54,6 +54,6 @@ def getSelectedRows(view: QAbstractItemView) -> list[int]:
 
     # Need to remove duplicates
     # Likely shouldn't be needed, but it's possible a row appears multiple times.
-    rows = list(set([index.row() for index in selected_rows if index.isValid()]))
+    rows = list({index.row() for index in selected_rows if index.isValid()})
 
     return rows

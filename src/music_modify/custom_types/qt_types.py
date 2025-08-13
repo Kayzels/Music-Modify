@@ -1,7 +1,9 @@
 from typing import TypedDict
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import QModelIndex, Qt
 from PySide6.QtWidgets import QLineEdit
+
+Q_MODEL_INDEX = QModelIndex()
 
 
 class QLineEditArgs(TypedDict, total=False):

@@ -42,11 +42,11 @@ class PrefsAbstractDialog(QDialog, ABC, metaclass=ABCQMeta):
             QMessageBox.warning(self, "Missing attributes", warning)
             return
         self.button_box.button(
-            QDialogButtonBox.StandardButton.RestoreDefaults
+            QDialogButtonBox.StandardButton.RestoreDefaults,
         ).clicked.connect(self.restoreDefaults)
 
         self.button_box.button(QDialogButtonBox.StandardButton.Reset).clicked.connect(
-            self.resetSettings
+            self.resetSettings,
         )
 
     @abstractmethod

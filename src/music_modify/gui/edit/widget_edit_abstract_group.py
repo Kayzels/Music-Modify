@@ -18,7 +18,10 @@ ValueG = TypeVar("ValueG", bound=SongListData | SongTableData)
 
 
 class EditAbstractGroupWidget(
-    EditAbstractWidget[ValueG], Generic[ValueG], ABC, metaclass=ABCQMeta
+    EditAbstractWidget[ValueG],
+    Generic[ValueG],
+    ABC,
+    metaclass=ABCQMeta,
 ):
     """Abstract class for widgets displayed on an EditDialog
     that contain multiple items, which can be displayed in lists or tables.

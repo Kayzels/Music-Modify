@@ -19,7 +19,10 @@ class EditAbstractDialog(QDialog, ABC, metaclass=ABCQMeta):
     for the song is changed."""
 
     def __init__(
-        self, parent: QWidget, repository: SongRepository, rows: list[int]
+        self,
+        parent: QWidget,
+        repository: SongRepository,
+        rows: list[int],
     ) -> None:
         super().__init__(parent)
 
@@ -58,19 +61,19 @@ class EditAbstractDialog(QDialog, ABC, metaclass=ABCQMeta):
         self.button_box.setStandardButtons(
             QDialogButtonBox.StandardButton.Ok
             | QDialogButtonBox.StandardButton.Cancel
-            | QDialogButtonBox.StandardButton.Apply
+            | QDialogButtonBox.StandardButton.Apply,
         )
 
         self.button_box.button(QDialogButtonBox.StandardButton.Cancel).clicked.connect(
-            self.reject
+            self.reject,
         )
         self.button_box.button(QDialogButtonBox.StandardButton.Ok).clicked.connect(
-            self.accept
+            self.accept,
         )
 
         # Update the song, but keep the dialog open
         self.button_box.button(QDialogButtonBox.StandardButton.Apply).clicked.connect(
-            self.updateSongInfo
+            self.updateSongInfo,
         )
 
         self.main_layout.addWidget(self.button_box)

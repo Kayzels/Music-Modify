@@ -8,6 +8,8 @@ from typing import override
 from PySide6.QtCore import QAbstractListModel, QModelIndex, QPersistentModelIndex, Qt
 from PySide6.QtWidgets import QWidget
 
+from music_modify.custom_types import qt_types
+
 
 def primary_contains(word: str, key: str) -> bool:
     """Function that checks whether `key` appears in `word`."""
@@ -23,7 +25,10 @@ class CompleteModel(QAbstractListModel):
     """Model that is used for text completion suggestions."""
 
     def __init__(
-        self, parent: QWidget | None = None, strip_completion_entries: bool = True
+        self,
+        parent: QWidget | None = None,
+        *,
+        strip_completion_entries: bool = True,
     ) -> None:
         super().__init__(parent)
 
@@ -64,14 +69,15 @@ class CompleteModel(QAbstractListModel):
 
     @override
     def rowCount(
-        self, parent: QModelIndex | QPersistentModelIndex = QModelIndex()
+        self,
+        parent: QModelIndex | QPersistentModelIndex = qt_types.Q_MODEL_INDEX,
     ) -> int:
         return len(self.current_items)
 
     @override
     def data(
         self,
-        index: QModelIndex | QPersistentModelIndex = QModelIndex(),
+        index: QModelIndex | QPersistentModelIndex = qt_types.Q_MODEL_INDEX,
         role: Qt.ItemDataRole | int = Qt.ItemDataRole.DisplayRole,
     ) -> str | None:
         if not index.isValid():
@@ -105,6 +111,6 @@ class CompleteModel(QAbstractListModel):
         self,
         row: int,
         column: int | None = 0,
-        parent: QModelIndex | QPersistentModelIndex = QModelIndex(),
+        parent: QModelIndex | QPersistentModelIndex = qt_types.Q_MODEL_INDEX,
     ) -> QModelIndex:
         return super().index(row, column, parent)
