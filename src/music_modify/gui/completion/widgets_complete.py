@@ -364,26 +364,25 @@ class LineEdit(QLineEdit):
     def getCompletedText(self, text: str) -> tuple[str, str]:
         if not self.multiple:
             return text, ""
+        sep = prefs.settings.split_text_entered
+        cursor_pos = self.original_cursor_pos
+        if cursor_pos is None:
+            cursor_pos = self.cursorPosition()
+        self.original_cursor_pos = None
+
+        curtext = str(self.text())
+        before_text = curtext[:cursor_pos]
+        after_text = curtext[cursor_pos:].rstrip()
+
+        # Remove the completion prefix from the before text
+        before_text = sep.join(before_text.split(sep)[:-1]).rstrip()
+        if before_text:
+            before_text += sep + " "
+        if self.add_separator or after_text:
+            completed_text = text + sep + " "
         else:
-            sep = prefs.settings.split_text_entered
-            cursor_pos = self.original_cursor_pos
-            if cursor_pos is None:
-                cursor_pos = self.cursorPosition()
-            self.original_cursor_pos = None
-
-            curtext = str(self.text())
-            before_text = curtext[:cursor_pos]
-            after_text = curtext[cursor_pos:].rstrip()
-
-            # Remove the completion prefix from the before text
-            before_text = sep.join(before_text.split(sep)[:-1]).rstrip()
-            if before_text:
-                before_text += sep + " "
-            if self.add_separator or after_text:
-                completed_text = text + sep + " "
-            else:
-                completed_text = text
-            return before_text + completed_text, after_text
+            completed_text = text
+        return before_text + completed_text, after_text
 
     @Slot(str)
     def completionSelected(self, text: str) -> None:

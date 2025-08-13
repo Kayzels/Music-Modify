@@ -54,7 +54,7 @@ class EditWidgetFactory:
                 copy.deepcopy(data) if data is not None else None,
             )
             return EditTableWidget(parent, data)
-        elif tag.allow_multiple:
+        if tag.allow_multiple:
             # Allow multiple is true, so list with current data
 
             # Send a copy otherwise when checking if a value is changed,
@@ -63,8 +63,7 @@ class EditWidgetFactory:
             data = cast(SongListData | None, data)
             data = data.copy() if data is not None else None
             return EditListWidget(parent, data)
-        else:
-            # Only allows a single value, which can be a string, ID3TimeStamp or None.
-            # Show in LineEdit.
-            data = cast(str | None, data)
-            return EditLineWidget(parent, data)
+        # Only allows a single value, which can be a string, ID3TimeStamp or None.
+        # Show in LineEdit.
+        data = cast(str | None, data)
+        return EditLineWidget(parent, data)

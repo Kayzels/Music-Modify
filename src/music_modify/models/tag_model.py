@@ -105,7 +105,7 @@ class TagModel(QAbstractTableModel):
 
         if field == "show_in_table":
             return super().flags(index) | Qt.ItemFlag.ItemIsUserCheckable
-        elif field in ("display_name", "id3_key"):
+        if field in ("display_name", "id3_key"):
             return super().flags(index) | Qt.ItemFlag.ItemIsEditable
 
         return super().flags(index)

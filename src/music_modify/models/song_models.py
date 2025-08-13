@@ -46,8 +46,7 @@ class SongTableModel(QAbstractTableModel):
             song = self.repository.getSong(index.row())
             if song is None:
                 return None
-            tag_info = song.display_info[index.column()]
-            return tag_info
+            return song.display_info[index.column()]
         return None
 
     @override
@@ -63,10 +62,9 @@ class SongTableModel(QAbstractTableModel):
         parent: QModelIndex | QPersistentModelIndex = qt_types.Q_MODEL_INDEX,
     ) -> int:
         if self.rowCount(parent) == 0:
+            # NOTE: Uses 1 to keep a column for info
             return 1
-            # ? Uses 1 to keep a column for info
-        else:
-            return len(prefs.settings.table_tags)
+        return len(prefs.settings.table_tags)
 
     @override
     def headerData(
@@ -85,7 +83,7 @@ class SongTableModel(QAbstractTableModel):
                 prefs.settings.table_tags,
             ):
                 return prefs.settings.table_tags[section].display_name
-            elif orientation == Qt.Orientation.Vertical and section < len(
+            if orientation == Qt.Orientation.Vertical and section < len(
                 self.repository,
             ):
                 return f"{section + 1}"

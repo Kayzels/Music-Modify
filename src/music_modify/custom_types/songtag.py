@@ -176,12 +176,10 @@ class SongTag:
             return None
         match self.frame_type:
             case TagType.People:
-                song_data = cast(SongTableData, song_data)
-                return song_data
+                return cast(SongTableData, song_data)
             case _:
                 # noinspection PyTypeHints
                 song_data = cast(SongLineData | SongListData, song_data)
                 if self.allow_multiple:
                     return [str(val) for val in song_data]
-                else:
-                    return str(song_data[0])
+                return str(song_data[0])

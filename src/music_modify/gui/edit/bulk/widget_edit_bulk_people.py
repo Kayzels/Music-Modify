@@ -61,8 +61,7 @@ class _ActionMapping(Generic[L]):
             if not self.tag.hasTag(song.id3):
                 self.tag.generateFrame(song.id3)
             original_values = []
-        original_values = cast(list[list[str]], original_values)
-        return original_values
+        return cast(list[list[str]], original_values)
 
     def performChange(self, song: Song) -> bool:
         """Call `func` on the data for the tag in the specified `song`.

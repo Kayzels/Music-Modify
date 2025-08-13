@@ -54,21 +54,20 @@ def valueToString(value: SongEditData | None, display_split: str) -> str:
     when `value` is a list."""
     if value is None or len(value) == 0:
         return ""
-    elif isinstance(value, str):
+    if isinstance(value, str):
         return value
-    elif isinstance(value[0], str):
+    if isinstance(value[0], str):
         value = cast(SongListData, value)
         return display_split.join(value)
-    else:
-        value = cast(SongTableData, value)
-        tag_values: list[str] = []
-        for group in value:
-            if len(group) == 2:
-                tag_values.append(f"{group[0]}:{group[1]}")
-            else:
-                logger.warning(f"Song column has an invalid length: {group}")
-                continue
-        return display_split.join(tag_values)
+    value = cast(SongTableData, value)
+    tag_values: list[str] = []
+    for group in value:
+        if len(group) == 2:
+            tag_values.append(f"{group[0]}:{group[1]}")
+        else:
+            logger.warning(f"Song column has an invalid length: {group}")
+            continue
+    return display_split.join(tag_values)
 
 
 def toTag(tag: str | SongTag, tag_list: list[SongTag]) -> SongTag | None:
@@ -77,8 +76,7 @@ def toTag(tag: str | SongTag, tag_list: list[SongTag]) -> SongTag | None:
     """
     if isinstance(tag, SongTag):
         return tag
-    else:
-        result = mapKey(tag, tag_list)
-        if result is None:
-            result = mapTag(tag, tag_list)
-        return result
+    result = mapKey(tag, tag_list)
+    if result is None:
+        result = mapTag(tag, tag_list)
+    return result

@@ -273,8 +273,7 @@ class EditDialog(EditAbstractDialog):
             logger.warning("Invalid song, closing dialog")
             self.reject()
             return
-        else:
-            logger.debug("Got a song")
+        logger.debug("Got a song")
 
         self.song_info = song_info
         self._switchButtonState()
