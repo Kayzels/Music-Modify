@@ -3,7 +3,7 @@ and creates the global `settings` object.
 """
 
 import logging
-from typing import final
+from typing import ClassVar, final
 
 from PySide6.QtCore import QSettings
 
@@ -86,7 +86,7 @@ class Settings:
     def split_values_at(self, value: str) -> None:
         self._settings.setValue("Split/split_values_at", value)
 
-    default_tags: list[TagInfo] = [
+    default_tags: ClassVar[list[TagInfo]] = [
         TagInfo(display_name="Track", id3_key="TRCK", show_in_table=True),
         TagInfo(display_name="Title", id3_key="TIT2", show_in_table=True),
         TagInfo(display_name="Artist", id3_key="TPE1", show_in_table=True),

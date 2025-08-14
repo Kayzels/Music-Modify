@@ -2,7 +2,7 @@
 which is used to represent an ID3 tag."""
 
 import logging
-from typing import Final, cast, override
+from typing import ClassVar, Final, cast, override
 
 from mutagen import id3
 from mutagen.id3 import ID3, Frames
@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 class SongTag:
     """Object representing an ID3 tag"""
 
-    KEYS_ALLOW_MULTIPLE_VALUES: set[str] = {
+    KEYS_ALLOW_MULTIPLE_VALUES: ClassVar[set[str]] = {
         "TCOM",  # Composer
         "TCON",  # Content Type (Genres)
         "TENC",  # Encoder
@@ -32,7 +32,7 @@ class SongTag:
         "TOLY",  # Original Lyricist
         "TPE4",  # Interpreter/Remixer
     }
-    """Hardcoded list of keys that store a list of strings,
+    """List of keys that store a list of strings,
     rather than a single value."""
 
     def __init__(self, display_name: str, id3_key: str) -> None:

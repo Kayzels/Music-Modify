@@ -6,8 +6,8 @@ from .time_utils import formatTime
 
 __all__ = [
     "formatTime",
+    "getUniqueOrdered",
+    "singularPlural",
     "snakeToTitle",
     "tableHeader",
-    "singularPlural",
-    "getUniqueOrdered",
 ]

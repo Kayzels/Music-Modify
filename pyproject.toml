@@ -70,6 +70,8 @@ select = [
   "PLW",
   "PLR",
   "C901",
+  "FURB",
+  "RUF",
 ]
 ignore = ["N802"]
 
