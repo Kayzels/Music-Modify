@@ -3,12 +3,11 @@ and displayed."""
 
 import copy
 import logging
-from typing import override
+from typing import TYPE_CHECKING, override
 
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QMessageBox, QWidget
 
-from music_modify.custom_types import TagInfo
 from music_modify.gui.utils import getSelectedRows
 from music_modify.models import TagModel
 from music_modify.prefs import prefs
@@ -16,6 +15,9 @@ from music_modify.prefs import prefs
 from .dialog_prefs_abstract import PrefsAbstractDialog
 from .dialog_prefs_tag_add import PrefsTagAddDialog
 from .ui_dialog_prefs_tag import Ui_PrefsTagDialog
+
+if TYPE_CHECKING:
+    from music_modify.custom_types import TagInfo
 
 logger = logging.getLogger(__name__)
 

@@ -1,13 +1,16 @@
 from datetime import datetime
 import logging
 import platform
+from typing import TYPE_CHECKING
 
 import mutagen
 import PySide6
-from PySide6.QtCore import QCoreApplication
 from PySide6.QtWidgets import QApplication, QDialog, QWidget
 
 from .ui_dialog_about import Ui_AboutDialog
+
+if TYPE_CHECKING:
+    from PySide6.QtCore import QCoreApplication
 
 logger = logging.getLogger(__name__)
 

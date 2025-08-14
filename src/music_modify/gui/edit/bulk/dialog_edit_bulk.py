@@ -3,7 +3,7 @@ editing the tags of multiple songs at the same time."""
 
 import copy
 import logging
-from typing import cast, override
+from typing import TYPE_CHECKING, cast, override
 
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import (
@@ -14,8 +14,6 @@ from PySide6.QtWidgets import (
 )
 
 from music_modify.custom_types.enums import TagType
-from music_modify.custom_types.song import Song
-from music_modify.custom_types.songtag import SongTag
 from music_modify.gui.edit.dialog_edit_abstract import EditAbstractDialog
 from music_modify.gui.utils import createTab
 from music_modify.models.song_repository import SongRepository
@@ -26,6 +24,10 @@ from .widget_edit_bulk_abstract import EditBulkAbstractWidget
 from .widget_edit_bulk_line import EditBulkLineWidget
 from .widget_edit_bulk_multiple import EditBulkMultipleWidget
 from .widget_edit_bulk_people import EditBulkPeopleWidget
+
+if TYPE_CHECKING:
+    from music_modify.custom_types.song import Song
+    from music_modify.custom_types.songtag import SongTag
 
 logger = logging.getLogger(__name__)
 
