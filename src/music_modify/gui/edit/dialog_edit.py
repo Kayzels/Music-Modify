@@ -198,7 +198,7 @@ class EditDialog(EditAbstractDialog):
             return
         logger.debug("Called updateSong")
         for id3_key, value in self.changed_values.items():
-            tag = mapKey(id3_key, prefs.settings.all_tags)
+            tag: SongTag | None = mapKey(id3_key, prefs.settings.all_tags)
             if tag is None:
                 logger.debug(f"Unknown id3 key: {id3_key}")
                 continue
@@ -207,13 +207,14 @@ class EditDialog(EditAbstractDialog):
                 logger.debug(f"Value was None, so removing key {id3_key}")
                 tag.removeTag(self.song_info.id3)
                 continue
+            new_value = value
 
             # Mutagen ID3 frames always store their values in a list,
             # so need to convert to that format.
-            if isinstance(value, str):
-                value = [value]
-            logger.debug(f"Setting tag for {id3_key} to {value}")
-            tag.setTag(self.song_info.id3, value)
+            if isinstance(new_value, str):
+                new_value = [new_value]
+            logger.debug(f"Setting tag for {id3_key} to {new_value}")
+            tag.setTag(self.song_info.id3, new_value)
         self.song_info.save()
         self.info_updated.emit()
 

@@ -65,12 +65,16 @@ select = [
   "PERF",
   "W",
   "UP",
+  "PLC",
+  "PLE",
+  "PLW",
 ]
 ignore = ["N802"]
 
 [tool.ruff.lint.per-file-ignores]
 "test*.py" = ["S101", "B011"]
 "**.pyi" = ["A", "COM812"]
+"widgets_complete.py" = ["PLC"]
 
 [tool.ruff.lint.pycodestyle]
 max-doc-length = 88

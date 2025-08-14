@@ -52,6 +52,10 @@ class SongTag:
             self.id3_key == other.id3_key
         )
 
+    @override
+    def __hash__(self) -> int:
+        return hash((self.id3_key, self.display_name))
+
     @property
     def id3_key(self) -> str:
         """The string value used to know which frame is being referenced
