@@ -22,7 +22,7 @@ class PrefsAbstractDialog(QDialog, ABC, metaclass=ABCQMeta):
     "Signal that is emitted whenever any setting is changed."
 
     @abstractmethod
-    def setupUi(self, dialog: Self) -> None:
+    def setupUi(self, dialog: Self, /) -> None:
         """Set up the display of the dialog."""
 
     def __init__(self, parent: QWidget | None = None) -> None:

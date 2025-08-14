@@ -1,11 +1,9 @@
 """Module that defines the dialog that configures which tags should be editable
 and displayed."""
 
-# pyright: reportIncompatibleMethodOverride=false
-
 import copy
 import logging
-from typing import Self, override
+from typing import override
 
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QMessageBox, QWidget
@@ -47,7 +45,7 @@ class PrefsTagDialog(PrefsAbstractDialog, Ui_PrefsTagDialog):
         self.down_toolbutton.clicked.connect(self.moveTagsDown)
 
     @override
-    def setupUi(self, dialog: Self) -> None:
+    def setupUi(self, dialog: PrefsAbstractDialog, /) -> None:
         Ui_PrefsTagDialog.setupUi(self, dialog)
 
     def addTag(self) -> None:

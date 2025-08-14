@@ -20,7 +20,7 @@ from PySide6.QtWidgets import (QAbstractButton, QAbstractItemView, QApplication,
     QTableView, QToolButton, QVBoxLayout, QWidget)
 
 class Ui_PrefsTagDialog(object):
-    def setupUi(self, PrefsTagDialog):
+    def setupUi(self, PrefsTagDialog, /):
         if not PrefsTagDialog.objectName():
             PrefsTagDialog.setObjectName(u"PrefsTagDialog")
         PrefsTagDialog.resize(510, 434)

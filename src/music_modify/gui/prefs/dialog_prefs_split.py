@@ -1,10 +1,8 @@
 """Module that defines the dialog used to let the user change
 how multiple values should be entered, and displayed."""
 
-# pyright: reportIncompatibleMethodOverride=false
-
 import logging
-from typing import Self, override
+from typing import override
 
 from PySide6.QtWidgets import QLineEdit, QWidget
 
@@ -48,7 +46,7 @@ class PrefsSplitDialog(PrefsAbstractDialog, Ui_PrefsSplitDialog):
         )
 
     @override
-    def setupUi(self, dialog: Self) -> None:
+    def setupUi(self, dialog: PrefsAbstractDialog, /) -> None:
         Ui_PrefsSplitDialog.setupUi(self, dialog)
 
     def _initializeDisplay(self) -> None:

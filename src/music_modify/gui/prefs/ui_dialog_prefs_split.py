@@ -20,7 +20,7 @@ from PySide6.QtWidgets import (QAbstractButton, QApplication, QDialog, QDialogBu
     QVBoxLayout, QWidget)
 
 class Ui_PrefsSplitDialog(object):
-    def setupUi(self, PrefsSplitDialog):
+    def setupUi(self, PrefsSplitDialog, /):
         if not PrefsSplitDialog.objectName():
             PrefsSplitDialog.setObjectName(u"PrefsSplitDialog")
         PrefsSplitDialog.resize(400, 186)
