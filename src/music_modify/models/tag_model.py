@@ -69,11 +69,9 @@ class TagModel(QAbstractTableModel):
         index: QModelIndex | QPersistentModelIndex,
         role: Qt.ItemDataRole | int = Qt.ItemDataRole.DisplayRole,
     ) -> str | Qt.CheckState | None:
-        if not index.isValid():
-            return None
-
-        col = index.column()
-        if col >= self.columnCount() or col < 0:
+        if not index.isValid() or (
+            (col := index.column()) >= self.columnCount() or col < 0
+        ):
             return None
 
         row = index.row()
@@ -90,7 +88,7 @@ class TagModel(QAbstractTableModel):
                 return ""
             return None
 
-        if role == Qt.ItemDataRole.DisplayRole or role == Qt.ItemDataRole.EditRole:
+        if role in (Qt.ItemDataRole.DisplayRole, Qt.ItemDataRole.EditRole):
             return getattr(self._tags[row], field)
 
         return None

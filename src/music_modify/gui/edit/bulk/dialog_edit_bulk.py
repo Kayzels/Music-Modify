@@ -133,4 +133,3 @@ class EditBulkDialog(EditAbstractDialog):
             for song in self.songs:
                 song.save()
             self.info_updated.emit()
-        return

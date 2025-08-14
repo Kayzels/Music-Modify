@@ -1,5 +1,7 @@
 """Module for utilities related to working with lists."""
 
+from music_modify.custom_types import constants
+
 
 def getUniqueOrdered(text: str, separator: str) -> list[str]:
     """Get the unique values from a string separated at `separator`,
@@ -28,7 +30,7 @@ def toPairs(values: list[str], separator: str) -> list[list[str]]:
         if not value.find(separator):
             continue
         parts = value.split(separator)
-        if len(parts) == 2:
+        if len(parts) == constants.PAIR_SIZE:
             result.append(parts)
     return result
 
@@ -66,7 +68,9 @@ def removeMatchingSublistPairs(
     if not remove_values:
         return original
     return [
-        item for item in original if len(item) == 2 and item[index] not in remove_values
+        item
+        for item in original
+        if len(item) == constants.PEOPLE_COL_COUNT and item[index] not in remove_values
     ]
 
 

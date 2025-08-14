@@ -4,6 +4,8 @@ Not part of the general utils, as that leads to an import cycle."""
 import logging
 from typing import cast
 
+from music_modify.custom_types import constants
+
 from .aliases import SongEditData, SongListData, SongTableData
 from .songtag import SongTag
 
@@ -62,7 +64,7 @@ def valueToString(value: SongEditData | None, display_split: str) -> str:
     value = cast(SongTableData, value)
     tag_values: list[str] = []
     for group in value:
-        if len(group) == 2:
+        if len(group) == constants.PEOPLE_COL_COUNT:
             tag_values.append(f"{group[0]}:{group[1]}")
         else:
             logger.warning(f"Song column has an invalid length: {group}")

@@ -19,6 +19,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from music_modify.custom_types import constants
 from music_modify.custom_types.aliases import SongTableData
 from music_modify.custom_types.enums import EditButton, RowDirection
 from music_modify.gui.utils import getSelectedRows
@@ -177,7 +178,10 @@ class EditTableWidget(EditAbstractGroupWidget[SongTableData]):
                 if item is not None:
                     text = item.text()
                     pair.append(text)
-            if not any(pair[j] == "" for j in range(len(pair))) and len(pair) == 2:
+            if (
+                not any(pair[j] == "" for j in range(len(pair)))
+                and len(pair) == constants.PAIR_SIZE
+            ):
                 # Don't add while one of the values in the pair is empty
                 # Also need to check for length,
                 # because the second item won't exist at first

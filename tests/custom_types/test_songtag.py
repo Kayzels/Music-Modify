@@ -1,6 +1,7 @@
 from mutagen.id3 import ID3
 import pytest
 
+from music_modify.custom_types import constants
 from music_modify.custom_types.enums import TagType
 from music_modify.custom_types.songtag import SongTag
 
@@ -66,7 +67,7 @@ def test_allow_multiple(
 def test_len(single_tag: SongTag, multiple_tag: SongTag, people_tag: SongTag) -> None:
     assert len(single_tag) == 1
     assert len(multiple_tag) == 1
-    assert len(people_tag) == 2
+    assert len(people_tag) == constants.PEOPLE_COL_COUNT
 
 
 def test_hasTag(
