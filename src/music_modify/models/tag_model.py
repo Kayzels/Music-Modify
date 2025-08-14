@@ -16,7 +16,7 @@ from PySide6.QtCore import (
     Signal,
 )
 
-from music_modify.custom_types import TagInfo, qt_types
+from music_modify.custom_types import TagInfo, constants
 from music_modify.utils import tableHeader
 
 logger = logging.getLogger(__name__)
@@ -43,14 +43,14 @@ class TagModel(QAbstractTableModel):
     @override
     def rowCount(
         self,
-        parent: QModelIndex | QPersistentModelIndex = qt_types.Q_MODEL_INDEX,
+        parent: QModelIndex | QPersistentModelIndex = constants.Q_MODEL_INDEX,
     ) -> int:
         return len(self._tags)
 
     @override
     def columnCount(
         self,
-        parent: QModelIndex | QPersistentModelIndex = qt_types.Q_MODEL_INDEX,
+        parent: QModelIndex | QPersistentModelIndex = constants.Q_MODEL_INDEX,
     ) -> int:
         return len(TAG_MODEL_COLUMNS)
 

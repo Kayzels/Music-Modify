@@ -12,10 +12,9 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from music_modify.custom_types.constants import PEOPLE_TAG_WIDTH
 from music_modify.models import SongRepository
 from music_modify.prefs import prefs
-
-PEOPLE_TAG_WIDTH = 150
 
 
 def updateTableView(table_view: QTableView, repository: SongRepository) -> None:

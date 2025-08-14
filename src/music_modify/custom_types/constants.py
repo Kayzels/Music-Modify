@@ -11,3 +11,9 @@ PEOPLE_COL_COUNT = 2
 Q_MODEL_INDEX = QModelIndex()
 """Single instance of an empty model index, so that it is not constructed
 when used as a value for a default argument"""
+
+PAIR_SEPARATOR = ": "
+"The character(s) that should be written between pairs in the table."
+
+PEOPLE_TAG_WIDTH = 150
+"The general width that a column displaying [role, person] pairs should have."

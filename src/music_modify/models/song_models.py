@@ -12,7 +12,7 @@ from PySide6.QtCore import (
     Qt,
 )
 
-from music_modify.custom_types import qt_types
+from music_modify.custom_types import constants
 from music_modify.prefs import prefs
 
 from .song_repository import SongRepository
@@ -57,14 +57,14 @@ class SongTableModel(QAbstractTableModel):
     @override
     def rowCount(
         self,
-        parent: QModelIndex | QPersistentModelIndex = qt_types.Q_MODEL_INDEX,
+        parent: QModelIndex | QPersistentModelIndex = constants.Q_MODEL_INDEX,
     ) -> int:
         return len(self.repository)
 
     @override
     def columnCount(
         self,
-        parent: QModelIndex | QPersistentModelIndex = qt_types.Q_MODEL_INDEX,
+        parent: QModelIndex | QPersistentModelIndex = constants.Q_MODEL_INDEX,
     ) -> int:
         if self.rowCount(parent) == 0:
             # NOTE: Uses 1 to keep a column for info

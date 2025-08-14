@@ -7,7 +7,7 @@ from typing import override
 from PySide6.QtCore import QAbstractListModel, QModelIndex, QPersistentModelIndex, Qt
 from PySide6.QtWidgets import QWidget
 
-from music_modify.custom_types import qt_types
+from music_modify.custom_types import constants
 
 
 def primary_contains(word: str, key: str) -> bool:
@@ -76,14 +76,14 @@ class CompleteModel(QAbstractListModel):
     @override
     def rowCount(
         self,
-        parent: QModelIndex | QPersistentModelIndex = qt_types.Q_MODEL_INDEX,
+        parent: QModelIndex | QPersistentModelIndex = constants.Q_MODEL_INDEX,
     ) -> int:
         return len(self.current_items)
 
     @override
     def data(
         self,
-        index: QModelIndex | QPersistentModelIndex = qt_types.Q_MODEL_INDEX,
+        index: QModelIndex | QPersistentModelIndex = constants.Q_MODEL_INDEX,
         role: Qt.ItemDataRole | int = Qt.ItemDataRole.DisplayRole,
     ) -> str | None:
         if not index.isValid():
@@ -117,6 +117,6 @@ class CompleteModel(QAbstractListModel):
         self,
         row: int,
         column: int | None = 0,
-        parent: QModelIndex | QPersistentModelIndex = qt_types.Q_MODEL_INDEX,
+        parent: QModelIndex | QPersistentModelIndex = constants.Q_MODEL_INDEX,
     ) -> QModelIndex:
         return super().index(row, column, parent)
