@@ -35,7 +35,7 @@ def toPairs(values: list[str], separator: str) -> list[list[str]]:
     return result
 
 
-def addValues[T](new: list[T], original: list[T]) -> list[T]:
+def addValues[T](new: list[T] | None, original: list[T]) -> list[T]:
     """Add the value to the list, if it isn't already present."""
     if not new:
         return original

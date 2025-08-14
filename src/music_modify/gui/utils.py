@@ -4,7 +4,14 @@ but that are used in multiple places."""
 from typing import cast
 
 from PySide6.QtCore import QSortFilterProxyModel
-from PySide6.QtWidgets import QAbstractItemView, QLayout, QTableView, QWidget
+from PySide6.QtWidgets import (
+    QAbstractItemView,
+    QLayout,
+    QScrollArea,
+    QTableView,
+    QTabWidget,
+    QWidget,
+)
 
 from music_modify.models import SongRepository
 from music_modify.prefs import prefs
@@ -55,3 +62,23 @@ def getSelectedRows(view: QAbstractItemView) -> list[int]:
     # Need to remove duplicates
     # Likely shouldn't be needed, but it's possible a row appears multiple times.
     return list({index.row() for index in selected_rows if index.isValid()})
+
+
+def createTab(
+    name: str,
+    tab_widget: QTabWidget,
+    layout_type: type[QLayout],
+) -> QLayout:
+    """Create a tab on a tab widget that contains a scoll area
+    that holds a widget with the layout type sent.
+
+    Returns the created layout.
+    """
+    page = QWidget()
+    layout = layout_type()
+    page.setLayout(layout)
+    scroll_area = QScrollArea()
+    scroll_area.setWidgetResizable(True)
+    scroll_area.setWidget(page)
+    tab_widget.addTab(scroll_area, name)
+    return layout

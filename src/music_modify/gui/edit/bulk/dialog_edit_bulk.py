@@ -8,7 +8,6 @@ from typing import cast, override
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import (
     QFormLayout,
-    QScrollArea,
     QTabWidget,
     QVBoxLayout,
     QWidget,
@@ -16,9 +15,12 @@ from PySide6.QtWidgets import (
 
 from music_modify.custom_types.enums import TagType
 from music_modify.custom_types.song import Song
+from music_modify.custom_types.songtag import SongTag
 from music_modify.gui.edit.dialog_edit_abstract import EditAbstractDialog
+from music_modify.gui.utils import createTab
 from music_modify.models.song_repository import SongRepository
 from music_modify.prefs import prefs
+from music_modify.utils.list_utils import addValues
 
 from .widget_edit_bulk_abstract import EditBulkAbstractWidget
 from .widget_edit_bulk_line import EditBulkLineWidget
@@ -26,6 +28,34 @@ from .widget_edit_bulk_multiple import EditBulkMultipleWidget
 from .widget_edit_bulk_people import EditBulkPeopleWidget
 
 logger = logging.getLogger(__name__)
+
+
+def _addMultiValues[T](
+    value: list[T] | None,
+    existing: set[T],
+) -> set[T]:
+    """Add the values from the list to the set, if not present."""
+    if value is None:
+        return existing
+    for item in value:
+        existing.add(item)
+    return existing
+
+
+def _addSingleValues(
+    value: str | None,
+    existing: set[str],
+    *,
+    in_all: bool = True,
+) -> tuple[set[str], bool]:
+    """Get the values that appear for all single tag values,
+    and whether the value appears in every song, or not."""
+    if value is None:
+        return existing, False
+    if len(existing) > 0 and value not in existing:
+        in_all = False
+    existing.add(value)
+    return existing, in_all
 
 
 class EditBulkDialog(EditAbstractDialog):
@@ -55,67 +85,78 @@ class EditBulkDialog(EditAbstractDialog):
     def _setupSongInfo(self) -> None:
         self.tab_widget: QTabWidget = QTabWidget()
         self.main_layout.addWidget(self.tab_widget)
-        simple_page = QWidget()
-        multiple_page = QWidget()
-        people_page = QWidget()
 
-        simple_widget_form_layout = QFormLayout()
-        simple_page.setLayout(simple_widget_form_layout)
-        simple_scroll_area = QScrollArea()
-        simple_scroll_area.setWidgetResizable(True)
-        simple_scroll_area.setWidget(simple_page)
-        self.tab_widget.addTab(simple_scroll_area, "Simple Tags")
+        simple_widget_form_layout = cast(
+            QFormLayout,
+            createTab(
+                "Simple Tags",
+                self.tab_widget,
+                QFormLayout,
+            ),
+        )
 
-        multi_widget_layout = QVBoxLayout()
-        multiple_page.setLayout(multi_widget_layout)
-        multi_scroll_area = QScrollArea()
-        multi_scroll_area.setWidgetResizable(True)
-        multi_scroll_area.setWidget(multiple_page)
-        self.tab_widget.addTab(multi_scroll_area, "List Tags")
+        multi_widget_layout = createTab(
+            "List Tags",
+            self.tab_widget,
+            QVBoxLayout,
+        )
 
-        people_widget_layout = QVBoxLayout()
-        people_page.setLayout(people_widget_layout)
-        people_scroll_area = QScrollArea()
-        people_scroll_area.setWidgetResizable(True)
-        people_scroll_area.setWidget(people_page)
-        self.tab_widget.addTab(people_scroll_area, "People Tags")
+        people_widget_layout = createTab(
+            "People Tags",
+            self.tab_widget,
+            QVBoxLayout,
+        )
+
+        people_values: dict[SongTag, list[list[str]]] = {}
+        normal_values: dict[SongTag, set[str]] = {}
 
         for tag in prefs.settings.all_tags:
+            # Get values from all songs, and store in dicts
+            in_all: bool = True
+            for song in self.songs:
+                current_data = copy.deepcopy(tag.getValue(song.id3))
+                if tag.frame_type == TagType.People:
+                    people_values[tag] = addValues(
+                        cast(list[list[str]] | None, current_data),
+                        people_values.get(tag, []),
+                    )
+                    continue
+                if tag.allow_multiple:
+                    normal_values[tag] = _addMultiValues(
+                        cast(list[str] | None, current_data),
+                        normal_values.get(tag, set()),
+                    )
+                    continue
+                normal_values[tag], in_all = _addSingleValues(
+                    cast(str | None, current_data),
+                    normal_values.get(tag, set()),
+                    in_all=in_all,
+                )
+
+            # Create widgets and add to layouts
             if tag.frame_type == TagType.People:
-                items: list[list[str]] = []
-                for song in self.songs:
-                    current_data = copy.deepcopy(tag.getValue(song.id3))
-                    if current_data is not None:
-                        current_data = cast(list[list[str]], current_data)
-                        for item in current_data:
-                            if item not in items:
-                                items.append(item)
-                widget = EditBulkPeopleWidget(self, items, tag)
-                people_widget_layout.addWidget(widget)
-            elif tag.allow_multiple:
-                tag_items: set[str] = set()
-                for song in self.songs:
-                    current_data = copy.deepcopy(tag.getValue(song.id3))
-                    if current_data is not None:
-                        current_data = cast(list[str], current_data)
-                        for item in current_data:
-                            tag_items.add(item)
-                widget = EditBulkMultipleWidget(self, tag_items, tag)
-                multi_widget_layout.addWidget(widget)
-            else:
-                tag_items = set()
-                in_all: bool = True
-                for song in self.songs:
-                    current_data = copy.deepcopy(tag.getValue(song.id3))
-                    if current_data is not None:
-                        current_data = cast(str, current_data)
-                        if len(tag_items) > 0 and current_data not in tag_items:
-                            in_all = False
-                        tag_items.add(current_data)
-                    else:
-                        in_all = False
-                widget = EditBulkLineWidget(self, tag_items, tag=tag, in_all=in_all)
-                simple_widget_form_layout.addRow(tag.display_name, widget)
+                people_widget_layout.addWidget(
+                    EditBulkPeopleWidget(
+                        self,
+                        people_values[tag],
+                        tag,
+                    ),
+                )
+                continue
+            if tag.allow_multiple:
+                multi_widget_layout.addWidget(
+                    EditBulkMultipleWidget(self, normal_values[tag], tag),
+                )
+                continue
+            simple_widget_form_layout.addRow(
+                tag.display_name,
+                EditBulkLineWidget(
+                    self,
+                    normal_values[tag],
+                    tag,
+                    in_all=in_all,
+                ),
+            )
 
         self.resize(600, 400)
 
