@@ -25,6 +25,59 @@ logger = logging.getLogger(__name__)
 
 PAIR_SEPARATOR = ": "
 
+
+def _removePeople(
+    remove_values: set[str],
+    original: list[list[str]],
+) -> list[list[str]]:
+    """Remove any string that appears in `remove_values` from the list,
+    when that string appears in the people index."""
+    return removeMatchingSublistPairs(
+        remove_values,
+        original,
+        index=PairIndex.Person.value,
+    )
+
+
+def _removeRoles(
+    remove_values: set[str],
+    original: list[list[str]],
+) -> list[list[str]]:
+    """Remove any string that appears in `remove_values` from the list,
+    when that string appears in the roles index."""
+    return removeMatchingSublistPairs(
+        remove_values,
+        original,
+        index=PairIndex.Role.value,
+    )
+
+
+def _remapPeople(
+    replacements: dict[str, str],
+    original: list[list[str]],
+) -> list[list[str]]:
+    """Remap any string that appears as a key in `replacements` from the list,
+    when that string appears in the people index."""
+    return remapMatchingSublistPairs(
+        replacements,
+        original,
+        index=PairIndex.Person.value,
+    )
+
+
+def _remapRoles(
+    replacements: dict[str, str],
+    original: list[list[str]],
+) -> list[list[str]]:
+    """Remap any string that appears as a key in `replacements` from the list,
+    when that string appears in the roles index."""
+    return remapMatchingSublistPairs(
+        replacements,
+        original,
+        index=PairIndex.Role.value,
+    )
+
+
 L = TypeVar("L", bound=Sized)
 MapFunc = Callable[[L, list[list[str]]], list[list[str]]]
 
@@ -69,7 +122,7 @@ class _ActionMapping[L: Sized]:
         Args:
             song: The `Song` that contains the data that should be changed.
         """
-        if len(self.items) == 0:
+        if not self.items or len(self.items) == 0:
             return False
         current_values = self._getSongValues(song)
         new_values = self.func(self.items, current_values)
@@ -233,64 +286,6 @@ class EditBulkPeopleWidget(EditBulkAbstractGroupWidget):
         # Store whether any change is actually made.
         # Updated if a refresh is requested.
         changes_made: bool = False
-
-        # Declare the functions explicitly so that it's more readable,
-        # compared to lambdas.
-        def _removePeople(
-            remove_values: set[str],
-            original: list[list[str]],
-        ) -> list[list[str]]:
-            """Remove any string that appears in `remove_values` from the list,
-            when that string appears in the people index."""
-            if len(remove_values) == 0:
-                return original
-            return removeMatchingSublistPairs(
-                remove_values,
-                original,
-                index=PairIndex.Person.value,
-            )
-
-        def _removeRoles(
-            remove_values: set[str],
-            original: list[list[str]],
-        ) -> list[list[str]]:
-            """Remove any string that appears in `remove_values` from the list,
-            when that string appears in the roles index."""
-            if len(remove_values) == 0:
-                return original
-            return removeMatchingSublistPairs(
-                remove_values,
-                original,
-                index=PairIndex.Role.value,
-            )
-
-        def _remapPeople(
-            replacements: dict[str, str],
-            original: list[list[str]],
-        ) -> list[list[str]]:
-            """Remap any string that appears as a key in `replacements` from the list,
-            when that string appears in the people index."""
-            if len(replacements) == 0:
-                return original
-            return remapMatchingSublistPairs(
-                replacements,
-                original,
-                index=PairIndex.Person.value,
-            )
-
-        def _remapRoles(
-            replacements: dict[str, str],
-            original: list[list[str]],
-        ) -> list[list[str]]:
-            """Remap any string that appears as a key in `replacements` from the list,
-            when that string appears in the roles index."""
-            if len(replacements) == 0:
-                return original
-            return remapMatchingSublistPairs(
-                replacements,
-                original,
-                index=PairIndex.Role.value,
-            )
 
         mappings: list[AllowedActionMapping] = [
             self._createActionMapping(add_items, addValues),

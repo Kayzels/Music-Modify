@@ -1,7 +1,5 @@
 """Module for utilities related to working with lists."""
 
-from typing import TypeVar
-
 
 def getUniqueOrdered(text: str, separator: str) -> list[str]:
     """Get the unique values from a string separated at `separator`,
@@ -35,11 +33,10 @@ def toPairs(values: list[str], separator: str) -> list[list[str]]:
     return result
 
 
-T = TypeVar("T")
-
-
-def addValues(new: list[T], original: list[T]) -> list[T]:
+def addValues[T](new: list[T], original: list[T]) -> list[T]:
     """Add the value to the list, if it isn't already present."""
+    if not new:
+        return original
     return original + [item for item in new if item not in original]
 
 
@@ -47,6 +44,8 @@ def removePairs(
     pairs: set[tuple[str, ...]],
     original: list[list[str]],
 ) -> list[list[str]]:
+    if not pairs:
+        return original
     """Remove any pairs from `pairs` that appear in the `original` list."""
     return [item for item in original if tuple(item) not in pairs]
 
@@ -64,6 +63,8 @@ def removeMatchingSublistPairs(
     with an index of `0`, the result is `[['b', 'a']]`,
     and with `1` it is `[['a', 'b']]`.
     """
+    if not remove_values:
+        return original
     return [
         item for item in original if len(item) == 2 and item[index] not in remove_values
     ]
@@ -82,6 +83,8 @@ def remapMatchingSublistPairs(
     with an index of `0`, the result is `[['c', 'b'], ['d', 'a']]`,
     and with `1` it is `[['a', 'b'], ['d', 'c']]`
     """
+    if not replacements:
+        return original
     return [
         [
             replacements.get(item[0], item[0]) if index == 0 else item[0],
