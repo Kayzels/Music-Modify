@@ -1,46 +1,81 @@
 """Module for utilities related to working with datetime values."""
 
 import datetime
-import re
+import math
+from typing import TypedDict
+
+from music_modify.utils.string_utils import singularPlural
+
+MINS_IN_HOUR = 60
+SECONDS_IN_MIN = 60
+SECONDS_IN_HOUR = SECONDS_IN_MIN * MINS_IN_HOUR
+MICROSECONDS_IN_SECOND = 1_000_000.0
+
+
+class _TimeDict(TypedDict):
+    days: int
+    hours: int
+    minutes: int
+    seconds: int
+    microseconds: int
+
+
+def getTimeDict(time_to_format: datetime.timedelta) -> _TimeDict:
+    """Calculate the various time fields from a timedelta object."""
+    days = time_to_format.days
+    seconds_remaining = time_to_format.seconds
+    hours, seconds_remaining = divmod(seconds_remaining, SECONDS_IN_HOUR)
+    minutes, seconds = divmod(seconds_remaining, SECONDS_IN_MIN)
+    microseconds = time_to_format.microseconds
+
+    return {
+        "days": days,
+        "hours": hours,
+        "minutes": minutes,
+        "seconds": seconds,
+        "microseconds": microseconds,
+    }
+
+
+def convertSecondsAndMicroseconds(
+    seconds: int,
+    microseconds: int,
+    decimal_places: int = 2,
+) -> str | None:
+    """Create a string representation of the seconds and microseconds together,
+    if there are values for either.
+
+    If both are 0, returns `None`.
+    Otherwise, returns a string of the form `seconds.microseconds`"""
+    if microseconds == 0:
+        if seconds == 0:
+            return None
+        return singularPlural(seconds, "second")
+    microsecond_calc = round(microseconds / MICROSECONDS_IN_SECOND, decimal_places)
+    if math.isclose(microsecond_calc, 0.0):
+        return None
+    second_calc = seconds + microsecond_calc
+    return f"{second_calc} seconds"
 
 
 def formatTime(time_to_format: datetime.timedelta, decimal_places: int = 2) -> str:
     """Converts a timedelta to a readable string"""
-    delta_str = str(time_to_format)
-    days = 0
-    if "day" in delta_str:
-        match = re.match(r"(\d+) day[s]?, (.+)", delta_str)
-        if match:
-            days = int(match.group(1))
-            time_part = match.group(2)
-        else:
-            time_part = delta_str
-    else:
-        time_part = delta_str
 
-    hours, mins, seconds = time_part.split(":")
-    seconds_split = seconds.split(".")
-    seconds = seconds_split[0]
-    if len(seconds_split) > 1:
-        seconds += "." + seconds_split[1][:decimal_places]
-
+    time_dict = getTimeDict(time_to_format)
     parts: list[str] = []
-    if days:
-        if days == 1:
-            parts.append("1 day")
-        else:
-            parts.append(f"{days} days")
-    if hours != "0":
-        hour_int = int(hours)
-        if hour_int == 1:
-            parts.append("1 hour")
-        else:
-            parts.append(f"{hour_int} hours")
-    if mins != "00":
-        min_int = int(mins)
-        if min_int == 1:
-            parts.append("1 min")
-        else:
-            parts.append(f"{int(mins)} mins")
-    parts.append(f"{seconds} seconds")
+    if (days := time_dict["days"]) > 0:
+        parts.append(singularPlural(days, "day"))
+    if (hours := time_dict["hours"]) > 0:
+        parts.append(singularPlural(hours, "hour"))
+    if (mins := time_dict["minutes"]) > 0:
+        parts.append(singularPlural(mins, "min"))
+
+    seconds_str = convertSecondsAndMicroseconds(
+        time_dict["seconds"],
+        time_dict["microseconds"],
+        decimal_places,
+    )
+    if seconds_str:
+        parts.append(seconds_str)
+
     return ", ".join(parts)
