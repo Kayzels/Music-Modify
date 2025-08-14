@@ -3,7 +3,7 @@ when the tag contains (role, person) pairs."""
 
 from collections.abc import Callable, Sized
 import logging
-from typing import TypeVar, cast, override
+from typing import cast, override
 
 from PySide6.QtWidgets import QFormLayout, QWidget
 
@@ -78,8 +78,7 @@ def _remapRoles(
     )
 
 
-L = TypeVar("L", bound=Sized)
-MapFunc = Callable[[L, list[list[str]]], list[list[str]]]
+type MapFunc[L: Sized] = Callable[[L, list[list[str]]], list[list[str]]]
 
 
 class _ActionMapping[L: Sized]:
@@ -236,7 +235,11 @@ class EditBulkPeopleWidget(EditBulkAbstractGroupWidget):
         self.clear_checkbox.setChecked(False)
         self.group_box.setChecked(False)
 
-    def _createActionMapping(self, items: L, func: MapFunc[L]) -> _ActionMapping[L]:
+    def _createActionMapping[L: Sized](
+        self,
+        items: L,
+        func: MapFunc[L],
+    ) -> _ActionMapping[L]:
         """Creates a mapping based on the items sent, and the function"""
         return _ActionMapping(self, items, func)
 
