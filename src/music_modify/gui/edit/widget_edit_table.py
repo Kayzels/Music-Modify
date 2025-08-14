@@ -31,12 +31,12 @@ logger = logging.getLogger(__name__)
 class _DragTableWidget(QTableWidget):
     """Private table class that emits a signal when rows are reordered."""
 
-    rowsReordered: Signal = Signal()
+    rows_reordered: Signal = Signal()
 
     @override
     def dropEvent(self, event: QDropEvent) -> None:
         super().dropEvent(event)
-        self.rowsReordered.emit()
+        self.rows_reordered.emit()
 
     @override
     def resizeEvent(self, event: QResizeEvent) -> None:
@@ -140,7 +140,7 @@ class EditTableWidget(EditAbstractGroupWidget[SongTableData]):
         )
 
         self.main_widget.itemChanged.connect(self._updateValue)
-        self.main_widget.rowsReordered.connect(self._updateValue)
+        self.main_widget.rows_reordered.connect(self._updateValue)
 
         button_layout = QVBoxLayout()
         layout.addLayout(button_layout)

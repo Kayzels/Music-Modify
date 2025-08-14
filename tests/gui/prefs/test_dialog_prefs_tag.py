@@ -10,7 +10,11 @@ from music_modify.gui.prefs.dialog_prefs_tag import PrefsTagDialog
 from music_modify.models.tag_model import TagModel
 import music_modify.prefs.prefs as prefs_module
 
-_testTagInfo = TagInfo(id3_key="TEST", display_name="Test Display", show_in_table=True)
+_test_tag_info = TagInfo(
+    id3_key="TEST",
+    display_name="Test Display",
+    show_in_table=True,
+)
 
 
 class MockPrefsTagAddDialog(QObject):
@@ -24,9 +28,9 @@ class MockPrefsTagAddDialog(QObject):
 
     @staticmethod
     def addToModel(model: TagModel) -> None:
-        id3_key = _testTagInfo.id3_key
-        display_name = _testTagInfo.display_name
-        show_in_table = _testTagInfo.show_in_table
+        id3_key = _test_tag_info.id3_key
+        display_name = _test_tag_info.display_name
+        show_in_table = _test_tag_info.show_in_table
         model.addTag(
             id3_key=id3_key,
             display_name=display_name,
@@ -80,7 +84,7 @@ def _makeChanges(dialog: PrefsTagDialog) -> list[TagInfo]:
 
     # Add row at end
     dialog.add_toolbutton.click()
-    tags.append(_testTagInfo)
+    tags.append(_test_tag_info)
 
     # Remove some rows
     _selectRows(dialog, [0, 1])
@@ -125,7 +129,7 @@ def test_PrefsTagDialog_addTag(
     dialog.add_toolbutton.click()
 
     assert model.rowCount() == before_len + 1
-    assert model.tags[-1] == _testTagInfo
+    assert model.tags[-1] == _test_tag_info
 
 
 def test_PrefsTagDialog_removeSelectedTags(

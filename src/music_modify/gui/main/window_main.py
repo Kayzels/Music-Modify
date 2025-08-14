@@ -270,11 +270,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def removeSelectedFiles(self) -> None:
         """Removes the files at the indexes provided by the selectionModel"""
-        selectionLength = self.getSelectionLength()
-        if selectionLength == 0:
+        selection_length = self.getSelectionLength()
+        if selection_length == 0:
             logger.debug("Called clear selection with a length of 0.")
             return
-        if selectionLength == len(self.songs_repository):
+        if selection_length == len(self.songs_repository):
             self.songs_repository.clearFiles()
             return
 
