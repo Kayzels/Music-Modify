@@ -1,5 +1,7 @@
-"""Module that defines a `SongRepository` object, which works as a way of interacting
-with the list of songs."""
+"""Module that defines a `SongRepository` object.
+
+This works works as a way of interacting with the list of songs.
+"""
 
 from os import PathLike
 
@@ -9,14 +11,16 @@ from music_modify.custom_types import Song
 
 
 class SongRepository(QObject):
-    """Wrapper around a list of songs, that allows easier management
-    for adding and removing songs
+    """Wrapper around a list of songs.
+
+    Allows easier management for adding and removing songs.
     """
 
     songs_updated: Signal = Signal()
     "Signal that is emitted whenever songs are added or removed."
 
     def __init__(self) -> None:
+        """Create a `SongRepository`, with no songs added yet."""
         super().__init__()
         self._songs: list[Song] = []
 
@@ -31,9 +35,14 @@ class SongRepository(QObject):
         return self._songs[index]
 
     def __getitem__(self, index: int) -> Song | None:
+        """Returns the song at the index.
+
+        Returns `None` if the index is invalid, rather than raising an IndexError.
+        """
         return self.getSong(index)
 
     def __len__(self) -> int:
+        """Returns the number of songs in the repository."""
         return len(self._songs)
 
     def addFile(self, file: str | PathLike[str]) -> None:
@@ -65,6 +74,7 @@ class SongRepository(QObject):
 
     def refreshDisplay(self) -> None:
         """Updates the information being displayed for each song in the repository.
+
         Should be called after any metadata is updated, to keep the view in sync.
         """
         for song in self._songs:

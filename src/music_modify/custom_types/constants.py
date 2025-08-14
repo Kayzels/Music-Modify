@@ -1,3 +1,5 @@
+"""Defines variables that don't change, that are needed in many places."""
+
 from PySide6.QtCore import QModelIndex
 
 PAIR_SIZE = 2

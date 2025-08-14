@@ -1,6 +1,4 @@
-"""Package that contains widgets specifically for completion suggestions
-in dropdown menus.
-"""
+"""Package that contains widgets for completion suggestions in dropdown menus."""
 
 from PySide6.QtWidgets import QWidget
 
@@ -14,9 +12,9 @@ def createCompletionWidget(
     multiple: bool = True,
     initial: str = "",
 ) -> EditWithComplete:
-    """
-    Creates a widget for showing completion suggestions,
-    that is populated with the items sent through.
+    """Creates a widget for showing completion suggestions.
+
+    The widget is populated with the items sent through.
 
     Args:
         parent: The parent widget.

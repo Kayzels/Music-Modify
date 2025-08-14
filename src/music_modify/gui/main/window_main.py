@@ -33,9 +33,10 @@ logger = logging.getLogger(__name__)
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):
-    """Main interface window for managing song metadata"""
+    """Main interface window for managing song metadata."""
 
     def __init__(self) -> None:
+        """Creates the main user interface."""
         super().__init__()
         self.setupUi(self)
 
@@ -113,8 +114,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.setSelectionActionState()
 
     def setSelectionActionState(self) -> None:
-        """Toggle actions related to selection,
-        based on whether any files are selected in the table."""
+        """Toggle selection-related actions, based on whether any files are selected."""
         self.action_select_all.setEnabled(len(self.songs_repository) > 0)
 
         has_selection = self.getSelectionLength() > 0
@@ -127,8 +127,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.setSelectionActionState()
 
     def openAddDialog(self, file_mode: QFileDialog.FileMode) -> None:
-        """Display a file picker that allows users to select the files (or folders)
-        to edit, based on the file_mode.
+        """Display a file picker based on the file mode.
+
+        This allows allows users to select the files (or folders) to edit.
         """
         files_dialog = QFileDialog(self)
         files_dialog.setFileMode(file_mode)
@@ -269,7 +270,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.statusLabel.setText(message)
 
     def removeSelectedFiles(self) -> None:
-        """Removes the files at the indexes provided by the selectionModel"""
+        """Removes the files at the indexes provided by the selectionModel."""
         selection_length = self.getSelectionLength()
         if selection_length == 0:
             logger.debug("Called clear selection with a length of 0.")
@@ -311,12 +312,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         updateTableView(self.files_table_view, self.songs_repository)
 
     def showEditDialog(self, *, bulk: bool = False) -> None:
-        """Create a dialog that allows editing the information for each song
+        """Create a dialog for editing the metadata in the selected songs.
+
+        Create a dialog that allows editing the information for each song
         in the selection, either individually with transitions between
         Next and Previous songs, or in bulk.
 
         Args:
-            bulk: Whether the information should be edited in bulk. Default False"""
+            bulk: Whether the information should be edited in bulk. Default False
+        """
         # Need to sort the list so that it's not shown in a random order
         rows = sorted(getSelectedRows(self.files_table_view))
 

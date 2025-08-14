@@ -1,3 +1,5 @@
+"""Module that defines some types needed for Qt."""
+
 from typing import TypedDict
 
 from PySide6.QtCore import QModelIndex, Qt
@@ -7,6 +9,8 @@ Q_MODEL_INDEX = QModelIndex()
 
 
 class QLineEditArgs(TypedDict, total=False):
+    """The argument types that can be used when initialising a QLineEdit."""
+
     inputMask: str | None
     text: str | None
     maxLength: int | None

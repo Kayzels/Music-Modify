@@ -1,5 +1,7 @@
-"""Module that defines the `Settings` class,
-and creates the global `settings` object.
+"""Module that defines the `Settings` class.
+
+It also creates the global `settings` object,
+which should be used when wanting to access user preferences.
 """
 
 import logging
@@ -18,6 +20,11 @@ class Settings:
     """Wrapper for QSettings that provides easier access to defined setting keys."""
 
     def __init__(self, new_settings: QSettings | None = None) -> None:
+        """Create a new Settings object.
+
+        Args:
+            new_settings: The settings values that should be read, if present.
+        """
         logger.info("In init method for Settings object")
         self._settings: QSettings = (
             # PERF: Is there a way to get this from the QApplication,
@@ -38,8 +45,10 @@ class Settings:
     @property
     def split_text_entered(self) -> str:
         """The symbol that should split the data typed in.
+
         For example, with it set to be ",",
-        John Smith, Jane Doe should be understood as two separate values."""
+        John Smith, Jane Doe should be understood as two separate values.
+        """
         return str(
             self._settings.value(
                 "Split/split_text_entered",
@@ -53,8 +62,8 @@ class Settings:
 
     @property
     def split_values_display(self) -> str:
-        """The symbol that should be used in the table to show when
-        there are multiple items in a field.
+        r"""The symbol used to separate values when there are multiple items in a field.
+
         If set to \\, John Smith, Jane Doe would be shown as
         John Smith\\Jane Doe
         """
@@ -72,6 +81,7 @@ class Settings:
     @property
     def split_values_at(self) -> str:
         """The symbol used when existing values should be split.
+
         For example, if an existing field is John Smith; Jane Doe,
         this should split it into separate values.
         """
@@ -148,9 +158,11 @@ class Settings:
     @property
     def all_tags(self) -> list[SongTag]:
         """`SongTag` version of the tags that are stored in settings.
+
         Used when a `SongTag` specifically needs to be checked,
         but the majority of the time, we can use `info_tags` instead,
-        using `TagInfo` objects."""
+        using `TagInfo` objects.
+        """
         return [
             SongTag(display_name=tag.display_name, id3_key=tag.id3_key)
             for tag in self.info_tags
@@ -159,7 +171,9 @@ class Settings:
     @property
     def info_tags(self) -> list[TagInfo]:
         """`TagInfo` version of the tags that are stored in settings.
-        Use `all_tags` if needing `SongTag` objects."""
+
+        Use `all_tags` if needing `SongTag` objects.
+        """
         return self._getArray("Tags/info_tags")
 
     @info_tags.setter
@@ -171,7 +185,8 @@ class Settings:
         """Set the QSettings array based on the list of TagInfo.
 
         Writes the settings file in QSettings array form,
-        which then needs to be converted into a list to be usable in Python."""
+        which then needs to be converted into a list to be usable in Python.
+        """
         logger.info(f"Began creating array for {key} with {len(vals)} entries.")
 
         self._settings.beginGroup(key)
@@ -187,8 +202,11 @@ class Settings:
         self._settings.endArray()
 
     def _getArray(self, key: str) -> list[TagInfo]:
-        """Convert the stored QSettings array for the specific key
-        into a list of tags that can be used in Python."""
+        """Convert the stored QSettings array into a Python list of tags.
+
+        Args:
+            key: The name of the array to read from settings.
+        """
         size = self._settings.beginReadArray(key)
         tags: list[TagInfo] = []
         for i in range(size):
@@ -232,14 +250,14 @@ class Settings:
             logger.info("Info Tags already set")
 
     def resetSplit(self) -> None:
-        """Reset the value for the split preferences back to default"""
+        """Reset the value for the split preferences back to default."""
         logger.info("Called reset split")
         self.split_text_entered = Settings.default_split_text_entered
         self.split_values_at = Settings.default_split_values_at
         self.split_values_display = Settings.default_split_values_display
 
     def resetTags(self) -> None:
-        """Reset the value for the tag list back to default"""
+        """Reset the value for the tag list back to default."""
         logger.info("Called reset tags")
         self.info_tags = Settings.default_tags
 

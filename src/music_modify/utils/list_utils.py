@@ -4,8 +4,7 @@ from music_modify.custom_types import constants
 
 
 def getUniqueOrdered(text: str, separator: str) -> list[str]:
-    """Get the unique values from a string separated at `separator`,
-    ordered alphabetically.
+    """Get the unique values from a string separated at `separator`, alphabetically.
 
     Args:
         text: String containing the text to be separated
@@ -19,8 +18,7 @@ def getUniqueOrdered(text: str, separator: str) -> list[str]:
 
 
 def toPairs(values: list[str], separator: str) -> list[list[str]]:
-    """Convert a list of strings into a list of string pairs,
-    split by separator.
+    """Convert a list of strings into a list of string pairs, split by separator.
 
     For example, given `['one:two', 'three:four']` and `:`,
     this will return `[['one', 'two'], ['three', 'four']]`
@@ -46,9 +44,9 @@ def removePairs(
     pairs: set[tuple[str, ...]],
     original: list[list[str]],
 ) -> list[list[str]]:
+    """Remove any pairs from `pairs` that appear in the `original` list."""
     if not pairs:
         return original
-    """Remove any pairs from `pairs` that appear in the `original` list."""
     return [item for item in original if tuple(item) not in pairs]
 
 
@@ -57,7 +55,9 @@ def removeMatchingSublistPairs(
     original: list[list[str]],
     index: int,
 ) -> list[list[str]]:
-    """Remove any pairs that appear in `remove_values` that contain
+    """Remove from original any pairs with values in `remove_values` at that index.
+
+    Remove any pairs that appear in `remove_values` that contain
     any values that appear in `original` specifically at that index.
 
     For example, if `remove_values` is `{'a'}`,
@@ -79,7 +79,9 @@ def remapMatchingSublistPairs(
     original: list[list[str]],
     index: int,
 ) -> list[list[str]]:
-    """Use the `replacements` dict to change the values that appear in `original`
+    """Replace values at index, for the strings that are keys in replacements.
+
+    Use the `replacements` dict to change the values that appear in `original`
     at the specified `index`, if the values appear in the list at that point.
 
     For example, if `replacements` is `{'a': 'c'}`,

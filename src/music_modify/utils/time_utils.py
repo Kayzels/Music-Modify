@@ -42,11 +42,11 @@ def convertSecondsAndMicroseconds(
     microseconds: int,
     decimal_places: int = 2,
 ) -> str | None:
-    """Create a string representation of the seconds and microseconds together,
-    if there are values for either.
+    """Create a string representation of the seconds and microseconds together.
 
     If both are 0, returns `None`.
-    Otherwise, returns a string of the form `seconds.microseconds`"""
+    Otherwise, returns a string of the form `seconds.microseconds`
+    """
     if microseconds == 0:
         if seconds == 0:
             return None
@@ -59,8 +59,7 @@ def convertSecondsAndMicroseconds(
 
 
 def formatTime(time_to_format: datetime.timedelta, decimal_places: int = 2) -> str:
-    """Converts a timedelta to a readable string"""
-
+    """Converts a timedelta to a readable string."""
     time_dict = getTimeDict(time_to_format)
     parts: list[str] = []
     if (days := time_dict["days"]) > 0:

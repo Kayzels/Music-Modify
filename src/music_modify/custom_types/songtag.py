@@ -1,5 +1,4 @@
-"""Module that defines a `SongTag` object,
-which is used to represent an ID3 tag."""
+"""Module that defines a `SongTag` object, which is used to represent an ID3 tag."""
 
 import logging
 from typing import ClassVar, Final, cast, override
@@ -20,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 
 class SongTag:
-    """Object representing an ID3 tag"""
+    """Object representing an ID3 tag."""
 
     KEYS_ALLOW_MULTIPLE_VALUES: ClassVar[set[str]] = {
         "TCOM",  # Composer
@@ -36,6 +35,12 @@ class SongTag:
     rather than a single value."""
 
     def __init__(self, display_name: str, id3_key: str) -> None:
+        """Create a `SongTag` based on a display name and key.
+
+        Args:
+            display_name: The human-readable name for the tag
+            id3_key: The field in an id3 object that this tag refers to
+        """
         self._id3_key: Final[str] = id3_key
         self._display_name: Final[str] = display_name
         self._frame_type: Final[TagType] = SongTag._getFrameType(id3_key)
@@ -58,8 +63,7 @@ class SongTag:
 
     @property
     def id3_key(self) -> str:
-        """The string value used to know which frame is being referenced
-        in a song."""
+        """The string value used to know which frame is being referenced in a song."""
         return self._id3_key
 
     @property
@@ -74,16 +78,21 @@ class SongTag:
 
     @property
     def allow_multiple(self) -> bool:
-        """Whether this specific tag stores a list of values (`True`),
-        or a single value (`False`)."""
+        """Returns `True` if this tag stores a list of values.
+
+        Tags can either store a list of strings, a string, or a list of string pairs.
+        This property is used to determine when a tag stores a list of strings.
+        Note that it returns `False` if the tag stores a string _or_ string pairs.
+        """
         # TODO: Consider whether people tags should return True here.
         return self.id3_key in SongTag.KEYS_ALLOW_MULTIPLE_VALUES
 
     @staticmethod
     def _getFrameType(id3_key: str) -> TagType:
-        """Depending on the tag, determines the list name of the type of
-        data that is stored.
-        This is needed to extract the correct type of data from the tag later."""
+        """Determines the list name of the type of data that is stored in the tag.
+
+        This is needed to extract the correct type of data from the tag later.
+        """
         if "TXXX" in id3_key:
             tag_frame = id3.TXXX.__base__
         else:
@@ -102,17 +111,24 @@ class SongTag:
                 return TagType.Text
 
     def __len__(self) -> int:
-        """Returns 1 if strings will be returned.
-        Returns 2 if the format is [role, person]"""
+        """Returns the general number of items this tag can store.
+
+        Returns 1 if strings will be returned.
+        Returns 2 if the format is [role, person]
+        """
         return 2 if self.frame_type == TagType.People else 1
 
     def getTag(self, song: ID3) -> SongGroupData:
         """Gets the current data for this tag in the song sent in.
+
         Returns None if tag is not in song, or empty.
+
         Returns a list of strings if the format is a single string, like for the title,
         or if it is a list of values, like for the composer
+
         Returns a list of pairs of strings if the format is a group of pairs,
-        like for the involved people list."""
+        like for the involved people list.
+        """
         try:
             # NOTE: Done like this because the frame type changes,
             # and there is no quick way to directly extract the right type.
@@ -172,8 +188,12 @@ class SongTag:
             logger.warning(f"Cannot create a tag frame with this key: {self.id3_key}")
 
     def getValue(self, song: ID3) -> SongEditData | None:
-        """Returns the value for the tag in the format useful for editing,
-        based on the type.
+        """Returns the value for the tag in a format useful for editing.
+
+        This is done based on the type.
+        If it stores (role, person) values, it returns a list of list of strings.
+        If it stores multiple values, a list of strings is returned.
+        If it stores a single string, this string is returned.
         """
         song_data = self.getTag(song)
         if song_data is None:

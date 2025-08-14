@@ -1,6 +1,9 @@
-"""Module that defines the abstract class used for widgets
+"""Module that defines an EditAbstractGroupWidget.
+
+This widget is the abstract class used for widgets
 in an EditDialog that display groups of values,
-rather than a single value."""
+rather than a single value.
+"""
 
 from abc import ABC, abstractmethod
 from typing import override
@@ -20,11 +23,18 @@ class EditAbstractGroupWidget[ValueG: SongListData | SongTableData](
     ABC,
     metaclass=ABCQMeta,
 ):
-    """Abstract class for widgets displayed on an EditDialog
-    that contain multiple items, which can be displayed in lists or tables.
+    """Abstract class for widgets on an EditDialog that contain multiple items.
+
+    These items can be displayed in lists or tables.
     """
 
     def __init__(self, parent: QWidget, data: ValueG | None) -> None:
+        """Create an EditAbstractGroupWidget.
+
+        Args:
+            parent: The widget that this widget should be displayed on.
+            data: The data to be displayed on this widget.
+        """
         super().__init__(parent, data)
 
     # noinspection PyTypeChecker

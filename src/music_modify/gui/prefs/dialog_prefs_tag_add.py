@@ -1,4 +1,4 @@
-"""Module that defines the dialog that allows a user to add a new tag"""
+"""Module that defines the dialog that allows a user to add a new tag."""
 
 import logging
 from typing import TypedDict
@@ -22,11 +22,17 @@ class PrefsTagAddDialog(QDialog, Ui_PrefsTagAddDialog):
     """Dialog that allows a user to add a new tag to the list of tags."""
 
     def __init__(self, parent: QWidget | None = None) -> None:
+        """Creates a PrefsTagAddDialog.
+
+        Args:
+            parent: The widget that this dialog should be displayed on.
+        """
         super().__init__(parent)
         self.setupUi(self)
 
     def _getValidTag(self, model: TagModel) -> _TagDict | None:
         """Gets the details for a tag, if that tag isn't already defined.
+
         If the tag already exists, returns `None`.
 
         Args:

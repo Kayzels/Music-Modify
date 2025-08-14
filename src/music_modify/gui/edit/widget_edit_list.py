@@ -1,5 +1,7 @@
-"""Module that defines the widget that is used
-when lists of single values are contained for a tag."""
+"""Module that defines an EditListWidget.
+
+This widget is used when lists of single values are contained for a tag.
+"""
 
 import copy
 import logging
@@ -30,6 +32,12 @@ class EditListWidget(EditAbstractGroupWidget[SongListData]):
     """Displays data in a list widget, with each row being a string."""
 
     def __init__(self, parent: QWidget, data: SongListData | None) -> None:
+        """Create an EditListWidget.
+
+        Args:
+            parent: The widget that this widget should be displayed on.
+            data: The data to be displayed on this widget.
+        """
         super().__init__(parent, data)
 
         self.main_widget: QListWidget

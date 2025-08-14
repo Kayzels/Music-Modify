@@ -1,5 +1,7 @@
-"""Module that defines a `TagModel`, that defines which frames in a song
-should be displayed and editable."""
+"""Module that defines a `TagModel`.
+
+This model defines which frames in a song should be displayed and editable.
+"""
 
 import copy
 import dataclasses
@@ -30,6 +32,11 @@ class TagModel(QAbstractTableModel):
     "Signal that is emitted when a user enters invalid input."
 
     def __init__(self, tags: list[TagInfo]) -> None:
+        """Create a new TagModel, based on the list of tags.
+
+        Args:
+            tags: A list of details about the tags that the model should manage.
+        """
         super().__init__()
         self._tags: list[TagInfo] = tags
 
@@ -205,9 +212,7 @@ class TagModel(QAbstractTableModel):
 
     @property
     def tags(self) -> list[TagInfo]:
-        """The current grouping of tags that are used for editing
-        and displaying song metadata.
-        """
+        """The current grouping of tags used for song metadata manipulation."""
         return self._tags
 
     @tags.setter

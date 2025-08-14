@@ -1,5 +1,7 @@
-"""Module that defines the `Song` object, that manages the metadata
-for an mp3 file."""
+"""Module that defines the `Song` object.
+
+Manages the metadata for an mp3 file.
+"""
 
 import logging
 import os
@@ -16,9 +18,17 @@ logger = logging.getLogger(__name__)
 
 
 class Song:
-    """Object representing data about an mp3 file"""
+    """Object representing data about an mp3 file."""
 
     def __init__(self, file: str | os.PathLike[str] | None = None) -> None:
+        """Creates a Song object from a provided file.
+
+        If `file` is `None`, it creates an empty ID3 that is not related
+        to any specific file.
+
+        Args:
+            file: The file that the metadata should be loaded from.
+        """
         self.file: str | os.PathLike[str] | None = file
         "The file on disk that this `Song` object represents."
         self.id3: ID3 = ID3()
@@ -29,8 +39,7 @@ class Song:
         "The displayed values for the tags that are present in the song."
 
     def _generateColumns(self) -> list[str]:
-        """Generate the display values for the columns that should be shown in the
-        table."""
+        """Generate display values for the columns that should be shown in the table."""
         info: list[str] = []
         for column in prefs.settings.table_tags:
             data_string: str
@@ -46,8 +55,10 @@ class Song:
         return info
 
     def updateInfo(self) -> None:
-        """Update the displayed values, so that they are in sync with what is stored
-        in the file."""
+        """Update the displayed values.
+
+        Ensures the values are in sync with what is stored in the file.
+        """
         self.display_info = self._generateColumns()
 
     def save(self) -> None:
@@ -67,24 +78,24 @@ class Song:
             found_tag.setTag(self.id3, value)
 
     def getValue(self, tag: str | SongTag) -> SongEditData | None:
-        """Return the value stored in the song for that specific tag,
-        or `None`, if the tag is not present."""
+        """Return the value stored in the song for that specific tag.
+
+        Returns `None`, if the tag is not present.
+        """
         found_tag = toTag(tag, prefs.settings.all_tags)
         if found_tag is None:
             return None
         return found_tag.getValue(self.id3)
 
     def removeTag(self, tag: str | SongTag) -> None:
-        """Remove the tag from the stored metadata for a song,
-        if it exists."""
+        """Remove the tag from the stored metadata for a song, if it exists."""
         found_tag = toTag(tag, prefs.settings.all_tags)
         if found_tag is None:
             return
         found_tag.removeTag(self.id3)
 
     def hasTag(self, tag: str | SongTag) -> bool:
-        """Returns `True` if the specified tag is defined within the metadata
-        for the song."""
+        """Returns `True` if the tag is defined in the metadata for the song."""
         found_tag = toTag(tag, prefs.settings.all_tags)
         if found_tag is None:
             return False

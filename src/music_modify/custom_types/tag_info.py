@@ -1,13 +1,19 @@
-"""Module that stores the `TagInfo` dataclass that represents
-basic information about a tag, before it is converted to a `SongTag`."""
+"""Module that stores the `TagInfo` dataclass.
+
+This dataclass represents basic information about a tag,
+before it is converted to a `SongTag`.
+"""
 
 from dataclasses import KW_ONLY, dataclass
 
 
 @dataclass
 class TagInfo:
-    """Basic tag information, used when construcing a `SongTag` object,
-    and in places where only basic data is needed."""
+    """Basic tag information.
+
+    Used when construcing a `SongTag` object,
+    and in places where only basic data is needed.
+    """
 
     _: KW_ONLY
     id3_key: str

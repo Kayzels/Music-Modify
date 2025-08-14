@@ -20,6 +20,11 @@ class PrefsDialog(QDialog, Ui_PrefsDialog):
     "Signal that is emitted whenever any setting is changed."
 
     def __init__(self, parent: QWidget | None = None) -> None:
+        """Create a PrefsDialog.
+
+        Args:
+            parent: The widget that the dialog should be displayed on.
+        """
         super().__init__(parent)
         self.setupUi(self)
 
@@ -31,8 +36,7 @@ class PrefsDialog(QDialog, Ui_PrefsDialog):
         )
 
     def openChildDialog(self, dialog_type: type[PrefsAbstractDialog]) -> None:
-        """Opens a dialog of the specified type to allow editing
-        those specific setting groups.
+        """Opens a dialog of the specified type to edit those specific setting groups.
 
         Args:
             dialog_type: The specific type of child dialog that should be opened.

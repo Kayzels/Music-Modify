@@ -17,6 +17,7 @@ logger = logging.getLogger()
 
 
 def main() -> Never:
+    """The entry point function for running the app."""
     app = QApplication(sys.argv)
     app.setOrganizationName("Kayzels")
     app.setApplicationName("Music Modify")

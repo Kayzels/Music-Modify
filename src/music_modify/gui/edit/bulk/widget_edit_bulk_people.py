@@ -1,5 +1,8 @@
-"""Moduole that contains the widget that is used for bulk editing data,
-when the tag contains (role, person) pairs."""
+"""Module that defines an EditBulkPeopleWidget.
+
+This widget is used for bulk editing data,
+when the tag contains (role, person) pairs.
+"""
 
 from collections.abc import Callable, Sized
 import logging
@@ -30,8 +33,7 @@ def _removePeople(
     remove_values: set[str],
     original: list[list[str]],
 ) -> list[list[str]]:
-    """Remove any string that appears in `remove_values` from the list,
-    when that string appears in the people index."""
+    """Remove any strings from `remove_values` that appear in the people index."""
     return removeMatchingSublistPairs(
         remove_values,
         original,
@@ -43,8 +45,7 @@ def _removeRoles(
     remove_values: set[str],
     original: list[list[str]],
 ) -> list[list[str]]:
-    """Remove any string that appears in `remove_values` from the list,
-    when that string appears in the roles index."""
+    """Remove any strings from `remove_values` that appear in the roles index."""
     return removeMatchingSublistPairs(
         remove_values,
         original,
@@ -56,8 +57,11 @@ def _remapPeople(
     replacements: dict[str, str],
     original: list[list[str]],
 ) -> list[list[str]]:
-    """Remap any string that appears as a key in `replacements` from the list,
-    when that string appears in the people index."""
+    """Replaces people index values, for the strings that are keys in replacements.
+
+    Remap any string that appears as a key in `replacements` from the list,
+    when that string appears in the people index.
+    """
     return remapMatchingSublistPairs(
         replacements,
         original,
@@ -69,8 +73,11 @@ def _remapRoles(
     replacements: dict[str, str],
     original: list[list[str]],
 ) -> list[list[str]]:
-    """Remap any string that appears as a key in `replacements` from the list,
-    when that string appears in the roles index."""
+    """Replaces role index values, for the strings that are keys in replacements.
+
+    Remap any string that appears as a key in `replacements` from the list,
+    when that string appears in the role index.
+    """
     return remapMatchingSublistPairs(
         replacements,
         original,
@@ -82,8 +89,7 @@ type MapFunc[L: Sized] = Callable[[L, list[list[str]]], list[list[str]]]
 
 
 class _ActionMapping[L: Sized]:
-    """Private class that is used to define a function that should
-    transform the data stored in a tag, in some way."""
+    """Private class that calls a function to transform the data stored in a tag."""
 
     def __init__(
         self,
@@ -91,7 +97,8 @@ class _ActionMapping[L: Sized]:
         items: L,
         func: MapFunc[L],
     ) -> None:
-        """
+        """Creates an ActionMapping.
+
         Args:
             widget: Widget that displays the data that should be mapped
             items: Any data structure that is used by `func` to transform the data
@@ -150,7 +157,16 @@ AllowedActionMapping = (
 
 
 class EditBulkPeopleWidget(EditBulkAbstractGroupWidget):
+    """Widget used for bulk editing values that are [role, person] pairs."""
+
     def __init__(self, parent: QWidget, data: list[list[str]], tag: SongTag) -> None:
+        """Create an EditBulkPeopleWidget.
+
+        Args:
+            parent: The widget that this widget should be displayed on.
+            data: The data to be displayed.
+            tag: The field in the song that should be updated.
+        """
         super().__init__(parent, tag)
 
         self.items: list[tuple[str, str]] = [(role, person) for role, person in data]
@@ -240,7 +256,7 @@ class EditBulkPeopleWidget(EditBulkAbstractGroupWidget):
         items: L,
         func: MapFunc[L],
     ) -> _ActionMapping[L]:
-        """Creates a mapping based on the items sent, and the function"""
+        """Creates a mapping based on the items sent, and the function."""
         return _ActionMapping(self, items, func)
 
     @override

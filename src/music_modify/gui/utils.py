@@ -1,5 +1,4 @@
-"""Module that contains utility functions that are specific to GUI management,
-but that are used in multiple places."""
+"""Module that contains utility functions that are specific to GUI management."""
 
 from typing import cast
 
@@ -21,8 +20,10 @@ PEOPLE_TAG_WIDTH = 150
 
 def updateTableView(table_view: QTableView, repository: SongRepository) -> None:
     """Updates the appearance of the table view.
+
     Sets the column widths to the max for tags with one field,
-    and the column width to `PEOPLE_TAG_WIDTH` for tags with multiple fields."""
+    and the column width to `PEOPLE_TAG_WIDTH` for tags with multiple fields.
+    """
     if len(repository) == 0:
         return
 
@@ -34,7 +35,7 @@ def updateTableView(table_view: QTableView, repository: SongRepository) -> None:
 
 
 def clearLayout(layout: QLayout) -> None:
-    """Removes all widgets from the given layout"""
+    """Removes all widgets from the given layout."""
     while layout.count() > 0:
         item = layout.takeAt(0)
         if cast(QLayout | None, item.layout()) is not None:
@@ -69,10 +70,17 @@ def createTab(
     tab_widget: QTabWidget,
     layout_type: type[QLayout],
 ) -> QLayout:
-    """Create a tab on a tab widget that contains a scoll area
-    that holds a widget with the layout type sent.
+    """Create a tab on a tab widget.
 
-    Returns the created layout.
+    This tab contains a scroll area that holds a widget with the layout type sent.
+
+    Args:
+        name: The name to be displayed for this tab
+        tab_widget: The widget to add the tab to
+        layout_type: The way that child widgets should be displayed
+
+    Returns:
+        The layout that is created.
     """
     page = QWidget()
     layout = layout_type()

@@ -20,8 +20,7 @@ class RowDirection(Enum):
 
 
 class EditButton(Flag):
-    """The buttons that can possibly appear in an EditWidget,
-    depending on its type."""
+    """The buttons that can possibly appear in an EditWidget, depending on its type."""
 
     Up = auto()
     Down = auto()
@@ -39,7 +38,7 @@ class NavDirection(Enum):
 
 
 class PairIndex(Enum):
-    """Index for People and Roles, rather than hardcoding this everywhere"""
+    """Index for People and Roles, rather than hardcoding this everywhere."""
 
     Role = 0
     Person = 1

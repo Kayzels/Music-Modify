@@ -1,5 +1,8 @@
-"""Module that contains the widget that is used for bulk editing data,
-when the tag can contain multiple values, but these values are not pairs."""
+"""Module that defines an EditBulkMultipleWidget.
+
+This widget is used for bulk editing data, when the tag can contain multiple values,
+but these values are not pairs.
+"""
 
 import logging
 from typing import Unpack, cast, override
@@ -41,11 +44,16 @@ class _MultipleLineEdit(QLineEdit):
 
 
 class EditBulkMultipleWidget(EditBulkAbstractGroupWidget):
-    """Widget that is used for bulk editing data,
-    when the tag can contain multiple values,
-    but these values are not pairs."""
+    """Widget used for bulk editing data when the tag contains multiple values."""
 
     def __init__(self, parent: QWidget, data: set[str], tag: SongTag) -> None:
+        """Create a widget for bulk editing multiple value keys.
+
+        Args:
+            parent: The widget that this widget shouldbe displayed on.
+            data: The data to be displayed.
+            tag: The field in the song that should be updated.
+        """
         super().__init__(parent, tag)
 
         self.items: tuple[str, ...] = tuple(data)

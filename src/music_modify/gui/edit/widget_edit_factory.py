@@ -1,5 +1,8 @@
-"""Module that defines a class for generating widgets
-for editing metadata, based on the format of the data."""
+"""Module that defines an EditWidgetFactory.
+
+This class is used to generate widgets for editing metadata,
+based on the format of the data.
+"""
 
 import copy
 from typing import TypeVar, cast

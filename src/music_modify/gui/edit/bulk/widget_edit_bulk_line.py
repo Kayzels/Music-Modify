@@ -1,5 +1,7 @@
-"""Module that contains the widget that is used for bulk editing
-single value keys."""
+"""Module that defines an EditBulkLineWidget.
+
+This widget is used for bulk editing single value keys.
+"""
 
 import logging
 from typing import override
@@ -30,6 +32,14 @@ class EditBulkLineWidget(EditBulkAbstractWidget):
         *,
         in_all: bool = False,
     ) -> None:
+        """Create a widget for bulk editing single value keys.
+
+        Args:
+            parent: The widget that this widget should be displayed on.
+            data: The data to be displayed.
+            tag: The field in the song that should be updated.
+            in_all: Whether the data appears in all songs being edited or not.
+        """
         super().__init__(parent, tag)
 
         self.items: tuple[str, ...] = tuple(data)
@@ -74,9 +84,11 @@ class EditBulkLineWidget(EditBulkAbstractWidget):
     @override
     def updateTag(self, songs: list[Song]) -> bool:
         """Update the value in all the songs sent for the tag this widget displays.
+
         If apply is selected, set the data to have the value in the main widget.
         If clear is selected, clear the data for that tag.
-        Returns whether the songs have been updated or not."""
+        Returns whether the songs have been updated or not.
+        """
         should_apply = self.apply_checkbox.isChecked()
         should_clear = self.clear_checkbox.isChecked()
 

@@ -1,5 +1,8 @@
-"""Module that defines a widget that is used to edit metadata
-that is can be contained in a single line (i.e. a single value)."""
+"""Module that defines an EditLineWidget.
+
+This widget is used to edit metadata
+that is can be contained in a single line (i.e. a single value).
+"""
 
 import logging
 from typing import cast, override
@@ -15,6 +18,12 @@ class EditLineWidget(EditAbstractWidget[str]):
     """Displays data in a line edit, used when the value is a single string."""
 
     def __init__(self, parent: QWidget, data: str | None) -> None:
+        """Create an EditLineWidget.
+
+        Args:
+            parent: The widget that this widget should be displayed on.
+            data: The data to be displayed on this widget.
+        """
         super().__init__(parent, data)
 
         self._original_data: str

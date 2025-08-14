@@ -1,5 +1,4 @@
-"""Module that defines the widget that is used
-to display (role, person) pairs."""
+"""Module that defines the widget that is used to display (role, person) pairs."""
 
 import copy
 import logging
@@ -45,8 +44,9 @@ class _DragTableWidget(QTableWidget):
         self.adjustColumnWidths()
 
     def adjustColumnWidths(self, length: int | None = None) -> None:
-        """Adjusts the widths of the table to the specified length,
-        except for the last column, which is stretched.
+        """Adjusts the widths of the table to the specified length.
+
+        Except for the last column, which is stretched.
         """
         if self.rowCount() <= 1 or length == 0:
             column_width = int(self.width() / self.columnCount())
@@ -59,8 +59,9 @@ class _DragTableWidget(QTableWidget):
 
 
 class EditTableWidget(EditAbstractGroupWidget[SongTableData]):
-    """Displays data in a table, used for People data,
-    which is stored in the form [role, person].
+    """Displays data in a table, used for People data.
+
+    This is stored in the form [role, person].
     """
 
     def __init__(
@@ -69,7 +70,8 @@ class EditTableWidget(EditAbstractGroupWidget[SongTableData]):
         data: SongTableData | None,
         labels: list[str] | None = None,
     ) -> None:
-        """
+        """Creates an EditTableWidget.
+
         Args:
             parent: The widget that should own this widget
             data: The information currently present for the tag

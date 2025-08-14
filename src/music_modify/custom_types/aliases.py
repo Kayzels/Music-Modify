@@ -1,5 +1,6 @@
-"""Aliases for commonly used types,
-mainly for the different forms song metadata can take.
+"""Aliases for commonly used types.
+
+Mainly for the different forms song metadata can take.
 """
 
 # noinspection PyProtectedMember

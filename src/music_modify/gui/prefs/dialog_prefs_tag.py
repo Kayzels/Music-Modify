@@ -1,5 +1,7 @@
-"""Module that defines the dialog that configures which tags should be editable
-and displayed."""
+"""Module that defines a PrefsTagDialog.
+
+This dialog configures which tags should be editable and displayed.
+"""
 
 import copy
 import logging
@@ -23,11 +25,18 @@ logger = logging.getLogger(__name__)
 
 
 class PrefsTagDialog(PrefsAbstractDialog, Ui_PrefsTagDialog):
-    """Allows the user to edit the metadata tags that are edited
+    """Dialog for editing metadata tags.
+
+    Allows the user to edit the metadata tags that are edited
     and displayed for songs.
     """
 
     def __init__(self, parent: QWidget | None = None) -> None:
+        """Create a PrefsTagDialog.
+
+        Args:
+            parent: The widget that this dialog should be displayed on.
+        """
         super().__init__(parent)
         self.setWindowTitle("Edit Tags")
 
@@ -94,9 +103,7 @@ class PrefsTagDialog(PrefsAbstractDialog, Ui_PrefsTagDialog):
                 self.model.removeTag(row)
 
     def moveTagsUp(self) -> None:
-        """Moves all selected tags up, which will change their order
-        in the main table.
-        """
+        """Moves all selected tags up, changing their order in the main table."""
         selected_rows = sorted(getSelectedRows(self.tag_table))
         if not selected_rows or selected_rows[0] == 0:
             return  # Can't move the first row up
@@ -105,9 +112,7 @@ class PrefsTagDialog(PrefsAbstractDialog, Ui_PrefsTagDialog):
             self.model.moveTag(row, row - 1)
 
     def moveTagsDown(self) -> None:
-        """Moves all selected tags down, which will change their order
-        in the main table.
-        """
+        """Moves all selected tags down, changing their order in the main table."""
         selected_rows = sorted(getSelectedRows(self.tag_table), reverse=True)
         if not selected_rows or selected_rows[0] == self.model.rowCount() - 1:
             return  # Can't move the last row down
@@ -121,10 +126,6 @@ class PrefsTagDialog(PrefsAbstractDialog, Ui_PrefsTagDialog):
 
     @override
     def updateSettings(self) -> None:
-        """A slot that should be called from the parent widget
-        when the dialog is accepted.
-        Changes the values in the settings file to match the ones set in the dialog.
-        """
         logger.info("Called update settings inside tag dialog")
         prefs.settings.info_tags = self.model.tags
         self.settings_updated.emit()

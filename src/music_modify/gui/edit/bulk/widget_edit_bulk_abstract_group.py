@@ -1,5 +1,8 @@
-"""Module that contains the abstract class that defines all functionality
-that widgets that display grouped data should have."""
+"""Module that defines an EditBulkAbstractGroupWidget.
+
+This is the abstract class that defines all functionality
+that widgets that display grouped data should have.
+"""
 
 from abc import ABC, abstractmethod
 from typing import override
@@ -13,7 +16,21 @@ from .widget_edit_bulk_abstract import EditBulkAbstractWidget
 
 
 class EditBulkAbstractGroupWidget(EditBulkAbstractWidget, ABC):
+    """Defines the functionality for widgets that display grouped data.
+
+    Attributes:
+        group_box: The checkable box that the widget should be contained in.
+        clear_checkbox: A checkbox that, when checked, clears the data.
+        form_container: The container that holds the form that holds the main widget.
+    """
+
     def __init__(self, parent: QWidget, tag: SongTag) -> None:
+        """Creates a widget for bulk editing on the `parent` widget.
+
+        Args:
+            parent: The widget that this widget should be displayed on.
+            tag: The tag that the data should be displayed for.
+        """
         super().__init__(parent, tag)
 
         self.group_box: QGroupBox

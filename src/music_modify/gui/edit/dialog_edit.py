@@ -38,6 +38,13 @@ class EditDialog(EditAbstractDialog):
         repository: SongRepository,
         rows: list[int],
     ) -> None:
+        """Creates a dialog for editing songs individually.
+
+        Args:
+            parent: The widget that the dialog should be displayed on.
+            repository: The list of songs being managed by the app.
+            rows: The indexes of the songs to be edited in the `repository`.
+        """
         super().__init__(parent, repository, rows)
 
         self.current_index: int = 0
@@ -114,8 +121,10 @@ class EditDialog(EditAbstractDialog):
         self.resize(600, 300)
 
     def _createWidgetType(self, tag: SongTag, data: SongEditData | None) -> QWidget:
-        """Creates the widget of the required type based on the tag and data,
-        and links the signals needed for updating and resetting it."""
+        """Creates the widget of the required type based on the tag and data.
+
+        It also links the signals needed for updating and resetting it.
+        """
         widget: EditAbstractWidgetType = EditWidgetFactory.createWidget(self, tag, data)
 
         @Slot()
@@ -132,9 +141,10 @@ class EditDialog(EditAbstractDialog):
 
         @Slot()
         def resetValue() -> None:
-            """Clears the value if it's the same as the original,
-            and that value is stored in the song.
-            Otherwise, stores the change."""
+            """Clears value if it's the same as the original, and currently in the song.
+
+            Otherwise, stores the change.
+            """
             # This is needed because after a user clicks Apply,
             # the value stored in the song is now no longer the same as the original,
             # so we can't just clear it.
@@ -223,16 +233,15 @@ class EditDialog(EditAbstractDialog):
         self.changed_values = {}
 
     def resetSongInfo(self) -> None:
-        """Sets the values for the song back to the original ones
-        before the changes occurred.
-        """
+        """Sets values for the song back to original ones before changes occurred."""
         widgets = self.findChildren(EditAbstractWidget)
         for widget in widgets:
             widget.reset()
 
     def _getSong(self) -> Song | None:
-        """Gets the song based on the index of the list of indexes,
-        or None if not valid.
+        """Gets the song based on the index of the list of indexes.
+
+        Returns `None` if not valid.
         """
         row = self.rows[self.current_index]
         song_info = self.repository.getSong(row)
@@ -242,9 +251,7 @@ class EditDialog(EditAbstractDialog):
         return song_info
 
     def _switchButtonState(self) -> None:
-        """Enable or disable the next and previous buttons based on
-        where we are in the list.
-        """
+        """Toggles the next and previous buttons based on where we are in the list."""
         if not hasattr(self, "next_button") or not hasattr(self, "previous_button"):
             logger.warning("Missing next or previous button in edit dialog")
             return
@@ -253,7 +260,9 @@ class EditDialog(EditAbstractDialog):
         self.next_button.setEnabled(self.current_index != len(self.rows) - 1)
 
     def showSongInDirection(self, nav_direction: NavDirection) -> None:
-        """Saves the current changes to the song,
+        """Saves changes and displays next song in given direction.
+
+        Saves the current changes to the song,
         and displays the next or previous song from the selection
         based on the direction.
         """

@@ -1,5 +1,8 @@
-"""Module that contains the abstract class that defines the functionality
-that all widgets on a BulkEditDialog should have."""
+"""Module that defines a EditBulkAbstractWidget.
+
+This is the abstract class that defines the functionality
+that all widgets on a BulkEditDialog should have.
+"""
 
 from abc import ABC, abstractmethod
 import logging
@@ -13,7 +16,15 @@ logger = logging.getLogger(__name__)
 
 
 class EditBulkAbstractWidget(QWidget, ABC, metaclass=ABCQMeta):
+    """Defines the functionality that all widgets on a BulkEditDialog should have."""
+
     def __init__(self, parent: QWidget, tag: SongTag) -> None:
+        """Creates a widget on `parent` for displaying the data in `tag`.
+
+        Args:
+            parent: The widget that this widget should be displayed on.
+            tag: The field in the song that this widget displays the data for.
+        """
         super().__init__(parent)
 
         self._tag: SongTag = tag

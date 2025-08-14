@@ -77,13 +77,14 @@ select = [
   "C901",
   "FURB",
   "RUF",
+  "D",
 ]
 ignore = ["N802", "TC006"]
 
 [tool.ruff.lint.per-file-ignores]
-"test*.py" = ["S101", "B011"]
+"test*.py" = ["S101", "B011", "D"]
 "**.pyi" = ["A", "COM812"]
-"widgets_complete.py" = ["PLC", "PLR", "C901"]
+"widgets_complete.py" = ["PLC", "PLR", "C901", "D"]
 
 [tool.ruff.lint.pycodestyle]
 max-doc-length = 88
@@ -92,3 +93,6 @@ max-line-length = 100
 
 [tool.ruff.lint.isort]
 force-sort-within-sections = true
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"

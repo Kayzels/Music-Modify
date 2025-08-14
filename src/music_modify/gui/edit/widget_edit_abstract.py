@@ -1,5 +1,7 @@
-"""Module that defines an abstract class, that is used to
-define the general behaviour of a widget inside an EditDialog.
+"""Module that defines an EditAbstractWidget.
+
+This is an abstract class, that is used to define the general behaviour of a widget
+inside an EditDialog.
 """
 
 from abc import ABC, abstractmethod
@@ -18,9 +20,7 @@ logger = logging.getLogger(__name__)
 
 
 class EditAbstractWidget[ValueT: SongEditData](QWidget, ABC, metaclass=ABCQMeta):
-    """An abstract class that defines the desired behaviour for a widget
-    inside an EditDialog.
-    """
+    """Defines the required functionality for a widget inside an EditDialog."""
 
     value_updated: Signal = Signal()
     "Signal that indicates that a value has changed to a new value."
@@ -29,6 +29,12 @@ class EditAbstractWidget[ValueT: SongEditData](QWidget, ABC, metaclass=ABCQMeta)
     it had when the widget was initialised."""
 
     def __init__(self, parent: QWidget, data: ValueT | None = None) -> None:
+        """Creates an EditAbstractWidget.
+
+        Args:
+            parent: The widget that this widget should be displayed on.
+            data: The data to be displayed.
+        """
         super().__init__(parent)
         self._initValue(data)
         self._setMainLayout()
@@ -61,9 +67,7 @@ class EditAbstractWidget[ValueT: SongEditData](QWidget, ABC, metaclass=ABCQMeta)
     @property
     @abstractmethod
     def value(self) -> ValueT:
-        """The value displayed and stored inside the widget,
-        depending on the data type.
-        """
+        """The value displayed and stored inside the widget, based on the data type."""
 
     @value.setter
     def value(self, value: ValueT) -> None:
@@ -93,8 +97,7 @@ class EditAbstractWidget[ValueT: SongEditData](QWidget, ABC, metaclass=ABCQMeta)
         buttons: EditButton = EditButton.Reset | EditButton.Clear,
         direction: QBoxLayout.Direction = QBoxLayout.Direction.LeftToRight,
     ) -> QBoxLayout:
-        """Creates a layout with the designated button types
-        in the desired orientation.
+        """Creates a layout with the designated button types in the desired orientation.
 
         Args:
             buttons: The set of button types that should be displayed

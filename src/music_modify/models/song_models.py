@@ -1,6 +1,7 @@
 """Module that governs how the metadata related to songs should be managed.
 
-Defines a `SongTableModel` and a `SongTableProxyModel`."""
+Defines a `SongTableModel`.
+"""
 
 from typing import Final, override
 
@@ -8,7 +9,6 @@ from PySide6.QtCore import (
     QAbstractTableModel,
     QModelIndex,
     QPersistentModelIndex,
-    QSortFilterProxyModel,
     Qt,
 )
 
@@ -29,6 +29,11 @@ class SongTableModel(QAbstractTableModel):
     empty_message: Final[str] = "Files will show here when added. Drag files here."
 
     def __init__(self, repository: SongRepository) -> None:
+        """Create a new model for the songs that should be managed.
+
+        Args:
+            repository: The list of songs that can be edited.
+        """
         super().__init__()
         self.repository: SongRepository = repository
         self.repository.songs_updated.connect(self.layoutChanged.emit)
@@ -89,25 +94,3 @@ class SongTableModel(QAbstractTableModel):
                 return f"{section + 1}"
             return None
         return None
-
-
-class SongTableProxyModel(QSortFilterProxyModel):
-    """Model used to show selected songs being edited"""
-
-    def __init__(self) -> None:
-        super().__init__()
-        self.model_indexes: list[QModelIndex] = []
-        self.selected_rows: list[int] = []
-
-    @override
-    def filterAcceptsRow(
-        self,
-        source_row: int,
-        _: QModelIndex | QPersistentModelIndex = qt_types.Q_MODEL_INDEX,
-    ) -> bool:
-        return source_row in self.selected_rows
-
-    def changeModelIndexes(self, model_indexes: list[QModelIndex]) -> None:
-        self.model_indexes = model_indexes
-        self.selected_rows = [model_index.row() for model_index in self.model_indexes]
-        self.invalidateFilter()

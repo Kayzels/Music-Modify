@@ -1,5 +1,7 @@
-"""Module that defines the dialog that allows
-editing the tags of multiple songs at the same time."""
+"""Module that defines an EditBulkDialog.
+
+This dialog allows editing the tags of multiple songs at the same time.
+"""
 
 import copy
 import logging
@@ -50,8 +52,12 @@ def _addSingleValues(
     *,
     in_all: bool = True,
 ) -> tuple[set[str], bool]:
-    """Get the values that appear for all single tag values,
-    and whether the value appears in every song, or not."""
+    """Finds the values in all tags, and whether it appears in every song.
+
+    Populates `existing` with the values that are not present,
+    and returns a tuple that has the values, and whether the value
+    was in every song or not.
+    """
     if value is None:
         return existing, False
     if len(existing) > 0 and value not in existing:
@@ -72,6 +78,13 @@ class EditBulkDialog(EditAbstractDialog):
         repository: SongRepository,
         rows: list[int],
     ) -> None:
+        """Create a dialog for bulk editing songs.
+
+        Args:
+            parent: The widget that the dialog should be displayed on
+            repository: The list of songs being managed
+            rows: The indexes of the songs to edit, in the `repository`
+        """
         super().__init__(parent, repository, rows)
 
         self.songs: list[Song] = [
@@ -165,7 +178,6 @@ class EditBulkDialog(EditAbstractDialog):
     @override
     def updateSongInfo(self) -> None:
         """Update all selected songs to have the changed data."""
-
         changed: bool = False
         widgets = self.findChildren(EditBulkAbstractWidget)
         for widget in widgets:

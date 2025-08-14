@@ -1,5 +1,4 @@
-"""Module that defines the model that is used for completion
-in widgets, when entering text."""
+"""Module that defines the model that is used for completion in widgets."""
 
 # Adapted from https://github.com/kovidgoyal/calibre/blob/master/src/calibre/gui2/complete2.py
 
@@ -30,6 +29,13 @@ class CompleteModel(QAbstractListModel):
         *,
         strip_completion_entries: bool = True,
     ) -> None:
+        """Creates a model that can be used for completion.
+
+        Args:
+            parent: The widget that the model should be used for
+            strip_completion_entries: Whether the entries should keep or remove
+                leading and trailing whitespace
+        """
         super().__init__(parent)
 
         self.strip_completion_entries: bool = strip_completion_entries

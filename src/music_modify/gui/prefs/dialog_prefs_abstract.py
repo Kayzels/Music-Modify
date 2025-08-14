@@ -1,5 +1,8 @@
-"""Module that defines an abstract class for defining the shared functionality
-of all preference dialogs."""
+"""Module that defines a PrefsAbstractDialog.
+
+This is an abstract class for defining the shared functionality
+of all preference dialogs.
+"""
 
 from abc import ABC, abstractmethod
 import logging
@@ -14,9 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 class PrefsAbstractDialog(QDialog, ABC, metaclass=ABCQMeta):
-    """An abstract class that specifies the required functionality for all
-    child preference dialogs.
-    """
+    """Defines the required functionality for all child preference dialogs."""
 
     settings_updated: Signal = Signal()
     "Signal that is emitted whenever any setting is changed."
@@ -26,6 +27,11 @@ class PrefsAbstractDialog(QDialog, ABC, metaclass=ABCQMeta):
         """Set up the display of the dialog."""
 
     def __init__(self, parent: QWidget | None = None) -> None:
+        """Creates a dialog for managing preferences.
+
+        Args:
+            parent: The widget that the dialog should be displayed on.
+        """
         self.button_box: QDialogButtonBox | None = None
         QDialog.__init__(self, parent)
         self.setupUi(self)
@@ -33,8 +39,7 @@ class PrefsAbstractDialog(QDialog, ABC, metaclass=ABCQMeta):
         self.accepted.connect(self.updateSettings)
 
     def _setButtonBoxConnections(self) -> None:
-        """Creates the connection between the signals from the buttons in the button box
-        and the slot in the class for that button."""
+        """Creates connections between button box signals and slots."""
         if not self.button_box:
             warning = "Button Box not found or invalid after calling setupUi()."
             logger.warning(warning)
@@ -50,9 +55,9 @@ class PrefsAbstractDialog(QDialog, ABC, metaclass=ABCQMeta):
 
     @abstractmethod
     def updateSettings(self) -> None:
-        """A slot that should be called from the parent widget
-        when the dialog is accepted.
-        Changes the values in the settings file to match the ones set in the dialog.
+        """Changes the values in the settings file to match the ones set in the dialog.
+
+        A slot that should be called from the parent widget when the dialog is accepted.
         """
 
     @abstractmethod

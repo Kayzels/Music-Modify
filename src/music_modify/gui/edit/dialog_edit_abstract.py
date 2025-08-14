@@ -1,5 +1,8 @@
-"""Module that defines an abstract dialog for editing metadata,
-which defines the general functionality all child dialogs should have."""
+"""Module that defines an EditAbstractDialog.
+
+This dialog is used for editing metadata,
+and defines the general functionality all child dialogs should have.
+"""
 
 from abc import ABC, abstractmethod
 
@@ -11,8 +14,7 @@ from music_modify.models.song_repository import SongRepository
 
 
 class EditAbstractDialog(QDialog, ABC, metaclass=ABCQMeta):
-    """An abstract class that defines the general functionality
-    that all dialogs that are used for editing metadata should have."""
+    """Defines the general functionality for dialogs used to edit metadata."""
 
     info_updated: Signal = Signal()
     """Signal that is emitted whenever any value being displayed
@@ -24,6 +26,13 @@ class EditAbstractDialog(QDialog, ABC, metaclass=ABCQMeta):
         repository: SongRepository,
         rows: list[int],
     ) -> None:
+        """Creates an EditAbstractDialog.
+
+        Args:
+            parent: The widget that this dialog should be displayed on.
+            repository: The list of songs that is being managed.
+            rows: The indexes of the songs in the `repository` that should be edited.
+        """
         super().__init__(parent)
 
         self.setModal(True)

@@ -1,4 +1,5 @@
 """Package for custom types that are used.
+
 Not called `types`, to prevent shadowing the builtin library.
 """
 
