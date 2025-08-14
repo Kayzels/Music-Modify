@@ -5,7 +5,6 @@ define the general behaviour of a widget inside an EditDialog.
 from abc import ABC, abstractmethod
 import copy
 import logging
-from typing import Generic, TypeVar
 
 from PySide6.QtCore import Signal
 from PySide6.QtGui import QIcon
@@ -17,10 +16,8 @@ from music_modify.gui.meta import ABCQMeta
 
 logger = logging.getLogger(__name__)
 
-ValueT = TypeVar("ValueT", bound=SongEditData)
 
-
-class EditAbstractWidget(QWidget, Generic[ValueT], ABC, metaclass=ABCQMeta):
+class EditAbstractWidget[ValueT: SongEditData](QWidget, ABC, metaclass=ABCQMeta):
     """An abstract class that defines the desired behaviour for a widget
     inside an EditDialog.
     """

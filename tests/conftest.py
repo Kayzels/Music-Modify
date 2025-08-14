@@ -3,7 +3,6 @@ import os
 from os import PathLike
 from pathlib import Path
 import tempfile
-from typing import Any
 
 from PySide6.QtCore import QSettings
 import pytest
@@ -31,7 +30,7 @@ def asset_folder() -> PathLike[str]:
 
 
 @pytest.fixture
-def temp_settings() -> Generator[Settings, Any, None]:  # pyright: ignore[reportExplicitAny]
+def temp_settings() -> Generator[Settings]:
     # Create a temp file and keep it until the fixture is done
     fd, path = tempfile.mkstemp()
     os.close(fd)

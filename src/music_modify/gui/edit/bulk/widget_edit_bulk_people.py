@@ -1,9 +1,9 @@
 """Moduole that contains the widget that is used for bulk editing data,
 when the tag contains (role, person) pairs."""
 
-from collections.abc import Sized
+from collections.abc import Callable, Sized
 import logging
-from typing import Callable, Generic, TypeVar, cast, override
+from typing import TypeVar, cast, override
 
 from PySide6.QtWidgets import QFormLayout, QWidget
 
@@ -29,7 +29,7 @@ L = TypeVar("L", bound=Sized)
 MapFunc = Callable[[L, list[list[str]]], list[list[str]]]
 
 
-class _ActionMapping(Generic[L]):
+class _ActionMapping[L: Sized]:
     """Private class that is used to define a function that should
     transform the data stored in a tag, in some way."""
 
@@ -45,7 +45,7 @@ class _ActionMapping(Generic[L]):
             items: Any data structure that is used by `func` to transform the data
             func: A function that transforms a list of pairs, using `items`
         """
-        self.widget: "EditBulkPeopleWidget" = widget
+        self.widget: EditBulkPeopleWidget = widget
         "The widget that displays the data"
         self.tag: SongTag = self.widget.tag
         "The tag that the data should be edited for."

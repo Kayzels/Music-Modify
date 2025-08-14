@@ -1,7 +1,8 @@
 # pyright: reportExplicitAny=false
 
+from collections.abc import Callable
 from types import TracebackType
-from typing import Callable, Self, override
+from typing import Self, override
 
 from _typeshed import Incomplete
 from PySide6.QtCore import Signal

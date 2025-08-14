@@ -3,7 +3,7 @@ in an EditDialog that display groups of values,
 rather than a single value."""
 
 from abc import ABC, abstractmethod
-from typing import Generic, TypeVar, override
+from typing import override
 
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QBoxLayout, QToolButton, QWidget
@@ -14,12 +14,9 @@ from music_modify.gui.meta import ABCQMeta
 
 from .widget_edit_abstract import EditAbstractWidget
 
-ValueG = TypeVar("ValueG", bound=SongListData | SongTableData)
 
-
-class EditAbstractGroupWidget(
+class EditAbstractGroupWidget[ValueG: SongListData | SongTableData](
     EditAbstractWidget[ValueG],
-    Generic[ValueG],
     ABC,
     metaclass=ABCQMeta,
 ):
