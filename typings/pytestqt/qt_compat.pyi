@@ -1,5 +1,3 @@
-# pyright: reportExplicitAny=false
-
 from _typeshed import Incomplete
 
 VersionTuple = ...

@@ -1,5 +1,3 @@
-# pyright: reportExplicitAny=false
-
 from collections.abc import Generator
 from contextlib import contextmanager
 from types import TracebackType

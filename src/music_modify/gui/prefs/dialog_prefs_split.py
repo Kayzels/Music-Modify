@@ -100,9 +100,9 @@ class PrefsSplitDialog(PrefsAbstractDialog, Ui_PrefsSplitDialog):
         logger.debug("Restore defaults called for split")
 
         split_defaults: dict[QLineEdit, str] = {
-            self.line_edit_split_text_entered: prefs.settings.default_split_text_entered,  # noqa: E501
+            self.line_edit_split_text_entered: prefs.settings.default_split_text_entered,
             self.line_edit_split_values_at: prefs.settings.default_split_values_at,
-            self.line_edit_split_values_display: prefs.settings.default_split_values_display,  # noqa: E501
+            self.line_edit_split_values_display: prefs.settings.default_split_values_display,
         }
 
         for line_edit, text in split_defaults.items():

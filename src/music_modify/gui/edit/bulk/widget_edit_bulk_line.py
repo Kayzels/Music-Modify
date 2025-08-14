@@ -59,10 +59,10 @@ class EditBulkLineWidget(EditBulkAbstractWidget):
         # Ensure the two checkboxes are mutually exclusive.
         # Needs to be done manually, to ensure deselection is possible.
         self.apply_checkbox.stateChanged.connect(
-            lambda state: self._checkboxStateChanged(state, self.clear_checkbox),  # pyright: ignore[reportUnknownLambdaType]
+            lambda state: self._checkboxStateChanged(state, self.clear_checkbox),
         )
         self.clear_checkbox.stateChanged.connect(
-            lambda state: self._checkboxStateChanged(state, self.apply_checkbox),  # pyright: ignore[reportUnknownLambdaType]
+            lambda state: self._checkboxStateChanged(state, self.apply_checkbox),
         )
 
     @staticmethod

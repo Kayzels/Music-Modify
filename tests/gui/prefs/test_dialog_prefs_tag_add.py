@@ -27,7 +27,7 @@ def createDialog(qtbot: QtBot, monkeypatch: pytest.MonkeyPatch) -> PrefsTagAddDi
     monkeypatch.setattr(
         QMessageBox,
         "warning",
-        lambda *args, **kwargs: QMessageBox.StandardButton.Ok,  # pyright: ignore[reportUnknownLambdaType]
+        lambda *args, **kwargs: QMessageBox.StandardButton.Ok,
     )
 
     return dialog

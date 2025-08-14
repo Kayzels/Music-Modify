@@ -1,5 +1,3 @@
-# pyright: reportExplicitAny=false
-
 from collections.abc import Callable, Generator
 import contextlib
 import pathlib

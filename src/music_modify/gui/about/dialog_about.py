@@ -3,7 +3,7 @@ import logging
 import platform
 
 import mutagen
-import PySide6  # pyright: ignore[reportMissingTypeStubs]
+import PySide6
 from PySide6.QtCore import QCoreApplication
 from PySide6.QtWidgets import QApplication, QDialog, QWidget
 

@@ -70,7 +70,7 @@ def _patchDialogs(
     monkeypatch.setattr(
         QMessageBox,
         "warning",
-        lambda *args, **kwargs: QMessageBox.StandardButton.Yes,  # pyright: ignore[reportUnknownLambdaType]
+        lambda *args, **kwargs: QMessageBox.StandardButton.Yes,
     )
     monkeypatch.setattr(
         "music_modify.gui.prefs.dialog_prefs_tag.PrefsTagAddDialog",

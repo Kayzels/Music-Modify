@@ -5,5 +5,8 @@
   "reportCallInDefaultInitializer": false,
   "reportPrivateImportUsage": false,
   "reportUnknownVariableType": false,
-  "reportUnknownArgumentType": false
+  "reportUnknownArgumentType": false,
+  "reportExplicitAny": false,
+  "reportMissingTypeStubs": false,
+  "reportUnknownLambdaType": false
 }
