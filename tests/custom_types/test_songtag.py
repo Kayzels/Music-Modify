@@ -1,9 +1,23 @@
+from typing import TypedDict
+
 from mutagen.id3 import ID3
 import pytest
 
 from music_modify.custom_types import constants
 from music_modify.custom_types.enums import TagType
 from music_modify.custom_types.songtag import SongTag
+
+
+class _TestTag(TypedDict):
+    single: SongTag
+    multiple: SongTag
+    people: SongTag
+
+
+class _TestTagValue(TypedDict):
+    single: list[str]
+    multiple: list[str]
+    people: list[list[str]]
 
 
 @pytest.fixture
@@ -22,6 +36,19 @@ def people_value() -> list[list[str]]:
 
 
 @pytest.fixture
+def tag_values(
+    single_value: list[str],
+    multiple_value: list[str],
+    people_value: list[list[str]],
+) -> _TestTagValue:
+    return {
+        "single": single_value,
+        "multiple": multiple_value,
+        "people": people_value,
+    }
+
+
+@pytest.fixture
 def single_tag() -> SongTag:
     return SongTag(id3_key="TIT2", display_name="Title")
 
@@ -36,6 +63,19 @@ def people_tag() -> SongTag:
     return SongTag(id3_key="TIPL", display_name="Involved People")
 
 
+@pytest.fixture
+def tag_types(
+    single_tag: SongTag,
+    multiple_tag: SongTag,
+    people_tag: SongTag,
+) -> _TestTag:
+    return {
+        "single": single_tag,
+        "multiple": multiple_tag,
+        "people": people_tag,
+    }
+
+
 def test_id3_key(single_tag: SongTag) -> None:
     assert single_tag.id3_key == "TIT2"
 
@@ -44,41 +84,29 @@ def test_display_name(single_tag: SongTag) -> None:
     assert single_tag.display_name == "Title"
 
 
-def test_frame_type(
-    single_tag: SongTag,
-    multiple_tag: SongTag,
-    people_tag: SongTag,
-) -> None:
-    assert single_tag.frame_type == TagType.Text
-    assert multiple_tag.frame_type == TagType.Text
-    assert people_tag.frame_type == TagType.People
+def test_frame_type(tag_types: _TestTag) -> None:
+    assert tag_types["single"].frame_type == TagType.Text
+    assert tag_types["multiple"].frame_type == TagType.Text
+    assert tag_types["people"].frame_type == TagType.People
 
 
-def test_allow_multiple(
-    single_tag: SongTag,
-    multiple_tag: SongTag,
-    people_tag: SongTag,
-) -> None:
-    assert not single_tag.allow_multiple
-    assert multiple_tag.allow_multiple
-    assert not people_tag.allow_multiple
+def test_allow_multiple(tag_types: _TestTag) -> None:
+    assert not tag_types["single"].allow_multiple
+    assert tag_types["multiple"].allow_multiple
+    assert not tag_types["people"].allow_multiple
 
 
-def test_len(single_tag: SongTag, multiple_tag: SongTag, people_tag: SongTag) -> None:
-    assert len(single_tag) == 1
-    assert len(multiple_tag) == 1
-    assert len(people_tag) == constants.PEOPLE_COL_COUNT
+def test_len(tag_types: _TestTag) -> None:
+    assert len(tag_types["single"]) == 1
+    assert len(tag_types["multiple"]) == 1
+    assert len(tag_types["people"]) == constants.PEOPLE_COL_COUNT
 
 
-def test_hasTag(
-    single_tag: SongTag,
-    multiple_tag: SongTag,
-    people_tag: SongTag,
-) -> None:
+def test_hasTag(tag_types: _TestTag) -> None:
     song = ID3()
-    assert not single_tag.hasTag(song)
-    assert not multiple_tag.hasTag(song)
-    assert not people_tag.hasTag(song)
+    assert not tag_types["single"].hasTag(song)
+    assert not tag_types["multiple"].hasTag(song)
+    assert not tag_types["people"].hasTag(song)
 
 
 def test_generateFrame_hasTag(single_tag: SongTag) -> None:
@@ -88,21 +116,11 @@ def test_generateFrame_hasTag(single_tag: SongTag) -> None:
     assert single_tag.hasTag(song)
 
 
-def test_setTag(
-    single_tag: SongTag,
-    multiple_tag: SongTag,
-    people_tag: SongTag,
-    single_value: list[str],
-    multiple_value: list[str],
-    people_value: list[list[str]],
-) -> None:
+def test_setTag(tag_types: _TestTag, tag_values: _TestTagValue) -> None:
     song = ID3()
-    single_tag.setTag(song, single_value)
-    assert single_tag.getTag(song) == single_value
-    multiple_tag.setTag(song, multiple_value)
-    assert multiple_tag.getTag(song) == multiple_value
-    people_tag.setTag(song, people_value)
-    assert people_tag.getTag(song) == people_value
+    for key in "single", "multiple", "people":
+        tag_types[key].setTag(song, tag_values[key])
+        assert tag_types[key].getTag(song) == tag_values[key]
 
 
 def test_removeTag(single_tag: SongTag, single_value: list[str]) -> None:
@@ -127,21 +145,13 @@ def test_getTag(
     assert multiple_tag.getTag(song) is None
 
 
-def test_getValue(
-    single_tag: SongTag,
-    multiple_tag: SongTag,
-    people_tag: SongTag,
-    single_value: list[str],
-    multiple_value: list[str],
-    people_value: list[list[str]],
-) -> None:
+def test_getValue(tag_types: _TestTag, tag_values: _TestTagValue) -> None:
     song = ID3()
-    assert not single_tag.hasTag(song)
-    single_tag.setTag(song, single_value)
-    assert single_tag.getValue(song) == single_value[0]
-
-    multiple_tag.setTag(song, multiple_value)
-    assert multiple_tag.getValue(song) == multiple_value
-
-    people_tag.setTag(song, people_value)
-    assert people_tag.getValue(song) == people_value
+    for key in "single", "multiple", "people":
+        assert not tag_types[key].hasTag(song)
+        tag_types[key].setTag(song, tag_values[key])
+        assert (
+            tag_types[key].getValue(song) == tag_values[key][0]
+            if key == "single"
+            else tag_values[key]
+        )
