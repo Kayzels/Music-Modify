@@ -232,7 +232,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             if url.toLocalFile().endswith(".mp3"):
                 event.acceptProposedAction()
                 files.append(url.toLocalFile())
-            elif os.path.isdir(url.toLocalFile()):
+            elif Path(url.toLocalFile()).is_dir():
                 event.acceptProposedAction()
                 folders.append(url.toLocalFile())
         if files:

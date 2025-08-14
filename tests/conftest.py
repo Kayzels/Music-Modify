@@ -41,4 +41,4 @@ def temp_settings() -> Generator[Settings, Any, None]:  # pyright: ignore[report
         test_settings = Settings(settings)
         yield test_settings
     finally:
-        os.remove(path)
+        Path(path).unlink()
