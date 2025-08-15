@@ -165,6 +165,9 @@ def test_prefsSplitDialog_resetSettings(
     split_dialog = PrefsSplitDialog()
     qtbot.addWidget(split_dialog)
 
+    # Ensure that nothing changes if settings is empty
+    split_dialog.resetSettings()
+
     assert split_dialog.line_edit_split_text_entered.text() == "::"
     assert split_dialog.line_edit_split_values_at.text() == "::"
     assert split_dialog.line_edit_split_values_display.text() == "::"
@@ -182,3 +185,23 @@ def test_prefsSplitDialog_resetSettings(
     assert split_dialog.line_edit_split_text_entered.text() == "::"
     assert split_dialog.line_edit_split_values_at.text() == "::"
     assert split_dialog.line_edit_split_values_display.text() == "::"
+
+
+def test_prefsSplitDialog_line_edit_empty(
+    qtbot: QtBot,
+    monkeypatch: pytest.MonkeyPatch,
+    temp_settings: prefs_module.Settings,
+) -> None:
+    monkeypatch.setattr(prefs_module, "settings", temp_settings)
+    split_dialog = PrefsSplitDialog()
+    qtbot.addWidget(split_dialog)
+
+    split_dialog.line_edit_split_text_entered.setText("")
+    split_dialog.line_edit_split_text_entered.editingFinished.emit()
+    assert split_dialog.changed_settings == {}
+    split_dialog.line_edit_split_text_entered.setText("++")
+    split_dialog.line_edit_split_text_entered.editingFinished.emit()
+    assert split_dialog.changed_settings == {"split_text_entered": "++"}
+    split_dialog.line_edit_split_text_entered.setText("")
+    split_dialog.line_edit_split_text_entered.editingFinished.emit()
+    assert split_dialog.changed_settings == {}

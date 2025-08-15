@@ -21,15 +21,26 @@ def toPairs(values: list[str], separator: str) -> list[list[str]]:
     """Convert a list of strings into a list of string pairs, split by separator.
 
     For example, given `['one:two', 'three:four']` and `:`,
-    this will return `[['one', 'two'], ['three', 'four']]`
+    this will return `[['one', 'two'], ['three', 'four']]`.
+
+    This returns _only_ the values that are pairs separated by separator.
+    Any values that are not separated by separator are _excluded_ from the result,
+    _not_ kept as they are.
+
+    If there are more than two items separated in a pair, the second up until the last
+    are merged into a single string.
     """
     result: list[list[str]] = []
     for value in values:
-        if not value.find(separator):
+        if value.find(separator) == -1:
             continue
         parts = value.split(separator)
         if len(parts) == constants.PAIR_SIZE:
             result.append(parts)
+        elif len(parts) > constants.PAIR_SIZE:
+            first = parts[0]
+            rest = separator.join(parts[1:])
+            result.append([first, rest])
     return result
 
 
@@ -64,8 +75,12 @@ def removeMatchingSublistPairs(
     and `original` is `[['a', 'b'], ['b', 'a']]`,
     with an index of `0`, the result is `[['b', 'a']]`,
     and with `1` it is `[['a', 'b']]`.
+
+    If `index` is not 0 or 1, returns the original list.
     """
     if not remove_values:
+        return original
+    if index < 0 or index >= constants.PEOPLE_COL_COUNT:
         return original
     return [
         item
@@ -88,8 +103,12 @@ def remapMatchingSublistPairs(
     and `original` is `[['a', 'b'], ['d', 'a']]`,
     with an index of `0`, the result is `[['c', 'b'], ['d', 'a']]`,
     and with `1` it is `[['a', 'b'], ['d', 'c']]`
+
+    If `index` is not 0 or 1, returns the original list.
     """
     if not replacements:
+        return original
+    if index < 0 or index >= constants.PEOPLE_COL_COUNT:
         return original
     return [
         [

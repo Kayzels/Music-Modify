@@ -48,9 +48,17 @@ def test_valueToString() -> None:
     string_value = "Some Title"
     list_value: list[str] = ["Person 1", "Person 2"]
     people_value: list[list[str]] = [["role1", "Person 1"], ["role2", "Person 2"]]
+    extra_people_value: list[list[str]] = [
+        ["role1", "Person 1"],
+        ["role2", "Person 2"],
+        ["role3", "Person 3", "extra"],
+    ]
     assert valueToString(string_value, separator) == "Some Title"
     assert valueToString(list_value, separator) == "Person 1; Person 2"
     assert valueToString(people_value, separator) == "role1:Person 1; role2:Person 2"
+    assert (
+        valueToString(extra_people_value, separator) == "role1:Person 1; role2:Person 2"
+    )
 
 
 def test_toTag(tags: list[SongTag]) -> None:

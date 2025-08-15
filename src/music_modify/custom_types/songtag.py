@@ -143,15 +143,6 @@ class SongTag:
             # this will happen.
             logger.debug(f"KeyError from song for id3_key {self.id3_key}")
             return None
-        except AttributeError:
-            # Shouldn't happen: means trying to get the wrong frame type.
-            logger.warning(
-                (
-                    f"AttributeError when accessing frame type {self.frame_type}"
-                    f" from song for id3_key {self.id3_key}"
-                ),
-            )
-            return None
 
     def setTag(self, song: ID3, values: SongGroupData) -> None:
         """Sets the tag for this song to contain the values that are sent."""
@@ -172,20 +163,16 @@ class SongTag:
         if self.hasTag(song):
             return
         encoding = id3.Encoding.UTF8
-        try:
-            if "TXXX" not in self.id3_key:
-                # ? Checks if the tag is custom or not.
-                frame = Frames[self.id3_key](encoding, [])
-            else:
-                # ? Custom tags work differently, taking in an extra param.
-                # ? This param is desc, which is a description taken
-                # ? from the tag name.
-                desc = self.id3_key.split(":")[1]
-                frame = Frames["TXXX"](encoding, desc=desc, text=[])
-            song.add(frame)
-        except TypeError:
-            # ? Cannot create a tag frame with this key
-            logger.warning(f"Cannot create a tag frame with this key: {self.id3_key}")
+        if "TXXX" not in self.id3_key:
+            # ? Checks if the tag is custom or not.
+            frame = Frames[self.id3_key](encoding, [])
+        else:
+            # ? Custom tags work differently, taking in an extra param.
+            # ? This param is desc, which is a description taken
+            # ? from the tag name.
+            desc = self.id3_key.split(":")[1]
+            frame = Frames["TXXX"](encoding, desc=desc, text=[])
+        song.add(frame)
 
     def getValue(self, song: ID3) -> SongEditData | None:
         """Returns the value for the tag in a format useful for editing.

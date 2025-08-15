@@ -42,15 +42,10 @@ class Song:
         """Generate display values for the columns that should be shown in the table."""
         info: list[str] = []
         for column in prefs.settings.table_tags:
-            data_string: str
-            try:
-                data_string = valueToString(
-                    value=self.getValue(column),
-                    display_split=prefs.settings.split_values_display,
-                )
-            except KeyError:
-                logger.info(f"{self.id3} wasn't a key in the song.")
-                data_string = ""
+            data_string = valueToString(
+                value=self.getValue(column),
+                display_split=prefs.settings.split_values_display,
+            )
             info.append(data_string)
         return info
 

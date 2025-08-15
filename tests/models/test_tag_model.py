@@ -54,6 +54,22 @@ def test_headers(model: TagModel) -> None:
         )
         is None
     )
+    assert (
+        model.headerData(
+            section=-1,
+            orientation=Qt.Orientation.Horizontal,
+            role=Qt.ItemDataRole.DisplayRole,
+        )
+        is None
+    )
+    assert (
+        model.headerData(
+            section=len(TAG_MODEL_COLUMNS),
+            orientation=Qt.Orientation.Horizontal,
+            role=Qt.ItemDataRole.DisplayRole,
+        )
+        is None
+    )
 
 
 def test_data(model: TagModel, tags: list[TagInfo]) -> None:
@@ -106,6 +122,21 @@ def test_setData(model: TagModel) -> None:
         TagInfo(id3_key="TPE2", display_name="Artist", show_in_table=False),
     ]
 
+    # Invalid index
+    assert model.setData(model.index(-1, -1), 1) is False
+
+    # Empty input
+    assert model.setData(model.index(0, 0), "", Qt.ItemDataRole.EditRole) is False
+
+    # Value already exists
+    assert model.setData(model.index(0, 0), "TPE2", Qt.ItemDataRole.EditRole) is False
+    assert model.setData(model.index(0, 0), "TRCK", Qt.ItemDataRole.EditRole)
+
+    # Invalid role
+    assert (
+        model.setData(model.index(0, 0), "TRCK", Qt.ItemDataRole.DisplayRole) is False
+    )
+
 
 def test_addTag(model: TagModel) -> None:
     model.addTag(id3_key="TRCK", display_name="Track", show_in_table=True)
@@ -125,7 +156,20 @@ def test_removeTag(model: TagModel) -> None:
 
 def test_moveTag(model: TagModel) -> None:
     model.moveTag(0, 1)
-    assert model.tags == [
+    tags = [
         TagInfo(id3_key="TPE2", display_name="Artist", show_in_table=False),
         TagInfo(id3_key="TIT2", display_name="Title", show_in_table=True),
     ]
+    assert model.tags == tags
+    model.moveTag(-1, 0)
+    assert model.tags == tags
+    model.moveTag(0, -1)
+    assert model.tags == tags
+    model.moveTag(-1, model.rowCount())
+    assert model.tags == tags
+    model.moveTag(model.rowCount(), 0)
+    assert model.tags == tags
+
+
+def test_flags(model: TagModel) -> None:
+    assert model.flags(model.index(-1, -1)) == Qt.ItemFlag.NoItemFlags

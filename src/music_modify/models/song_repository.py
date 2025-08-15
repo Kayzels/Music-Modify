@@ -56,6 +56,14 @@ class SongRepository(QObject):
         for file in files:
             self.addFile(file)
 
+    def addSong(self, song: Song | None = None) -> None:
+        """Add the song to the repository, not necessarily linked to a file."""
+        if song:
+            self._songs.append(song)
+        else:
+            self._songs.append(Song())
+        self.songs_updated.emit()
+
     def clearFiles(self) -> None:
         """Remove all songs from the repository."""
         self._songs.clear()

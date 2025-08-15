@@ -41,3 +41,27 @@ def test_columns_set_updated_removed(song_path: Path) -> None:
     song.removeTag("TPE2")
     assert not song.hasTag("TIT2")
     assert not song.hasTag("TPE2")
+
+
+def test_song_invalid_tag() -> None:
+    song = Song()
+    assert not song.hasTag("ABCD")
+    assert song.getValue("ABCD") is None
+    # needed to ensure it works with invalid, but nothing to assert
+    song.removeTag("ABCD")
+
+
+def test_song_save_update(song_path: Path) -> None:
+    song = Song(song_path)
+    song.setTag("TIT2", ["Some Title"])
+    song.save()
+    expected_output: list[str] = []
+    for col in prefs.settings.table_tags:
+        if col.id3_key == "TIT2":
+            expected_output.append("Some Title")
+        else:
+            expected_output.append("")
+    assert song.display_info == expected_output
+    song.removeTag("TIT2")
+    assert not song.hasTag("TIT2")
+    song.save()

@@ -114,6 +114,8 @@ def test_generateFrame_hasTag(single_tag: SongTag) -> None:
     assert not single_tag.hasTag(song)
     single_tag.generateFrame(song)
     assert single_tag.hasTag(song)
+    # Ensure that making it again doesn't lead to issues
+    single_tag.generateFrame(song)
 
 
 def test_setTag(tag_types: _TestTag, tag_values: _TestTagValue) -> None:
@@ -150,8 +152,40 @@ def test_getValue(tag_types: _TestTag, tag_values: _TestTagValue) -> None:
     for key in "single", "multiple", "people":
         assert not tag_types[key].hasTag(song)
         tag_types[key].setTag(song, tag_values[key])
-        assert (
-            tag_types[key].getValue(song) == tag_values[key][0]
-            if key == "single"
-            else tag_values[key]
-        )
+        if key == "single":
+            assert tag_types[key].getValue(song) == tag_values[key][0]
+        else:
+            assert tag_types[key].getValue(song) == tag_values[key]
+
+
+def test_SongTag_repr(single_tag: SongTag) -> None:
+    assert repr(single_tag) == "SongTag(TIT2, Title)"
+
+
+def test_SongTag_eq(single_tag: SongTag, multiple_tag: SongTag) -> None:
+    assert single_tag != multiple_tag
+    assert single_tag == SongTag(id3_key="TIT2", display_name="Title")
+    assert single_tag != "TIT2"
+
+
+def test_SongTag_hash(single_tag: SongTag) -> None:
+    assert hash(single_tag) == hash((single_tag.id3_key, single_tag.display_name))
+
+
+def test_frame_type_unknown() -> None:
+    invalid_tag = SongTag(id3_key="ABCD", display_name="Invalid")
+    assert invalid_tag.frame_type == TagType.Text
+
+
+def test_frame_type_others() -> None:
+    binary_tag = SongTag(id3_key="MCDI", display_name="TOC from CD")
+    assert binary_tag.frame_type == TagType.Data
+    url_tag = SongTag(id3_key="WCOP", display_name="Copyright")
+    assert url_tag.frame_type == TagType.Url
+
+
+def test_generateFrame_custom() -> None:
+    song = ID3()
+    custom_tag = SongTag(id3_key="TXXX:TEMPO", display_name="Tempo")
+    # Ensure this runs without errors, nothing to assert
+    custom_tag.generateFrame(song)

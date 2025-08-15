@@ -72,6 +72,9 @@ class PrefsSplitDialog(PrefsAbstractDialog, Ui_PrefsSplitDialog):
         Stores this in the list of settings to change, which will be reflected
         when the dialog is confirmed.
 
+        Sending in an empty string for `setting_value` will remove the value
+        from the settings to change, but this doesn't update the UI.
+
         Args:
             setting_name: The name of the setting to change
             setting_value: The new value that the setting should be set to
@@ -80,15 +83,16 @@ class PrefsSplitDialog(PrefsAbstractDialog, Ui_PrefsSplitDialog):
             f"Called _getSettingChange with {setting_name} and {setting_value}",
         )
         if setting_value == "":
-            # Don't want to use empty string for values
+            # Clear the value that's currently set to change, if present
+            _ = self.changed_settings.pop(setting_name, None)
             return
 
         if getattr(prefs.settings, setting_name) != setting_value:
             # Set the value in changed_settings if it's different
-            self.changed_settings[setting_name] = setting_value
+            _ = self.changed_settings[setting_name] = setting_value
         else:
             # Remove the value if it's set back to previous one
-            self.changed_settings.pop(setting_name, None)
+            _ = self.changed_settings.pop(setting_name, None)
         logger.debug(f"Changed settings is {self.changed_settings}")
 
     @override

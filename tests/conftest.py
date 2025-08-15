@@ -2,6 +2,7 @@ from collections.abc import Generator
 import os
 from os import PathLike
 from pathlib import Path
+import shutil
 import tempfile
 
 from PySide6.QtCore import QSettings
@@ -9,24 +10,42 @@ import pytest
 
 from music_modify.prefs.prefs import Settings
 
-
-@pytest.fixture
-def song_path() -> Path:
-    return Path("tests/assets/test_song_1.mp3").absolute()
+NUM_TEMP_SONGS = 3
 
 
 @pytest.fixture
-def song_paths() -> list[PathLike[str]]:
-    return [
-        Path("tests/assets/test_song_1.mp3").absolute(),
-        Path("tests/assets/test_song_2.mp3").absolute(),
-        Path("tests/assets/test_song_3.mp3").absolute(),
-    ]
+def num_temp_songs() -> int:
+    return NUM_TEMP_SONGS
 
 
-@pytest.fixture
-def asset_folder() -> PathLike[str]:
-    return Path("tests/assets/").absolute()
+@pytest.fixture(scope="session")
+def asset_folder(tmp_path_factory: pytest.TempPathFactory) -> Generator[str]:
+    temp_dir = tmp_path_factory.mktemp("tmp_songs")
+    yield str(temp_dir)
+    shutil.rmtree(temp_dir)
+
+
+@pytest.fixture(scope="session")
+def song_path(tmp_path_factory: pytest.TempPathFactory) -> Generator[Path]:
+    original_file = Path("tests/assets/test_song.mp3").absolute()
+    temp_dir = tmp_path_factory.mktemp("tmp_song")
+    temp_file = temp_dir / "test_song.mp3"
+    yield shutil.copyfile(original_file, temp_file)
+    shutil.rmtree(temp_dir)
+
+
+@pytest.fixture(scope="session")
+def song_paths(
+    # tmp_path_factory: pytest.TempPathFactory,
+    asset_folder: str,
+) -> list[PathLike[str]]:
+    original_file = Path("tests/assets/test_song.mp3").absolute()
+    files: list[PathLike[str]] = []
+    for i in range(1, NUM_TEMP_SONGS + 1):
+        new_file = Path(asset_folder) / f"test_song_{i}.mp3"
+        temp_file = shutil.copyfile(original_file, new_file)
+        files.append(temp_file)
+    return files
 
 
 @pytest.fixture

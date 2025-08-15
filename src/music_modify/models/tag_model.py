@@ -110,10 +110,7 @@ class TagModel(QAbstractTableModel):
 
         if field == "show_in_table":
             return super().flags(index) | Qt.ItemFlag.ItemIsUserCheckable
-        if field in ("display_name", "id3_key"):
-            return super().flags(index) | Qt.ItemFlag.ItemIsEditable
-
-        return super().flags(index)
+        return super().flags(index) | Qt.ItemFlag.ItemIsEditable
 
     @override
     def setData(
@@ -143,9 +140,10 @@ class TagModel(QAbstractTableModel):
                 )
                 return False
 
-            # Update the value
-            setattr(self._tags[row], field, value)
-            self.dataChanged.emit(index, index, [role])
+            # Only update the value if its not the same already
+            if getattr(self._tags[row], field) != value:
+                setattr(self._tags[row], field, value)
+                self.dataChanged.emit(index, index, [role])
             return True
 
         # Editing checkbox for Show column

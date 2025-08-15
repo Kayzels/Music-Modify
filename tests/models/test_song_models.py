@@ -29,10 +29,23 @@ def test_add(song_path: Path) -> None:
 def test_headers(song_paths: list[PathLike[str]]) -> None:
     repo = SongRepository()
     model = SongTableModel(repo)
+    assert (
+        model.headerData(
+            len(repo),
+            Qt.Orientation.Vertical,
+            Qt.ItemDataRole.DisplayRole,
+        )
+        is None
+    )
     repo.addFiles(song_paths)
     assert len(repo) > 0
     assert (
-        model.headerData(0, Qt.Orientation.Vertical, Qt.ItemDataRole.DisplayRole) == "1"
+        model.headerData(
+            0,
+            Qt.Orientation.Vertical,
+            Qt.ItemDataRole.DisplayRole,
+        )
+        == "1"
     )
     assert (
         model.headerData(0, Qt.Orientation.Horizontal, Qt.ItemDataRole.DisplayRole)

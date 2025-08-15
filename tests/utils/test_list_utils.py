@@ -19,6 +19,16 @@ def test_toPairs() -> None:
     values: list[str] = ["role1: Person1", "role2: Person2"]
     separator = ": "
     assert toPairs(values, separator) == [["role1", "Person1"], ["role2", "Person2"]]
+    # If no pairs found, that are separated, should be empty
+    assert toPairs(values, ".") == []
+    values2: list[str] = ["role1: Person1", "role2.Person2"]
+    assert toPairs(values2, separator) == [["role1", "Person1"]]
+    assert toPairs(values2, ".") == [["role2", "Person2"]]
+    values3 = ["role1: Person1", "role2: Person2: another"]
+    assert toPairs(values3, ": ") == [
+        ["role1", "Person1"],
+        ["role2", "Person2: another"],
+    ]
 
 
 def test_addValues() -> None:
@@ -34,11 +44,16 @@ def test_addValues() -> None:
         ["role3", "Person3"],
     ]
 
+    original = [1, 2, 3]
+    assert addValues(None, original) == [1, 2, 3]
+    assert addValues([], original) == [1, 2, 3]
+
 
 def test_removePairs() -> None:
     pairs = {("role1", "Person1"), ("role2", "Person2")}
     original = [["role1", "Person1"], ["role2", "Person2"], ["role3", "Person3"]]
     assert removePairs(pairs, original) == [["role3", "Person3"]]
+    assert removePairs(set(), original) == original
 
 
 def test_removeMatchingSublistPairs() -> None:
@@ -58,6 +73,12 @@ def test_removeMatchingSublistPairs() -> None:
         ["role1", "Person1"],
         ["role2", "Person3"],
     ]
+    assert removeMatchingSublistPairs(set(), original, PairIndex.Role.value) == original
+    assert (
+        removeMatchingSublistPairs(set(), original, PairIndex.Person.value) == original
+    )
+    assert removeMatchingSublistPairs(roles, original, 2) == original
+    assert removeMatchingSublistPairs(roles, original, -1) == original
 
 
 def test_remapMatchingSublistPairs() -> None:
@@ -89,3 +110,7 @@ def test_remapMatchingSublistPairs() -> None:
         ["role2", "Person3"],
         ["role3", "Another_Person"],
     ]
+    assert remapMatchingSublistPairs({}, original, PairIndex.Role.value) == original
+    assert remapMatchingSublistPairs({}, original, PairIndex.Person.value) == original
+    assert remapMatchingSublistPairs(role_replacements, original, 2) == original
+    assert remapMatchingSublistPairs(people_replacements, original, -1) == original
