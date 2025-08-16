@@ -140,7 +140,7 @@ class TagModel(QAbstractTableModel):
                 )
                 return False
 
-            # Only update the value if its not the same already
+            # Only update the value if it's not the same already
             if getattr(self._tags[row], field) != value:
                 setattr(self._tags[row], field, value)
                 self.dataChanged.emit(index, index, [role])

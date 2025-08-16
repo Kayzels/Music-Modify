@@ -54,11 +54,11 @@ class EditListWidget(EditAbstractGroupWidget[SongListData]):
 
     @override
     def _setupUi(self) -> None:
-        layout: QLayout | None = self.layout()
-        if layout is None:
+        layout_get: QLayout | None = self.layout()
+        if layout_get is None:
             logger.info("Didn't create a layout for list widget")
             return
-        layout = cast(QHBoxLayout, layout)
+        layout: QHBoxLayout = cast(QHBoxLayout, layout_get)
 
         self.main_widget = QListWidget()
         self.main_widget.setMinimumHeight(200)

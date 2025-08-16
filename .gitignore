@@ -3,3 +3,4 @@ old_gui/
 .egg-info
 *.egg-info/
 .coverage
+htmlcov/

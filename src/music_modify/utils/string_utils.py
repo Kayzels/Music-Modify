@@ -7,7 +7,7 @@ def snakeToTitle(value: str) -> str:
 
 
 def tableHeader(value: str) -> str:
-    """Convers snake case text to title case, and replaces Id3 with ID3."""
+    """Converts snake case text to title case, and replaces Id3 with ID3."""
     return snakeToTitle(value).replace("Id3", "ID3")
 
 

@@ -1,6 +1,6 @@
 """Module that defines a `SongRepository` object.
 
-This works works as a way of interacting with the list of songs.
+This works as a way of interacting with the list of songs.
 """
 
 from os import PathLike

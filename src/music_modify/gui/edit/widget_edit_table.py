@@ -100,11 +100,11 @@ class EditTableWidget(EditAbstractGroupWidget[SongTableData]):
 
     @override
     def _setupUi(self) -> None:
-        layout: QLayout | None = self.layout()
-        if layout is None:
+        layout_get: QLayout | None = self.layout()
+        if layout_get is None:
             logger.info("Layout was None for table widget")
             return
-        layout = cast(QHBoxLayout, layout)
+        layout: QHBoxLayout = cast(QHBoxLayout, layout_get)
 
         # Put the table in a frame so that there are borders,
         # like the other EditWidgets.

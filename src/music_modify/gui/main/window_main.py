@@ -129,7 +129,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def openAddDialog(self, file_mode: QFileDialog.FileMode) -> None:
         """Display a file picker based on the file mode.
 
-        This allows allows users to select the files (or folders) to edit.
+        This allows users to select the files (or folders) to edit.
         """
         files_dialog = QFileDialog(self)
         files_dialog.setFileMode(file_mode)

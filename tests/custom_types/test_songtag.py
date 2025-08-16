@@ -1,4 +1,4 @@
-from typing import TypedDict
+from typing import TypedDict, cast, Literal
 
 from mutagen.id3 import ID3
 import pytest
@@ -121,6 +121,7 @@ def test_generateFrame_hasTag(single_tag: SongTag) -> None:
 def test_setTag(tag_types: _TestTag, tag_values: _TestTagValue) -> None:
     song = ID3()
     for key in "single", "multiple", "people":
+        key = cast(Literal["single", "multiple", "people"], key)
         tag_types[key].setTag(song, tag_values[key])
         assert tag_types[key].getTag(song) == tag_values[key]
 
@@ -150,6 +151,7 @@ def test_getTag(
 def test_getValue(tag_types: _TestTag, tag_values: _TestTagValue) -> None:
     song = ID3()
     for key in "single", "multiple", "people":
+        key = cast(Literal["single", "multiple", "people"], key)
         assert not tag_types[key].hasTag(song)
         tag_types[key].setTag(song, tag_values[key])
         if key == "single":

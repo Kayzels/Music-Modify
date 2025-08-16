@@ -11,7 +11,7 @@ from dataclasses import KW_ONLY, dataclass
 class TagInfo:
     """Basic tag information.
 
-    Used when construcing a `SongTag` object,
+    Used when constructing a `SongTag` object,
     and in places where only basic data is needed.
     """
 

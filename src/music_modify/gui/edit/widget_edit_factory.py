@@ -37,6 +37,7 @@ class EditWidgetFactory:
     # Having a class here is probably overkill.
     # But it makes it neater when calling, and keeps it in scope.
 
+    # noinspection PyTypeHints
     @staticmethod
     def createWidget(
         parent: QWidget,

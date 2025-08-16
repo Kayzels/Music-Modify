@@ -9,7 +9,7 @@ from PySide6.QtCore import QRect, Qt, Signal
 from PySide6.QtGui import QKeySequence
 from PySide6.QtWidgets import QWidget
 
-from .wait_signal import CallbackBlocker, MultiSignalBlocker, SignalBlocker
+from pytestqt.wait_signal import CallbackBlocker, MultiSignalBlocker, SignalBlocker
 
 class QtBot:
     def __init__(self, request: Incomplete) -> None: ...

@@ -16,6 +16,7 @@ class QLineEditArgs(TypedDict, total=False):
     echoMode: QLineEdit.EchoMode | None
     displayText: str | None
     cursorPosition: int | None
+    # noinspection PyTypeHints,PyTypedDict
     alignment: Qt.AlignmentFlag | None
     modified: bool | None
     hasSelectedText: bool | None

@@ -125,6 +125,7 @@ class EditDialog(EditAbstractDialog):
 
         It also links the signals needed for updating and resetting it.
         """
+        # noinspection PyTypeHints
         widget: EditAbstractWidgetType = EditWidgetFactory.createWidget(self, tag, data)
 
         @Slot()

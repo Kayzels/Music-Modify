@@ -71,11 +71,11 @@ class PrefsTagAddDialog(QDialog, Ui_PrefsTagAddDialog):
             logger.warning(message)
             QMessageBox.warning(self, "Tag Exists", message)
             return None
-        return {
-            "id3_key": id3_key,
-            "display_name": display_name,
-            "show_in_table": show_in_table,
-        }
+        return _TagDict(
+            id3_key=id3_key,
+            display_name=display_name,
+            show_in_table=show_in_table,
+        )
 
     def addToModel(self, model: TagModel) -> None:
         """Adds the created tag to the model, if it is valid.
