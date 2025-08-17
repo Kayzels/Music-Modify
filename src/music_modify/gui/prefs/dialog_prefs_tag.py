@@ -8,15 +8,23 @@ import logging
 from typing import TYPE_CHECKING, override
 
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QMessageBox, QWidget
+from PySide6.QtWidgets import (
+    QAbstractItemView,
+    QHBoxLayout,
+    QMessageBox,
+    QTableView,
+    QVBoxLayout,
+    QWidget,
+)
 
+from music_modify.custom_types.enums import RowDirection
+from music_modify.gui.mixins.row_operation_mixin import RowOperationMixin
 from music_modify.gui.utils import getSelectedRows
 from music_modify.models import TagModel
 from music_modify.prefs import prefs
 
 from .dialog_prefs_abstract import PrefsAbstractDialog
 from .dialog_prefs_tag_add import PrefsTagAddDialog
-from .ui_dialog_prefs_tag import Ui_PrefsTagDialog
 
 if TYPE_CHECKING:
     from music_modify.custom_types import TagInfo
@@ -24,7 +32,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class PrefsTagDialog(PrefsAbstractDialog, Ui_PrefsTagDialog):
+class PrefsTagDialog(PrefsAbstractDialog, RowOperationMixin):
     """Dialog for editing metadata tags.
 
     Allows the user to edit the metadata tags that are edited
@@ -46,27 +54,16 @@ class PrefsTagDialog(PrefsAbstractDialog, Ui_PrefsTagDialog):
         self.model: TagModel = TagModel(tags)
         self.tag_table.setModel(self.model)
         self.tag_table.resizeColumnsToContents()
-        self.tag_table.setShowGrid(False)
-        self.tag_table.setAlternatingRowColors(True)
         self.model.invalid_input.connect(self.showInvalidInputMessage)
 
-        self.add_toolbutton.clicked.connect(self.addTag)
-        self.remove_toolbutton.clicked.connect(self.removeSelectedTags)
-        self.up_toolbutton.clicked.connect(self.moveTagsUp)
-        self.down_toolbutton.clicked.connect(self.moveTagsDown)
-
     @override
-    def setupUi(self, dialog: PrefsAbstractDialog, /) -> None:
-        Ui_PrefsTagDialog.setupUi(self, dialog)
-
-    def addTag(self) -> None:
-        """Add a new tag to the group of tags that can be used."""
+    def _addRow(self) -> None:
         add_dialog = PrefsTagAddDialog(self)
         add_dialog.accepted.connect(lambda: add_dialog.addToModel(self.model))
         add_dialog.show()
 
-    def removeSelectedTags(self) -> None:
-        """Remove selected tags from the table and settings."""
+    @override
+    def _removeRow(self) -> None:
         selected_rows = getSelectedRows(self.tag_table)
 
         if len(selected_rows) == 0:
@@ -102,23 +99,25 @@ class PrefsTagDialog(PrefsAbstractDialog, Ui_PrefsTagDialog):
             for row in sorted(selected_rows, reverse=True):
                 self.model.removeTag(row)
 
-    def moveTagsUp(self) -> None:
-        """Moves all selected tags up, changing their order in the main table."""
-        selected_rows = sorted(getSelectedRows(self.tag_table))
-        if not selected_rows or selected_rows[0] == 0:
-            return  # Can't move the first row up
-
+    @override
+    def _moveRows(self, direction: RowDirection) -> None:
+        selected_rows = sorted(
+            getSelectedRows(self.tag_table), reverse=direction == RowDirection.Down
+        )
+        if not selected_rows:
+            return
+        direction_num = 1
+        match direction:
+            case RowDirection.Up:
+                if selected_rows[0] == 0:
+                    return
+                direction_num = -1
+            case RowDirection.Down:
+                if selected_rows[0] == self.model.rowCount() - 1:
+                    return
+                direction_num = 1
         for row in selected_rows:
-            self.model.moveTag(row, row - 1)
-
-    def moveTagsDown(self) -> None:
-        """Moves all selected tags down, changing their order in the main table."""
-        selected_rows = sorted(getSelectedRows(self.tag_table), reverse=True)
-        if not selected_rows or selected_rows[0] == self.model.rowCount() - 1:
-            return  # Can't move the last row down
-
-        for row in selected_rows:
-            self.model.moveTag(row, row + 1)
+            self.model.moveTag(row, row + direction_num)
 
     def showInvalidInputMessage(self, message: str) -> None:
         """Displays a message about invalid input."""
@@ -140,3 +139,33 @@ class PrefsTagDialog(PrefsAbstractDialog, Ui_PrefsTagDialog):
         logger.debug("Called reset settings in tag")
         """Reset the settings to the values they had when the dialog opened."""
         self.model.tags = self.original_tags
+
+    @override
+    def setupUi(self) -> None:
+        """Creates the interface for the dialog."""
+        self.resize(510, 434)
+
+        vertical_layout = QVBoxLayout(self)
+
+        horizontal_layout = QHBoxLayout()
+
+        self.tag_table: QTableView = QTableView(self)
+        self.tag_table.setAlternatingRowColors(True)
+        self.tag_table.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
+        self.tag_table.setSelectionBehavior(
+            QAbstractItemView.SelectionBehavior.SelectRows
+        )
+        self.tag_table.setShowGrid(False)
+        self.tag_table.horizontalHeader().setStretchLastSection(True)
+        self.tag_table.verticalHeader().setVisible(False)
+
+        horizontal_layout.addWidget(self.tag_table)
+
+        button_layout = QVBoxLayout()
+        new_buttons = self.createOperationButtons(self)
+        for new_button in new_buttons:
+            button_layout.addWidget(new_button)
+        horizontal_layout.addLayout(button_layout)
+
+        vertical_layout.addLayout(horizontal_layout)
+        vertical_layout.setStretch(0, 10)

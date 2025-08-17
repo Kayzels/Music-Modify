@@ -10,9 +10,15 @@ from typing import TYPE_CHECKING
 
 import mutagen
 import PySide6
-from PySide6.QtWidgets import QApplication, QDialog, QWidget
-
-from .ui_dialog_about import Ui_AboutDialog
+from PySide6.QtCore import Qt
+from PySide6.QtWidgets import (
+    QApplication,
+    QDialog,
+    QDialogButtonBox,
+    QTextEdit,
+    QVBoxLayout,
+    QWidget,
+)
 
 if TYPE_CHECKING:
     from PySide6.QtCore import QCoreApplication
@@ -20,7 +26,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class AboutDialog(QDialog, Ui_AboutDialog):
+class AboutDialog(QDialog):
     """Dialog that displays the meta information about the app.
 
     The information shown includes the name, version, and tools used.
@@ -29,10 +35,30 @@ class AboutDialog(QDialog, Ui_AboutDialog):
     def __init__(self, parent: QWidget | None = None) -> None:
         """Creates an AboutDialog that is owned by the `parent` widget."""
         QDialog.__init__(self, parent)
-        self.setupUi(self)
-        text = self.generateText()
-        if text:
-            self.textEdit.setHtml(text)
+        self.setupUi()
+
+    def setupUi(self) -> None:
+        """Create the interface for an AboutDialog."""
+        self.resize(518, 346)
+
+        layout = QVBoxLayout(self)
+
+        text_edit = QTextEdit(self)
+        text_edit.setUndoRedoEnabled(False)
+        text_edit.setReadOnly(True)
+        text_edit.setHtml(self.generateText())
+
+        layout.addWidget(text_edit)
+
+        button_box = QDialogButtonBox(
+            self,
+            orientation=Qt.Orientation.Horizontal,
+            standardButtons=QDialogButtonBox.StandardButton.Close,
+        )
+        layout.addWidget(button_box)
+
+        button_box.rejected.connect(self.close)
+        self.setWindowTitle("About Music Modify")
 
     @staticmethod
     def generateText() -> str:

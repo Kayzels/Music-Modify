@@ -7,17 +7,22 @@ how multiple values should be entered, and displayed.
 import logging
 from typing import override
 
-from PySide6.QtWidgets import QLineEdit, QWidget
+from PySide6.QtWidgets import (
+    QFormLayout,
+    QLabel,
+    QLineEdit,
+    QVBoxLayout,
+    QWidget,
+)
 
 from music_modify.prefs import prefs
 
 from .dialog_prefs_abstract import PrefsAbstractDialog
-from .ui_dialog_prefs_split import Ui_PrefsSplitDialog
 
 logger = logging.getLogger(__name__)
 
 
-class PrefsSplitDialog(PrefsAbstractDialog, Ui_PrefsSplitDialog):
+class PrefsSplitDialog(PrefsAbstractDialog):
     """Dialog for editing the values stored in the Split settings section.
 
     These values have to do with how strings are displayed
@@ -55,10 +60,6 @@ class PrefsSplitDialog(PrefsAbstractDialog, Ui_PrefsSplitDialog):
                 self.line_edit_split_values_at.text(),
             ),
         )
-
-    @override
-    def setupUi(self, dialog: PrefsAbstractDialog, /) -> None:
-        Ui_PrefsSplitDialog.setupUi(self, dialog)
 
     def _initializeDisplay(self) -> None:
         """Displays current values for split settings before the user changes them."""
@@ -129,3 +130,41 @@ class PrefsSplitDialog(PrefsAbstractDialog, Ui_PrefsSplitDialog):
         # TODO:Disable reset button when there are no changes
         self.changed_settings = {}
         self._initializeDisplay()
+
+    @override
+    def setupUi(self) -> None:
+        """Creates the interface for the dialog."""
+        self.setWindowTitle("Edit Split Characters")
+
+        vertical_layout = QVBoxLayout(self)
+        form_layout = QFormLayout()
+
+        self.line_edit_split_text_entered = QLineEdit(self)
+        label_split_text_entered = QLabel("Split Text Entered", parent=self)
+        label_split_text_entered.setToolTip(
+            'The symbol that should split the data typed in. For example, with it set to be ",", '
+            + "John Smith, Jane Doe should be understood as two separate values."
+        )
+        form_layout.addRow(label_split_text_entered, self.line_edit_split_text_entered)
+
+        self.line_edit_split_values_display = QLineEdit(self)
+        label_split_values_display = QLabel("Split Values Display", parent=self)
+        label_split_values_display.setToolTip(
+            "The symbol that should be used in the table "
+            + "to show when there are multiple items in a field. "
+            + "If set to \\\\, John Smith, Jane Doe would be shown as John Smith\\\\Jane Doe."
+        )
+        form_layout.addRow(
+            label_split_values_display, self.line_edit_split_values_display
+        )
+
+        self.line_edit_split_values_at = QLineEdit(self)
+        label_split_values_at = QLabel("Split Values At", parent=self)
+        label_split_values_at.setToolTip(
+            "The symbol used when existing values should be split. "
+            + "For example, if an existing field is John Smith; Jane Doe, "
+            + "this should split it into separate values."
+        )
+        form_layout.addRow(label_split_values_at, self.line_edit_split_values_at)
+
+        vertical_layout.addLayout(form_layout)

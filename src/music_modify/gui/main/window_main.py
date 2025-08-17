@@ -1,23 +1,32 @@
 """Module that defines the main user interface."""
 
+from collections.abc import Callable
+from dataclasses import dataclass
 import datetime
 import logging
 import os
 from os import PathLike
 from pathlib import Path
 import time
-from typing import Final
+from typing import Final, final
 
-from PySide6.QtCore import QPoint, Qt
-from PySide6.QtGui import QDragEnterEvent, QDragMoveEvent, QDropEvent
+from PySide6.QtCore import QPoint, QRect, Qt
+from PySide6.QtGui import QAction, QDragEnterEvent, QDragMoveEvent, QDropEvent, QIcon
 from PySide6.QtWidgets import (
+    QAbstractItemView,
     QApplication,
     QDialog,
     QFileDialog,
     QLabel,
     QMainWindow,
     QMenu,
+    QMenuBar,
     QProgressDialog,
+    QStatusBar,
+    QTableView,
+    QToolBar,
+    QVBoxLayout,
+    QWidget,
 )
 
 from music_modify.gui.about import AboutDialog
@@ -27,18 +36,16 @@ from music_modify.gui.utils import getSelectedRows, updateTableView
 from music_modify.models import SongRepository, SongTableModel
 from music_modify.utils import formatTime
 
-from .ui_window_main import Ui_MainWindow
-
 logger = logging.getLogger(__name__)
 
 
-class MainWindow(QMainWindow, Ui_MainWindow):
+class MainWindow(QMainWindow):
     """Main interface window for managing song metadata."""
 
     def __init__(self) -> None:
         """Creates the main user interface."""
         super().__init__()
-        self.setupUi(self)
+        self._setupUi()
 
         # Create separate QLabel widgets instead of using the statbusbar default ones,
         # so that they're not overridden when a QStatusTipEvent happens.
@@ -53,6 +60,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         "Repository that stores the songs being managed"
         self.songs_model: Final[SongTableModel] = SongTableModel(self.songs_repository)
         "Model that links between the song repository and the display of the metadata"
+
+        self.dialog_factory: EditDialogFactory = EditDialogFactory(
+            self,
+            self.songs_repository,
+        )
+        "Factory for generating the right type of EditDialog, based on selection"
+
         self.files_table_view.setModel(self.songs_model)
         self.files_table_view.setShowGrid(False)
         self.files_table_view.resizeColumnsToContents()
@@ -65,46 +79,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.songs_repository.songs_updated.connect(
             lambda: updateTableView(self.files_table_view, self.songs_repository),
         )
-        self.songs_repository.songs_updated.connect(self.setFileActionState)
-        self.songs_repository.songs_updated.connect(self.updateStatusbarMessage)
-        self.files_table_view.setContextMenuPolicy(
-            Qt.ContextMenuPolicy.CustomContextMenu,
-        )
         self.files_table_view.customContextMenuRequested.connect(
             self.showCustomContextMenu,
         )
 
-        # Drag and Drop
-        self.files_table_view.setAcceptDrops(True)
-        self.files_table_view.dropEvent = self.processTableDropEvents
-        self.files_table_view.dragEnterEvent = self.processTableDragEvent
-        self.files_table_view.dragMoveEvent = self.processTableDragEvent
+        self._createActions()
 
-        # Actions
-        self.action_add_files.triggered.connect(
-            lambda: self.openAddDialog(QFileDialog.FileMode.ExistingFiles),
-        )
-        self.action_add_folder.triggered.connect(
-            lambda: self.openAddDialog(QFileDialog.FileMode.Directory),
-        )
-        self.action_clear_files.triggered.connect(self.clearFiles)
-        self.action_remove_selected.triggered.connect(self.removeSelectedFiles)
-        self.action_select_all.triggered.connect(self.files_table_view.selectAll)
-        self.action_select_none.triggered.connect(self.files_table_view.clearSelection)
-        self.action_about.triggered.connect(self.showAboutDialog)
-        self.action_preferences.triggered.connect(self.showPrefsDialog)
+        self.songs_repository.songs_updated.connect(self.setFileActionState)
+        self.songs_repository.songs_updated.connect(self.updateStatusbarMessage)
 
         self.setActionState()
         self.updateStatusbarMessage()
-
-        # Edit Actions
-        self.dialog_factory: EditDialogFactory = EditDialogFactory(
-            self,
-            self.songs_repository,
-        )
-        "Factory for generating the right type of EditDialog, based on selection"
-        self.action_edit_individual.triggered.connect(self.showEditDialog)
-        self.action_edit_bulk.triggered.connect(lambda: self.showEditDialog(bulk=True))
 
         self.addStatusbarAppMessage()
 
@@ -364,3 +349,143 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         context_menu.addAction(self.action_remove_selected)
 
         context_menu.popup(self.files_table_view.viewport().mapToGlobal(position))
+
+    def _createActions(self) -> None:
+        """Create the possible actions.
+
+        Should be called after the UI is created, and all widgets and members defined.
+        """
+
+        @dataclass
+        class _ActionInfo:
+            name: str
+            icon: QIcon.ThemeIcon | None = None
+            func: Callable[..., None] | None = None
+
+        actions: tuple[_ActionInfo, ...] = (
+            _ActionInfo(
+                "Add Files",
+                QIcon.ThemeIcon.DocumentNew,
+                lambda: self.openAddDialog(QFileDialog.FileMode.ExistingFiles),
+            ),
+            _ActionInfo(
+                "Add Folder",
+                QIcon.ThemeIcon.FolderNew,
+                lambda: self.openAddDialog(QFileDialog.FileMode.Directory),
+            ),
+            _ActionInfo("Clear Files", QIcon.ThemeIcon.ListRemove, self.clearFiles),
+            _ActionInfo(
+                "Select All",
+                QIcon.ThemeIcon.EditSelectAll,
+                self.files_table_view.selectAll,
+            ),
+            _ActionInfo("Preferences...", None, self.showPrefsDialog),
+            _ActionInfo("Select None", None, self.files_table_view.clearSelection),
+            _ActionInfo(
+                "About Music Modify...", QIcon.ThemeIcon.HelpAbout, self.showAboutDialog
+            ),
+            _ActionInfo(
+                "Remove Selected", QIcon.ThemeIcon.EditDelete, self.removeSelectedFiles
+            ),
+            _ActionInfo("Edit individually", None, self.showEditDialog),
+            _ActionInfo("Edit in bulk", None, lambda: self.showEditDialog(bulk=True)),
+        )
+
+        def createAction(info: _ActionInfo) -> QAction:
+            action = QAction(info.name, self, menuRole=QAction.MenuRole.NoRole)
+            if info.icon:
+                action.setIcon(QIcon(QIcon.fromTheme(info.icon)))
+            if info.func:
+                action.triggered.connect(info.func)
+            return action
+
+        (
+            self.action_add_files,
+            self.action_add_folder,
+            self.action_clear_files,
+            self.action_select_all,
+            self.action_preferences,
+            self.action_select_none,
+            self.action_about,
+            self.action_remove_selected,
+            self.action_edit_individual,
+            self.action_edit_bulk,
+        ) = [createAction(info) for info in actions]
+
+        self.menubar = QMenuBar(self)
+        self.menubar.setGeometry(QRect(0, 0, 800, 22))
+
+        self.menu_file, self.menu_view, self.menu_edit, self.menu_help = (
+            QMenu(name, self.menubar) for name in ("File", "View", "Edit", "Help")
+        )
+        self.menu_edit_songs = QMenu(self.menu_edit)
+        self.setMenuBar(self.menubar)
+
+        for menu_action in (
+            self.menu_file,
+            self.menu_edit,
+            self.menu_view,
+            self.menu_help,
+        ):
+            self.menubar.addAction(menu_action.menuAction())
+
+        for file_action in (
+            self.action_add_files,
+            self.action_add_folder,
+            self.action_clear_files,
+            self.action_remove_selected,
+        ):
+            self.menu_file.addAction(file_action)
+            self.tool_bar.addAction(file_action)
+
+        for select_action in (self.action_select_all, self.action_select_none):
+            self.menu_edit.addAction(select_action)
+
+        self.menu_edit.addSeparator()
+        self.menu_edit.addAction(self.menu_edit_songs.menuAction())
+        self.menu_edit.addSeparator()
+        self.menu_edit.addAction(self.action_preferences)
+
+        for song_action in (self.action_edit_individual, self.action_edit_bulk):
+            self.menu_edit_songs.addAction(song_action)
+
+        self.menu_help.addAction(self.action_about)
+
+    @final
+    def _setupUi(self) -> None:
+        """Create the main interface."""
+        self.setWindowTitle("Music Modify")
+        self.resize(800, 600)
+
+        centralwidget = QWidget(self)
+        vertical_layout = QVBoxLayout(centralwidget)
+        vertical_layout.setContentsMargins(0, 0, 0, 0)
+
+        self.setCentralWidget(centralwidget)
+
+        self.files_table_view = QTableView(centralwidget)
+        self.files_table_view.setDragDropMode(QAbstractItemView.DragDropMode.DropOnly)
+        self.files_table_view.setAlternatingRowColors(True)
+        self.files_table_view.setSelectionBehavior(
+            QAbstractItemView.SelectionBehavior.SelectRows
+        )
+        self.files_table_view.horizontalHeader().setStretchLastSection(True)
+        self.files_table_view.setShowGrid(False)
+        self.files_table_view.setContextMenuPolicy(
+            Qt.ContextMenuPolicy.CustomContextMenu
+        )
+
+        # Drag and Drop
+        self.files_table_view.setAcceptDrops(True)
+        self.files_table_view.dropEvent = self.processTableDropEvents
+        self.files_table_view.dragEnterEvent = self.processTableDragEvent
+        self.files_table_view.dragMoveEvent = self.processTableDragEvent
+
+        vertical_layout.addWidget(self.files_table_view)
+
+        self.statusbar = QStatusBar(self)
+        self.setStatusBar(self.statusbar)
+
+        self.tool_bar = QToolBar(self)
+        self.tool_bar.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextBesideIcon)
+        self.addToolBar(Qt.ToolBarArea.TopToolBarArea, self.tool_bar)

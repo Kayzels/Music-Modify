@@ -3,11 +3,19 @@
 import logging
 from typing import TypedDict
 
-from PySide6.QtWidgets import QDialog, QMessageBox, QWidget
+from PySide6.QtCore import Qt
+from PySide6.QtWidgets import (
+    QCheckBox,
+    QDialog,
+    QDialogButtonBox,
+    QFormLayout,
+    QLineEdit,
+    QMessageBox,
+    QVBoxLayout,
+    QWidget,
+)
 
 from music_modify.models.tag_model import TagModel
-
-from .ui_dialog_prefs_tag_add import Ui_PrefsTagAddDialog
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +26,7 @@ class _TagDict(TypedDict):
     show_in_table: bool
 
 
-class PrefsTagAddDialog(QDialog, Ui_PrefsTagAddDialog):
+class PrefsTagAddDialog(QDialog):
     """Dialog that allows a user to add a new tag to the list of tags."""
 
     def __init__(self, parent: QWidget | None = None) -> None:
@@ -28,7 +36,7 @@ class PrefsTagAddDialog(QDialog, Ui_PrefsTagAddDialog):
             parent: The widget that this dialog should be displayed on.
         """
         super().__init__(parent)
-        self.setupUi(self)
+        self.setupUi()
 
     def _getValidTag(self, model: TagModel) -> _TagDict | None:
         """Gets the details for a tag, if that tag isn't already defined.
@@ -87,3 +95,34 @@ class PrefsTagAddDialog(QDialog, Ui_PrefsTagAddDialog):
         if tag is None:
             return
         model.addTag(**tag)
+
+    def setupUi(self) -> None:
+        """Create the interface for the dialog."""
+        self.resize(300, 140)
+        self.setWindowTitle("Add Tag")
+
+        vertical_layout = QVBoxLayout(self)
+
+        form_layout = QFormLayout()
+
+        self.id3_line_edit = QLineEdit(parent=self)
+        form_layout.addRow("ID3 Key", self.id3_line_edit)
+
+        self.display_name_line_edit = QLineEdit(self)
+        form_layout.addRow("Display Name", self.display_name_line_edit)
+
+        self.show_checkbox = QCheckBox("Show in Table")
+        form_layout.addRow(self.show_checkbox)
+
+        vertical_layout.addLayout(form_layout)
+
+        button_box = QDialogButtonBox(
+            self,
+            orientation=Qt.Orientation.Horizontal,
+            standardButtons=QDialogButtonBox.StandardButton.Cancel
+            | QDialogButtonBox.StandardButton.Ok,
+        )
+        button_box.accepted.connect(self.accept)
+        button_box.rejected.connect(self.reject)
+
+        vertical_layout.addWidget(button_box)

@@ -6,10 +6,10 @@ of all preference dialogs.
 
 from abc import ABC, abstractmethod
 import logging
-from typing import Self
+from typing import final
 
-from PySide6.QtCore import Signal
-from PySide6.QtWidgets import QDialog, QDialogButtonBox, QMessageBox, QWidget
+from PySide6.QtCore import Qt, Signal
+from PySide6.QtWidgets import QDialog, QDialogButtonBox, QWidget
 
 from music_modify.gui.meta import ABCQMeta
 
@@ -23,7 +23,7 @@ class PrefsAbstractDialog(QDialog, ABC, metaclass=ABCQMeta):
     "Signal that is emitted whenever any setting is changed."
 
     @abstractmethod
-    def setupUi(self, dialog: Self, /) -> None:
+    def setupUi(self) -> None:
         """Set up the display of the dialog."""
 
     def __init__(self, parent: QWidget | None = None) -> None:
@@ -32,26 +32,34 @@ class PrefsAbstractDialog(QDialog, ABC, metaclass=ABCQMeta):
         Args:
             parent: The widget that the dialog should be displayed on.
         """
-        self.button_box: QDialogButtonBox | None = None
         QDialog.__init__(self, parent)
-        self.setupUi(self)
-        self._setButtonBoxConnections()
+        self.setupUi()
+        self.button_box: QDialogButtonBox = self._createButtonBox()
         self.accepted.connect(self.updateSettings)
 
-    def _setButtonBoxConnections(self) -> None:
-        """Creates connections between button box signals and slots."""
-        if not self.button_box:
-            warning = "Button Box not found or invalid after calling setupUi()."
-            logger.warning(warning)
-            QMessageBox.warning(self, "Missing attributes", warning)
-            return
-        self.button_box.button(
+    @final
+    def _createButtonBox(self) -> QDialogButtonBox:
+        layout = self.layout()
+        if layout is None:
+            raise Exception("Layout not set for dialog in setupUi")
+        button_box = QDialogButtonBox(self)
+        button_box.setOrientation(Qt.Orientation.Horizontal)
+        button_box.setStandardButtons(
+            QDialogButtonBox.StandardButton.Cancel
+            | QDialogButtonBox.StandardButton.Ok
+            | QDialogButtonBox.StandardButton.Reset
+            | QDialogButtonBox.StandardButton.RestoreDefaults
+        )
+        button_box.accepted.connect(self.accept)
+        button_box.rejected.connect(self.reject)
+        button_box.button(
             QDialogButtonBox.StandardButton.RestoreDefaults,
         ).clicked.connect(self.restoreDefaults)
-
-        self.button_box.button(QDialogButtonBox.StandardButton.Reset).clicked.connect(
+        button_box.button(QDialogButtonBox.StandardButton.Reset).clicked.connect(
             self.resetSettings,
         )
+        layout.addWidget(button_box)
+        return button_box
 
     @abstractmethod
     def updateSettings(self) -> None:

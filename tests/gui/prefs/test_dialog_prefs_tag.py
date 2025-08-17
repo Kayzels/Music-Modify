@@ -76,26 +76,26 @@ def _makeChanges(
     table = dialog.tag_table
 
     # Add row at end
-    dialog.add_toolbutton.click()
+    dialog.add_button.click()
     tags.append(_test_tag_info)
 
     # Remove some rows
     selectRows(table, [0, 1])
-    dialog.remove_toolbutton.click()
+    dialog.remove_button.click()
     tags.pop(1)
     tags.pop(0)
 
     # Move rows up
     up_rows = [2, 4]
     selectRows(table, [2, 4])
-    dialog.up_toolbutton.click()
+    dialog.up_button.click()
     for row in up_rows:
         tags.insert(row - 1, tags.pop(row))
 
     # Move rows down
     down_rows = [5, 7]
     selectRows(table, down_rows)
-    dialog.down_toolbutton.click()
+    dialog.down_button.click()
     for row in down_rows:
         tags.insert(row + 1, tags.pop(row))
     return tags
@@ -119,7 +119,7 @@ def test_PrefsTagDialog_addTag(
     model = dialog.model
     before_len = model.rowCount()
 
-    dialog.add_toolbutton.click()
+    dialog.add_button.click()
 
     assert model.rowCount() == before_len + 1
     assert model.tags[-1] == _test_tag_info
@@ -139,19 +139,19 @@ def test_PrefsTagDialog_removeSelectedTags(
 
     # With nothing selected, should do nothing
     before_len = model.rowCount()
-    dialog.remove_toolbutton.click()
+    dialog.remove_button.click()
     assert model.rowCount() == before_len
 
     # Select the first row and remove
     selectRows(table, [0])
-    dialog.remove_toolbutton.click()
+    dialog.remove_button.click()
     tags.pop(0)
     assert model.tags == tags
 
     # Select second and fourth rows and remove
     rows_to_remove = [2, 4]
     selectRows(table, rows_to_remove)
-    dialog.remove_toolbutton.click()
+    dialog.remove_button.click()
     for row in reversed(rows_to_remove):
         tags.pop(row)
     assert model.tags == tags
@@ -169,17 +169,17 @@ def test_PrefsTagDialog_moveTagsUp(
     table = dialog.tag_table
 
     # With nothing selected, should do nothing
-    dialog.up_toolbutton.click()
+    dialog.up_button.click()
     assert model.tags == tags
 
     # With first row selected, should do nothing
     selectRows(table, [0])
-    dialog.up_toolbutton.click()
+    dialog.up_button.click()
     assert model.tags == tags
 
     # With second row selected, should swap first and second
     selectRows(table, [1])
-    dialog.up_toolbutton.click()
+    dialog.up_button.click()
     val: TagInfo = tags.pop(1)
     tags.insert(0, val)
     assert model.tags == tags
@@ -187,7 +187,7 @@ def test_PrefsTagDialog_moveTagsUp(
     # With third and fourth selected, should become second and third
     rows_to_move = [2, 3]
     selectRows(table, rows_to_move)
-    dialog.up_toolbutton.click()
+    dialog.up_button.click()
     for row in rows_to_move:
         tags.insert(row - 1, tags.pop(row))
     assert model.tags == tags
@@ -205,17 +205,17 @@ def test_PrefsTagDialog_moveTagsDown(
     table = dialog.tag_table
 
     # With nothing selected, should do nothing
-    dialog.down_toolbutton.click()
+    dialog.down_button.click()
     assert model.tags == tags
 
     # With last row selected, should do nothing
     selectRows(table, [len(tags) - 1])
-    dialog.down_toolbutton.click()
+    dialog.down_button.click()
     assert model.tags == tags
 
     # With second row selected, should swap second and third
     selectRows(table, [1])
-    dialog.down_toolbutton.click()
+    dialog.down_button.click()
     val: TagInfo = tags.pop(1)
     tags.insert(2, val)
     assert model.tags == tags
@@ -223,7 +223,7 @@ def test_PrefsTagDialog_moveTagsDown(
     # With third and fourth selected, should become fourth and fifth
     rows_to_move = [2, 3]
     selectRows(table, rows_to_move)
-    dialog.down_toolbutton.click()
+    dialog.down_button.click()
     for row in reversed(rows_to_move):
         tags.insert(row + 1, tags.pop(row))
     assert model.tags == tags
@@ -273,7 +273,7 @@ def test_PrefsTagDialog_resetSettings(
     rows_to_remove = [2, 4]
     table1 = dialog1.tag_table
     selectRows(table1, rows_to_remove)
-    dialog1.remove_toolbutton.click()
+    dialog1.remove_button.click()
     assert tags1 != model1.tags
     assert len(model1.tags) == len(tags1) - 2
     dialog1.accept()
@@ -306,7 +306,7 @@ def test_PrefsTagDialog_restore_then_reset(
     table1 = dialog1.tag_table
     rows_to_remove = [2, 4]
     selectRows(table1, rows_to_remove)
-    dialog1.remove_toolbutton.click()
+    dialog1.remove_button.click()
     assert tags1 != model1.tags
     assert len(model1.tags) == len(tags1) - 2
     dialog1.accept()

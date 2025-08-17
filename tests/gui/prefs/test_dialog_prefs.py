@@ -2,7 +2,7 @@ from typing import TYPE_CHECKING, cast, override
 from unittest.mock import MagicMock
 
 from PySide6.QtCore import Signal
-from PySide6.QtWidgets import QDialogButtonBox, QWidget
+from PySide6.QtWidgets import QVBoxLayout, QWidget
 import pytest
 from pytestqt.qtbot import QtBot
 
@@ -27,12 +27,8 @@ class MockAbstractChildDialog(PrefsAbstractDialog):
         self.show: Callable[..., None] = MagicMock()
 
     @override
-    def setupUi(self, dialog: PrefsAbstractDialog, /) -> None:
-        # noinspection PyTypeChecker
-        self.button_box: QDialogButtonBox | None = QDialogButtonBox(
-            QDialogButtonBox.StandardButton.RestoreDefaults
-            | QDialogButtonBox.StandardButton.Reset,
-        )
+    def setupUi(self) -> None:
+        self.setLayout(QVBoxLayout())
 
     @override
     def updateSettings(self) -> None:
