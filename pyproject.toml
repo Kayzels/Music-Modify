@@ -33,6 +33,7 @@ reportUnknownArgumentType = false
 reportExplicitAny = false
 reportMissingTypeStubs = false
 reportUnknownLambdaType = false
+reportUnannotatedClassAttribute = false
 
 [tool.ruff]
 # Formatter wraps lines at a length of 80

@@ -47,12 +47,19 @@ class EditAbstractWidget[ValueT: SongEditData, WidgetT: QWidget](
         "The layout that the main widget should be placed on."
         self.main_widget: WidgetT
         "Main widget used to display the values currently stored."
+        self._original_data: ValueT
         self._initValue(data)
         self._setupCommonUi()
 
-    @abstractmethod
+    @final
     def _initValue(self, data: ValueT | None, /) -> None:
         """Sets the original value that the widget should store."""
+        if data is None:
+            self.value = self.empty
+        else:
+            self.value = data
+
+        self._original_data = copy.deepcopy(self.value)
 
     @abstractmethod
     def _setupUi(self) -> None:
@@ -74,10 +81,6 @@ class EditAbstractWidget[ValueT: SongEditData, WidgetT: QWidget](
         """Updates the value that is stored in the widget, and displayed."""
 
     @abstractmethod
-    def _clearValue(self) -> None:
-        """Sets the value to the equivalent empty value."""
-
-    @abstractmethod
     def _isReset(self) -> bool:
         """Returns whether the value has been set back to its original state."""
 
@@ -88,28 +91,36 @@ class EditAbstractWidget[ValueT: SongEditData, WidgetT: QWidget](
         This function _must_ set the `main_widget` instance variable.
 
         It also should not call other private methods like `_displayValue`.
-        It it better for that function to be called in `_setupUi`.
+        It is better for that function to be called in `_setupUi`.
         """
 
     @property
-    @abstractmethod
+    @final
     def value(self) -> ValueT:
         """The value displayed and stored inside the widget, based on the data type."""
+        return self._value
 
     @value.setter
-    @abstractmethod
+    @final
     def value(self, value: ValueT) -> None:
         """The value displayed and stored inside the widget, based on the data type."""
+        self._value: ValueT = value
+
+    @property
+    @final
+    def original(self) -> ValueT:
+        """The original value that was stored inside the widget, before changes."""
+        return self._original_data
 
     @property
     @abstractmethod
-    def original(self) -> ValueT:
-        """The original value that was stored inside the widget, before changes."""
+    def empty(self) -> ValueT:
+        """The empty value for the data type, for example, the empty list or string."""
 
     @final
     def clear(self) -> None:
         """Clears the value stored and displayed in the widget."""
-        self._clearValue()
+        self.value = self.empty
         self._displayValue()
         self._emitUpdate()
 

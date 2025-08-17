@@ -1,6 +1,5 @@
 """Module that defines the widget that is used to display (role, person) pairs."""
 
-import copy
 import logging
 from typing import override
 
@@ -54,15 +53,6 @@ class EditTableWidget(EditAbstractGroupWidget[SongTableData, DragTableWidget]):
         self._original_data: SongTableData
 
         self.main_widget.adjustColumnWidths(len(self.value))
-
-    @override
-    def _initValue(self, data: SongTableData | None, /) -> None:
-        if data is None:
-            self.value = []
-        else:
-            self.value = data
-
-        self._original_data = copy.deepcopy(self.value)
 
     @override
     def _setMainWidget(self) -> DragTableWidget:
@@ -189,10 +179,6 @@ class EditTableWidget(EditAbstractGroupWidget[SongTableData, DragTableWidget]):
             self._addRow()
 
     @override
-    def _clearValue(self) -> None:
-        self.value = []
-
-    @override
     def _addRow(self) -> None:
         self.main_widget.insertRow(self.main_widget.rowCount())
         # Need to add items here, rather than keeping as None,
@@ -273,16 +259,5 @@ class EditTableWidget(EditAbstractGroupWidget[SongTableData, DragTableWidget]):
 
     @property
     @override
-    def value(self) -> SongTableData:
-        return self._value
-
-    @value.setter
-    @override
-    def value(self, value: SongTableData) -> None:
-        # noinspection PyAttributeOutsideInit
-        self._value: SongTableData = value
-
-    @property
-    @override
-    def original(self) -> SongTableData:
-        return self._original_data
+    def empty(self) -> SongTableData:
+        return []

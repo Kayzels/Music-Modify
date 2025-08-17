@@ -8,5 +8,6 @@
   "reportUnknownArgumentType": false,
   "reportExplicitAny": false,
   "reportMissingTypeStubs": false,
-  "reportUnknownLambdaType": false
+  "reportUnknownLambdaType": false,
+  "reportUnannotatedClassAttribute": false
 }

@@ -26,17 +26,6 @@ class EditLineWidget(EditAbstractWidget[str, QLineEdit]):
         """
         super().__init__(parent, data)
 
-        self._original_data: str
-
-    @override
-    def _initValue(self, data: str | None, /) -> None:
-        if data is None:
-            self.value = ""
-        else:
-            self.value = data
-
-        self._original_data = self.value
-
     @override
     def _setMainWidget(self) -> QLineEdit:
         main_widget = QLineEdit()
@@ -64,24 +53,9 @@ class EditLineWidget(EditAbstractWidget[str, QLineEdit]):
 
     @override
     def _displayValue(self) -> None:
-        """Sets the values for the table based on the current value property."""
         self.main_widget.setText(self.value)
 
-    @override
-    def _clearValue(self) -> None:
-        self.value = ""
-
     @property
     @override
-    def value(self) -> str:
-        return self._value
-
-    @value.setter
-    @override
-    def value(self, value: str) -> None:
-        self._value: str = value
-
-    @property
-    @override
-    def original(self) -> str:
-        return self._original_data
+    def empty(self) -> str:
+        return ""

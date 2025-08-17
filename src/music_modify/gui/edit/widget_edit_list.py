@@ -3,7 +3,6 @@
 This widget is used when lists of single values are contained for a tag.
 """
 
-import copy
 import logging
 from typing import override
 
@@ -37,17 +36,6 @@ class EditListWidget(EditAbstractGroupWidget[SongListData, QListWidget]):
             data: The data to be displayed on this widget.
         """
         super().__init__(parent, data)
-
-        self._original_data: SongListData
-
-    @override
-    def _initValue(self, data: SongListData | None) -> None:
-        if data is None:
-            self.value = []
-        else:
-            self.value = data.copy()
-
-        self._original_data = copy.deepcopy(self.value)
 
     @override
     def _setMainWidget(self) -> QListWidget:
@@ -113,10 +101,6 @@ class EditListWidget(EditAbstractGroupWidget[SongListData, QListWidget]):
             self._addRow()
 
     @override
-    def _clearValue(self) -> None:
-        self.value = []
-
-    @override
     def _addRow(self) -> None:
         item = QListWidgetItem("")
         item.setFlags(item.flags() | Qt.ItemFlag.ItemIsEditable)
@@ -168,15 +152,5 @@ class EditListWidget(EditAbstractGroupWidget[SongListData, QListWidget]):
 
     @property
     @override
-    def value(self) -> SongListData:
-        return self._value
-
-    @value.setter
-    @override
-    def value(self, value: SongListData) -> None:
-        self._value: SongListData = value
-
-    @property
-    @override
-    def original(self) -> SongListData:
-        return self._original_data
+    def empty(self) -> SongListData:
+        return []
