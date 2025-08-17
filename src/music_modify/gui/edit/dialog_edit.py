@@ -47,6 +47,10 @@ class EditDialog(EditAbstractDialog):
         """
         super().__init__(parent, repository, rows)
 
+        if len(rows) == 0:
+            self.reject()
+            return
+
         self.current_index: int = 0
         "The index of this specific song in the song repository"
 

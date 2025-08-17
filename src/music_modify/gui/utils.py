@@ -2,7 +2,7 @@
 
 from typing import cast
 
-from PySide6.QtCore import QSortFilterProxyModel
+from PySide6.QtCore import QItemSelectionModel, QSortFilterProxyModel
 from PySide6.QtWidgets import (
     QAbstractItemView,
     QLayout,
@@ -89,3 +89,16 @@ def createTab(
     scroll_area.setWidget(page)
     tab_widget.addTab(scroll_area, name)
     return layout
+
+
+def selectRows(view: QAbstractItemView, rows: list[int]) -> None:
+    """Select the rows in `view` that correspond to the values in `rows`."""
+    model = view.model()
+    selection_model = view.selectionModel()
+    selection_model.clearSelection()
+    for row in rows:
+        selection_model.select(
+            model.index(row, 0),
+            QItemSelectionModel.SelectionFlag.Select
+            | QItemSelectionModel.SelectionFlag.Rows,
+        )

@@ -5,16 +5,16 @@ that is can be contained in a single line (i.e. a single value).
 """
 
 import logging
-from typing import cast, override
+from typing import override
 
-from PySide6.QtWidgets import QHBoxLayout, QLayout, QLineEdit, QWidget
+from PySide6.QtWidgets import QLineEdit, QWidget
 
 from .widget_edit_abstract import EditAbstractWidget
 
 logger = logging.getLogger(__name__)
 
 
-class EditLineWidget(EditAbstractWidget[str]):
+class EditLineWidget(EditAbstractWidget[str, QLineEdit]):
     """Displays data in a line edit, used when the value is a single string."""
 
     def __init__(self, parent: QWidget, data: str | None) -> None:
@@ -27,10 +27,9 @@ class EditLineWidget(EditAbstractWidget[str]):
         super().__init__(parent, data)
 
         self._original_data: str
-        self.main_widget: QLineEdit
 
     @override
-    def _initValue(self, data: str | None) -> None:
+    def _initValue(self, data: str | None, /) -> None:
         if data is None:
             self.value = ""
         else:
@@ -39,19 +38,18 @@ class EditLineWidget(EditAbstractWidget[str]):
         self._original_data = self.value
 
     @override
-    def _setupUi(self) -> None:
-        layout_get: QLayout | None = self.layout()
-        if layout_get is None:
-            logger.info("Didn't create a layout for list widget")
-            return
-        layout: QHBoxLayout = cast(QHBoxLayout, layout_get)
+    def _setMainWidget(self) -> QLineEdit:
+        main_widget = QLineEdit()
+        main_widget.editingFinished.connect(self._updateValue)
+        return main_widget
 
-        self.main_widget = QLineEdit()
+    @override
+    def _setupUi(self) -> None:
+        layout = self.main_layout
         self._displayValue()
         layout.addWidget(self.main_widget)
         button_layout = self.createButtons()
         layout.addLayout(button_layout)
-        self.main_widget.editingFinished.connect(self._updateValue)
 
     @override
     def _isReset(self) -> bool:
@@ -67,9 +65,6 @@ class EditLineWidget(EditAbstractWidget[str]):
     @override
     def _displayValue(self) -> None:
         """Sets the values for the table based on the current value property."""
-        if not hasattr(self, "main_widget"):
-            return
-
         self.main_widget.setText(self.value)
 
     @override

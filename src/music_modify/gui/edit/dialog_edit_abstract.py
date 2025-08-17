@@ -37,6 +37,9 @@ class EditAbstractDialog(QDialog, ABC, metaclass=ABCQMeta):
 
         self.setModal(True)
 
+        if len(rows) == 0:
+            self.reject()
+            return
         self.repository: SongRepository = repository
         "The list of songs that is currently being managed."
         self.rows: list[int] = rows

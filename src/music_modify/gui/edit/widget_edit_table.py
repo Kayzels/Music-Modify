@@ -2,17 +2,13 @@
 
 import copy
 import logging
-from typing import cast, override
+from typing import override
 
-from PySide6.QtCore import QItemSelectionModel, Qt, Signal
-from PySide6.QtGui import QDropEvent, QResizeEvent
+from PySide6.QtCore import QItemSelectionModel, Qt
 from PySide6.QtWidgets import (
     QAbstractItemView,
     QBoxLayout,
     QFrame,
-    QHBoxLayout,
-    QLayout,
-    QTableWidget,
     QTableWidgetItem,
     QVBoxLayout,
     QWidget,
@@ -24,41 +20,12 @@ from music_modify.custom_types.enums import EditButton, RowDirection
 from music_modify.gui.utils import getSelectedRows
 
 from .widget_edit_abstract_group import EditAbstractGroupWidget
+from .widget_table_drag import DragTableWidget
 
 logger = logging.getLogger(__name__)
 
 
-class _DragTableWidget(QTableWidget):
-    """Private table class that emits a signal when rows are reordered."""
-
-    rows_reordered: Signal = Signal()
-
-    @override
-    def dropEvent(self, event: QDropEvent) -> None:
-        super().dropEvent(event)
-        self.rows_reordered.emit()
-
-    @override
-    def resizeEvent(self, event: QResizeEvent) -> None:
-        super().resizeEvent(event)
-        self.adjustColumnWidths()
-
-    def adjustColumnWidths(self, length: int | None = None) -> None:
-        """Adjusts the widths of the table to the specified length.
-
-        Except for the last column, which is stretched.
-        """
-        if self.rowCount() <= 1 or length == 0:
-            column_width = int(self.width() / self.columnCount())
-            for column in range(self.columnCount() - 1):
-                self.setColumnWidth(column, column_width)
-        else:
-            for column in range(self.columnCount() - 1):
-                self.resizeColumnToContents(column)
-        self.horizontalHeader().setStretchLastSection(True)
-
-
-class EditTableWidget(EditAbstractGroupWidget[SongTableData]):
+class EditTableWidget(EditAbstractGroupWidget[SongTableData, DragTableWidget]):
     """Displays data in a table, used for People data.
 
     This is stored in the form [role, person].
@@ -84,13 +51,12 @@ class EditTableWidget(EditAbstractGroupWidget[SongTableData]):
 
         super().__init__(parent, data)
 
-        self.main_widget: _DragTableWidget
         self._original_data: SongTableData
 
         self.main_widget.adjustColumnWidths(len(self.value))
 
     @override
-    def _initValue(self, data: SongTableData | None) -> None:
+    def _initValue(self, data: SongTableData | None, /) -> None:
         if data is None:
             self.value = []
         else:
@@ -99,12 +65,36 @@ class EditTableWidget(EditAbstractGroupWidget[SongTableData]):
         self._original_data = copy.deepcopy(self.value)
 
     @override
+    def _setMainWidget(self) -> DragTableWidget:
+        main_widget = DragTableWidget()
+        main_widget.setMinimumHeight(250)
+        main_widget.setColumnCount(2)
+        main_widget.setHorizontalHeaderLabels(self.labels)
+        main_widget.setRowCount(len(self.value))
+        main_widget.setShowGrid(False)
+        main_widget.setAlternatingRowColors(True)
+
+        # Allow dragging rows up and down
+        # NOTE: To ensure rows aren't overwritten,
+        # need to ensure that ItemIsDropEnabled is unset
+        # for all items. (Done in _displayValue)
+        main_widget.setDragDropMode(QAbstractItemView.DragDropMode.InternalMove)
+        main_widget.setDragDropOverwriteMode(False)
+
+        main_widget.setSelectionMode(
+            QAbstractItemView.SelectionMode.ExtendedSelection,
+        )
+        main_widget.setSelectionBehavior(
+            QAbstractItemView.SelectionBehavior.SelectRows,
+        )
+
+        main_widget.itemChanged.connect(self._updateValue)
+        main_widget.rows_reordered.connect(self._updateValue)
+        return main_widget
+
+    @override
     def _setupUi(self) -> None:
-        layout_get: QLayout | None = self.layout()
-        if layout_get is None:
-            logger.info("Layout was None for table widget")
-            return
-        layout: QHBoxLayout = cast(QHBoxLayout, layout_get)
+        layout = self.main_layout
 
         # Put the table in a frame so that there are borders,
         # like the other EditWidgets.
@@ -116,34 +106,9 @@ class EditTableWidget(EditAbstractGroupWidget[SongTableData]):
         frame_layout.addWidget(frame)
         layout.addLayout(frame_layout)
 
-        self.main_widget = _DragTableWidget()
-        self.main_widget.setMinimumHeight(250)
-        self.main_widget.setColumnCount(2)
-        self.main_widget.setHorizontalHeaderLabels(self.labels)
-        self.main_widget.setRowCount(len(self.value))
-        self.main_widget.setShowGrid(False)
-        self.main_widget.setAlternatingRowColors(True)
-
         frame_layout.addWidget(self.main_widget)
 
-        # Allow dragging rows up and down
-        # NOTE: To ensure rows aren't overwritten,
-        # need to ensure that ItemIsDropEnabled is unset
-        # for all items. (Done in _displayValue)
-        self.main_widget.setDragDropMode(QAbstractItemView.DragDropMode.InternalMove)
-        self.main_widget.setDragDropOverwriteMode(False)
-
         self._displayValue()
-
-        self.main_widget.setSelectionMode(
-            QAbstractItemView.SelectionMode.ExtendedSelection,
-        )
-        self.main_widget.setSelectionBehavior(
-            QAbstractItemView.SelectionBehavior.SelectRows,
-        )
-
-        self.main_widget.itemChanged.connect(self._updateValue)
-        self.main_widget.rows_reordered.connect(self._updateValue)
 
         button_layout = QVBoxLayout()
         layout.addLayout(button_layout)
@@ -195,9 +160,6 @@ class EditTableWidget(EditAbstractGroupWidget[SongTableData]):
     @override
     def _displayValue(self) -> None:
         """Sets the values for the table based on the current value property."""
-        if not hasattr(self, "main_widget"):
-            return
-
         self.main_widget.clearContents()
 
         # Ensure we have enough rows for the data, if a row was deleted before.
@@ -253,6 +215,9 @@ class EditTableWidget(EditAbstractGroupWidget[SongTableData]):
         for row in selected_rows:
             self.main_widget.removeRow(row)
         self._updateValue()
+
+        if self.main_widget.rowCount() == 0:
+            self._addRow()
 
     @override
     def _moveRows(self, direction: RowDirection) -> None:

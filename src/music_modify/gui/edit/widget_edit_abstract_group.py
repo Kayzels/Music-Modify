@@ -18,8 +18,8 @@ from music_modify.gui.meta import ABCQMeta
 from .widget_edit_abstract import EditAbstractWidget
 
 
-class EditAbstractGroupWidget[ValueG: SongListData | SongTableData](
-    EditAbstractWidget[ValueG],
+class EditAbstractGroupWidget[ValueG: SongListData | SongTableData, WidgetT: QWidget](
+    EditAbstractWidget[ValueG, WidgetT],
     ABC,
     metaclass=ABCQMeta,
 ):
@@ -35,6 +35,14 @@ class EditAbstractGroupWidget[ValueG: SongListData | SongTableData](
             parent: The widget that this widget should be displayed on.
             data: The data to be displayed on this widget.
         """
+        self.down_button: QToolButton | None = None
+        "Button used for moving rows down in the widget."
+        self.remove_button: QToolButton | None = None
+        "Button that removes the selected row from the widget."
+        self.add_button: QToolButton | None = None
+        "Button that adds a row to the widget."
+        self.up_button: QToolButton | None = None
+        "Button used for moving rows up in the widget."
         super().__init__(parent, data)
 
     # noinspection PyTypeChecker
@@ -53,28 +61,30 @@ class EditAbstractGroupWidget[ValueG: SongListData | SongTableData](
         # So populate from last going forward, with insert
 
         if buttons & EditButton.Down:
-            down_button = QToolButton(self)
-            down_button.setIcon(QIcon(QIcon.fromTheme(QIcon.ThemeIcon.GoDown)))
-            button_layout.insertWidget(0, down_button)
-            down_button.clicked.connect(lambda: self._moveRows(RowDirection.Down))
+            self.down_button = QToolButton(self)
+            self.down_button.setIcon(QIcon(QIcon.fromTheme(QIcon.ThemeIcon.GoDown)))
+            button_layout.insertWidget(0, self.down_button)
+            self.down_button.clicked.connect(lambda: self._moveRows(RowDirection.Down))
 
         if buttons & EditButton.Remove:
-            remove_button = QToolButton(self)
-            remove_button.setIcon(QIcon(QIcon.fromTheme(QIcon.ThemeIcon.ListRemove)))
-            button_layout.insertWidget(0, remove_button)
-            remove_button.clicked.connect(self._removeRow)
+            self.remove_button = QToolButton(self)
+            self.remove_button.setIcon(
+                QIcon(QIcon.fromTheme(QIcon.ThemeIcon.ListRemove))
+            )
+            button_layout.insertWidget(0, self.remove_button)
+            self.remove_button.clicked.connect(self._removeRow)
 
         if buttons & EditButton.Add:
-            add_button = QToolButton(self)
-            add_button.setIcon(QIcon(QIcon.fromTheme(QIcon.ThemeIcon.ListAdd)))
-            button_layout.insertWidget(0, add_button)
-            add_button.clicked.connect(self._addRow)
+            self.add_button = QToolButton(self)
+            self.add_button.setIcon(QIcon(QIcon.fromTheme(QIcon.ThemeIcon.ListAdd)))
+            button_layout.insertWidget(0, self.add_button)
+            self.add_button.clicked.connect(self._addRow)
 
         if buttons & EditButton.Up:
-            up_button = QToolButton(self)
-            up_button.setIcon(QIcon(QIcon.fromTheme(QIcon.ThemeIcon.GoUp)))
-            button_layout.insertWidget(0, up_button)
-            up_button.clicked.connect(lambda: self._moveRows(RowDirection.Up))
+            self.up_button = QToolButton(self)
+            self.up_button.setIcon(QIcon(QIcon.fromTheme(QIcon.ThemeIcon.GoUp)))
+            button_layout.insertWidget(0, self.up_button)
+            self.up_button.clicked.connect(lambda: self._moveRows(RowDirection.Up))
 
         return button_layout
 

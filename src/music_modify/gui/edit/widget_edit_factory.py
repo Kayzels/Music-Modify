@@ -5,9 +5,9 @@ based on the format of the data.
 """
 
 import copy
-from typing import TypeVar, cast
+from typing import cast
 
-from PySide6.QtWidgets import QWidget
+from PySide6.QtWidgets import QLineEdit, QListWidget, QWidget
 
 from music_modify.custom_types.aliases import (
     SongEditData,
@@ -21,13 +21,12 @@ from .widget_edit_abstract import EditAbstractWidget
 from .widget_edit_line import EditLineWidget
 from .widget_edit_list import EditListWidget
 from .widget_edit_table import EditTableWidget
+from .widget_table_drag import DragTableWidget
 
-ValueT = TypeVar("ValueT", bound=SongEditData)
-
-EditAbstractWidgetType = (
-    EditAbstractWidget[SongListData]
-    | EditAbstractWidget[SongTableData]
-    | EditAbstractWidget[str]
+type EditAbstractWidgetType = (
+    EditAbstractWidget[SongListData, QListWidget]
+    | EditAbstractWidget[SongTableData, DragTableWidget]
+    | EditAbstractWidget[str, QLineEdit]
 )
 
 

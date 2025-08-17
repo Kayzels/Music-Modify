@@ -5,14 +5,12 @@ This widget is used when lists of single values are contained for a tag.
 
 import copy
 import logging
-from typing import cast, override
+from typing import override
 
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
     QAbstractItemView,
     QBoxLayout,
-    QHBoxLayout,
-    QLayout,
     QListWidget,
     QListWidgetItem,
     QVBoxLayout,
@@ -28,7 +26,7 @@ from .widget_edit_abstract_group import EditAbstractGroupWidget
 logger = logging.getLogger(__name__)
 
 
-class EditListWidget(EditAbstractGroupWidget[SongListData]):
+class EditListWidget(EditAbstractGroupWidget[SongListData, QListWidget]):
     """Displays data in a list widget, with each row being a string."""
 
     def __init__(self, parent: QWidget, data: SongListData | None) -> None:
@@ -40,7 +38,6 @@ class EditListWidget(EditAbstractGroupWidget[SongListData]):
         """
         super().__init__(parent, data)
 
-        self.main_widget: QListWidget
         self._original_data: SongListData
 
     @override
@@ -53,25 +50,24 @@ class EditListWidget(EditAbstractGroupWidget[SongListData]):
         self._original_data = copy.deepcopy(self.value)
 
     @override
-    def _setupUi(self) -> None:
-        layout_get: QLayout | None = self.layout()
-        if layout_get is None:
-            logger.info("Didn't create a layout for list widget")
-            return
-        layout: QHBoxLayout = cast(QHBoxLayout, layout_get)
-
-        self.main_widget = QListWidget()
-        self.main_widget.setMinimumHeight(200)
-        self._displayValue()
-        self.main_widget.setDragDropMode(QAbstractItemView.DragDropMode.InternalMove)
-        self.main_widget.model().rowsMoved.connect(self._updateValue)
-        self.main_widget.setSelectionMode(
+    def _setMainWidget(self) -> QListWidget:
+        main_widget = QListWidget()
+        main_widget.setMinimumHeight(200)
+        main_widget.setDragDropMode(QAbstractItemView.DragDropMode.InternalMove)
+        main_widget.model().rowsMoved.connect(self._updateValue)
+        main_widget.setSelectionMode(
             QAbstractItemView.SelectionMode.ExtendedSelection,
         )
-        self.main_widget.itemChanged.connect(self._updateValue)
-        self.main_widget.setAlternatingRowColors(True)
+        main_widget.itemChanged.connect(self._updateValue)
+        main_widget.setAlternatingRowColors(True)
+        return main_widget
 
+    @override
+    def _setupUi(self) -> None:
+        layout = self.main_layout
         layout.addWidget(self.main_widget)
+
+        self._displayValue()
 
         button_layout = QVBoxLayout()
         layout.addLayout(button_layout)
@@ -105,15 +101,16 @@ class EditListWidget(EditAbstractGroupWidget[SongListData]):
 
     @override
     def _displayValue(self) -> None:
-        if not hasattr(self, "main_widget"):
-            return
-
         # Remove all current items and rebuild the list.
         self.main_widget.clear()
         for val in self.value:
             item = QListWidgetItem(val)
             item.setFlags(item.flags() | Qt.ItemFlag.ItemIsEditable)
             self.main_widget.addItem(item)
+
+        # Ensure there's always one row available for editing
+        if self.main_widget.model().rowCount() == 0:
+            self._addRow()
 
     @override
     def _clearValue(self) -> None:
@@ -137,6 +134,8 @@ class EditListWidget(EditAbstractGroupWidget[SongListData]):
         for row in selected_rows:
             _ = self.main_widget.takeItem(row)
         self._updateValue()
+        if self.main_widget.model().rowCount() == 0:
+            self._addRow()
 
     @override
     def _moveRows(self, direction: RowDirection) -> None:

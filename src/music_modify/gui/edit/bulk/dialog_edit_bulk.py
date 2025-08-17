@@ -87,10 +87,16 @@ class EditBulkDialog(EditAbstractDialog):
         """
         super().__init__(parent, repository, rows)
 
-        self.songs: list[Song] = [
-            song for index in rows if (song := repository.getSong(index)) is not None
-        ]
+        if len(rows) == 0:
+            self.reject()
+            return
+
+        self.songs: list[Song] = []
         "The list of song objects that should be changed."
+        for index in rows:
+            song = repository[index]
+            if song is not None:
+                self.songs.append(song)
 
         self.setWindowTitle(f"Bulk editing {len(self.songs)} songs")
 
@@ -153,21 +159,21 @@ class EditBulkDialog(EditAbstractDialog):
                 people_widget_layout.addWidget(
                     EditBulkPeopleWidget(
                         self,
-                        people_values[tag],
+                        people_values.get(tag, []),
                         tag,
                     ),
                 )
                 continue
             if tag.allow_multiple:
                 multi_widget_layout.addWidget(
-                    EditBulkMultipleWidget(self, normal_values[tag], tag),
+                    EditBulkMultipleWidget(self, normal_values.get(tag, set()), tag),
                 )
                 continue
             simple_widget_form_layout.addRow(
                 tag.display_name,
                 EditBulkLineWidget(
                     self,
-                    normal_values[tag],
+                    normal_values.get(tag, set()),
                     tag,
                     in_all=in_all,
                 ),

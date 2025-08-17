@@ -44,11 +44,15 @@ class EditBulkLineWidget(EditBulkAbstractWidget):
 
         self.items: tuple[str, ...] = tuple(data)
 
+        initial = ""
+        if len(self.items) != 0 and in_all:
+            initial = self.items[0]
+
         self.main_widget: EditWithComplete = createCompletionWidget(
             self,
             items=self.items,
             multiple=False,
-            initial=self.items[0] if in_all else "",
+            initial=initial,
         )
 
         self.setupUi()

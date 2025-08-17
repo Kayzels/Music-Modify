@@ -1,12 +1,14 @@
 import copy
+from unittest.mock import MagicMock
 
-from PySide6.QtCore import QItemSelectionModel, QObject, Signal
+from PySide6.QtCore import QObject, Signal
 from PySide6.QtWidgets import QDialogButtonBox, QMessageBox, QWidget
 import pytest
 from pytestqt.qtbot import QtBot
 
 from music_modify.custom_types.tag_info import TagInfo
 from music_modify.gui.prefs.dialog_prefs_tag import PrefsTagDialog
+from music_modify.gui.utils import selectRows
 from music_modify.models.tag_model import TagModel
 import music_modify.prefs.prefs as prefs_module
 
@@ -38,19 +40,6 @@ class MockPrefsTagAddDialog(QObject):
         )
 
 
-def _selectRows(dialog: PrefsTagDialog, rows: list[int]) -> None:
-    model = dialog.tag_table.model()
-    selection_model = dialog.tag_table.selectionModel()
-    selection_model.clearSelection()
-    for row in rows:
-        # noinspection PyTypeChecker
-        selection_model.select(
-            model.index(row, 0),
-            QItemSelectionModel.SelectionFlag.Select
-            | QItemSelectionModel.SelectionFlag.Rows,
-        )
-
-
 def _createDialog(
     qtbot: QtBot,
     monkeypatch: pytest.MonkeyPatch,
@@ -78,30 +67,34 @@ def _patchDialogs(
     )
 
 
-def _makeChanges(dialog: PrefsTagDialog) -> list[TagInfo]:
+def _makeChanges(
+    dialog: PrefsTagDialog,
+) -> list[TagInfo]:
     model = dialog.model
     tags: list[TagInfo] = copy.deepcopy(model.tags)
+
+    table = dialog.tag_table
 
     # Add row at end
     dialog.add_toolbutton.click()
     tags.append(_test_tag_info)
 
     # Remove some rows
-    _selectRows(dialog, [0, 1])
+    selectRows(table, [0, 1])
     dialog.remove_toolbutton.click()
     tags.pop(1)
     tags.pop(0)
 
     # Move rows up
     up_rows = [2, 4]
-    _selectRows(dialog, up_rows)
+    selectRows(table, [2, 4])
     dialog.up_toolbutton.click()
     for row in up_rows:
         tags.insert(row - 1, tags.pop(row))
 
     # Move rows down
     down_rows = [5, 7]
-    _selectRows(dialog, down_rows)
+    selectRows(table, down_rows)
     dialog.down_toolbutton.click()
     for row in down_rows:
         tags.insert(row + 1, tags.pop(row))
@@ -140,6 +133,8 @@ def test_PrefsTagDialog_removeSelectedTags(
     dialog = _createDialog(qtbot, monkeypatch, temp_settings)
     model = dialog.model
 
+    table = dialog.tag_table
+
     tags: list[TagInfo] = copy.deepcopy(model.tags)
 
     # With nothing selected, should do nothing
@@ -148,14 +143,14 @@ def test_PrefsTagDialog_removeSelectedTags(
     assert model.rowCount() == before_len
 
     # Select the first row and remove
-    _selectRows(dialog, [0])
+    selectRows(table, [0])
     dialog.remove_toolbutton.click()
     tags.pop(0)
     assert model.tags == tags
 
     # Select second and fourth rows and remove
     rows_to_remove = [2, 4]
-    _selectRows(dialog, rows_to_remove)
+    selectRows(table, rows_to_remove)
     dialog.remove_toolbutton.click()
     for row in reversed(rows_to_remove):
         tags.pop(row)
@@ -171,17 +166,19 @@ def test_PrefsTagDialog_moveTagsUp(
     model = dialog.model
     tags: list[TagInfo] = copy.deepcopy(model.tags)
 
+    table = dialog.tag_table
+
     # With nothing selected, should do nothing
     dialog.up_toolbutton.click()
     assert model.tags == tags
 
     # With first row selected, should do nothing
-    _selectRows(dialog, [0])
+    selectRows(table, [0])
     dialog.up_toolbutton.click()
     assert model.tags == tags
 
     # With second row selected, should swap first and second
-    _selectRows(dialog, [1])
+    selectRows(table, [1])
     dialog.up_toolbutton.click()
     val: TagInfo = tags.pop(1)
     tags.insert(0, val)
@@ -189,7 +186,7 @@ def test_PrefsTagDialog_moveTagsUp(
 
     # With third and fourth selected, should become second and third
     rows_to_move = [2, 3]
-    _selectRows(dialog, rows_to_move)
+    selectRows(table, rows_to_move)
     dialog.up_toolbutton.click()
     for row in rows_to_move:
         tags.insert(row - 1, tags.pop(row))
@@ -205,17 +202,19 @@ def test_PrefsTagDialog_moveTagsDown(
     model = dialog.model
     tags: list[TagInfo] = copy.deepcopy(model.tags)
 
+    table = dialog.tag_table
+
     # With nothing selected, should do nothing
     dialog.down_toolbutton.click()
     assert model.tags == tags
 
     # With last row selected, should do nothing
-    _selectRows(dialog, [len(tags) - 1])
+    selectRows(table, [len(tags) - 1])
     dialog.down_toolbutton.click()
     assert model.tags == tags
 
     # With second row selected, should swap second and third
-    _selectRows(dialog, [1])
+    selectRows(table, [1])
     dialog.down_toolbutton.click()
     val: TagInfo = tags.pop(1)
     tags.insert(2, val)
@@ -223,7 +222,7 @@ def test_PrefsTagDialog_moveTagsDown(
 
     # With third and fourth selected, should become fourth and fifth
     rows_to_move = [2, 3]
-    _selectRows(dialog, rows_to_move)
+    selectRows(table, rows_to_move)
     dialog.down_toolbutton.click()
     for row in reversed(rows_to_move):
         tags.insert(row + 1, tags.pop(row))
@@ -272,7 +271,8 @@ def test_PrefsTagDialog_resetSettings(
     model1 = dialog1.model
     tags1: list[TagInfo] = copy.deepcopy(model1.tags)
     rows_to_remove = [2, 4]
-    _selectRows(dialog1, rows_to_remove)
+    table1 = dialog1.tag_table
+    selectRows(table1, rows_to_remove)
     dialog1.remove_toolbutton.click()
     assert tags1 != model1.tags
     assert len(model1.tags) == len(tags1) - 2
@@ -303,8 +303,9 @@ def test_PrefsTagDialog_restore_then_reset(
     dialog1 = _createDialog(qtbot, monkeypatch, temp_settings)
     model1 = dialog1.model
     tags1: list[TagInfo] = copy.deepcopy(model1.tags)
+    table1 = dialog1.tag_table
     rows_to_remove = [2, 4]
-    _selectRows(dialog1, rows_to_remove)
+    selectRows(table1, rows_to_remove)
     dialog1.remove_toolbutton.click()
     assert tags1 != model1.tags
     assert len(model1.tags) == len(tags1) - 2
@@ -331,3 +332,26 @@ def test_PrefsTagDialog_restore_then_reset(
     reset_button.click()
     assert model2.tags != changed_tags
     assert model2.tags != temp_settings.default_tags
+
+
+def test_PrefsTagDialog_showInvalidInputMessage(
+    qtbot: QtBot,
+    monkeypatch: pytest.MonkeyPatch,
+    temp_settings: prefs_module.Settings,
+) -> None:
+    dialog = _createDialog(qtbot, monkeypatch, temp_settings)
+    qtbot.addWidget(dialog)
+
+    mock_qmessagebox_warning = MagicMock()
+    monkeypatch.setattr(QMessageBox, "warning", mock_qmessagebox_warning)
+
+    model = dialog.model
+    test_message = "This is a test invalid input message."
+
+    model.invalid_input.emit(test_message)
+
+    mock_qmessagebox_warning.assert_called_once_with(
+        dialog.tag_table,
+        "Invalid Input",
+        test_message,
+    )
