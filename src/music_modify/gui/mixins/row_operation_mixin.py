@@ -1,4 +1,4 @@
-"""Defines functionality for moving rows in widgets."""
+"""Defines functionality for working with rows in widgets."""
 
 from abc import ABC, abstractmethod
 from collections.abc import Mapping
@@ -30,10 +30,10 @@ class RowOperationMixin(ABC, metaclass=ABCQMeta):
     and `down_button`.
 
     Attributes:
-        add_button: Button that adds a row to the widget
-        remove_button: Button that removes the selected row from the widget
-        up_button: Button used for moving rows up in the widget
-        down_button: Button used for moving rows down in the widget
+        add_button (QToolButton): Button to add row to widget
+        remove_button (QToolButton): Button to remove selected row from widget
+        up_button (QToolButton): Button for moving rows up in the widget
+        down_button (QToolButton): Button for moving rows down in the widget
     """
 
     @abstractmethod
@@ -114,20 +114,20 @@ class RowOperationMixin(ABC, metaclass=ABCQMeta):
 
         match button_type:
             case EditButton.Down:
-                self.down_button = button
                 button.setText("Move down")
+                self.down_button: QToolButton = button
                 "Button used for moving rows down in the widget."
             case EditButton.Up:
-                self.up_button = button
                 button.setText("Move up")
+                self.up_button: QToolButton = button
                 "Button used for moving rows up in the widget."
             case EditButton.Add:
-                self.add_button = button
                 button.setText("Add rows")
+                self.add_button: QToolButton = button
                 "Button that adds a row to the widget."
             case EditButton.Remove:
-                self.remove_button = button
                 button.setText("Remove rows")
+                self.remove_button: QToolButton = button
                 "Button that removes the selected row from the widget."
             case _:
                 logger.info(
