@@ -3,6 +3,7 @@
 from abc import ABC, abstractmethod
 from collections.abc import Mapping
 from functools import cached_property
+import logging
 from typing import final
 
 from PySide6.QtGui import QIcon
@@ -10,6 +11,8 @@ from PySide6.QtWidgets import QToolButton, QWidget
 
 from music_modify.custom_types.enums import EditButton, RowDirection
 from music_modify.gui.meta import ABCQMeta
+
+logger = logging.getLogger(__name__)
 
 
 class RowOperationMixin(ABC, metaclass=ABCQMeta):
@@ -73,6 +76,9 @@ class RowOperationMixin(ABC, metaclass=ABCQMeta):
             It should be called with `&` (bitwise and) before being sent through.
             This ensures it's only the one flag.
         """
+        if len(button_type) != 1:
+            raise ValueError("button_type must be a single EditButton flag.")
+
         match button_type:
             case EditButton.Down:
                 button.clicked.connect(lambda: self._moveRows(RowDirection.Down))
@@ -83,7 +89,9 @@ class RowOperationMixin(ABC, metaclass=ABCQMeta):
             case EditButton.Remove:
                 button.clicked.connect(self._removeRow)
             case _:
-                pass
+                logger.info(
+                    f"Invalid button type called: {button_type}. No action taken."
+                )
 
     @final
     def _setAttribute(self, button: QToolButton, button_type: EditButton) -> None:
@@ -101,6 +109,9 @@ class RowOperationMixin(ABC, metaclass=ABCQMeta):
             It should be called with `&` (bitwise and) before being sent through.
             This ensures it's only the one flag.
         """
+        if len(button_type) != 1:
+            raise ValueError("button_type must be a single EditButton flag.")
+
         match button_type:
             case EditButton.Down:
                 self.down_button = button
@@ -119,7 +130,9 @@ class RowOperationMixin(ABC, metaclass=ABCQMeta):
                 button.setText("Remove rows")
                 "Button that removes the selected row from the widget."
             case _:
-                pass
+                logger.info(
+                    f"Invalid button type called: {button_type}. No action taken."
+                )
 
     @final
     def _setIcon(self, button: QToolButton, button_type: EditButton) -> None:
@@ -137,6 +150,9 @@ class RowOperationMixin(ABC, metaclass=ABCQMeta):
             It should be called with `&` (bitwise and) before being sent through.
             This ensures it's only the one flag.
         """
+        if len(button_type) != 1:
+            raise ValueError("button_type must be a single EditButton flag.")
+
         if button_type in self._button_icons:
             button.setIcon(QIcon(QIcon.fromTheme(self._button_icons[button_type])))
 

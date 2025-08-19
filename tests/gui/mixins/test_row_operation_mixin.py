@@ -1,0 +1,177 @@
+# pyright: reportPrivateUsage = false
+
+import logging
+from typing import override
+
+from PySide6.QtWidgets import QToolButton, QWidget
+import pytest
+from pytestqt.qtbot import QtBot
+
+from music_modify.custom_types.enums import EditButton, RowDirection
+from music_modify.gui.mixins.row_operation_mixin import RowOperationMixin
+
+
+class OperationWidget(QWidget, RowOperationMixin):
+    def __init__(self, parent: QWidget | None = None) -> None:
+        super().__init__(parent)
+
+    @override
+    def _moveRows(self, direction: RowDirection) -> None:
+        pass
+
+    @override
+    def _addRow(self) -> None:
+        pass
+
+    @override
+    def _removeRow(self) -> None:
+        pass
+
+
+def test_RowOperationMixin_createOperationButton_missing_order(qtbot: QtBot) -> None:
+    widget = OperationWidget()
+    qtbot.addWidget(widget)
+
+    order: tuple[EditButton, EditButton, EditButton, EditButton] = (
+        EditButton.Up,
+        EditButton.Add,
+        EditButton.Remove,
+        EditButton.Reset,
+    )
+
+    expected_exception_message = f"Missing required button in order: {EditButton.Down}"
+
+    with pytest.raises(Exception, match=expected_exception_message) as exc_info:
+        _ = widget.createOperationButtons(widget, order=order)
+
+    assert str(exc_info.value) == expected_exception_message
+
+
+def test_RowOperationMixin_createOperationButton_sets_attributes_individual(
+    qtbot: QtBot,
+) -> None:
+    widget = OperationWidget()
+    qtbot.addWidget(widget)
+
+    assert not hasattr(widget, "up_button")
+    _ = widget.createOperationButtons(widget, EditButton.Up)
+    assert hasattr(widget, "up_button")
+    assert isinstance(widget.up_button, QToolButton)
+
+    assert not hasattr(widget, "down_button")
+    _ = widget.createOperationButtons(widget, EditButton.Down)
+    assert hasattr(widget, "down_button")
+    assert isinstance(widget.up_button, QToolButton)
+
+    assert not hasattr(widget, "remove_button")
+    _ = widget.createOperationButtons(widget, EditButton.Remove)
+    assert hasattr(widget, "remove_button")
+    assert isinstance(widget.remove_button, QToolButton)
+
+    assert not hasattr(widget, "add_button")
+    _ = widget.createOperationButtons(widget, EditButton.Add)
+    assert hasattr(widget, "add_button")
+    assert isinstance(widget.add_button, QToolButton)
+
+
+def test_RowOperationMixin_createOperationButton_sets_attributes_multiple(
+    qtbot: QtBot,
+) -> None:
+    widget = OperationWidget()
+    qtbot.addWidget(widget)
+
+    assert not hasattr(widget, "up_button")
+    assert not hasattr(widget, "down_button")
+    assert not hasattr(widget, "remove_button")
+    assert not hasattr(widget, "add_button")
+    _ = widget.createOperationButtons(
+        widget, EditButton.Up | EditButton.Down | EditButton.Remove | EditButton.Add
+    )
+    assert hasattr(widget, "up_button")
+    assert hasattr(widget, "down_button")
+    assert hasattr(widget, "remove_button")
+    assert hasattr(widget, "add_button")
+    assert isinstance(widget.up_button, QToolButton)
+    assert isinstance(widget.down_button, QToolButton)
+    assert isinstance(widget.remove_button, QToolButton)
+    assert isinstance(widget.add_button, QToolButton)
+
+
+def test_RowOperationMixin_createOperationButton_custom_order(
+    qtbot: QtBot,
+) -> None:
+    widget = OperationWidget()
+    qtbot.addWidget(widget)
+
+    new_buttons = widget.createOperationButtons(
+        widget,
+        order=(EditButton.Add, EditButton.Remove, EditButton.Down, EditButton.Up),
+    )
+    assert new_buttons[0] == widget.add_button
+    assert new_buttons[1] == widget.remove_button
+    assert new_buttons[2] == widget.down_button
+    assert new_buttons[3] == widget.up_button
+
+
+def test_RowOperationMixin_non_single_flag_raises_error(qtbot: QtBot) -> None:
+    widget = OperationWidget()
+    qtbot.addWidget(widget)
+    composite_flag = EditButton.Add | EditButton.Remove
+    temp_button = QToolButton(widget)
+
+    expected_exception_message = "button_type must be a single EditButton flag."
+
+    # Test _createSignalConnection
+    with pytest.raises(ValueError, match=expected_exception_message) as exc_info:
+        widget._createSignalConnection(temp_button, composite_flag)
+    assert str(exc_info.value) == expected_exception_message
+
+    # Test _setAttribute
+    with pytest.raises(ValueError, match=expected_exception_message) as exc_info:
+        widget._setAttribute(temp_button, composite_flag)
+    assert str(exc_info.value) == expected_exception_message
+
+    # Test _setIcon
+    with pytest.raises(ValueError, match=expected_exception_message) as exc_info:
+        widget._setIcon(temp_button, composite_flag)
+    assert str(exc_info.value) == expected_exception_message
+
+
+def test_RowOperationMixin_createSignalConnection_log_invalid_type(
+    qtbot: QtBot, caplog: pytest.LogCaptureFixture
+) -> None:
+    widget = OperationWidget()
+    qtbot.addWidget(widget)
+
+    unused_flag = EditButton.Reset
+    temp_button = QToolButton(widget)
+
+    caplog.set_level(logging.INFO, logger="music_modify.gui.mixins.row_operation_mixin")
+
+    expected_message = f"Invalid button type called: {unused_flag}. No action taken."
+
+    widget._createSignalConnection(temp_button, unused_flag)
+
+    assert expected_message in caplog.text
+    assert caplog.records[0].levelname == "INFO"
+    assert caplog.records[0].message == expected_message
+
+
+def test_RowOperationMixin_setAttribute_log_invalid_type(
+    qtbot: QtBot, caplog: pytest.LogCaptureFixture
+) -> None:
+    widget = OperationWidget()
+    qtbot.addWidget(widget)
+
+    unused_flag = EditButton.Clear
+    temp_button = QToolButton(widget)
+
+    caplog.set_level(logging.INFO, logger="music_modify.gui.mixins.row_operation_mixin")
+
+    expected_message = f"Invalid button type called: {unused_flag}. No action taken."
+
+    widget._setAttribute(temp_button, unused_flag)
+
+    assert expected_message in caplog.text
+    assert caplog.records[0].levelname == "INFO"
+    assert caplog.records[0].message == expected_message
