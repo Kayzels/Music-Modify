@@ -6,6 +6,7 @@ import shutil
 import tempfile
 
 from PySide6.QtCore import QSettings
+from PySide6.QtWidgets import QApplication
 import pytest
 
 from music_modify.prefs.prefs import Settings
@@ -60,3 +61,12 @@ def temp_settings() -> Generator[Settings]:
         yield test_settings
     finally:
         Path(path).unlink()
+
+
+@pytest.fixture(scope="session")
+def app_info(qapp: QApplication) -> tuple[str, str]:
+    name = "Test Music Modify"
+    version = "9.9.9"
+    qapp.setApplicationName(name)
+    qapp.setApplicationVersion(version)
+    return (name, version)
