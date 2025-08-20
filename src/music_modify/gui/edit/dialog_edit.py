@@ -212,11 +212,13 @@ class EditDialog(EditAbstractDialog):
         if len(self.changed_values) == 0:
             return
         logger.debug("Called updateSong")
+        any_updated = False
         for id3_key, value in self.changed_values.items():
             tag: SongTag | None = mapKey(id3_key, prefs.settings.all_tags)
             if tag is None:
                 logger.debug(f"Unknown id3 key: {id3_key}")
                 continue
+            any_updated = True
             if value is None:
                 # Remove tag from song
                 logger.debug(f"Value was None, so removing key {id3_key}")
@@ -230,8 +232,9 @@ class EditDialog(EditAbstractDialog):
                 new_value = [new_value]
             logger.debug(f"Setting tag for {id3_key} to {new_value}")
             tag.setTag(self.song_info.id3, new_value)
-        self.song_info.save()
-        self.info_updated.emit()
+        if any_updated:
+            self.song_info.save()
+            self.info_updated.emit()
 
         # Clear the values: they've been changed in the song,
         # so don't need to be stored in this list anymore
@@ -275,6 +278,7 @@ class EditDialog(EditAbstractDialog):
             nav_direction == NavDirection.Next
             and self.current_index == len(self.rows) - 1
         ) or (nav_direction == NavDirection.Previous and self.current_index == 0):
+            logger.debug("Tried to go to next song on last, or previous song on first.")
             return
         match nav_direction:
             case NavDirection.Next:
