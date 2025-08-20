@@ -63,6 +63,8 @@ class EditWidgetFactory:
             # Send a copy otherwise when checking if a value is changed,
             # it will always be false, because it's comparing the two
             # changed values
+            if isinstance(data, str):
+                data = [data]
             data = cast(SongListData | None, data)
             data = data.copy() if data is not None else None
             return EditListWidget(parent, data)
