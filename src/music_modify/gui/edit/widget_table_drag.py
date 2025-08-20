@@ -1,6 +1,6 @@
 """Module that defines a DragTableWidget.
 
-This widget is used by an EditTableWidget for knowing when rows are reodered.
+This widget is used by an EditTableWidget for knowing when rows are reordered.
 """
 
 from typing import override

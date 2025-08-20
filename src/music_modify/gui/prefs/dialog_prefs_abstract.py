@@ -44,6 +44,7 @@ class PrefsAbstractDialog(QDialog, ABC, metaclass=ABCQMeta):
             raise Exception("Layout not set for dialog in setupUi")
         button_box = QDialogButtonBox(self)
         button_box.setOrientation(Qt.Orientation.Horizontal)
+        # noinspection PyTypeChecker
         button_box.setStandardButtons(
             QDialogButtonBox.StandardButton.Cancel
             | QDialogButtonBox.StandardButton.Ok

@@ -303,7 +303,7 @@
       <scope name="UI Files" level="INFORMATION" enabled="false" editorAttributes="INFORMATION_ATTRIBUTES" />
       <option name="ignoredIdentifiers">
         <list>
-          <option value="music_modify.gui.prefs.dialog_prefs_abstract.PrefsAbstractDialog.*" />
+          <option value="PySide6.QtCore.Signal.*" />
         </list>
       </option>
     </inspection_tool>

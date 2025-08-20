@@ -97,6 +97,7 @@ def selectRows(view: QAbstractItemView, rows: list[int]) -> None:
     selection_model = view.selectionModel()
     selection_model.clearSelection()
     for row in rows:
+        # noinspection PyTypeChecker
         selection_model.select(
             model.index(row, 0),
             QItemSelectionModel.SelectionFlag.Select

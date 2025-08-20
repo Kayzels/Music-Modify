@@ -156,6 +156,7 @@ class RowOperationMixin(ABC, metaclass=ABCQMeta):
         if button_type in self._button_icons:
             button.setIcon(QIcon(QIcon.fromTheme(self._button_icons[button_type])))
 
+    # noinspection PyTypeChecker
     @final
     def createOperationButtons(
         self,

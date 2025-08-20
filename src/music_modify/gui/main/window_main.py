@@ -457,13 +457,13 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("Music Modify")
         self.resize(800, 600)
 
-        centralwidget = QWidget(self)
-        vertical_layout = QVBoxLayout(centralwidget)
+        central_widget = QWidget(self)
+        vertical_layout = QVBoxLayout(central_widget)
         vertical_layout.setContentsMargins(0, 0, 0, 0)
 
-        self.setCentralWidget(centralwidget)
+        self.setCentralWidget(central_widget)
 
-        self.files_table_view = QTableView(centralwidget)
+        self.files_table_view = QTableView(central_widget)
         self.files_table_view.setDragDropMode(QAbstractItemView.DragDropMode.DropOnly)
         self.files_table_view.setAlternatingRowColors(True)
         self.files_table_view.setSelectionBehavior(

@@ -116,6 +116,7 @@ class PrefsTagAddDialog(QDialog):
 
         vertical_layout.addLayout(form_layout)
 
+        # noinspection PyTypeChecker
         button_box = QDialogButtonBox(
             self,
             orientation=Qt.Orientation.Horizontal,
