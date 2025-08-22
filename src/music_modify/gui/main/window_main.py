@@ -418,7 +418,7 @@ class MainWindow(QMainWindow):
         self.menu_file, self.menu_view, self.menu_edit, self.menu_help = (
             QMenu(name, self.menubar) for name in ("File", "View", "Edit", "Help")
         )
-        self.menu_edit_songs = QMenu(self.menu_edit)
+        self.menu_edit_songs = QMenu("Edit Songs", self.menu_edit)
         self.setMenuBar(self.menubar)
 
         for menu_action in (
