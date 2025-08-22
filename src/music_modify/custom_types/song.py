@@ -58,7 +58,8 @@ class Song:
 
     def save(self) -> None:
         """Save the changed values for the song, and refresh the display."""
-        self.id3.save(v2_version=4)
+        if self.file is not None:
+            self.id3.save(v2_version=4)
         self.updateInfo()
 
     def load(self, file: str | os.PathLike[str]) -> None:

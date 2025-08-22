@@ -97,3 +97,6 @@ force-sort-within-sections = true
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
+
+[tool.ruff.lint.mccabe]
+max-complexity = 12

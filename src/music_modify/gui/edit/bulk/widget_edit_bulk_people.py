@@ -90,6 +90,8 @@ type MapFunc[L: Sized] = Callable[[L, list[list[str]]], list[list[str]]]
 class _ActionMapping[L: Sized]:
     """Private class that calls a function to transform the data stored in a tag."""
 
+    __hash__ = None  # pyright: ignore[reportAssignmentType]
+
     def __init__(
         self,
         widget: "EditBulkPeopleWidget",
@@ -111,6 +113,16 @@ class _ActionMapping[L: Sized]:
         "Any data structure that is used to transform a pair"
         self.func: MapFunc[L] = func
         "Function that uses `items` to transform a pair into a new pair"
+
+    @override
+    def __eq__(self, value: object, /) -> bool:
+        if not isinstance(value, _ActionMapping):
+            return False
+        return (
+            value.items == self.items
+            and value.func == self.func
+            and value.widget == self.widget
+        )
 
     def _getSongValues(self, song: Song) -> list[list[str]]:
         """Get the values stored for the song, for the tag."""
@@ -134,7 +146,6 @@ class _ActionMapping[L: Sized]:
 
         if new_values != current_values:
             self.tag.setTag(song.id3, new_values)
-            song.save()
 
             new_pairs: list[tuple[str, str]] = [
                 (role, person) for role, person in new_values
@@ -301,9 +312,8 @@ class EditBulkPeopleWidget(EditBulkAbstractGroupWidget):
         if not change_attempted:
             return False
 
-        # Store whether any change is actually made.
-        # Updated if a refresh is requested.
-        changes_made: bool = False
+        # Store which songs were actually modified.
+        modified_songs: set[Song] = set()
 
         mappings: list[AllowedActionMapping] = [
             self._createActionMapping(add_items, addValues),
@@ -315,10 +325,17 @@ class EditBulkPeopleWidget(EditBulkAbstractGroupWidget):
         ]
 
         for song in songs:
+            song_had_changes = False
             for mapping in mappings:
-                changes_made = mapping.performChange(song) or changes_made
+                if mapping.performChange(song):
+                    song_had_changes = True
+            if song_had_changes:
+                modified_songs.add(song)
 
-        if changes_made:
+        if modified_songs:
+            for song in modified_songs:
+                song.save()
             self._resetView()
+            return True
 
-        return changes_made
+        return False

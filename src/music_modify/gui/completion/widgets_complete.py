@@ -551,10 +551,6 @@ class EditWithComplete(EnComboBox):
         text = self.text()
         return getUniqueOrdered(text, prefs.settings.split_text_entered)
 
-    @values.setter
-    def values(self, values: list[str]) -> None:
-        self.updateItemsCache(tuple(values))
-
 
 def testWidgets() -> int:
     from PySide6.QtWidgets import QDialog, QVBoxLayout
