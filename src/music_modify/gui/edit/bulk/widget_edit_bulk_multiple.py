@@ -94,61 +94,96 @@ class EditBulkMultipleWidget(EditBulkAbstractGroupWidget):
         self.clear_checkbox.setChecked(False)
         self.group_box.setChecked(False)
 
-    @override
-    def updateTag(self, songs: list[Song]) -> bool:  # noqa: C901, PLR0912
+    def _handleCheckboxes(self, songs: list[Song]) -> bool | None:
+        """Process the updating of the tag when either of the checkboxes are checked.
+
+        Returns:
+            True if any of the songs data has changed.
+            None if there is further processing needed after checking the checkboxes.
+
+        Information:
+            If group_box isn't checked, returns False.
+            If clear_checkbox is checked, it removes the tag from all existing songs.
+            Otherwise, we need more information, so returns None.
+        """
         if not self.group_box.isChecked():
             return False
-        if self.clear_checkbox.isChecked():
-            any_updated = False
-            for song in songs:
-                if self.tag.hasTag(song.id3):
-                    any_updated = True
-                    self.tag.removeTag(song.id3)
-            self._resetView()
-            return any_updated
+        if not self.clear_checkbox.isChecked():
+            return None
+        any_updated = False
+        for song in songs:
+            if self.tag.hasTag(song.id3):
+                any_updated = True
+                self.tag.removeTag(song.id3)
+        self._resetView()
+        return any_updated
 
-        add_values = self.add_line.items
-        remove_values = self.remove_line.values
+    def _getSongValue(self, song: Song) -> list[str] | None:
+        """Returns the value stored in the song.
 
-        if not add_values and not remove_values:
-            self._resetView()
+        If the song doesn't have the tag, and we plan to add to it,
+        it creates the tag.
+
+        Returns None if the song doesn't have the tag, but we aren't
+        adding anything to it.
+        """
+        song_values = cast(list[str] | None, self.tag.getValue(song.id3))
+        if song_values is None:
+            if not self.add_line.items:
+                return None
+            self.tag.generateFrame(song.id3)
+            return []
+        return song_values
+
+    def _addValuesToSong(self, song: Song) -> bool:
+        """Add the values from add_line to the song.
+
+        If the values aren't in the list of items for the current widget,
+        adds them so that they are part of the completion suggestions.
+
+        Returns:
+            True if the values are added to any of the songs.
+        """
+        song_values = self._getSongValue(song)
+        if song_values is None:
             return False
+        add_values = self.add_line.items
+        new_values = [value for value in add_values if value not in song_values]
+        if not new_values:
+            return False
+        values = song_values + new_values
 
-        all_items: list[str] = list(self.items)
+        widget_items = list(self.items)
+        self.items = tuple(
+            widget_items + [value for value in new_values if value not in widget_items]
+        )
+        self.tag.setTag(song.id3, values)
+        return True
+
+    def _removeValuesFromSong(self, song: Song) -> bool:
+        """Remove the values from remove_line from the song."""
+        remove_values = self.remove_line.values
+        if not remove_values:
+            return False
+        song_values = self._getSongValue(song)
+        if song_values is None:
+            return False
+        new_values = [value for value in song_values if value not in remove_values]
+        if new_values != song_values:
+            self.tag.setTag(song.id3, new_values)
+            return True
+        return False
+
+    @override
+    def updateTag(self, songs: list[Song]) -> bool:
+        checkbox_result = self._handleCheckboxes(songs)
+        if checkbox_result is not None:
+            return checkbox_result
 
         any_updated = False
         for song in songs:
-            original_values = cast(list[str] | None, self.tag.getValue(song.id3))
-            if original_values is None:
-                if not add_values:
-                    continue
-                if not self.tag.hasTag(song.id3):
-                    self.tag.generateFrame(song.id3)
-                original_values = []
-
-            if add_values:
-                new_values = [
-                    value for value in add_values if value not in original_values
-                ]
-                if new_values:
-                    any_updated = True
-                    values = original_values + new_values
-                    self.tag.setTag(song.id3, values)
-
-                    all_items += [
-                        value for value in new_values if value not in all_items
-                    ]
-                    self.items = tuple(all_items)
-                    # Need to update this, so that remove_values has the right values
-                    original_values = values
-
-            if remove_values:
-                new_values = [
-                    value for value in original_values if value not in remove_values
-                ]
-                if new_values != original_values:
-                    any_updated = True
-                    self.tag.setTag(song.id3, new_values)
+            any_updated = self._addValuesToSong(song) or any_updated
+            any_updated = self._removeValuesFromSong(song) or any_updated
 
         if any_updated:
             self._resetView()
