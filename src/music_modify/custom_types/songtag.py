@@ -22,6 +22,8 @@ class SongTag:
     """Object representing an ID3 tag."""
 
     KEYS_ALLOW_MULTIPLE_VALUES: ClassVar[set[str]] = {
+        "TPE1",  # Artist
+        "TPE2",  # Album Artist
         "TCOM",  # Composer
         "TCON",  # Content Type (Genres)
         "TENC",  # Encoder

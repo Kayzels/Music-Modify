@@ -95,57 +95,66 @@ class EditBulkMultipleWidget(EditBulkAbstractGroupWidget):
         self.group_box.setChecked(False)
 
     @override
-    def updateTag(self, songs: list[Song]) -> bool:
+    def updateTag(self, songs: list[Song]) -> bool:  # noqa: C901, PLR0912
         if not self.group_box.isChecked():
             return False
-        should_clear = self.clear_checkbox.isChecked()
-        if should_clear:
+        if self.clear_checkbox.isChecked():
+            any_updated = False
             for song in songs:
-                self.tag.removeTag(song.id3)
-            return True
+                if self.tag.hasTag(song.id3):
+                    any_updated = True
+                    self.tag.removeTag(song.id3)
+            self._resetView()
+            return any_updated
 
-        should_add = len(self.add_line.items) > 0
-        should_remove = len(self.remove_line.values) > 0
+        add_values = self.add_line.items
+        remove_values = self.remove_line.values
 
-        if not should_add and not should_remove:
+        if not add_values and not remove_values:
             self._resetView()
             return False
 
         all_items: list[str] = list(self.items)
+
+        any_updated = False
         for song in songs:
-            original_values = self.tag.getValue(song.id3)
+            original_values = cast(list[str] | None, self.tag.getValue(song.id3))
             if original_values is None:
+                if not add_values:
+                    continue
                 if not self.tag.hasTag(song.id3):
                     self.tag.generateFrame(song.id3)
                 original_values = []
-            original_values = cast(list[str], original_values)
-            # TODO: Consider the logic for adding and removing.
-            # At the moment, if the same value is in add and remove,
-            # it gets added and then removed.
-            # But that might not be obvious.
-            if should_add:
-                new_values = self.add_line.items
-                not_present = [
-                    value for value in new_values if value not in original_values
+
+            if add_values:
+                new_values = [
+                    value for value in add_values if value not in original_values
                 ]
-                values = original_values + not_present
-                self.tag.setTag(song.id3, values)
+                if new_values:
+                    any_updated = True
+                    values = original_values + new_values
+                    self.tag.setTag(song.id3, values)
 
-                all_items += [value for value in new_values if value not in all_items]
-                self.items = tuple(all_items)
+                    all_items += [
+                        value for value in new_values if value not in all_items
+                    ]
+                    self.items = tuple(all_items)
+                    # Need to update this, so that remove_values has the right values
+                    original_values = values
 
-                # Do this so that the remove part has the data
-                original_values = values
-            if should_remove:
-                remove_values = self.remove_line.values
-                # Doing it this way with a list comprehension,
-                # so that order remains.
-                values = [
+            if remove_values:
+                new_values = [
                     value for value in original_values if value not in remove_values
                 ]
-                self.tag.setTag(song.id3, values)
+                if new_values != original_values:
+                    any_updated = True
+                    self.tag.setTag(song.id3, new_values)
 
-        # Clear the values after an update
-        self._resetView()
+        if any_updated:
+            self._resetView()
 
-        return True
+        return any_updated
+
+        # TODO: Consider the logic for adding and removing.
+        # At the moment, adding is processed before removing,
+        # but this might not be obvious
