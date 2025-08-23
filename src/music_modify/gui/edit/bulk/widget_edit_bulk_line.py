@@ -78,12 +78,25 @@ class EditBulkLineWidget(EditBulkAbstractWidget):
         self.clear_checkbox.stateChanged.connect(
             lambda state: self._checkboxStateChanged(state, self.apply_checkbox),
         )
+        self.clear_checkbox.stateChanged.connect(self._toggleMainWidget)
+        self.apply_checkbox.stateChanged.connect(self._toggleMainWidget)
 
     @staticmethod
     def _checkboxStateChanged(state: Qt.CheckState, other: QCheckBox) -> None:
         """When Apply is checked, uncheck Clear, and vice versa."""
         if state == Qt.CheckState.Checked.value:
             other.setChecked(False)
+
+    def _toggleMainWidget(self, _: Qt.CheckState) -> None:
+        """Enable or disable the line edit, depending on the checkbox.
+
+        If apply is checked, it should be enabled.
+        Otherwise, it should be disabled.
+        """
+        should_enable = (
+            not self.clear_checkbox.isChecked() and self.apply_checkbox.isChecked()
+        )
+        self.main_widget.setEnabled(should_enable)
 
     @override
     def updateTag(self, songs: list[Song]) -> bool:
@@ -99,6 +112,7 @@ class EditBulkLineWidget(EditBulkAbstractWidget):
         if not should_apply and not should_clear:
             return False
 
+        any_updated = False
         if should_apply:
             value = self.main_widget.text().strip()
             if value == "":
@@ -106,14 +120,18 @@ class EditBulkLineWidget(EditBulkAbstractWidget):
             else:
                 logger.info(f"Setting value {value} for tag {self.tag.display_name}")
                 for song in songs:
-                    # PERF: Only update if the value isn't the same?
-                    self.tag.setTag(song.id3, [value])
-                    self.main_widget.setText(value)
+                    current_tag = self.tag.getTag(song.id3)
+                    if current_tag != [value]:
+                        self.tag.setTag(song.id3, [value])
+                        any_updated = True
+            self.main_widget.setText(value)
 
         if should_clear:
             logger.info(f"Removing tag for {self.tag.display_name}")
             for song in songs:
-                self.tag.removeTag(song.id3)
+                if self.tag.hasTag(song.id3):
+                    self.tag.removeTag(song.id3)
+                    any_updated = True
             self.main_widget.clear()
 
-        return True
+        return any_updated
