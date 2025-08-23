@@ -99,7 +99,7 @@ class EditBulkLineWidget(EditBulkAbstractWidget):
         self.main_widget.setEnabled(should_enable)
 
     @override
-    def updateTag(self, songs: list[Song]) -> bool:
+    def updateTag(self, songs: list[Song]) -> set[Song]:
         """Update the value in all the songs sent for the tag this widget displays.
 
         If apply is selected, set the data to have the value in the main widget.
@@ -110,9 +110,9 @@ class EditBulkLineWidget(EditBulkAbstractWidget):
         should_clear = self.clear_checkbox.isChecked()
 
         if not should_apply and not should_clear:
-            return False
+            return set()
 
-        any_updated = False
+        updated_songs = set()
         if should_apply:
             value = self.main_widget.text().strip()
             if value == "":
@@ -123,7 +123,7 @@ class EditBulkLineWidget(EditBulkAbstractWidget):
                     current_tag = self.tag.getTag(song.id3)
                     if current_tag != [value]:
                         self.tag.setTag(song.id3, [value])
-                        any_updated = True
+                        updated_songs.add(song)
             self.main_widget.setText(value)
 
         if should_clear:
@@ -131,7 +131,7 @@ class EditBulkLineWidget(EditBulkAbstractWidget):
             for song in songs:
                 if self.tag.hasTag(song.id3):
                     self.tag.removeTag(song.id3)
-                    any_updated = True
+                    updated_songs.add(song)
             self.main_widget.clear()
 
-        return any_updated
+        return updated_songs

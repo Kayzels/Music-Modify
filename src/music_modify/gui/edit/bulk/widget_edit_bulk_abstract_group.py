@@ -10,7 +10,7 @@ from typing import override
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QCheckBox, QGroupBox, QHBoxLayout, QVBoxLayout, QWidget
 
-from music_modify.custom_types import SongTag
+from music_modify.custom_types import Song, SongTag
 
 from .widget_edit_bulk_abstract import EditBulkAbstractWidget
 
@@ -73,3 +73,27 @@ class EditBulkAbstractGroupWidget(EditBulkAbstractWidget, ABC):
     @abstractmethod
     def _resetView(self) -> None:
         """Resets the display to be the same as it was on initialisation."""
+
+    def _handleCheckboxes(self, songs: list[Song]) -> set[Song] | None:
+        """Process the updating of the tag when either of the checkboxes are checked.
+
+        Returns:
+            True if any of the songs data has changed.
+            None if there is further processing needed after checking the checkboxes.
+
+        Information:
+            If group_box isn't checked, returns False.
+            If clear_checkbox is checked, it removes the tag from all existing songs.
+            Otherwise, we need more information, so returns None.
+        """
+        if not self.group_box.isChecked():
+            return set()
+        if not self.clear_checkbox.isChecked():
+            return None
+        updated_songs: set[Song] = set()
+        for song in songs:
+            if self.tag.hasTag(song.id3):
+                self.tag.removeTag(song.id3)
+                updated_songs.add(song)
+        self._resetView()
+        return updated_songs

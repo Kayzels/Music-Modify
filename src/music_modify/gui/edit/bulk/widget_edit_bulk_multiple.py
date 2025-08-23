@@ -94,30 +94,6 @@ class EditBulkMultipleWidget(EditBulkAbstractGroupWidget):
         self.clear_checkbox.setChecked(False)
         self.group_box.setChecked(False)
 
-    def _handleCheckboxes(self, songs: list[Song]) -> bool | None:
-        """Process the updating of the tag when either of the checkboxes are checked.
-
-        Returns:
-            True if any of the songs data has changed.
-            None if there is further processing needed after checking the checkboxes.
-
-        Information:
-            If group_box isn't checked, returns False.
-            If clear_checkbox is checked, it removes the tag from all existing songs.
-            Otherwise, we need more information, so returns None.
-        """
-        if not self.group_box.isChecked():
-            return False
-        if not self.clear_checkbox.isChecked():
-            return None
-        any_updated = False
-        for song in songs:
-            if self.tag.hasTag(song.id3):
-                any_updated = True
-                self.tag.removeTag(song.id3)
-        self._resetView()
-        return any_updated
-
     def _getSongValue(self, song: Song) -> list[str] | None:
         """Returns the value stored in the song.
 
@@ -135,7 +111,7 @@ class EditBulkMultipleWidget(EditBulkAbstractGroupWidget):
             return []
         return song_values
 
-    def _addValuesToSong(self, song: Song) -> bool:
+    def _addValuesToSong(self, song: Song, add_values: list[str]) -> bool:
         """Add the values from add_line to the song.
 
         If the values aren't in the list of items for the current widget,
@@ -147,7 +123,6 @@ class EditBulkMultipleWidget(EditBulkAbstractGroupWidget):
         song_values = self._getSongValue(song)
         if song_values is None:
             return False
-        add_values = self.add_line.items
         new_values = [value for value in add_values if value not in song_values]
         if not new_values:
             return False
@@ -160,9 +135,8 @@ class EditBulkMultipleWidget(EditBulkAbstractGroupWidget):
         self.tag.setTag(song.id3, values)
         return True
 
-    def _removeValuesFromSong(self, song: Song) -> bool:
+    def _removeValuesFromSong(self, song: Song, remove_values: list[str]) -> bool:
         """Remove the values from remove_line from the song."""
-        remove_values = self.remove_line.values
         if not remove_values:
             return False
         song_values = self._getSongValue(song)
@@ -175,20 +149,25 @@ class EditBulkMultipleWidget(EditBulkAbstractGroupWidget):
         return False
 
     @override
-    def updateTag(self, songs: list[Song]) -> bool:
+    def updateTag(self, songs: list[Song]) -> set[Song]:
         checkbox_result = self._handleCheckboxes(songs)
         if checkbox_result is not None:
             return checkbox_result
 
-        any_updated = False
-        for song in songs:
-            any_updated = self._addValuesToSong(song) or any_updated
-            any_updated = self._removeValuesFromSong(song) or any_updated
+        remove_values = self.remove_line.values
+        add_values = [item for item in self.add_line.items if item not in remove_values]
 
-        if any_updated:
+        updated_songs: set[Song] = set()
+        for song in songs:
+            added = self._addValuesToSong(song, add_values)
+            removed = self._removeValuesFromSong(song, remove_values)
+            if added or removed:
+                updated_songs.add(song)
+
+        if updated_songs:
             self._resetView()
 
-        return any_updated
+        return updated_songs
 
         # TODO: Consider the logic for adding and removing.
         # At the moment, adding is processed before removing,

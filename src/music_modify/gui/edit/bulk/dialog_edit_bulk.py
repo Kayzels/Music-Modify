@@ -184,13 +184,11 @@ class EditBulkDialog(EditAbstractDialog):
     @override
     def updateSongInfo(self) -> None:
         """Update all selected songs to have the changed data."""
-        changed: bool = False
+        updated_songs: set[Song] = set()
         widgets = self.findChildren(EditBulkAbstractWidget)
         for widget in widgets:
-            # Needs to be in this order to avoid short-circuiting if an earlier
-            # tag has changed.
-            changed = widget.updateTag(self.songs) or changed
-        if changed:
-            for song in self.songs:
+            updated_songs = updated_songs | widget.updateTag(self.songs)
+        if updated_songs:
+            for song in updated_songs:
                 song.save()
             self.info_updated.emit()

@@ -207,9 +207,7 @@ def test_EditBulkPeopleWidget_updateTag_unchecked(qtbot: QtBot) -> None:
     assert not widget.updateTag(songs)
 
 
-def test_EditBulkPeopleWidget_updateTag_clear_checkbox_checked(
-    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_EditBulkPeopleWidget_updateTag_clear_checkbox_checked(qtbot: QtBot) -> None:
     parent = QWidget()
     qtbot.addWidget(parent)
     tag = SongTag(display_name="Involved People", id3_key="TIPL")
@@ -218,33 +216,21 @@ def test_EditBulkPeopleWidget_updateTag_clear_checkbox_checked(
     qtbot.addWidget(widget)
 
     song1 = Song()
-    song1 = Song()
     song1.setTag(tag.id3_key, initial_data)
     song2 = Song()
     song2.setTag(tag.id3_key, initial_data)
     songs = [song1, song2]
 
-    # Mock song.save() to verify calls
-    mock_save1 = MagicMock()
-    mock_save2 = MagicMock()
-    monkeypatch.setattr(song1, "save", mock_save1)
-    monkeypatch.setattr(song2, "save", mock_save2)
-
     widget.group_box.setChecked(True)
     widget.clear_checkbox.setChecked(True)
 
-    assert widget.updateTag(songs) is True
+    assert widget.updateTag(songs) == {song1, song2}
 
     assert tag.getTag(song1.id3) is None
     assert tag.getTag(song2.id3) is None
 
-    mock_save1.assert_called_once()
-    mock_save2.assert_called_once()
 
-
-def test_EditBulkPeopleWidget_updateTag_no_changes_attempted(
-    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_EditBulkPeopleWidget_updateTag_no_changes_attempted(qtbot: QtBot) -> None:
     parent = QWidget()
     qtbot.addWidget(parent)
     tag = SongTag(display_name="Involved People", id3_key="TIPL")
@@ -254,9 +240,6 @@ def test_EditBulkPeopleWidget_updateTag_no_changes_attempted(
     song = Song()
     assert not tag.hasTag(song.id3)
     songs = [song]
-
-    mock_save = MagicMock()
-    monkeypatch.setattr(song, "save", mock_save)
 
     widget.group_box.setChecked(True)
     widget.clear_checkbox.setChecked(False)
@@ -271,15 +254,12 @@ def test_EditBulkPeopleWidget_updateTag_no_changes_attempted(
     widget.remap_person_widget.value = []
     widget.remap_role_widget.value = []
 
-    assert widget.updateTag(songs) is False
-    mock_save.assert_not_called()
+    assert not widget.updateTag(songs)
     assert not tag.hasTag(song.id3)
     assert tag.getTag(song.id3) is None
 
 
-def test_EditBulkPeopleWidget_updateTag_add_items_no_overlap(
-    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_EditBulkPeopleWidget_updateTag_add_items_no_overlap(qtbot: QtBot) -> None:
     parent = QWidget()
     qtbot.addWidget(parent)
     tag = SongTag(display_name="Involved People", id3_key="TIPL")
@@ -293,27 +273,18 @@ def test_EditBulkPeopleWidget_updateTag_add_items_no_overlap(
     add_items = [["Role A", "Person A"], ["Role B", "Person B"]]
     widget.add_widget.value = add_items
 
-    mock_save1 = MagicMock()
-    mock_save2 = MagicMock()
-    monkeypatch.setattr(song1, "save", mock_save1)
-    monkeypatch.setattr(song2, "save", mock_save2)
-
     widget.group_box.setChecked(True)
     widget.clear_checkbox.setChecked(False)
 
-    assert widget.updateTag(songs) is True
+    assert widget.updateTag(songs) == {song1, song2}
 
     assert tag.getTag(song1.id3) == add_items
     assert tag.getTag(song2.id3) == add_items
 
-    mock_save1.assert_called_once()
-    mock_save2.assert_called_once()
     assert widget.items == [("Role A", "Person A"), ("Role B", "Person B")]
 
 
-def test_EditBulkPeopleWidget_updateTag_add_items_mixed_overlap(
-    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_EditBulkPeopleWidget_updateTag_add_items_mixed_overlap(qtbot: QtBot) -> None:
     parent = QWidget()
     qtbot.addWidget(parent)
     tag = SongTag(display_name="Involved People", id3_key="TIPL")
@@ -338,31 +309,15 @@ def test_EditBulkPeopleWidget_updateTag_add_items_mixed_overlap(
 
     widget.add_widget.value = add_items
 
-    mock_save1 = MagicMock()
-    mock_save2 = MagicMock()
-    mock_save3 = MagicMock()
-    mock_save4 = MagicMock()
-    monkeypatch.setattr(song1, "save", mock_save1)
-    monkeypatch.setattr(song2, "save", mock_save2)
-    monkeypatch.setattr(song3, "save", mock_save3)
-    monkeypatch.setattr(song4, "save", mock_save4)
-
     widget.group_box.setChecked(True)
     widget.clear_checkbox.setChecked(False)
 
-    assert widget.updateTag(songs) is True
+    assert widget.updateTag(songs) == {song2, song3, song4}
 
     assert tag.getTag(song1.id3) == add_items
-    mock_save1.assert_not_called()
-
     assert tag.getTag(song2.id3) == add_items
-    mock_save2.assert_called_once()
-
     assert tag.getTag(song3.id3) == add_items
-    mock_save3.assert_called_once()
-
     assert tag.getTag(song4.id3) == [["RoleE", "PersonE"], *add_items]
-    mock_save4.assert_called_once()
 
     expected_widget_items = [
         ("RoleA", "PersonA"),
@@ -373,9 +328,7 @@ def test_EditBulkPeopleWidget_updateTag_add_items_mixed_overlap(
     assert widget.items == expected_widget_items
 
 
-def test_EditBulkPeopleWidget_updateTag_remove_pairs_no_overlap(
-    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_EditBulkPeopleWidget_updateTag_remove_pairs_no_overlap(qtbot: QtBot) -> None:
     parent = QWidget()
     qtbot.addWidget(parent)
     tag = SongTag(display_name="Involved People", id3_key="TIPL")
@@ -391,20 +344,16 @@ def test_EditBulkPeopleWidget_updateTag_remove_pairs_no_overlap(
     widget.remove_pair_widget.setText("RoleA" + PAIR_SEPARATOR + "PersonA")
     assert widget.remove_pair_widget.values == remove_pairs
 
-    mock_save = MagicMock()
-    monkeypatch.setattr(song, "save", mock_save)
-
     widget.group_box.setChecked(True)
     widget.clear_checkbox.setChecked(False)
 
-    assert widget.updateTag(songs) is False
+    assert not widget.updateTag(songs)
 
     assert tag.getTag(song.id3) == initial_data
-    mock_save.assert_not_called()
 
 
 def test_EditBulkPeopleWidget_updateTag_remove_pairs_mixed_overlap(
-    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch
+    qtbot: QtBot,
 ) -> None:
     parent = QWidget()
     qtbot.addWidget(parent)
@@ -433,31 +382,17 @@ def test_EditBulkPeopleWidget_updateTag_remove_pairs_mixed_overlap(
     widget.remove_pair_widget.setText(",".join(pairs_to_remove))
     assert widget.remove_pair_widget.values == pairs_to_remove
 
-    mock_save1 = MagicMock()
-    mock_save2 = MagicMock()
-    mock_save3 = MagicMock()
-    monkeypatch.setattr(song1, "save", mock_save1)
-    monkeypatch.setattr(song2, "save", mock_save2)
-    monkeypatch.setattr(song3, "save", mock_save3)
-
     widget.group_box.setChecked(True)
     widget.clear_checkbox.setChecked(False)
 
-    assert widget.updateTag(songs) is True
+    assert widget.updateTag(songs) == {song1, song2}
 
     assert tag.getTag(song1.id3) == [["RoleC", "PersonC"]]
-    mock_save1.assert_called_once()
-
     assert tag.getTag(song2.id3) == [["RoleD", "PersonE"]]
-    mock_save2.assert_called_once()
-
     assert tag.getTag(song3.id3) == [["RoleX", "PersonY"]]
-    mock_save3.assert_not_called()  # No change to song3
 
 
-def test_EditBulkPeopleWidget_updateTag_remove_roles_no_overlap(
-    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_EditBulkPeopleWidget_updateTag_remove_roles_no_overlap(qtbot: QtBot) -> None:
     parent = QWidget()
     qtbot.addWidget(parent)
     tag = SongTag(display_name="Involved People", id3_key="TIPL")
@@ -473,20 +408,16 @@ def test_EditBulkPeopleWidget_updateTag_remove_roles_no_overlap(
     widget.remove_role_widget.setText(",".join(remove_roles))
     assert widget.remove_role_widget.values == remove_roles
 
-    mock_save = MagicMock()
-    monkeypatch.setattr(song, "save", mock_save)
-
     widget.group_box.setChecked(True)
     widget.clear_checkbox.setChecked(False)
 
-    assert widget.updateTag(songs) is False
+    assert not widget.updateTag(songs)
 
     assert tag.getTag(song.id3) == initial_data
-    mock_save.assert_not_called()
 
 
 def test_EditBulkPeopleWidget_updateTag_remove_roles_mixed_overlap(
-    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch
+    qtbot: QtBot,
 ) -> None:
     parent = QWidget()
     qtbot.addWidget(parent)
@@ -512,31 +443,17 @@ def test_EditBulkPeopleWidget_updateTag_remove_roles_mixed_overlap(
     widget.remove_role_widget.setText(",".join(roles_to_remove))
     assert widget.remove_role_widget.values == roles_to_remove
 
-    mock_save1 = MagicMock()
-    mock_save2 = MagicMock()
-    mock_save3 = MagicMock()
-    monkeypatch.setattr(song1, "save", mock_save1)
-    monkeypatch.setattr(song2, "save", mock_save2)
-    monkeypatch.setattr(song3, "save", mock_save3)
-
     widget.group_box.setChecked(True)
     widget.clear_checkbox.setChecked(False)
 
-    assert widget.updateTag(songs) is True
+    assert widget.updateTag(songs) == {song1, song2}
 
     assert tag.getTag(song1.id3) == [["RoleC", "Person3"]]
-    mock_save1.assert_called_once()
-
     assert tag.getTag(song2.id3) == [["RoleD", "Person5"]]
-    mock_save2.assert_called_once()
-
     assert tag.getTag(song3.id3) == [["RoleX", "PersonY"]]
-    mock_save3.assert_not_called()
 
 
-def test_EditBulkPeopleWidget_updateTag_remove_people_no_overlap(
-    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_EditBulkPeopleWidget_updateTag_remove_people_no_overlap(qtbot: QtBot) -> None:
     parent = QWidget()
     qtbot.addWidget(parent)
     tag = SongTag(display_name="Involved People", id3_key="TIPL")
@@ -552,20 +469,16 @@ def test_EditBulkPeopleWidget_updateTag_remove_people_no_overlap(
     widget.remove_person_widget.setText(",".join(remove_people))
     assert widget.remove_person_widget.values == remove_people
 
-    mock_save = MagicMock()
-    monkeypatch.setattr(song, "save", mock_save)
-
     widget.group_box.setChecked(True)
     widget.clear_checkbox.setChecked(False)
 
-    assert widget.updateTag(songs) is False
+    assert not widget.updateTag(songs)
 
     assert tag.getTag(song.id3) == initial_data
-    mock_save.assert_not_called()
 
 
 def test_EditBulkPeopleWidget_updateTag_remove_people_mixed_overlap(
-    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch
+    qtbot: QtBot,
 ) -> None:
     parent = QWidget()
     qtbot.addWidget(parent)
@@ -591,31 +504,17 @@ def test_EditBulkPeopleWidget_updateTag_remove_people_mixed_overlap(
     widget.remove_person_widget.setText(",".join(people_to_remove))
     assert widget.remove_person_widget.values == people_to_remove
 
-    mock_save1 = MagicMock()
-    mock_save2 = MagicMock()
-    mock_save3 = MagicMock()
-    monkeypatch.setattr(song1, "save", mock_save1)
-    monkeypatch.setattr(song2, "save", mock_save2)
-    monkeypatch.setattr(song3, "save", mock_save3)
-
     widget.group_box.setChecked(True)
     widget.clear_checkbox.setChecked(False)
 
-    assert widget.updateTag(songs) is True
+    assert widget.updateTag(songs) == {song1, song2}
 
     assert tag.getTag(song1.id3) == [["Role3", "PersonC"]]
-    mock_save1.assert_called_once()
-
     assert tag.getTag(song2.id3) == [["Role5", "PersonD"]]
-    mock_save2.assert_called_once()
-
     assert tag.getTag(song3.id3) == [["RoleX", "PersonY"]]
-    mock_save3.assert_not_called()
 
 
-def test_EditBulkPeopleWidget_updateTag_remap_roles_mixed_overlap(
-    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_EditBulkPeopleWidget_updateTag_remap_roles_mixed_overlap(qtbot: QtBot) -> None:
     parent = QWidget()
     qtbot.addWidget(parent)
     tag = SongTag(display_name="Involved People", id3_key="TIPL")
@@ -640,34 +539,22 @@ def test_EditBulkPeopleWidget_updateTag_remap_roles_mixed_overlap(
 
     widget.remap_role_widget.value = role_replacements
 
-    mock_save1 = MagicMock()
-    mock_save2 = MagicMock()
-    mock_save3 = MagicMock()
-    monkeypatch.setattr(song1, "save", mock_save1)
-    monkeypatch.setattr(song2, "save", mock_save2)
-    monkeypatch.setattr(song3, "save", mock_save3)
-
     widget.group_box.setChecked(True)
     widget.clear_checkbox.setChecked(False)
 
-    assert widget.updateTag(songs) is True
+    assert widget.updateTag(songs) == {song1, song2}
 
     assert tag.getTag(song1.id3) == [
         ["NewRole1", "PersonA"],
         ["NewRole2", "PersonB"],
         ["RoleX", "PersonY"],
     ]
-    mock_save1.assert_called_once()
-
     assert tag.getTag(song2.id3) == [["NewRole1", "PersonC"], ["RoleZ", "PersonW"]]
-    mock_save2.assert_called_once()
-
     assert tag.getTag(song3.id3) == [["RoleA", "PersonF"]]
-    mock_save3.assert_not_called()
 
 
 def test_EditBulkPeopleWidget_updateTag_remap_people_mixed_overlap(
-    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch
+    qtbot: QtBot,
 ) -> None:
     parent = QWidget()
     qtbot.addWidget(parent)
@@ -693,35 +580,21 @@ def test_EditBulkPeopleWidget_updateTag_remap_people_mixed_overlap(
 
     widget.remap_person_widget.value = person_replacements
 
-    mock_save1 = MagicMock()
-    mock_save2 = MagicMock()
-    mock_save3 = MagicMock()
-    monkeypatch.setattr(song1, "save", mock_save1)
-    monkeypatch.setattr(song2, "save", mock_save2)
-    monkeypatch.setattr(song3, "save", mock_save3)
-
     widget.group_box.setChecked(True)
     widget.clear_checkbox.setChecked(False)
 
-    assert widget.updateTag(songs) is True
+    assert widget.updateTag(songs) == {song1, song2}
 
     assert tag.getTag(song1.id3) == [
         ["RoleA", "NewPerson1"],
         ["RoleB", "NewPerson2"],
         ["RoleC", "PersonX"],
     ]
-    mock_save1.assert_called_once()
-
     assert tag.getTag(song2.id3) == [["RoleD", "NewPerson1"], ["RoleE", "PersonY"]]
-    mock_save2.assert_called_once()
-
     assert tag.getTag(song3.id3) == [["RoleF", "PersonZ"]]
-    mock_save3.assert_not_called()
 
 
-def test_EditBulkPeopleWidget_updateTag_multiple_actions(
-    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_EditBulkPeopleWidget_updateTag_multiple_actions(qtbot: QtBot) -> None:
     parent = QWidget()
     qtbot.addWidget(parent)
     tag = SongTag(display_name="Involved People", id3_key="TIPL")
@@ -748,7 +621,6 @@ def test_EditBulkPeopleWidget_updateTag_multiple_actions(
             ["StaticRole", "StaticPerson"],
         ],
     )
-    songs = [song]
 
     # Set up actions
     widget.add_widget.value = [["NewRole", "NewPerson"]]
@@ -765,13 +637,10 @@ def test_EditBulkPeopleWidget_updateTag_multiple_actions(
     widget.remap_role_widget.value = [["OldRole", "RemappedRole"]]
     widget.remap_person_widget.value = [["OldPerson", "RemappedPerson"]]
 
-    mock_save = MagicMock()
-    monkeypatch.setattr(song, "save", mock_save)
-
     widget.group_box.setChecked(True)
     widget.clear_checkbox.setChecked(False)
 
-    assert widget.updateTag(songs) is True
+    assert widget.updateTag([song]) == {song}
 
     # Order of operations: addValues, removePairs, _removePeople, _removeRoles,
     # _remapPeople, _remapRoles
@@ -784,8 +653,6 @@ def test_EditBulkPeopleWidget_updateTag_multiple_actions(
         ("AnotherRole", "RemappedPerson"),  # Remap person
         ("StaticRole", "StaticPerson"),
     }
-
-    mock_save.assert_called_once()
 
 
 def test_EditBulkPeopleWidget_resetView(

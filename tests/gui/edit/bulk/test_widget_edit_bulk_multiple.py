@@ -85,7 +85,7 @@ def test_EditBulkMultipleWidget_updateTag_clear_checkbox_checked(qtbot: QtBot) -
 
     widget.clear_checkbox.setChecked(True)
 
-    assert widget.updateTag(songs) is True
+    assert widget.updateTag(songs) == {song1, song2}
     assert not song1.hasTag(tag)
     assert not song2.hasTag(tag)
 
@@ -110,7 +110,7 @@ def test_EditBulkMultipleWidget_updateTag_empty_add_empty_remove(qtbot: QtBot) -
     widget.remove_line.setText("")
     assert len(widget.remove_line.values) == 0
 
-    assert widget.updateTag(songs) is False
+    assert not widget.updateTag(songs)
 
     assert tag.getTag(song1.id3) == ["One Artist"]
     assert tag.getTag(song2.id3) == ["One Artist", "Another Artist"]
@@ -126,7 +126,6 @@ def test_EditBulkMultipleWidget_updateTag_single_song_empty_add(qtbot: QtBot) ->
     widget.group_box.setChecked(True)
 
     song1 = Song()
-    songs = [song1]
 
     assert widget.items == ()
     assert widget.remove_line.all_items == ()
@@ -135,7 +134,7 @@ def test_EditBulkMultipleWidget_updateTag_single_song_empty_add(qtbot: QtBot) ->
     assert widget.add_line.items == ["New Name"]
 
     assert not tag.hasTag(song1.id3)
-    assert widget.updateTag(songs) is True
+    assert widget.updateTag([song1]) == {song1}
 
     assert tag.getTag(song1.id3) == ["New Name"]
 
@@ -163,7 +162,7 @@ def test_EditBulkMultipleWidget_updateTag_single_song_and_widget_same(
     widget.add_line.setText("Some Name")
     assert widget.add_line.items == ["Some Name"]
 
-    assert widget.updateTag(songs) is False
+    assert not widget.updateTag(songs)
     assert tag.getTag(song.id3) == ["Some Name", "And Another"]
 
 
@@ -178,14 +177,13 @@ def test_EditBulkMultipleWidget_updateTag_single_widget_has_extra(qtbot: QtBot) 
 
     song = Song()
     song.setTag(tag, ["Some Name"])
-    songs = [song]
 
     assert isinstance(tag.getValue(song.id3), list)
 
     widget.add_line.setText("Some Name, And Another Name")
     assert widget.add_line.items == ["Some Name", "And Another Name"]
 
-    assert widget.updateTag(songs) is True
+    assert widget.updateTag([song]) == {song}
     assert tag.getTag(song.id3) == ["Some Name", "And Another Name"]
 
 
@@ -212,7 +210,7 @@ def test_EditBulkMultipleWidget_updateTag_multiple_add(qtbot: QtBot) -> None:
     widget.add_line.setText("Some Name, Another Name")
     assert widget.add_line.items == ["Some Name", "Another Name"]
 
-    assert widget.updateTag(songs) is True
+    assert widget.updateTag(songs) == {song1, song3, song4, song5}
     assert tag.getTag(song1.id3) == ["Some Name", "Another Name"]
     assert tag.getTag(song2.id3) == ["Some Name", "Another Name"]
     assert tag.getTag(song3.id3) == ["Another Name", "Some Name"]
@@ -277,7 +275,7 @@ def test_EditBulkMultipleWidget_updateTag_remove_song_value_same_line_value_only
     widget.remove_line.setText("Song Value")
     assert widget.remove_line.values == ["Song Value"]
 
-    assert widget.updateTag([song])
+    assert widget.updateTag([song]) == {song}
     assert tag.getValue(song.id3) == []
 
 
@@ -298,7 +296,7 @@ def test_EditBulkMultipleWidget_updateTag_remove_song_value_same_line_value_line
     widget.remove_line.setText("Song Value, Extra Value")
     assert widget.remove_line.values == ["Song Value", "Extra Value"]
 
-    assert widget.updateTag([song])
+    assert widget.updateTag([song]) == {song}
     assert tag.getValue(song.id3) == []
 
 
@@ -319,7 +317,7 @@ def test_EditBulkMultipleWidget_updateTag_remove_song_value_same_line_value_song
     widget.remove_line.setText("Song Value")
     assert widget.remove_line.values == ["Song Value"]
 
-    assert widget.updateTag([song])
+    assert widget.updateTag([song]) == {song}
     assert tag.getValue(song.id3) == ["Extra Value"]
 
 
@@ -340,7 +338,7 @@ def test_EditBulkMultipleWidget_updateTag_remove_song_value_same_line_value_song
     widget.remove_line.setText("Song Value, Another Value")
     assert widget.remove_line.values == ["Song Value", "Another Value"]
 
-    assert widget.updateTag([song])
+    assert widget.updateTag([song]) == {song}
     assert tag.getValue(song.id3) == ["Extra Value", "Even More"]
 
 
@@ -364,7 +362,7 @@ def test_EditBulkMultipleWidget_updateTag_add_remove(
     widget.remove_line.setText("Song Value, Another Value, Removed")
     assert widget.remove_line.values == ["Song Value", "Another Value", "Removed"]
 
-    assert widget.updateTag([song])
+    assert widget.updateTag([song]) == {song}
     assert tag.getValue(song.id3) == ["Extra Value", "New Value", "And Another"]
 
 

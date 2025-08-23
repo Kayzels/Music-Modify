@@ -270,16 +270,10 @@ class EditBulkPeopleWidget(EditBulkAbstractGroupWidget):
         return _ActionMapping(self, items, func)
 
     @override
-    def updateTag(self, songs: list[Song]) -> bool:
-        if not self.group_box.isChecked():
-            return False
-
-        if self.clear_checkbox.isChecked():
-            for song in songs:
-                self.tag.removeTag(song.id3)
-                song.save()
-            self._resetView()
-            return True
+    def updateTag(self, songs: list[Song]) -> set[Song]:
+        checkbox_result = self._handleCheckboxes(songs)
+        if checkbox_result is not None:
+            return checkbox_result
 
         # Collect all possible changes
         add_items: list[list[str]] = self.add_widget.value
@@ -310,7 +304,7 @@ class EditBulkPeopleWidget(EditBulkAbstractGroupWidget):
             )
         )
         if not change_attempted:
-            return False
+            return set()
 
         # Store which songs were actually modified.
         modified_songs: set[Song] = set()
@@ -333,9 +327,6 @@ class EditBulkPeopleWidget(EditBulkAbstractGroupWidget):
                 modified_songs.add(song)
 
         if modified_songs:
-            for song in modified_songs:
-                song.save()
             self._resetView()
-            return True
 
-        return False
+        return modified_songs
