@@ -129,12 +129,12 @@ def test_EditBulkLineWidget_updateTag_apply_empty_clears(qtbot: QtBot) -> None:
     widget.apply_checkbox.setChecked(True)
 
     song = Song()
-    tag.setTag(song.id3, ["First"])
-    assert tag.hasTag(song.id3)
+    song.setTag(tag, ["First"])
+    assert song.hasTag(tag)
     widget.main_widget.setText("")
 
     assert widget.updateTag([song]) == {song}
-    assert tag.hasTag(song.id3) is False
+    assert song.hasTag(tag) is False
 
 
 def test_EditBulkLineWidget_updateTag_apply_only_space_clears(qtbot: QtBot) -> None:
@@ -150,12 +150,12 @@ def test_EditBulkLineWidget_updateTag_apply_only_space_clears(qtbot: QtBot) -> N
     widget.apply_checkbox.setChecked(True)
 
     song = Song()
-    tag.setTag(song.id3, ["First"])
-    assert tag.hasTag(song.id3)
+    song.setTag(tag, ["First"])
+    assert song.hasTag(tag)
     widget.main_widget.setText("     ")
 
     assert widget.updateTag([song]) == {song}
-    assert tag.hasTag(song.id3) is False
+    assert song.hasTag(tag) is False
 
 
 def test_EditBulkLineWidget_updateTag_apply_not_empty_sets(qtbot: QtBot) -> None:
@@ -171,15 +171,17 @@ def test_EditBulkLineWidget_updateTag_apply_not_empty_sets(qtbot: QtBot) -> None
     widget.apply_checkbox.setChecked(True)
 
     song = Song()
-    tag.setTag(song.id3, ["First"])
-    assert tag.hasTag(song.id3)
-    widget.main_widget.setText("Second")
+    song.setTag(tag, ["First"])
+    assert song.hasTag(tag)
+
+    new_value = "Second"
+    widget.main_widget.setText(new_value)
 
     assert widget.updateTag([song]) == {song}
-    assert tag.hasTag(song.id3) is True
-    assert tag.getTag(song.id3) == ["Second"]
+    assert song.hasTag(tag) is True
+    assert song.getValue(tag) == new_value
 
-    assert widget.main_widget.text() == "Second"
+    assert widget.main_widget.text() == new_value
 
 
 def test_EditBulkLineWidget_updateTag_apply_not_empty_sets_stripped(
@@ -197,15 +199,17 @@ def test_EditBulkLineWidget_updateTag_apply_not_empty_sets_stripped(
     widget.apply_checkbox.setChecked(True)
 
     song = Song()
-    tag.setTag(song.id3, ["First"])
-    assert tag.hasTag(song.id3)
-    widget.main_widget.setText(" Another     ")
+    song.setTag(tag, ["First"])
+    assert song.hasTag(tag)
+
+    new_value = " Another      "
+    widget.main_widget.setText(new_value)
 
     assert widget.updateTag([song]) == {song}
-    assert tag.hasTag(song.id3) is True
-    assert tag.getTag(song.id3) == ["Another"]
+    assert song.hasTag(tag) is True
+    assert song.getValue(tag) == new_value.strip()
 
-    assert widget.main_widget.text() == "Another"
+    assert widget.main_widget.text() == new_value.strip()
 
 
 def test_EditBulkLineWidget_updateTag_clear(qtbot: QtBot) -> None:
@@ -223,10 +227,10 @@ def test_EditBulkLineWidget_updateTag_clear(qtbot: QtBot) -> None:
     widget.clear_checkbox.setChecked(True)
 
     song = Song()
-    tag.setTag(song.id3, ["First"])
-    assert tag.hasTag(song.id3)
+    song.setTag(tag, ["First"])
+    assert song.hasTag(tag)
 
     assert widget.updateTag([song]) == {song}
-    assert tag.hasTag(song.id3) is False
+    assert song.hasTag(tag) is False
 
     assert widget.main_widget.text() == ""

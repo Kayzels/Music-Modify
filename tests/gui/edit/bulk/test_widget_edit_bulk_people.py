@@ -216,9 +216,9 @@ def test_EditBulkPeopleWidget_updateTag_clear_checkbox_checked(qtbot: QtBot) -> 
     qtbot.addWidget(widget)
 
     song1 = Song()
-    song1.setTag(tag.id3_key, initial_data)
+    song1.setTag(tag, initial_data)
     song2 = Song()
-    song2.setTag(tag.id3_key, initial_data)
+    song2.setTag(tag, initial_data)
     songs = [song1, song2]
 
     widget.group_box.setChecked(True)
@@ -226,8 +226,8 @@ def test_EditBulkPeopleWidget_updateTag_clear_checkbox_checked(qtbot: QtBot) -> 
 
     assert widget.updateTag(songs) == {song1, song2}
 
-    assert tag.getTag(song1.id3) is None
-    assert tag.getTag(song2.id3) is None
+    assert song1.getValue(tag) is None
+    assert song2.getValue(tag) is None
 
 
 def test_EditBulkPeopleWidget_updateTag_no_changes_attempted(qtbot: QtBot) -> None:
@@ -238,7 +238,7 @@ def test_EditBulkPeopleWidget_updateTag_no_changes_attempted(qtbot: QtBot) -> No
     qtbot.addWidget(widget)
 
     song = Song()
-    assert not tag.hasTag(song.id3)
+    assert not song.hasTag(tag)
     songs = [song]
 
     widget.group_box.setChecked(True)
@@ -255,8 +255,8 @@ def test_EditBulkPeopleWidget_updateTag_no_changes_attempted(qtbot: QtBot) -> No
     widget.remap_role_widget.value = []
 
     assert not widget.updateTag(songs)
-    assert not tag.hasTag(song.id3)
-    assert tag.getTag(song.id3) is None
+    assert not song.hasTag(tag)
+    assert song.getValue(tag) is None
 
 
 def test_EditBulkPeopleWidget_updateTag_add_items_no_overlap(qtbot: QtBot) -> None:
@@ -278,8 +278,8 @@ def test_EditBulkPeopleWidget_updateTag_add_items_no_overlap(qtbot: QtBot) -> No
 
     assert widget.updateTag(songs) == {song1, song2}
 
-    assert tag.getTag(song1.id3) == add_items
-    assert tag.getTag(song2.id3) == add_items
+    assert song1.getValue(tag) == add_items
+    assert song2.getValue(tag) == add_items
 
     assert widget.items == [("Role A", "Person A"), ("Role B", "Person B")]
 
@@ -294,16 +294,16 @@ def test_EditBulkPeopleWidget_updateTag_add_items_mixed_overlap(qtbot: QtBot) ->
     add_items = [["RoleA", "PersonA"], ["RoleB", "PersonB"], ["RoleC", "PersonC"]]
 
     song1 = Song()  # Has all items
-    song1.setTag(tag.id3_key, add_items)
+    song1.setTag(tag, add_items)
 
     song2 = Song()  # Has some items
-    song2.setTag(tag.id3_key, [["RoleA", "PersonA"]])
+    song2.setTag(tag, [["RoleA", "PersonA"]])
 
     song3 = Song()  # Has no items
-    song3.setTag(tag.id3_key, [])
+    song3.setTag(tag, [])
 
     song4 = Song()  # Has extra items
-    song4.setTag(tag.id3_key, [["RoleE", "PersonE"]])
+    song4.setTag(tag, [["RoleE", "PersonE"]])
 
     songs = [song1, song2, song3, song4]
 
@@ -314,10 +314,10 @@ def test_EditBulkPeopleWidget_updateTag_add_items_mixed_overlap(qtbot: QtBot) ->
 
     assert widget.updateTag(songs) == {song2, song3, song4}
 
-    assert tag.getTag(song1.id3) == add_items
-    assert tag.getTag(song2.id3) == add_items
-    assert tag.getTag(song3.id3) == add_items
-    assert tag.getTag(song4.id3) == [["RoleE", "PersonE"], *add_items]
+    assert song1.getValue(tag) == add_items
+    assert song2.getValue(tag) == add_items
+    assert song3.getValue(tag) == add_items
+    assert song4.getValue(tag) == [["RoleE", "PersonE"], *add_items]
 
     expected_widget_items = [
         ("RoleA", "PersonA"),
@@ -337,7 +337,7 @@ def test_EditBulkPeopleWidget_updateTag_remove_pairs_no_overlap(qtbot: QtBot) ->
     qtbot.addWidget(widget)
 
     song = Song()
-    song.setTag(tag.id3_key, initial_data)
+    song.setTag(tag, initial_data)
     songs = [song]
 
     remove_pairs = ["RoleA" + PAIR_SEPARATOR + "PersonA"]
@@ -349,7 +349,7 @@ def test_EditBulkPeopleWidget_updateTag_remove_pairs_no_overlap(qtbot: QtBot) ->
 
     assert not widget.updateTag(songs)
 
-    assert tag.getTag(song.id3) == initial_data
+    assert song.getValue(tag) == initial_data
 
 
 def test_EditBulkPeopleWidget_updateTag_remove_pairs_mixed_overlap(
@@ -368,14 +368,14 @@ def test_EditBulkPeopleWidget_updateTag_remove_pairs_mixed_overlap(
 
     song1 = Song()  # Has all pairs to remove + one extra
     song1.setTag(
-        tag.id3_key, [["RoleA", "PersonA"], ["RoleB", "PersonB"], ["RoleC", "PersonC"]]
+        tag, [["RoleA", "PersonA"], ["RoleB", "PersonB"], ["RoleC", "PersonC"]]
     )
 
     song2 = Song()  # Has some pairs to remove + one extra
-    song2.setTag(tag.id3_key, [["RoleA", "PersonA"], ["RoleD", "PersonE"]])
+    song2.setTag(tag, [["RoleA", "PersonA"], ["RoleD", "PersonE"]])
 
     song3 = Song()  # Has none of the pairs to remove + one extra
-    song3.setTag(tag.id3_key, [["RoleX", "PersonY"]])
+    song3.setTag(tag, [["RoleX", "PersonY"]])
 
     songs = [song1, song2, song3]
 
@@ -387,9 +387,9 @@ def test_EditBulkPeopleWidget_updateTag_remove_pairs_mixed_overlap(
 
     assert widget.updateTag(songs) == {song1, song2}
 
-    assert tag.getTag(song1.id3) == [["RoleC", "PersonC"]]
-    assert tag.getTag(song2.id3) == [["RoleD", "PersonE"]]
-    assert tag.getTag(song3.id3) == [["RoleX", "PersonY"]]
+    assert song1.getValue(tag) == [["RoleC", "PersonC"]]
+    assert song2.getValue(tag) == [["RoleD", "PersonE"]]
+    assert song3.getValue(tag) == [["RoleX", "PersonY"]]
 
 
 def test_EditBulkPeopleWidget_updateTag_remove_roles_no_overlap(qtbot: QtBot) -> None:
@@ -401,7 +401,7 @@ def test_EditBulkPeopleWidget_updateTag_remove_roles_no_overlap(qtbot: QtBot) ->
     qtbot.addWidget(widget)
 
     song = Song()
-    song.setTag(tag.id3_key, initial_data)
+    song.setTag(tag, initial_data)
     songs = [song]
 
     remove_roles = ["RoleA"]
@@ -413,7 +413,7 @@ def test_EditBulkPeopleWidget_updateTag_remove_roles_no_overlap(qtbot: QtBot) ->
 
     assert not widget.updateTag(songs)
 
-    assert tag.getTag(song.id3) == initial_data
+    assert song.getValue(tag) == initial_data
 
 
 def test_EditBulkPeopleWidget_updateTag_remove_roles_mixed_overlap(
@@ -429,14 +429,14 @@ def test_EditBulkPeopleWidget_updateTag_remove_roles_mixed_overlap(
 
     song1 = Song()  # Has all roles to remove + one extra
     song1.setTag(
-        tag.id3_key, [["RoleA", "Person1"], ["RoleB", "Person2"], ["RoleC", "Person3"]]
+        tag, [["RoleA", "Person1"], ["RoleB", "Person2"], ["RoleC", "Person3"]]
     )
 
     song2 = Song()  # Has some roles to remove + one extra
-    song2.setTag(tag.id3_key, [["RoleA", "Person4"], ["RoleD", "Person5"]])
+    song2.setTag(tag, [["RoleA", "Person4"], ["RoleD", "Person5"]])
 
     song3 = Song()  # Has none of the roles to remove + one extra
-    song3.setTag(tag.id3_key, [["RoleX", "PersonY"]])
+    song3.setTag(tag, [["RoleX", "PersonY"]])
 
     songs = [song1, song2, song3]
 
@@ -448,9 +448,9 @@ def test_EditBulkPeopleWidget_updateTag_remove_roles_mixed_overlap(
 
     assert widget.updateTag(songs) == {song1, song2}
 
-    assert tag.getTag(song1.id3) == [["RoleC", "Person3"]]
-    assert tag.getTag(song2.id3) == [["RoleD", "Person5"]]
-    assert tag.getTag(song3.id3) == [["RoleX", "PersonY"]]
+    assert song1.getValue(tag) == [["RoleC", "Person3"]]
+    assert song2.getValue(tag) == [["RoleD", "Person5"]]
+    assert song3.getValue(tag) == [["RoleX", "PersonY"]]
 
 
 def test_EditBulkPeopleWidget_updateTag_remove_people_no_overlap(qtbot: QtBot) -> None:
@@ -462,7 +462,7 @@ def test_EditBulkPeopleWidget_updateTag_remove_people_no_overlap(qtbot: QtBot) -
     qtbot.addWidget(widget)
 
     song = Song()
-    song.setTag(tag.id3_key, initial_data)
+    song.setTag(tag, initial_data)
     songs = [song]
 
     remove_people = ["PersonA"]
@@ -474,7 +474,7 @@ def test_EditBulkPeopleWidget_updateTag_remove_people_no_overlap(qtbot: QtBot) -
 
     assert not widget.updateTag(songs)
 
-    assert tag.getTag(song.id3) == initial_data
+    assert song.getValue(tag) == initial_data
 
 
 def test_EditBulkPeopleWidget_updateTag_remove_people_mixed_overlap(
@@ -490,14 +490,14 @@ def test_EditBulkPeopleWidget_updateTag_remove_people_mixed_overlap(
 
     song1 = Song()  # Has all people to remove + one extra
     song1.setTag(
-        tag.id3_key, [["Role1", "PersonA"], ["Role2", "PersonB"], ["Role3", "PersonC"]]
+        tag, [["Role1", "PersonA"], ["Role2", "PersonB"], ["Role3", "PersonC"]]
     )
 
     song2 = Song()  # Has some people to remove + one extra
-    song2.setTag(tag.id3_key, [["Role4", "PersonA"], ["Role5", "PersonD"]])
+    song2.setTag(tag, [["Role4", "PersonA"], ["Role5", "PersonD"]])
 
     song3 = Song()  # Has none of the people to remove + one extra
-    song3.setTag(tag.id3_key, [["RoleX", "PersonY"]])
+    song3.setTag(tag, [["RoleX", "PersonY"]])
 
     songs = [song1, song2, song3]
 
@@ -509,9 +509,9 @@ def test_EditBulkPeopleWidget_updateTag_remove_people_mixed_overlap(
 
     assert widget.updateTag(songs) == {song1, song2}
 
-    assert tag.getTag(song1.id3) == [["Role3", "PersonC"]]
-    assert tag.getTag(song2.id3) == [["Role5", "PersonD"]]
-    assert tag.getTag(song3.id3) == [["RoleX", "PersonY"]]
+    assert song1.getValue(tag) == [["Role3", "PersonC"]]
+    assert song2.getValue(tag) == [["Role5", "PersonD"]]
+    assert song3.getValue(tag) == [["RoleX", "PersonY"]]
 
 
 def test_EditBulkPeopleWidget_updateTag_remap_roles_mixed_overlap(qtbot: QtBot) -> None:
@@ -525,15 +525,15 @@ def test_EditBulkPeopleWidget_updateTag_remap_roles_mixed_overlap(qtbot: QtBot) 
 
     song1 = Song()  # Has all roles to remap
     song1.setTag(
-        tag.id3_key,
+        tag,
         [["OldRole1", "PersonA"], ["OldRole2", "PersonB"], ["RoleX", "PersonY"]],
     )
 
     song2 = Song()  # Has some roles to remap
-    song2.setTag(tag.id3_key, [["OldRole1", "PersonC"], ["RoleZ", "PersonW"]])
+    song2.setTag(tag, [["OldRole1", "PersonC"], ["RoleZ", "PersonW"]])
 
     song3 = Song()  # Has none of the roles to remap
-    song3.setTag(tag.id3_key, [["RoleA", "PersonF"]])
+    song3.setTag(tag, [["RoleA", "PersonF"]])
 
     songs = [song1, song2, song3]
 
@@ -544,13 +544,13 @@ def test_EditBulkPeopleWidget_updateTag_remap_roles_mixed_overlap(qtbot: QtBot) 
 
     assert widget.updateTag(songs) == {song1, song2}
 
-    assert tag.getTag(song1.id3) == [
+    assert song1.getValue(tag) == [
         ["NewRole1", "PersonA"],
         ["NewRole2", "PersonB"],
         ["RoleX", "PersonY"],
     ]
-    assert tag.getTag(song2.id3) == [["NewRole1", "PersonC"], ["RoleZ", "PersonW"]]
-    assert tag.getTag(song3.id3) == [["RoleA", "PersonF"]]
+    assert song2.getValue(tag) == [["NewRole1", "PersonC"], ["RoleZ", "PersonW"]]
+    assert song3.getValue(tag) == [["RoleA", "PersonF"]]
 
 
 def test_EditBulkPeopleWidget_updateTag_remap_people_mixed_overlap(
@@ -566,15 +566,15 @@ def test_EditBulkPeopleWidget_updateTag_remap_people_mixed_overlap(
 
     song1 = Song()  # Has all people to remap
     song1.setTag(
-        tag.id3_key,
+        tag,
         [["RoleA", "OldPerson1"], ["RoleB", "OldPerson2"], ["RoleC", "PersonX"]],
     )
 
     song2 = Song()  # Has some people to remap
-    song2.setTag(tag.id3_key, [["RoleD", "OldPerson1"], ["RoleE", "PersonY"]])
+    song2.setTag(tag, [["RoleD", "OldPerson1"], ["RoleE", "PersonY"]])
 
     song3 = Song()  # Has none of the people to remap
-    song3.setTag(tag.id3_key, [["RoleF", "PersonZ"]])
+    song3.setTag(tag, [["RoleF", "PersonZ"]])
 
     songs = [song1, song2, song3]
 
@@ -585,13 +585,13 @@ def test_EditBulkPeopleWidget_updateTag_remap_people_mixed_overlap(
 
     assert widget.updateTag(songs) == {song1, song2}
 
-    assert tag.getTag(song1.id3) == [
+    assert song1.getValue(tag) == [
         ["RoleA", "NewPerson1"],
         ["RoleB", "NewPerson2"],
         ["RoleC", "PersonX"],
     ]
-    assert tag.getTag(song2.id3) == [["RoleD", "NewPerson1"], ["RoleE", "PersonY"]]
-    assert tag.getTag(song3.id3) == [["RoleF", "PersonZ"]]
+    assert song2.getValue(tag) == [["RoleD", "NewPerson1"], ["RoleE", "PersonY"]]
+    assert song3.getValue(tag) == [["RoleF", "PersonZ"]]
 
 
 def test_EditBulkPeopleWidget_updateTag_multiple_actions(qtbot: QtBot) -> None:
@@ -610,7 +610,7 @@ def test_EditBulkPeopleWidget_updateTag_multiple_actions(qtbot: QtBot) -> None:
     # one by role, one by person,
     # one whose role will be remapped, one whose person will be remapped.
     song.setTag(
-        tag.id3_key,
+        tag,
         [
             ["ExistingRole", "ExistingPerson"],
             ["RoleToRemove", "PersonToRemove"],
@@ -645,7 +645,7 @@ def test_EditBulkPeopleWidget_updateTag_multiple_actions(qtbot: QtBot) -> None:
     # Order of operations: addValues, removePairs, _removePeople, _removeRoles,
     # _remapPeople, _remapRoles
     # The list_utils functions can reorder.
-    final_song_tags = cast(list[list[str]], tag.getTag(song.id3))
+    final_song_tags = cast(list[list[str]], song.getValue(tag))
     assert set(map(tuple, final_song_tags)) == {
         ("ExistingRole", "ExistingPerson"),
         ("NewRole", "NewPerson"),
