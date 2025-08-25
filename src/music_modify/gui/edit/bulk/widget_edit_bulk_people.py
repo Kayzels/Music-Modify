@@ -13,7 +13,7 @@ from PySide6.QtWidgets import QFormLayout, QWidget
 from music_modify.custom_types import Song, SongTag
 from music_modify.custom_types.constants import PAIR_SEPARATOR
 from music_modify.custom_types.enums import PairIndex
-from music_modify.gui.completion import EditWithComplete, createCompletionWidget
+from music_modify.gui.completion import EditWithComplete
 from music_modify.gui.edit.widget_edit_table import EditTableWidget
 from music_modify.utils.list_utils import (
     addValues,
@@ -202,21 +202,21 @@ class EditBulkPeopleWidget(EditBulkAbstractGroupWidget):
         pairs = list(
             {f"{role}{PAIR_SEPARATOR}{person}" for (role, person) in self.items},
         )
-        self.remove_pair_widget = createCompletionWidget(
+        self.remove_pair_widget = EditWithComplete(
             parent=self,
             items=tuple(pairs),
         )
         form_layout.addRow("Remove Pair", self.remove_pair_widget)
 
         roles = list({role for (role, _) in self.items})
-        self.remove_role_widget = createCompletionWidget(
+        self.remove_role_widget = EditWithComplete(
             parent=self,
             items=tuple(roles),
         )
         form_layout.addRow("Remove Role", self.remove_role_widget)
 
         people = list({person for (_, person) in self.items})
-        self.remove_person_widget = createCompletionWidget(
+        self.remove_person_widget = EditWithComplete(
             parent=self,
             items=tuple(people),
         )

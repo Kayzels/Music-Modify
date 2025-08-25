@@ -1,6 +1,6 @@
 from PySide6.QtCore import Qt
 
-from music_modify.gui.completion.complete_model import CompleteModel
+from music_modify.gui.completion._complete_model import CompleteModel
 
 
 def test_CompleteModel_init() -> None:

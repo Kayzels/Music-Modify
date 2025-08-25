@@ -16,7 +16,7 @@ from PySide6.QtWidgets import (
 
 from music_modify.custom_types import Song, SongTag
 from music_modify.custom_types.qt_types import QLineEditArgs
-from music_modify.gui.completion import EditWithComplete, createCompletionWidget
+from music_modify.gui.completion import EditWithComplete
 from music_modify.prefs import prefs
 from music_modify.utils import getUniqueOrdered
 
@@ -76,7 +76,7 @@ class EditBulkMultipleWidget(EditBulkAbstractGroupWidget):
         form_layout.addRow("Add", add_layout)
 
         remove_layout = QHBoxLayout()
-        self.remove_line = createCompletionWidget(
+        self.remove_line = EditWithComplete(
             parent=self,
             items=self.items,
             multiple=True,

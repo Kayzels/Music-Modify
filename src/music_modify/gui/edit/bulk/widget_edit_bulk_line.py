@@ -14,7 +14,7 @@ from PySide6.QtWidgets import (
 )
 
 from music_modify.custom_types import Song, SongTag
-from music_modify.gui.completion import EditWithComplete, createCompletionWidget
+from music_modify.gui.completion import EditWithComplete
 
 from .widget_edit_bulk_abstract import EditBulkAbstractWidget
 
@@ -48,7 +48,7 @@ class EditBulkLineWidget(EditBulkAbstractWidget):
         if len(self.items) != 0 and in_all:
             initial = self.items[0]
 
-        self.main_widget: EditWithComplete = createCompletionWidget(
+        self.main_widget: EditWithComplete = EditWithComplete(
             self,
             items=self.items,
             multiple=False,
