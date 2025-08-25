@@ -120,9 +120,9 @@ class EditBulkLineWidget(EditBulkAbstractWidget):
             else:
                 logger.info(f"Setting value {value} for tag {self.tag.display_name}")
                 for song in songs:
-                    current_tag = self.tag.getTag(song.id3)
-                    if current_tag != [value]:
-                        self.tag.setTag(song.id3, [value])
+                    current_value = song.getValue(self.tag)
+                    if current_value != value:
+                        song.setTag(self.tag, [value])
                         updated_songs.add(song)
             self.main_widget.setText(value)
 
