@@ -10,18 +10,19 @@ from PySide6.QtWidgets import QWidget
 from music_modify.custom_types import constants
 
 
-def primary_contains(word: str, key: str) -> bool:
-    """Function that checks whether `key` appears in `word`."""
-    return key in word
-
-
-def primary_startswith(word: str, key: str) -> bool:
-    """Function that checks whether `key` is at the start of `word`."""
-    return word.startswith(key)
-
-
 class CompleteModel(QAbstractListModel):
-    """Model that is used for text completion suggestions."""
+    """Model that is used for text completion suggestions.
+
+    Attributes:
+        strip_completion_entries (bool): Whether the entires should keep or remove
+            leading and trailing whitespace
+        all_items (tuple[str, ...]): The unfiltered possible items that can be listed
+            as suggestions
+        current_items (tuple[str, ...]): The possible items that can be listed as
+            suggestions, based on `current_prefix`
+        current_prefix (str): The text used to filter items to only include the ones
+            that start with this value
+    """
 
     def __init__(
         self,
@@ -39,9 +40,13 @@ class CompleteModel(QAbstractListModel):
         super().__init__(parent)
 
         self.strip_completion_entries: bool = strip_completion_entries
+        "Whether the entries should keep or remove leading and trailing whitespace"
         self.all_items: tuple[str, ...] = ()
+        "The possible items that can be listed as suggestions"
         self.current_items: tuple[str, ...] = ()
+        "The filtered possible items that can be listed as suggestions"
         self.current_prefix: str = ""
+        "The text used to filter items to include only ones that start with this value"
 
     def setItems(self, items: tuple[str, ...]) -> None:
         """Sets the items that should be used as suggestions when typing."""
@@ -70,7 +75,7 @@ class CompleteModel(QAbstractListModel):
         universe = self.current_items if subset else self.all_items
 
         self.beginResetModel()
-        self.current_items = tuple(x for x in universe if primary_contains(x, prefix))
+        self.current_items = tuple(x for x in universe if prefix in x)
         self.endResetModel()
 
     @override
@@ -107,7 +112,7 @@ class CompleteModel(QAbstractListModel):
     def indexForPrefix(self, prefix: str) -> QModelIndex | None:
         """Gets the index of the first item that starts with the given string."""
         for i, item in enumerate(self.current_items):
-            if primary_startswith(item, prefix):
+            if item.startswith(prefix):
                 return self.index(i)
 
         return None
