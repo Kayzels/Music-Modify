@@ -69,7 +69,9 @@ class Song:
 
     def setTag(self, tag: str | SongTag, value: SongGroupData) -> None:
         """Set the tag within the file to have the value specified."""
-        found_tag = toTag(tag, prefs.settings.all_tags)
+        found_tag = (
+            toTag(tag, prefs.settings.all_tags) if not isinstance(tag, SongTag) else tag
+        )
         if found_tag is not None:
             found_tag.setTag(self.id3, value)
 
@@ -78,21 +80,27 @@ class Song:
 
         Returns `None`, if the tag is not present.
         """
-        found_tag = toTag(tag, prefs.settings.all_tags)
+        found_tag = (
+            toTag(tag, prefs.settings.all_tags) if not isinstance(tag, SongTag) else tag
+        )
         if found_tag is None:
             return None
         return found_tag.getValue(self.id3)
 
     def removeTag(self, tag: str | SongTag) -> None:
         """Remove the tag from the stored metadata for a song, if it exists."""
-        found_tag = toTag(tag, prefs.settings.all_tags)
+        found_tag = (
+            toTag(tag, prefs.settings.all_tags) if not isinstance(tag, SongTag) else tag
+        )
         if found_tag is None:
             return
         found_tag.removeTag(self.id3)
 
     def hasTag(self, tag: str | SongTag) -> bool:
         """Returns `True` if the tag is defined in the metadata for the song."""
-        found_tag = toTag(tag, prefs.settings.all_tags)
+        found_tag = (
+            toTag(tag, prefs.settings.all_tags) if not isinstance(tag, SongTag) else tag
+        )
         if found_tag is None:
             return False
         return found_tag.hasTag(self.id3)

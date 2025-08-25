@@ -70,3 +70,10 @@ def test_toTag(tags: list[SongTag]) -> None:
     assert result2.display_name == "Artist"
     result3: SongTag | None = toTag("TIPL", tags)
     assert result3 is None
+
+
+def test_toTag_existing(tags: list[SongTag]) -> None:
+    created_tag: SongTag | None = toTag("TIT2", tags)
+    assert created_tag is not None
+    assert created_tag.id3_key == "TIT2"
+    assert toTag(created_tag, tags) is created_tag
