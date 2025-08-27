@@ -158,10 +158,7 @@ class EditWithComplete(QComboBox):
 
     @override
     def eventFilter(self, watched: QObject, event: QEvent, /) -> bool:
-        try:
-            completer = self.line_edit.mcompleter
-        except AttributeError:
-            return False
+        completer = self.line_edit.mcompleter
         if (
             self.eat_focus_out
             and self is watched

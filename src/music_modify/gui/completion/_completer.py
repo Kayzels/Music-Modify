@@ -36,7 +36,7 @@ class Completer(QListView):
     """Signal that is emitted when the current text displayed should be used,
     and added to the items."""
     relayout_needed: Signal = Signal()
-    "Signal that is emitted when the widgets need to be re-layed out."
+    "Signal that is emitted when the widgets need to be re-laid out."
 
     def __init__(
         self,
@@ -84,7 +84,7 @@ class Completer(QListView):
         self.item_selected.emit(str(text))
 
     def setItems(self, items: tuple[str, ...]) -> None:
-        """Set the completion items for the model, and relayout if needed."""
+        """Set the completion items for the model, and re-layout if needed."""
         self.complete_model.setItems(items)
         if self.isVisible():
             self.relayout_needed.emit()
@@ -167,14 +167,14 @@ class Completer(QListView):
 
         Otherwise just forward the movement.
         """
-        idx = self.indexAt(event.pos())
+        idx = self.indexAt(event.position().toPoint())
         if idx.isValid():
             current = self.currentIndex()
             if idx.row() != current.row():
                 self.setCurrentIndex(idx)
         return super().mouseMoveEvent(event)
 
-    def _processKeyPress(  # noqa: C901, PLR0911, PLR0912
+    def _processKeyPress(  # noqa: C901, PLR0912
         self, watched: QObject, event: QKeyEvent, widget: QWidget
     ) -> bool:
         """Process an event where a keyboard button is typed."""
@@ -182,21 +182,22 @@ class Completer(QListView):
             key = event.key()
         except AttributeError:
             return QObject.eventFilter(self, watched, event)
+        processed = False
         if key == Qt.Key.Key_Escape:
             self.hide()
             event.accept()
-            return True
+            processed = True
         if key == Qt.Key.Key_F4 and event.modifiers() & Qt.KeyboardModifier.AltModifier:
             self.hide()
             event.accept()
-            return True
+            processed = True
         if key in (Qt.Key.Key_Enter, Qt.Key.Key_Return):
             idx = self.currentIndex()
             if idx.isValid():
                 self.chooseItem(idx)
             self.hide()
             event.accept()
-            return True
+            processed = True
         if key == Qt.Key.Key_Tab:
             idx = self.currentIndex()
             if idx.isValid():
@@ -208,7 +209,7 @@ class Completer(QListView):
             elif self.model().rowCount() > 0:
                 self.nextMatch()
             event.accept()
-            return True
+            processed = True
         if key in (Qt.Key.Key_PageUp, Qt.Key.Key_PageDown):
             # Let the list view handle these keys
             return False
@@ -219,6 +220,9 @@ class Completer(QListView):
                 else NavDirection.Next
             )
             event.accept()
+            processed = True
+
+        if processed:
             return True
 
         # Send to widget
@@ -237,13 +241,13 @@ class Completer(QListView):
 
     def _processMouseEvent(self, event: QMouseEvent, widget: QWidget) -> bool:
         if isinstance(widget, QComboBox):
-            # Ensure clicing the dropdown arrow of the combobox closes the popup
+            # Ensure clicking the dropdown arrow of the combobox closes the popup
             opt = QStyleOptionComboBox()
             widget.initStyleOption(opt)
             subcontrol = widget.style().hitTestComplexControl(
                 QStyle.ComplexControl.CC_ComboBox,
                 opt,
-                widget.mapFromGlobal(event.globalPos()),
+                widget.mapFromGlobal(event.globalPosition().toPoint()),
                 widget,
             )
             if subcontrol == QStyle.SubControl.SC_ComboBoxArrow:
@@ -267,9 +271,9 @@ class Completer(QListView):
             return self._processKeyPress(watched, event, widget)
         if (
             etype == QEvent.Type.MouseButtonPress
-            and hasattr(event, "globalPos")
+            and hasattr(event, "globalPosition")
             and not self.rect().contains(
-                self.mapFromGlobal(cast(QMouseEvent, event).globalPos())
+                self.mapFromGlobal(cast(QMouseEvent, event).globalPosition().toPoint())
             )
         ):
             # A click outside the popup, close it.

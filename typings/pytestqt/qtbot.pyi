@@ -5,10 +5,9 @@ from types import TracebackType
 from typing import Literal, Self
 
 from _typeshed import Incomplete
-from PySide6.QtCore import QRect, Qt, Signal
+from PySide6.QtCore import QRect, Qt, SignalInstance
 from PySide6.QtGui import QKeySequence
 from PySide6.QtWidgets import QWidget
-
 from pytestqt.wait_signal import CallbackBlocker, MultiSignalBlocker, SignalBlocker
 
 class QtBot:
@@ -26,7 +25,7 @@ class QtBot:
     def stop(self) -> None: ...
     def waitSignal(
         self,
-        signal: Signal,
+        signal: SignalInstance,
         *,
         timeout: int = ...,
         raising: bool = ...,
@@ -34,7 +33,7 @@ class QtBot:
     ) -> SignalBlocker: ...
     def waitSignals(
         self,
-        signals: list[Signal],
+        signals: list[SignalInstance],
         *,
         timeout: int = ...,
         raising: bool = ...,
@@ -44,7 +43,7 @@ class QtBot:
     def wait(self, ms: int) -> None: ...
     @contextlib.contextmanager
     def assertNotEmitted(
-        self, signal: Signal, *, wait: int = ...
+        self, signal: SignalInstance, *, wait: int = ...
     ) -> Generator[None]: ...
     def waitUntil(
         self, callback: Callable[..., Incomplete], *, timeout: int = ...

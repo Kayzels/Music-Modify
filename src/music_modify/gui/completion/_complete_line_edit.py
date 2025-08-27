@@ -69,8 +69,6 @@ class EnLineEdit(QLineEdit):
         "Whether a popup should be displayed for the line edit or not"
         self.multiple: bool = multiple
         "Whether multiple items can be displayed and selected, or only single items"
-        self.add_separator: bool = True
-        "Whether a separator should be displayed between entries"
 
     @property
     def all_items(self) -> tuple[str, ...]:
@@ -160,9 +158,13 @@ class EnLineEdit(QLineEdit):
 
         # Remove the completion prefix from the before text
         before_text = sep.join(before_text.split(sep)[:-1]).rstrip()
+
+        # Remove the separator and space from after, if it exists
+        if after_text.startswith(sep + " "):
+            after_text = after_text[len(sep) + 1 :]
         if before_text:
             before_text += sep + " "
-        completed_text = text + sep + " " if self.add_separator or after_text else text
+        completed_text = text + sep + " "
         return before_text + completed_text, after_text
 
     @Slot(str)
