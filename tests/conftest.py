@@ -28,7 +28,7 @@ def asset_folder(tmp_path_factory: pytest.TempPathFactory) -> Generator[str]:
 
 @pytest.fixture(scope="session")
 def song_path(tmp_path_factory: pytest.TempPathFactory) -> Generator[Path]:
-    original_file = Path("tests/assets/test_song.mp3").absolute()
+    original_file = (Path(__file__).parent / "assets/test_song.mp3").absolute()
     temp_dir = tmp_path_factory.mktemp("tmp_song")
     temp_file = temp_dir / "test_song.mp3"
     yield shutil.copyfile(original_file, temp_file)
@@ -37,10 +37,9 @@ def song_path(tmp_path_factory: pytest.TempPathFactory) -> Generator[Path]:
 
 @pytest.fixture(scope="session")
 def song_paths(
-    # tmp_path_factory: pytest.TempPathFactory,
     asset_folder: str,
 ) -> list[PathLike[str]]:
-    original_file = Path("tests/assets/test_song.mp3").absolute()
+    original_file = (Path(__file__).parent / "assets/test_song.mp3").absolute()
     files: list[PathLike[str]] = []
     for i in range(1, NUM_TEMP_SONGS + 1):
         new_file = Path(asset_folder) / f"test_song_{i}.mp3"
