@@ -46,7 +46,7 @@ def test_remapPeopleAndRoles() -> None:
 def test_ActionMapping_with_widget_empty_items_in_mapping(qtbot: QtBot) -> None:
     parent = QWidget()
     qtbot.addWidget(parent)
-    tag = SongTag("Involved People", "TIPL")
+    tag = SongTag(display_name="Involved People", id3_key="TIPL")
     widget = EditBulkPeopleWidget(parent, [], tag)
     qtbot.addWidget(widget)
     items: list[list[str]] = [["First Role", "First Person"]]
@@ -66,7 +66,7 @@ def test_ActionMapping_with_widget_empty_items_in_mapping(qtbot: QtBot) -> None:
 def test_ActionMapping_with_widget_empty_no_items_in_mapping(qtbot: QtBot) -> None:
     parent = QWidget()
     qtbot.addWidget(parent)
-    tag = SongTag("Involved People", "TIPL")
+    tag = SongTag(display_name="Involved People", id3_key="TIPL")
     widget = EditBulkPeopleWidget(parent, [], tag)
     qtbot.addWidget(widget)
     items: list[list[str]] = []
@@ -89,7 +89,7 @@ def test_ActionMapping_with_widget_mapping_items_identical_not_empty(
     parent = QWidget()
     qtbot.addWidget(parent)
     song = Song()
-    tag = SongTag("Involved People", "TIPL")
+    tag = SongTag(display_name="Involved People", id3_key="TIPL")
     original_data = [["First Role", "First Person"]]
     song.setTag("TIPL", original_data)
     widget = EditBulkPeopleWidget(parent, original_data, tag)
@@ -109,7 +109,7 @@ def test_ActionMapping_with_widget_not_empty_mapping_items_empty(qtbot: QtBot) -
     parent = QWidget()
     qtbot.addWidget(parent)
     song = Song()
-    tag = SongTag("Involved People", "TIPL")
+    tag = SongTag(display_name="Involved People", id3_key="TIPL")
     original_data = [["First Role", "First Person"]]
     song.setTag("TIPL", original_data)
     widget = EditBulkPeopleWidget(parent, original_data, tag)
@@ -128,7 +128,7 @@ def test_ActionMapping_with_widget_not_empty_mapping_items_empty(qtbot: QtBot) -
 def test_ActionMapping_eq(qtbot: QtBot) -> None:
     parent = QWidget()
     qtbot.addWidget(parent)
-    tag = SongTag("Involved People", "TIPL")
+    tag = SongTag(display_name="Involved People", id3_key="TIPL")
     widget1 = EditBulkPeopleWidget(parent, [], tag)
     widget2 = EditBulkPeopleWidget(parent, [], tag)
     assert widget1 != widget2
@@ -183,7 +183,7 @@ def test_ActionMapping_eq(qtbot: QtBot) -> None:
 def test_EditBulkPeopleWidget_createActionMapping(qtbot: QtBot) -> None:
     parent = QWidget()
     qtbot.addWidget(parent)
-    tag = SongTag("Involved People", "TIPL")
+    tag = SongTag(display_name="Involved People", id3_key="TIPL")
     widget = EditBulkPeopleWidget(parent, [], tag)
     qtbot.addWidget(widget)
     items: list[list[str]] = []

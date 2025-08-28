@@ -27,7 +27,7 @@ def test_MultipleLineEdit_items(qtbot: QtBot, monkeypatch: pytest.MonkeyPatch) -
 def test_EditBulkMultipleWidget_updateTag_group_box_unchecked(qtbot: QtBot) -> None:
     parent = QWidget()
     qtbot.addWidget(parent)
-    tag = SongTag("Artist", "TPE1")
+    tag = SongTag(display_name="Artist", id3_key="TPE1")
     widget = EditBulkMultipleWidget(parent, {"One"}, tag)
     qtbot.addWidget(widget)
     widget.group_box.setChecked(False)
@@ -39,7 +39,7 @@ def test_EditBulkMultipleWidget_updateTag_group_box_unchecked(qtbot: QtBot) -> N
 def test_EditBulkMultipleWidget_adds_to_line(qtbot: QtBot) -> None:
     parent = QWidget()
     qtbot.addWidget(parent)
-    tag = SongTag("Artist", "TPE2")
+    tag = SongTag(display_name="Artist", id3_key="TPE2")
     widget = EditBulkMultipleWidget(parent, {"One"}, tag)
     qtbot.addWidget(widget)
 
@@ -53,7 +53,7 @@ def test_EditBulkMultipleWidget_adds_to_line(qtbot: QtBot) -> None:
 
 def test_EditBulkMultipleWidget_init_not_empty(qtbot: QtBot) -> None:
     parent = QWidget()
-    tag = SongTag("Artist", "TPE2")
+    tag = SongTag(display_name="Artist", id3_key="TPE2")
     widget = EditBulkMultipleWidget(parent, {"One"}, tag)
     qtbot.addWidget(widget)
 

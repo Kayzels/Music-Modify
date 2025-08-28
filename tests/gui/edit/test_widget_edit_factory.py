@@ -19,14 +19,14 @@ def test_EditWidgetFactory_create_type_with_data(qtbot: QtBot) -> None:
     assert isinstance(edit_line_widget, EditLineWidget)
     assert edit_line_widget.value == "Name"
 
-    list_tag = SongTag("Composer", "TCOM")
+    list_tag = SongTag(display_name="Composer", id3_key="TCOM")
     list_data = ["First Name", "Second Name"]
     edit_list_widget = EditWidgetFactory.createWidget(widget, list_tag, list_data)
     qtbot.addWidget(edit_list_widget)
     assert isinstance(edit_list_widget, EditListWidget)
     assert edit_list_widget.value == ["First Name", "Second Name"]
 
-    people_tag = SongTag("Involved People", "TIPL")
+    people_tag = SongTag(display_name="Involved People", id3_key="TIPL")
     people_data = [["role1", "Name 1"], ["role2", "Name 2"]]
     edit_people_widget = EditWidgetFactory.createWidget(widget, people_tag, people_data)
     qtbot.addWidget(edit_people_widget)
@@ -45,14 +45,14 @@ def test_EditWidgetFactory_create_type_with_None(qtbot: QtBot) -> None:
     assert isinstance(edit_line_widget, EditLineWidget)
     assert edit_line_widget.value == ""
 
-    list_tag = SongTag("Composer", "TCOM")
+    list_tag = SongTag(display_name="Composer", id3_key="TCOM")
     list_data = None
     edit_list_widget = EditWidgetFactory.createWidget(widget, list_tag, list_data)
     qtbot.addWidget(edit_list_widget)
     assert isinstance(edit_list_widget, EditListWidget)
     assert edit_list_widget.value == []
 
-    people_tag = SongTag("Involved People", "TIPL")
+    people_tag = SongTag(display_name="Involved People", id3_key="TIPL")
     people_data = None
     edit_people_widget = EditWidgetFactory.createWidget(widget, people_tag, people_data)
     qtbot.addWidget(edit_people_widget)

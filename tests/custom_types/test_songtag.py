@@ -162,6 +162,7 @@ def test_getValue(tag_types: _TestTag, tag_values: _TestTagValue) -> None:
 
 def test_SongTag_repr(single_tag: SongTag) -> None:
     assert repr(single_tag) == "SongTag(TIT2, Title)"
+    assert repr(single_tag) == "SongTag(display_name='Title', id3_key='TIT2')"
 
 
 def test_SongTag_eq(single_tag: SongTag, multiple_tag: SongTag) -> None:

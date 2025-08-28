@@ -36,7 +36,7 @@ class SongTag:
     """List of keys that store a list of strings,
     rather than a single value."""
 
-    def __init__(self, display_name: str, id3_key: str) -> None:
+    def __init__(self, *, display_name: str, id3_key: str) -> None:
         """Create a `SongTag` based on a display name and key.
 
         Args:
@@ -49,7 +49,7 @@ class SongTag:
 
     @override
     def __repr__(self) -> str:
-        return f"SongTag({self.id3_key}, {self.display_name})"
+        return f"SongTag(display_name='{self.display_name}', id3_key='{self.id3_key}')"
 
     @override
     def __eq__(self, other: object) -> bool:
