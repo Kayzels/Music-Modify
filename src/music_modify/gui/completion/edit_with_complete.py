@@ -9,7 +9,7 @@ from PySide6.QtGui import QKeyEvent
 from PySide6.QtWidgets import QComboBox, QSizePolicy, QWidget
 
 from music_modify.prefs import prefs
-from music_modify.utils.list_utils import getUniqueOrdered
+from music_modify.utils import getUnique
 
 from ._complete_line_edit import EnLineEdit
 
@@ -175,4 +175,4 @@ class EditWithComplete(QComboBox):
         The text is split by the setting value for `split_text_entered`.
         """
         text = self.text()
-        return getUniqueOrdered(text, prefs.settings.split_text_entered)
+        return getUnique(text, prefs.settings.split_text_entered)

@@ -18,7 +18,7 @@ from music_modify.custom_types import Song, SongTag
 from music_modify.custom_types.qt_types import QLineEditArgs
 from music_modify.gui.completion import EditWithComplete
 from music_modify.prefs import prefs
-from music_modify.utils import getUniqueOrdered
+from music_modify.utils import getUnique
 
 from .widget_edit_bulk_abstract_group import EditBulkAbstractGroupWidget
 
@@ -40,7 +40,7 @@ class _MultipleLineEdit(QLineEdit):
     def items(self) -> list[str]:
         """The list of strings that is displayed."""
         text = self.text()
-        return getUniqueOrdered(text, prefs.settings.split_text_entered)
+        return getUnique(text, prefs.settings.split_text_entered)
 
 
 class EditBulkMultipleWidget(EditBulkAbstractGroupWidget):

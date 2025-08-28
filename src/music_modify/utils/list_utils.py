@@ -3,19 +3,22 @@
 from music_modify.custom_types import constants
 
 
-def getUniqueOrdered(text: str, separator: str) -> list[str]:
-    """Get the unique values from a string separated at `separator`, alphabetically.
+def getUnique(text: str, separator: str) -> list[str]:
+    """Get the unique values from a string separated at `separator`.
+
+    The values are kept in the original order, rather than being sorted.
+    Empty strings are removed.
 
     Args:
         text: String containing the text to be separated
         separator: The character(s) used to split the string
     """
-    items = [word.strip() for word in text.split(separator)]
-    ordered_unique_items: dict[str, None] = {}
+    items = [word.strip() for word in text.split(separator) if word.strip()]
+    unique_items: list[str] = []
     for item in items:
-        if item:  # check not empty string
-            ordered_unique_items[item] = None
-    return list(ordered_unique_items.keys())
+        if item not in unique_items:
+            unique_items.append(item)
+    return unique_items
 
 
 def toPairs(values: list[str], separator: str) -> list[list[str]]:

@@ -1,3 +1,5 @@
+"""Tests for time utilities."""
+
 from datetime import timedelta
 
 from music_modify.utils.time_utils import (
@@ -8,6 +10,7 @@ from music_modify.utils.time_utils import (
 
 
 def test_getTimeDict() -> None:
+    """Test that timedelta values are correctly converted to dicts."""
     td1 = timedelta(hours=1, minutes=5, seconds=10.45)
     assert getTimeDict(td1) == {
         "days": 0,
@@ -35,6 +38,7 @@ def test_getTimeDict() -> None:
 
 
 def test_convertSecondsAndMicroseconds() -> None:
+    """Test that seconds and microseconds are rounded and returned correctly."""
     assert convertSecondsAndMicroseconds(0, 0) is None
     assert convertSecondsAndMicroseconds(1, 0) == "1 second"
     assert convertSecondsAndMicroseconds(2, 0) == "2 seconds"
@@ -46,6 +50,7 @@ def test_convertSecondsAndMicroseconds() -> None:
 
 
 def test_formatTime() -> None:
+    """Test that a timedelta is formatted in the correct way."""
     td1 = timedelta(hours=1, minutes=5, seconds=10.45)
     td2 = timedelta(
         weeks=1,
