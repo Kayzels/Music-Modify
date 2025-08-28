@@ -83,7 +83,8 @@ select = [
 ignore = ["N802", "TC006", "COM812"]
 
 [tool.ruff.lint.per-file-ignores]
-"test*.py" = ["S101", "B011", "D", "PLR2004", "W505", "E501", "N806"]
+# "test*.py" = ["S101", "B011", "D", "PLR2004", "W505", "E501", "N806"]
+"test*.py" = ["S101", "B011", "PLR2004", "N806"]
 "**.pyi" = ["A", "COM812"]
 "widgets_complete.py" = ["PLC", "PLR", "C901", "D"]
 
@@ -102,7 +103,4 @@ convention = "google"
 max-complexity = 12
 
 [tool.coverage.report]
-omit = [
-  "src/music_modify/__main__.py",
-  "src/music_modify/music_modify.py",
-]
+omit = ["src/music_modify/__main__.py", "src/music_modify/music_modify.py"]
