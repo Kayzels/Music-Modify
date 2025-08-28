@@ -1,3 +1,5 @@
+"""Tests for utilities related to GUI."""
+
 from PySide6.QtCore import QItemSelectionModel, QSortFilterProxyModel, Qt
 from PySide6.QtGui import QStandardItem, QStandardItemModel
 from PySide6.QtWidgets import (
@@ -6,17 +8,30 @@ from PySide6.QtWidgets import (
     QLineEdit,
     QListView,
     QListWidget,
+    QScrollArea,
     QTableWidget,
+    QTabWidget,
     QVBoxLayout,
     QWidget,
 )
 from pytestqt.qtbot import QtBot
 
-from music_modify.gui.utils import clearLayout, getSelectedRows
+from music_modify.gui.utils import clearLayout, createTab, getSelectedRows, selectRows
+
+
+def test_getSelectedRows_no_selection(qtbot: QtBot) -> None:
+    """Test that getSelectedRows returns an empty list when there is no selection."""
+    table = QTableWidget(4, 2)
+    qtbot.addWidget(table)
+    table.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
+    table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
+
+    assert getSelectedRows(table) == []
 
 
 # noinspection PyTypeChecker
-def test_getSelectedRows(qtbot: QtBot) -> None:
+def test_getSelectedRows_normal(qtbot: QtBot) -> None:
+    """Test that getSelectedRows gets the correct row numbers from the widget."""
     table = QTableWidget(4, 2)
     qtbot.addWidget(table)
     table.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
@@ -24,19 +39,7 @@ def test_getSelectedRows(qtbot: QtBot) -> None:
     table.selectRow(2)
     assert getSelectedRows(table) == [2]
 
-    model = table.model()
-    selection_model = table.selectionModel()
-    selection_model.clearSelection()
-    selection_model.select(
-        model.index(1, 0),
-        QItemSelectionModel.SelectionFlag.Select
-        | QItemSelectionModel.SelectionFlag.Rows,
-    )
-    selection_model.select(
-        model.index(3, 0),
-        QItemSelectionModel.SelectionFlag.Select
-        | QItemSelectionModel.SelectionFlag.Rows,
-    )
+    selectRows(table, [1, 3])
     assert getSelectedRows(table) == [1, 3]
 
     list_widget = QListWidget()
@@ -45,29 +48,14 @@ def test_getSelectedRows(qtbot: QtBot) -> None:
     qtbot.addWidget(list_widget)
     list_widget.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
     list_widget.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
-    model = list_widget.model()
-    selection_model = list_widget.selectionModel()
-    selection_model.select(
-        model.index(2, 0),
-        QItemSelectionModel.SelectionFlag.Select
-        | QItemSelectionModel.SelectionFlag.Rows,
-    )
+    selectRows(list_widget, [2])
     assert getSelectedRows(list_widget) == [2]
-    selection_model.clearSelection()
-    selection_model.select(
-        model.index(1, 0),
-        QItemSelectionModel.SelectionFlag.Select
-        | QItemSelectionModel.SelectionFlag.Rows,
-    )
-    selection_model.select(
-        model.index(3, 0),
-        QItemSelectionModel.SelectionFlag.Select
-        | QItemSelectionModel.SelectionFlag.Rows,
-    )
-    assert getSelectedRows(table) == [1, 3]
+    selectRows(list_widget, [1, 3])
+    assert getSelectedRows(list_widget) == [1, 3]
 
 
 def test_getSelectedRows_with_proxy_model(qtbot: QtBot) -> None:
+    """Test that getSelectedRows gets the correct rows when a proxy model is used."""
     source_model = QStandardItemModel(4, 1)
     for i in range(4):
         source_model.setItem(i, 0, QStandardItem(f"Item {i}"))
@@ -101,7 +89,8 @@ def test_getSelectedRows_with_proxy_model(qtbot: QtBot) -> None:
     assert sorted(selected_source_rows) == [1, 3]
 
 
-def test_clearLayout(qtbot: QtBot) -> None:
+def test_clearLayout_normal(qtbot: QtBot) -> None:
+    """Test that clearLayout clears layouts for widgets."""
     widget1 = QWidget()
     layout1 = QHBoxLayout()
     widget2 = QLineEdit("This is some text")
@@ -116,6 +105,7 @@ def test_clearLayout(qtbot: QtBot) -> None:
 
 
 def test_clearLayout_recursive(qtbot: QtBot) -> None:
+    """Test that clearLayout is called recursively when needed."""
     parent_widget = QWidget()
     qtbot.addWidget(parent_widget)
     parent_layout = QVBoxLayout()
@@ -137,9 +127,9 @@ def test_clearLayout_recursive(qtbot: QtBot) -> None:
     second_layout.addLayout(second_inner_layout_one)
     second_layout.addLayout(second_inner_layout_two)
 
-    assert parent_layout.count() == 2  # noqa: PLR2004
-    assert first_layout.count() == 2  # noqa: PLR2004
-    assert second_layout.count() == 2  # noqa: PLR2004
+    assert parent_layout.count() == 2
+    assert first_layout.count() == 2
+    assert second_layout.count() == 2
 
     clearLayout(parent_layout)
 
@@ -147,3 +137,20 @@ def test_clearLayout_recursive(qtbot: QtBot) -> None:
     # The other layouts might still exist, and might not,
     # so they can't be checked.
     # But they won't be accessible where they were previously used.
+
+
+def test_createTab(qtbot: QtBot) -> None:
+    """Test that a tab is created correctly, and that a layout is returned."""
+    tab_widget = QTabWidget()
+    qtbot.addWidget(tab_widget)
+
+    layout1 = createTab("First Tab", tab_widget, QVBoxLayout)
+    layout2 = createTab("Second Tab", tab_widget, QHBoxLayout)
+
+    assert isinstance(layout1, QVBoxLayout)
+    assert isinstance(layout2, QHBoxLayout)
+    assert tab_widget.count() == 2
+    assert tab_widget.tabText(0) == "First Tab"
+    assert tab_widget.tabText(1) == "Second Tab"
+    assert isinstance(tab_widget.widget(0), QScrollArea)
+    assert isinstance(tab_widget.widget(1), QScrollArea)
