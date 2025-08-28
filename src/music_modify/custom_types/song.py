@@ -35,8 +35,9 @@ class Song:
         "The metadata structure and values stored in the song."
         if file is not None:
             self.load(file)
-        self.display_info: list[str] = self._generateColumns()
+        self.display_info: list[str]
         "The displayed values for the tags that are present in the song."
+        self.updateInfo()
 
     def _generateColumns(self) -> list[str]:
         """Generate display values for the columns that should be shown in the table."""
@@ -66,6 +67,7 @@ class Song:
         """Load the metadata from this specific file."""
         self.file = file
         self.id3.load(file)
+        self.updateInfo()
 
     def setTag(self, tag: str | SongTag, value: SongGroupData) -> None:
         """Set the tag within the file to have the value specified."""

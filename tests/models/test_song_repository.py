@@ -142,10 +142,13 @@ def test_SongRepository_refreshDisplay(monkeypatch: pytest.MonkeyPatch) -> None:
     mock_update_info = MagicMock()
     monkeypatch.setattr(Song, "updateInfo", mock_update_info)
 
+    num_songs = 3
+
     repo = SongRepository()
-    for _ in range(3):
+    for _ in range(num_songs):
         repo.addSong()
 
     repo.refreshDisplay()
 
-    assert mock_update_info.call_count == 3
+    # Needs to be twice, because updateInfo is called in init as well
+    assert mock_update_info.call_count == 2 * num_songs
