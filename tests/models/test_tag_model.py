@@ -1,3 +1,5 @@
+"""Tests for TagModel."""
+
 from typing import Literal
 
 from PySide6.QtCore import Qt
@@ -10,6 +12,7 @@ from music_modify.utils.string_utils import tableHeader
 
 @pytest.fixture
 def tags() -> list[TagInfo]:
+    """Fixture that creates a list of TagInfo."""
     return [
         TagInfo(id3_key="TIT2", display_name="Title", show_in_table=True),
         TagInfo(id3_key="TPE2", display_name="Artist", show_in_table=False),
@@ -18,16 +21,24 @@ def tags() -> list[TagInfo]:
 
 @pytest.fixture
 def model(tags: list[TagInfo]) -> TagModel:
+    """Fixture that creates a tag model."""
     return TagModel(tags)
 
 
-def test_size(model: TagModel, tags: list[TagInfo]) -> None:
+def test_TagModel_rowCount_columnCount(model: TagModel, tags: list[TagInfo]) -> None:
+    """Test that the number of rows and columns for a TagModel is correct."""
     assert model.rowCount() == len(tags)
     assert model.columnCount() == len(TAG_MODEL_COLUMNS)
     assert model.tags == tags
 
 
-def test_headers(model: TagModel) -> None:
+def test_TagModel_headerData(model: TagModel) -> None:
+    """Test that the vertical and horizontal header values are correct.
+
+    Horizontal headers should have the TagInfo labels.
+    Vertical headers should return None.
+    Headers for invalid indexes and roles should return None.
+    """
     for col in range(len(TAG_MODEL_COLUMNS)):
         check_val: str = tableHeader(TAG_MODEL_COLUMNS[col])
         assert (
@@ -72,12 +83,10 @@ def test_headers(model: TagModel) -> None:
     )
 
 
-def test_data(model: TagModel, tags: list[TagInfo]) -> None:
-    # Should be title, but the index for column might change.
-    # Depends on TAG_MODEL_COLUMNS
-
+def test_TagModel_data(model: TagModel, tags: list[TagInfo]) -> None:
+    """Test that the data values for tags are found and displayed correctly."""
+    # Only need to test one row, no need to iterate through tags
     for i in range(len(TAG_MODEL_COLUMNS)):
-        # Only need to test one row, no need to iterate through tags
         index = model.index(0, i)
         field = TAG_MODEL_COLUMNS[i]
         role: Literal[Qt.ItemDataRole.DisplayRole, Qt.ItemDataRole.CheckStateRole] = (
@@ -94,7 +103,8 @@ def test_data(model: TagModel, tags: list[TagInfo]) -> None:
     assert model.data(index, Qt.ItemDataRole.DisplayRole) is None
 
 
-def test_setData(model: TagModel) -> None:
+def test_TagModel_setData(model: TagModel) -> None:
+    """Test that data can be added to the TagModel."""
     # Check setting strings first
     cols = [i for i, column in enumerate(TAG_MODEL_COLUMNS) if column == "id3_key"]
     if len(cols) != 1:
@@ -138,7 +148,8 @@ def test_setData(model: TagModel) -> None:
     )
 
 
-def test_addTag(model: TagModel) -> None:
+def test_TagModel_addTag(model: TagModel) -> None:
+    """Test creating a new tag for the model."""
     model.addTag(id3_key="TRCK", display_name="Track", show_in_table=True)
     assert model.tags == [
         TagInfo(id3_key="TIT2", display_name="Title", show_in_table=True),
@@ -147,7 +158,8 @@ def test_addTag(model: TagModel) -> None:
     ]
 
 
-def test_removeTag(model: TagModel) -> None:
+def test_TagModel_removeTag(model: TagModel) -> None:
+    """Test removing a tag from the model."""
     model.removeTag(1)
     assert model.tags == [
         TagInfo(id3_key="TIT2", display_name="Title", show_in_table=True),
@@ -155,21 +167,47 @@ def test_removeTag(model: TagModel) -> None:
 
 
 def test_moveTag(model: TagModel) -> None:
+    """Test moving tags up and down in the model."""
     model.moveTag(0, 1)
     tags = [
         TagInfo(id3_key="TPE2", display_name="Artist", show_in_table=False),
         TagInfo(id3_key="TIT2", display_name="Title", show_in_table=True),
     ]
-    assert model.tags == tags
+
+    # Invalid source row
     model.moveTag(-1, 0)
     assert model.tags == tags
+    # Invalid destination row
     model.moveTag(0, -1)
     assert model.tags == tags
+    # Invalid source and destination row
     model.moveTag(-1, model.rowCount())
     assert model.tags == tags
+    # Invalid source row
     model.moveTag(model.rowCount(), 0)
     assert model.tags == tags
 
+    model.moveTag(0, 1)
+    assert model.tags == [
+        TagInfo(id3_key="TIT2", display_name="Title", show_in_table=True),
+        TagInfo(id3_key="TPE2", display_name="Artist", show_in_table=False),
+    ]
 
-def test_flags(model: TagModel) -> None:
+
+def test_TagModel_flags(model: TagModel) -> None:
+    """Test that flags are set correctly based on index."""
+    # Invalid index
     assert model.flags(model.index(-1, -1)) == Qt.ItemFlag.NoItemFlags
+
+    for col_idx, field in enumerate(TAG_MODEL_COLUMNS):
+        index = model.index(0, col_idx)
+        current_flags = model.flags(index)
+
+        if field == "show_in_table":
+            assert current_flags & Qt.ItemFlag.ItemIsUserCheckable
+            assert current_flags & Qt.ItemFlag.ItemIsEnabled
+            assert not (current_flags & Qt.ItemFlag.ItemIsEditable)
+        else:
+            assert current_flags & Qt.ItemFlag.ItemIsEditable
+            assert current_flags & Qt.ItemFlag.ItemIsEnabled
+            assert not (current_flags & Qt.ItemFlag.ItemIsUserCheckable)

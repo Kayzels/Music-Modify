@@ -24,10 +24,6 @@ class SongRepository(QObject):
         super().__init__()
         self._songs: list[Song] = []
 
-    def getSongs(self) -> list[Song]:
-        """Returns the list of songs the repository manages."""
-        return self._songs
-
     def getSong(self, index: int) -> Song | None:
         """Gets the song at a specific index."""
         if index < 0 or index >= len(self._songs):
@@ -45,9 +41,17 @@ class SongRepository(QObject):
         """Returns the number of songs in the repository."""
         return len(self._songs)
 
+    def __contains__(self, new_song: Song | str | PathLike[str]) -> bool:
+        """Returns True if a song with that file path already exists in the repo."""
+        if isinstance(new_song, Song):
+            file_matches = any(song.file == new_song.file for song in self._songs)
+            song_matches = new_song in self._songs
+            return file_matches or song_matches
+        return any(song.file == new_song for song in self._songs)
+
     def addFile(self, file: str | PathLike[str]) -> None:
         """Add file to the list of songs, if not already present."""
-        if not any(song.file == file for song in self._songs):
+        if file not in self:
             self._songs.append(Song(file))
             self.songs_updated.emit()
 
