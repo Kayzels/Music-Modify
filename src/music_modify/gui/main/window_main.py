@@ -215,12 +215,13 @@ class MainWindow(QMainWindow):
         files: list[str] | list[os.PathLike[str]] = []
         folders: list[str] | list[os.PathLike[str]] = []
         for url in event.mimeData().urls():
-            if url.toLocalFile().endswith(".mp3"):
+            local_url = url.toLocalFile()
+            if local_url.endswith(".mp3"):
                 event.acceptProposedAction()
-                files.append(url.toLocalFile())
-            elif Path(url.toLocalFile()).is_dir():
+                files.append(local_url)
+            elif Path(local_url).is_dir():
                 event.acceptProposedAction()
-                folders.append(url.toLocalFile())
+                folders.append(local_url)
         if files:
             self.addFiles(files)
         if folders:
