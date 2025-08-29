@@ -153,6 +153,11 @@ class EditDialog(EditAbstractDialog):
             # This is needed because after a user clicks Apply,
             # the value stored in the song is now no longer the same as the original,
             # so we can't just clear it.
+
+            # widget.value holds the original value for the widget,
+            # as this slot is only called after value_reset,
+            # which only happens if the widget has been reset
+            # to store the original value.
             value = widget.value
 
             # Need to get the value inside the song and compare

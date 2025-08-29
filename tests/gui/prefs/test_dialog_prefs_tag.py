@@ -1,3 +1,5 @@
+"""Tests for PrefsTagDialog."""
+
 import copy
 from unittest.mock import MagicMock
 
@@ -19,7 +21,7 @@ _test_tag_info = TagInfo(
 )
 
 
-class MockPrefsTagAddDialog(QObject):
+class _MockPrefsTagAddDialog(QObject):
     accepted: Signal = Signal()
 
     def __init__(self, parent: QWidget | None = None) -> None:
@@ -63,7 +65,7 @@ def _patchDialogs(
     )
     monkeypatch.setattr(
         "music_modify.gui.prefs.dialog_prefs_tag.PrefsTagAddDialog",
-        MockPrefsTagAddDialog,
+        _MockPrefsTagAddDialog,
     )
 
 
@@ -106,6 +108,7 @@ def test_PrefsTagDialog_init(
     monkeypatch: pytest.MonkeyPatch,
     temp_settings: prefs_module.Settings,
 ) -> None:
+    """Tests that creating a PrefsTagDialog works correctly."""
     dialog = _createDialog(qtbot, monkeypatch, temp_settings)
     assert dialog.tag_table.model().rowCount() == len(temp_settings.info_tags)
 
@@ -115,6 +118,7 @@ def test_PrefsTagDialog_addTag(
     monkeypatch: pytest.MonkeyPatch,
     temp_settings: prefs_module.Settings,
 ) -> None:
+    """Tests that adding a valid tag to the dialog adds it."""
     dialog = _createDialog(qtbot, monkeypatch, temp_settings)
     model = dialog.model
     before_len = model.rowCount()
@@ -130,6 +134,7 @@ def test_PrefsTagDialog_removeSelectedTags(
     monkeypatch: pytest.MonkeyPatch,
     temp_settings: prefs_module.Settings,
 ) -> None:
+    """Tests that removing the selected rows works."""
     dialog = _createDialog(qtbot, monkeypatch, temp_settings)
     model = dialog.model
 
@@ -162,6 +167,7 @@ def test_PrefsTagDialog_moveTagsUp(
     monkeypatch: pytest.MonkeyPatch,
     temp_settings: prefs_module.Settings,
 ) -> None:
+    """Tests that moving tags up in the model works."""
     dialog = _createDialog(qtbot, monkeypatch, temp_settings)
     model = dialog.model
     tags: list[TagInfo] = copy.deepcopy(model.tags)
@@ -198,6 +204,7 @@ def test_PrefsTagDialog_moveTagsDown(
     monkeypatch: pytest.MonkeyPatch,
     temp_settings: prefs_module.Settings,
 ) -> None:
+    """Tests that moving tags down in the model works."""
     dialog = _createDialog(qtbot, monkeypatch, temp_settings)
     model = dialog.model
     tags: list[TagInfo] = copy.deepcopy(model.tags)
@@ -234,6 +241,7 @@ def test_PrefsTagDialog_updateSettings(
     monkeypatch: pytest.MonkeyPatch,
     temp_settings: prefs_module.Settings,
 ) -> None:
+    """Tests that calling updateSettings makes changes to the settings values."""
     dialog = _createDialog(qtbot, monkeypatch, temp_settings)
     orig_tags: list[TagInfo] = copy.deepcopy(dialog.model.tags)
     tags: list[TagInfo] = _makeChanges(dialog)
@@ -251,6 +259,7 @@ def test_PrefsTagDialog_restoreDefaults(
     monkeypatch: pytest.MonkeyPatch,
     temp_settings: prefs_module.Settings,
 ) -> None:
+    """Tests that calling restoreDefaults puts the values back to their defaults."""
     dialog = _createDialog(qtbot, monkeypatch, temp_settings)
     tags: list[TagInfo] = _makeChanges(dialog)
     assert dialog.button_box is not None
@@ -267,6 +276,7 @@ def test_PrefsTagDialog_resetSettings(
     monkeypatch: pytest.MonkeyPatch,
     temp_settings: prefs_module.Settings,
 ) -> None:
+    """Tests that calling resetSettings puts the values back to initial values."""
     dialog1 = _createDialog(qtbot, monkeypatch, temp_settings)
     model1 = dialog1.model
     tags1: list[TagInfo] = copy.deepcopy(model1.tags)
@@ -300,6 +310,7 @@ def test_PrefsTagDialog_restore_then_reset(
     monkeypatch: pytest.MonkeyPatch,
     temp_settings: prefs_module.Settings,
 ) -> None:
+    """Tests that restoring defaults then calling reset puts initial values back."""
     dialog1 = _createDialog(qtbot, monkeypatch, temp_settings)
     model1 = dialog1.model
     tags1: list[TagInfo] = copy.deepcopy(model1.tags)
@@ -339,6 +350,7 @@ def test_PrefsTagDialog_showInvalidInputMessage(
     monkeypatch: pytest.MonkeyPatch,
     temp_settings: prefs_module.Settings,
 ) -> None:
+    """Test that an invalid input message is shown when needed."""
     dialog = _createDialog(qtbot, monkeypatch, temp_settings)
     qtbot.addWidget(dialog)
 

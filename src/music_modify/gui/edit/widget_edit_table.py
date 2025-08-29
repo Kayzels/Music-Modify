@@ -43,7 +43,7 @@ class EditTableWidget(EditAbstractGroupWidget[SongTableData, DragTableWidget]):
             data: The information currently present for the tag
             labels (optional): The headings that the table should have
         """
-        if labels is None:
+        if labels is None or len(labels) != constants.PEOPLE_COL_COUNT:
             self.labels: list[str] = ["Role", "Person"]
         else:
             self.labels = labels

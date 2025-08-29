@@ -1,4 +1,7 @@
+"""Tests for EditWidgetFactory."""
+
 from PySide6.QtWidgets import QWidget
+import pytest
 from pytestqt.qtbot import QtBot
 
 from music_modify.custom_types.songtag import SongTag
@@ -8,53 +11,93 @@ from music_modify.gui.edit.widget_edit_list import EditListWidget
 from music_modify.gui.edit.widget_edit_table import EditTableWidget
 
 
-def test_EditWidgetFactory_create_type_with_data(qtbot: QtBot) -> None:
+@pytest.mark.parametrize(
+    ("data", "tag", "empty_data", "expected_type"),
+    [
+        pytest.param(
+            None,
+            SongTag(display_name="Title", id3_key="TIT2"),
+            "",
+            EditLineWidget,
+            id="line_tag_with_None",
+        ),
+        pytest.param(
+            None,
+            SongTag(display_name="Composer", id3_key="TCOM"),
+            [],
+            EditListWidget,
+            id="list_tag_with_None",
+        ),
+        pytest.param(
+            None,
+            SongTag(display_name="Involved People", id3_key="TIPL"),
+            [],
+            EditTableWidget,
+            id="people_tag_with_None",
+        ),
+        pytest.param(
+            "",
+            SongTag(display_name="Title", id3_key="TIT2"),
+            "",
+            EditLineWidget,
+            id="line_tag_with_empty_value",
+        ),
+        pytest.param(
+            [],
+            SongTag(display_name="Composer", id3_key="TCOM"),
+            [],
+            EditListWidget,
+            id="list_tag_with_empty_value",
+        ),
+        pytest.param(
+            [],
+            SongTag(display_name="Involved People", id3_key="TIPL"),
+            [],
+            EditTableWidget,
+            id="people_tag_with_empty_value",
+        ),
+        pytest.param(
+            "Name",
+            SongTag(display_name="Title", id3_key="TIT2"),
+            "",
+            EditLineWidget,
+            id="line_tag_with_value",
+        ),
+        pytest.param(
+            ["First Name", "Second Name"],
+            SongTag(display_name="Composer", id3_key="TCOM"),
+            [],
+            EditListWidget,
+            id="list_tag_with_multiple_values",
+        ),
+        pytest.param(
+            ["First Name"],
+            SongTag(display_name="Composer", id3_key="TCOM"),
+            [],
+            EditListWidget,
+            id="list_tag_with_single_value",
+        ),
+        pytest.param(
+            [["role1", "Name 1"], ["role2", "Name 2"]],
+            SongTag(display_name="Involved People", id3_key="TIPL"),
+            [],
+            EditTableWidget,
+            id="people_tag_with_value",
+        ),
+    ],
+)
+def test_EditWidgetFactory_create_type(
+    qtbot: QtBot,
+    data: str | list[str] | list[list[str]] | None,
+    tag: SongTag,
+    empty_data: str | list[str] | list[list[str]],
+    expected_type: type[EditLineWidget] | type[EditListWidget] | type[EditTableWidget],
+) -> None:
+    """Tests that the correct widget types are created based on the tag."""
     widget = QWidget()
     qtbot.addWidget(widget)
 
-    line_tag = SongTag(display_name="Title", id3_key="TIT2")
-    line_data = "Name"
-    edit_line_widget = EditWidgetFactory.createWidget(widget, line_tag, line_data)
-    qtbot.addWidget(edit_line_widget)
-    assert isinstance(edit_line_widget, EditLineWidget)
-    assert edit_line_widget.value == "Name"
-
-    list_tag = SongTag(display_name="Composer", id3_key="TCOM")
-    list_data = ["First Name", "Second Name"]
-    edit_list_widget = EditWidgetFactory.createWidget(widget, list_tag, list_data)
-    qtbot.addWidget(edit_list_widget)
-    assert isinstance(edit_list_widget, EditListWidget)
-    assert edit_list_widget.value == ["First Name", "Second Name"]
-
-    people_tag = SongTag(display_name="Involved People", id3_key="TIPL")
-    people_data = [["role1", "Name 1"], ["role2", "Name 2"]]
-    edit_people_widget = EditWidgetFactory.createWidget(widget, people_tag, people_data)
-    qtbot.addWidget(edit_people_widget)
-    assert isinstance(edit_people_widget, EditTableWidget)
-    assert edit_people_widget.value == [["role1", "Name 1"], ["role2", "Name 2"]]
-
-
-def test_EditWidgetFactory_create_type_with_None(qtbot: QtBot) -> None:
-    widget = QWidget()
-    qtbot.addWidget(widget)
-
-    line_tag = SongTag(display_name="Title", id3_key="TIT2")
-    line_data = None
-    edit_line_widget = EditWidgetFactory.createWidget(widget, line_tag, line_data)
-    qtbot.addWidget(edit_line_widget)
-    assert isinstance(edit_line_widget, EditLineWidget)
-    assert edit_line_widget.value == ""
-
-    list_tag = SongTag(display_name="Composer", id3_key="TCOM")
-    list_data = None
-    edit_list_widget = EditWidgetFactory.createWidget(widget, list_tag, list_data)
-    qtbot.addWidget(edit_list_widget)
-    assert isinstance(edit_list_widget, EditListWidget)
-    assert edit_list_widget.value == []
-
-    people_tag = SongTag(display_name="Involved People", id3_key="TIPL")
-    people_data = None
-    edit_people_widget = EditWidgetFactory.createWidget(widget, people_tag, people_data)
-    qtbot.addWidget(edit_people_widget)
-    assert isinstance(edit_people_widget, EditTableWidget)
-    assert edit_people_widget.value == []
+    created_widget = EditWidgetFactory.createWidget(widget, tag, data)
+    qtbot.addWidget(created_widget)
+    assert isinstance(created_widget, expected_type)
+    assert created_widget.value == (data if data is not None else empty_data)

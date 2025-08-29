@@ -1,13 +1,17 @@
+"""Tests for PrefsAbstractDialog."""
+
 from typing import override
 
 import pytest
 from pytestqt.qtbot import QtBot
 
-import music_modify.gui.prefs.dialog_prefs_abstract as abstract_prefs_dialog_module
+from music_modify.gui.prefs.dialog_prefs_abstract import PrefsAbstractDialog
 
 
 def test_prefsAbstractDialog_missingLayout(qtbot: QtBot) -> None:
-    class TestDialogWithoutLayout(abstract_prefs_dialog_module.PrefsAbstractDialog):
+    """Test that if the dialog doesn't set layout, there is an exception."""
+
+    class TestDialogWithoutLayout(PrefsAbstractDialog):
         """A temporary dialog class that deliberately does not set a layout."""
 
         @override
@@ -28,7 +32,7 @@ def test_prefsAbstractDialog_missingLayout(qtbot: QtBot) -> None:
 
     expected_exception_message = "Layout not set for dialog in setupUi"
 
-    w = None
+    w: TestDialogWithoutLayout | None = None
     with pytest.raises(Exception, match=expected_exception_message) as excinfo:
         w = TestDialogWithoutLayout()
     if w:

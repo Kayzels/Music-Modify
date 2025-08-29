@@ -1,3 +1,4 @@
+"""Tests for RowOperationMixin."""
 # pyright: reportPrivateUsage = false
 
 import logging
@@ -11,7 +12,7 @@ from music_modify.custom_types.enums import EditButton, RowDirection
 from music_modify.gui.mixins.row_operation_mixin import RowOperationMixin
 
 
-class OperationWidget(QWidget, RowOperationMixin):
+class _OperationWidget(QWidget, RowOperationMixin):
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
 
@@ -29,7 +30,8 @@ class OperationWidget(QWidget, RowOperationMixin):
 
 
 def test_RowOperationMixin_createOperationButton_missing_order(qtbot: QtBot) -> None:
-    widget = OperationWidget()
+    """Test that an exception is raised when a button is missing in order."""
+    widget = _OperationWidget()
     qtbot.addWidget(widget)
 
     order: tuple[EditButton, EditButton, EditButton, EditButton] = (
@@ -50,7 +52,8 @@ def test_RowOperationMixin_createOperationButton_missing_order(qtbot: QtBot) -> 
 def test_RowOperationMixin_createOperationButton_sets_attributes_individual(
     qtbot: QtBot,
 ) -> None:
-    widget = OperationWidget()
+    """Test that createOperationButtons creates attributes with single calls."""
+    widget = _OperationWidget()
     qtbot.addWidget(widget)
 
     assert not hasattr(widget, "up_button")
@@ -77,7 +80,8 @@ def test_RowOperationMixin_createOperationButton_sets_attributes_individual(
 def test_RowOperationMixin_createOperationButton_sets_attributes_multiple(
     qtbot: QtBot,
 ) -> None:
-    widget = OperationWidget()
+    """Test that createOperationButtons creates attributes with multiple calls."""
+    widget = _OperationWidget()
     qtbot.addWidget(widget)
 
     assert not hasattr(widget, "up_button")
@@ -100,7 +104,8 @@ def test_RowOperationMixin_createOperationButton_sets_attributes_multiple(
 def test_RowOperationMixin_createOperationButton_custom_order(
     qtbot: QtBot,
 ) -> None:
-    widget = OperationWidget()
+    """Test that createOperationButtons creates buttons in custom order."""
+    widget = _OperationWidget()
     qtbot.addWidget(widget)
 
     new_buttons = widget.createOperationButtons(
@@ -114,7 +119,8 @@ def test_RowOperationMixin_createOperationButton_custom_order(
 
 
 def test_RowOperationMixin_non_single_flag_raises_error(qtbot: QtBot) -> None:
-    widget = OperationWidget()
+    """Test calling methods expecting single flags with multiple raises exceptions."""
+    widget = _OperationWidget()
     qtbot.addWidget(widget)
     composite_flag = EditButton.Add | EditButton.Remove
     temp_button = QToolButton(widget)
@@ -140,17 +146,17 @@ def test_RowOperationMixin_non_single_flag_raises_error(qtbot: QtBot) -> None:
 def test_RowOperationMixin_createSignalConnection_log_invalid_type(
     qtbot: QtBot, caplog: pytest.LogCaptureFixture
 ) -> None:
-    widget = OperationWidget()
+    """Test trying to create a connection for invalid button sends log message."""
+    widget = _OperationWidget()
     qtbot.addWidget(widget)
 
     unused_flag = EditButton.Reset
     temp_button = QToolButton(widget)
 
-    caplog.set_level(logging.INFO, logger="music_modify.gui.mixins.row_operation_mixin")
-
     expected_message = f"Invalid button type called: {unused_flag}. No action taken."
 
-    widget._createSignalConnection(temp_button, unused_flag)
+    with caplog.at_level(logging.INFO):
+        widget._createSignalConnection(temp_button, unused_flag)
 
     assert expected_message in caplog.text
     assert caplog.records[0].levelname == "INFO"
@@ -160,17 +166,17 @@ def test_RowOperationMixin_createSignalConnection_log_invalid_type(
 def test_RowOperationMixin_setAttribute_log_invalid_type(
     qtbot: QtBot, caplog: pytest.LogCaptureFixture
 ) -> None:
-    widget = OperationWidget()
+    """Test trying to set an attribute for invalid button sends log message."""
+    widget = _OperationWidget()
     qtbot.addWidget(widget)
 
     unused_flag = EditButton.Clear
     temp_button = QToolButton(widget)
 
-    caplog.set_level(logging.INFO, logger="music_modify.gui.mixins.row_operation_mixin")
-
     expected_message = f"Invalid button type called: {unused_flag}. No action taken."
 
-    widget._setAttribute(temp_button, unused_flag)
+    with caplog.at_level(logging.INFO):
+        widget._setAttribute(temp_button, unused_flag)
 
     assert expected_message in caplog.text
     assert caplog.records[0].levelname == "INFO"

@@ -1,3 +1,5 @@
+"""Tests for PrefsSplitDialog."""
+
 from PySide6.QtWidgets import QDialogButtonBox
 import pytest
 from pytestqt.qtbot import QtBot
@@ -6,14 +8,22 @@ from music_modify.gui.prefs.dialog_prefs_split import PrefsSplitDialog
 import music_modify.prefs.prefs as prefs_module
 
 
+def _createDialog(
+    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch, temp_settings: prefs_module.Settings
+) -> PrefsSplitDialog:
+    monkeypatch.setattr(prefs_module, "settings", temp_settings)
+    split_dialog = PrefsSplitDialog()
+    qtbot.addWidget(split_dialog)
+    return split_dialog
+
+
 def test_prefsSplitDialog_init(
     qtbot: QtBot,
     monkeypatch: pytest.MonkeyPatch,
     temp_settings: prefs_module.Settings,
 ) -> None:
-    monkeypatch.setattr(prefs_module, "settings", temp_settings)
-    split_dialog = PrefsSplitDialog()
-    qtbot.addWidget(split_dialog)
+    """Test that a PrefsSplitDialog is created correctly."""
+    split_dialog = _createDialog(qtbot, monkeypatch, temp_settings)
 
     assert (
         split_dialog.line_edit_split_text_entered.text()
@@ -33,9 +43,8 @@ def test_prefsSplitDialog_line_edit_single(
     monkeypatch: pytest.MonkeyPatch,
     temp_settings: prefs_module.Settings,
 ) -> None:
-    monkeypatch.setattr(prefs_module, "settings", temp_settings)
-    split_dialog = PrefsSplitDialog()
-    qtbot.addWidget(split_dialog)
+    """Test that modifying the value for one line edit updates changed_settings."""
+    split_dialog = _createDialog(qtbot, monkeypatch, temp_settings)
 
     split_dialog.line_edit_split_text_entered.setText("++")
     split_dialog.line_edit_split_text_entered.editingFinished.emit()
@@ -53,9 +62,8 @@ def test_prefsSplitDialog_line_edit_multiple(
     monkeypatch: pytest.MonkeyPatch,
     temp_settings: prefs_module.Settings,
 ) -> None:
-    monkeypatch.setattr(prefs_module, "settings", temp_settings)
-    split_dialog = PrefsSplitDialog()
-    qtbot.addWidget(split_dialog)
+    """Test that modifying values for multiple line edits updates changed_settings."""
+    split_dialog = _createDialog(qtbot, monkeypatch, temp_settings)
 
     split_dialog.line_edit_split_text_entered.setText("++")
     split_dialog.line_edit_split_text_entered.editingFinished.emit()
@@ -101,9 +109,8 @@ def test_prefsSplitDialog_updateSettings(
     monkeypatch: pytest.MonkeyPatch,
     temp_settings: prefs_module.Settings,
 ) -> None:
-    monkeypatch.setattr(prefs_module, "settings", temp_settings)
-    split_dialog = PrefsSplitDialog()
-    qtbot.addWidget(split_dialog)
+    """Test that updateSettings modifies the stored settings values."""
+    split_dialog = _createDialog(qtbot, monkeypatch, temp_settings)
 
     split_dialog.line_edit_split_text_entered.setText("++")
     split_dialog.line_edit_split_text_entered.editingFinished.emit()
@@ -123,9 +130,8 @@ def test_prefsSplitDialog_restoreDefaults(
     monkeypatch: pytest.MonkeyPatch,
     temp_settings: prefs_module.Settings,
 ) -> None:
-    monkeypatch.setattr(prefs_module, "settings", temp_settings)
-    split_dialog = PrefsSplitDialog()
-    qtbot.addWidget(split_dialog)
+    """Test the restoreDefaults modifies the values to be the original defaults."""
+    split_dialog = _createDialog(qtbot, monkeypatch, temp_settings)
 
     split_dialog.line_edit_split_text_entered.setText("++")
     split_dialog.line_edit_split_text_entered.editingFinished.emit()
@@ -158,12 +164,11 @@ def test_prefsSplitDialog_resetSettings(
     monkeypatch: pytest.MonkeyPatch,
     temp_settings: prefs_module.Settings,
 ) -> None:
-    monkeypatch.setattr(prefs_module, "settings", temp_settings)
+    """Tests that resetSettings sets values to be the same as they were on opening."""
     temp_settings.split_text_entered = "::"
     temp_settings.split_values_display = "::"
     temp_settings.split_values_at = "::"
-    split_dialog = PrefsSplitDialog()
-    qtbot.addWidget(split_dialog)
+    split_dialog = _createDialog(qtbot, monkeypatch, temp_settings)
 
     # Ensure that nothing changes if settings is empty
     split_dialog.resetSettings()
@@ -192,9 +197,12 @@ def test_prefsSplitDialog_line_edit_empty(
     monkeypatch: pytest.MonkeyPatch,
     temp_settings: prefs_module.Settings,
 ) -> None:
-    monkeypatch.setattr(prefs_module, "settings", temp_settings)
-    split_dialog = PrefsSplitDialog()
-    qtbot.addWidget(split_dialog)
+    """Tests that an empty line edit removes values from changed_settings.
+
+    Changed settings should store the changes that need to be made.
+    With an empty line edit, this indicates no changes should be made for that item.
+    """
+    split_dialog = _createDialog(qtbot, monkeypatch, temp_settings)
 
     split_dialog.line_edit_split_text_entered.setText("")
     split_dialog.line_edit_split_text_entered.editingFinished.emit()

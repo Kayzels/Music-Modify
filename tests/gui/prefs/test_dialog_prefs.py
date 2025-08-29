@@ -1,3 +1,5 @@
+"""Tests for PrefsDialog."""
+
 from typing import TYPE_CHECKING, cast, override
 from unittest.mock import MagicMock
 
@@ -16,7 +18,7 @@ if TYPE_CHECKING:
     from typing import Any
 
 
-class MockAbstractChildDialog(PrefsAbstractDialog):
+class _MockAbstractChildDialog(PrefsAbstractDialog):
     """A mock dialog for testing the generic behaviour of openChildDialog."""
 
     settings_updated: Signal = Signal()
@@ -43,9 +45,9 @@ class MockAbstractChildDialog(PrefsAbstractDialog):
         pass
 
 
-# noinspection PyUnresolvedReferences
 def test_PrefsDialog_openChildDialog_logic(qtbot: QtBot) -> None:
-    child_dialog = MockAbstractChildDialog()
+    """Test that a child dialog is created, and the signals are set up."""
+    child_dialog = _MockAbstractChildDialog()
     qtbot.addWidget(child_dialog)
     child_dialog_class: type[PrefsAbstractDialog] = cast(
         type[PrefsAbstractDialog],
@@ -55,23 +57,21 @@ def test_PrefsDialog_openChildDialog_logic(qtbot: QtBot) -> None:
     parent_dialog = PrefsDialog()
     qtbot.addWidget(parent_dialog)
 
-    mock_parent_settings_updated = MagicMock()
-    parent_dialog.settings_updated.connect(mock_parent_settings_updated)
-
     parent_dialog.openChildDialog(child_dialog_class)
 
-    child_dialog_class.assert_called_once_with(parent_dialog)  # pyright: ignore[reportAttributeAccessIssue]
-    child_dialog.setModal.assert_called_once_with(True)  # noqa: FBT003  # pyright: ignore[reportFunctionMemberAccess]
-    child_dialog.show.assert_called_once()  # pyright: ignore[reportFunctionMemberAccess]
+    cast(MagicMock, child_dialog_class).assert_called_once_with(parent_dialog)
+    cast(MagicMock, child_dialog.setModal).assert_called_once_with(True)  # noqa: FBT003
+    cast(MagicMock, child_dialog.show).assert_called_once()
 
-    child_dialog.settings_updated.emit()
-    mock_parent_settings_updated.assert_called_once()
+    with qtbot.waitSignal(parent_dialog.settings_updated, timeout=1000):
+        child_dialog.settings_updated.emit()
 
 
 def test_PrefsDialog_buttonEditTags_opensTagDialog(
     qtbot: QtBot,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    """Test that clicking Edit Tags button opens a PrefsTagDialog."""
     tag_dialog_instance = MagicMock(spec=PrefsTagDialog)
     tag_dialog_class = MagicMock(return_value=tag_dialog_instance)
 
@@ -94,6 +94,7 @@ def test_PrefsDialog_buttonEditTags_opensSplitDialog(
     qtbot: QtBot,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    """Test that clicking Edit Split button opens a PrefsSplitDialog."""
     split_dialog_instance = MagicMock(spec=PrefsSplitDialog)
     split_dialog_class = MagicMock(return_value=split_dialog_instance)
 

@@ -1,6 +1,8 @@
+"""Tests for EditDialog."""
 # pyright: reportPrivateUsage = false
 
 import logging
+from typing import cast
 from unittest.mock import Mock, PropertyMock
 
 from PySide6.QtWidgets import QDialog, QWidget
@@ -15,40 +17,40 @@ from music_modify.gui.edit.widget_edit_abstract import EditAbstractWidget
 from music_modify.models.song_repository import SongRepository
 
 
-def test_EditDialog_init_no_rows(qtbot: QtBot) -> None:
+def _createParentAndRepo(
+    qtbot: QtBot, num_songs: int = 0
+) -> tuple[QWidget, SongRepository]:
     widget = QWidget()
     qtbot.addWidget(widget)
     repo = SongRepository()
-    rows = []
+    for _ in range(num_songs):
+        repo.addSong()
+    return widget, repo
 
+
+def _createDialog(
+    qtbot: QtBot, rows: list[int], *, num_songs: int = 0
+) -> tuple[QWidget, EditDialog]:
+    widget, repo = _createParentAndRepo(qtbot, num_songs)
     dialog = EditDialog(widget, repo, rows)
-    qtbot.addWidget(dialog)
+    return widget, dialog
 
+
+def test_EditDialog_init_no_rows(qtbot: QtBot) -> None:
+    """Tests that passing no rows through rejects the dialog."""
+    _, dialog = _createDialog(qtbot, [], num_songs=0)
     assert dialog.result() == QDialog.DialogCode.Rejected
 
 
 def test_EditDialog_init_song_None(qtbot: QtBot) -> None:
-    widget = QWidget()
-    qtbot.addWidget(widget)
-    repo = SongRepository()
-    rows = [0]
-
-    dialog = EditDialog(widget, repo, rows)
-    qtbot.addWidget(dialog)
-
+    """Tests that the dialog is rejected if there is no song at that index."""
+    _, dialog = _createDialog(qtbot, [0], num_songs=0)
     assert dialog.result() == QDialog.DialogCode.Rejected
 
 
 def test_EditDialog_init_song_single(qtbot: QtBot) -> None:
-    widget = QWidget()
-    qtbot.addWidget(widget)
-
-    repo = SongRepository()
-    repo.addSong()
-    rows = [0]
-
-    dialog = EditDialog(widget, repo, rows)
-    qtbot.addWidget(dialog)
+    """Tests that the song is found at the index, and nav buttons aren't created."""
+    _, dialog = _createDialog(qtbot, [0], num_songs=1)
 
     assert dialog.song_info is not None
     assert isinstance(dialog.song_info, Song)
@@ -58,16 +60,8 @@ def test_EditDialog_init_song_single(qtbot: QtBot) -> None:
 
 
 def test_EditDialog_init_song_multiple(qtbot: QtBot) -> None:
-    widget = QWidget()
-    qtbot.addWidget(widget)
-
-    repo = SongRepository()
-    repo.addSong()
-    repo.addSong()
-    rows = [0, 1]
-
-    dialog = EditDialog(widget, repo, rows)
-    qtbot.addWidget(dialog)
+    """Tests that the songs are found at the indexes, and nav buttons are created."""
+    _, dialog = _createDialog(qtbot, [0, 1], num_songs=2)
 
     assert dialog.song_info is not None
     assert isinstance(dialog.song_info, Song)
@@ -99,15 +93,8 @@ def test_EditDialog_init_song_multiple(qtbot: QtBot) -> None:
 def test_EditDialog_updateSongInfo_setsValue(
     qtbot: QtBot, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    widget = QWidget()
-    qtbot.addWidget(widget)
-
-    repo = SongRepository()
-    repo.addSong()
-    rows: list[int] = [0]
-
-    dialog = EditDialog(widget, repo, rows)
-    qtbot.addWidget(dialog)
+    """Tests that calling updateSongInfo saves the values to the song."""
+    _, dialog = _createDialog(qtbot, [0], num_songs=1)
 
     mock_tag = Mock(spec=SongTag)
     test_key: str = "TIT2"
@@ -125,27 +112,20 @@ def test_EditDialog_updateSongInfo_setsValue(
     dialog.changed_values = {test_key: test_value}
 
     # Check that info_updated signal is emitted after updateSongInfo
-    with qtbot.waitSignal(dialog.info_updated, timeout=1000):  # pyright: ignore[reportArgumentType]
+    with qtbot.waitSignal(dialog.info_updated, timeout=1000):
         dialog.updateSongInfo()
 
     mock_tag.setTag.assert_called_once_with(dialog.song_info.id3, [test_value])
     mock_tag.removeTag.assert_not_called()
-    dialog.song_info.save.assert_called_once()  # pyright: ignore[reportAttributeAccessIssue]
+    cast(Mock, dialog.song_info.save).assert_called_once()
     assert not dialog.changed_values
 
 
 def test_EditDialog_updateSongInfo_removesValue(
     qtbot: QtBot, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    widget = QWidget()
-    qtbot.addWidget(widget)
-
-    repo = SongRepository()
-    repo.addSong()
-    rows: list[int] = [0]
-
-    dialog = EditDialog(widget, repo, rows)
-    qtbot.addWidget(dialog)
+    """Tests that calling updateSongInfo removes values when needed."""
+    _, dialog = _createDialog(qtbot, [0], num_songs=1)
 
     mock_tag = Mock(spec=SongTag)
     test_key: str = "TPE1"
@@ -163,27 +143,20 @@ def test_EditDialog_updateSongInfo_removesValue(
     dialog.changed_values = {test_key: test_value}
 
     # Check that info_updated signal is emitted after updateSongInfo
-    with qtbot.waitSignal(dialog.info_updated, timeout=1000):  # pyright: ignore[reportArgumentType]
+    with qtbot.waitSignal(dialog.info_updated, timeout=1000):
         dialog.updateSongInfo()
 
     mock_tag.setTag.assert_not_called()
     mock_tag.removeTag.assert_called_once_with(dialog.song_info.id3)
-    dialog.song_info.save.assert_called_once()  # pyright: ignore[reportAttributeAccessIssue]
+    cast(Mock, dialog.song_info.save).assert_called_once()
     assert not dialog.changed_values
 
 
 def test_EditDialog_updateSongInfo_unknownTag(
     qtbot: QtBot, monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
 ) -> None:
-    widget = QWidget()
-    qtbot.addWidget(widget)
-
-    repo = SongRepository()
-    repo.addSong()
-    rows: list[int] = [0]
-
-    dialog = EditDialog(widget, repo, rows)
-    qtbot.addWidget(dialog)
+    """Tests that updating an unknown tag logs, and doesn't save."""
+    _, dialog = _createDialog(qtbot, [0], num_songs=1)
 
     mock_tag = Mock(spec=SongTag)
     test_key: str = "TPE1"
@@ -205,27 +178,22 @@ def test_EditDialog_updateSongInfo_unknownTag(
     expected_log_message = "Unknown id3 key: TIT2"
 
     caplog.set_level(logging.DEBUG, logger="music_modify.gui.edit.dialog_edit")
-    with qtbot.assertNotEmitted(dialog.info_updated):  # pyright: ignore[reportArgumentType]
+    with qtbot.assertNotEmitted(dialog.info_updated):
         dialog.updateSongInfo()
 
         assert expected_log_message in caplog.text
 
     mock_tag.setTag.assert_not_called()
     mock_tag.removeTag.assert_not_called()
-    dialog.song_info.save.assert_not_called()  # pyright: ignore[reportAttributeAccessIssue]
+    cast(Mock, dialog.song_info.save).assert_not_called()
     assert not dialog.changed_values
 
 
 def test_EditDialog_switchButtonState_no_buttons_logged(
     qtbot: QtBot, caplog: pytest.LogCaptureFixture
 ) -> None:
-    widget = QWidget()
-    qtbot.addWidget(widget)
-
-    repo = SongRepository()
-    rows = []
-    dialog = EditDialog(widget, repo, rows)
-    qtbot.addWidget(dialog)
+    """Tests logging when trying to change button state for non-existing buttons."""
+    _, dialog = _createDialog(qtbot, [], num_songs=0)
 
     assert not hasattr(dialog, "next_button")
     assert not hasattr(dialog, "previous_button")
@@ -240,15 +208,8 @@ def test_EditDialog_switchButtonState_no_buttons_logged(
 def test_EditDialog_showSongInDirection_last_or_first_logged(
     qtbot: QtBot, caplog: pytest.LogCaptureFixture
 ) -> None:
-    widget = QWidget()
-    qtbot.addWidget(widget)
-
-    repo = SongRepository()
-    repo.addSong()
-    repo.addSong()
-    rows = [0, 1]
-    dialog = EditDialog(widget, repo, rows)
-    qtbot.addWidget(dialog)
+    """Tests that invalid navigation on first or last is logged."""
+    _, dialog = _createDialog(qtbot, [0, 1], num_songs=2)
 
     assert dialog.current_index == 0
 
@@ -275,14 +236,8 @@ def test_EditDialog_showSongInDirection_last_or_first_logged(
 def test_EditDialog_showSongInDirection_no_song(
     qtbot: QtBot, caplog: pytest.LogCaptureFixture
 ) -> None:
-    widget = QWidget()
-    qtbot.addWidget(widget)
-
-    repo = SongRepository()
-    repo.addSong()
-    rows = [0, 1]
-    dialog = EditDialog(widget, repo, rows)
-    qtbot.addWidget(dialog)
+    """Tests that trying to display a song at an invalid index closes the dialog."""
+    _, dialog = _createDialog(qtbot, [0, 1], num_songs=1)
 
     with caplog.at_level(logging.WARNING):
         dialog.showSongInDirection(NavDirection.Next)
@@ -294,11 +249,8 @@ def test_EditDialog_showSongInDirection_no_song(
 def test_EditDialog_resetSongInfo(
     qtbot: QtBot, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    widget = QWidget()
-    qtbot.addWidget(widget)
-
-    repo = SongRepository()
-    repo.addSong()
+    """Tests that the song values can be reset."""
+    widget, repo = _createParentAndRepo(qtbot, 1)
     rows: list[int] = [0]
 
     mock_tag1 = Mock(spec=SongTag)
@@ -335,16 +287,8 @@ def test_EditDialog_resetSongInfo(
 def edit_dialog_mocks(
     qtbot: QtBot, monkeypatch: pytest.MonkeyPatch
 ) -> tuple[EditDialog, Mock, Mock, PropertyMock]:
-    widget = QWidget()
-    qtbot.addWidget(widget)
-
-    repo = SongRepository()
-    repo.addSong()
-    rows: list[int] = [0]
-
-    dialog = EditDialog(widget, repo, rows)
-    # NOTE: DO NOT CALL qtbot.addWidget(dialog) here.
-    # It leads to some weird Qt error.
+    """Fixture for creating multiple mocks for EditDialogs."""
+    _, dialog = _createDialog(qtbot, [0], num_songs=1)
 
     mock_tag = Mock(spec=SongTag)
     mock_tag.id3_key = "TEST"
@@ -371,6 +315,7 @@ def edit_dialog_mocks(
 def test_EditDialog_createWidgetType_signal_connections(
     edit_dialog_mocks: tuple[EditDialog, Mock, Mock, PropertyMock],
 ) -> None:
+    """Tests that the signal connections are created for the widgets."""
     dialog, mock_tag, mock_edit_widget, _ = edit_dialog_mocks
 
     created_widget = dialog._createWidgetType(mock_tag, None)
@@ -383,6 +328,7 @@ def test_EditDialog_createWidgetType_signal_connections(
 def test_EditDialog_createWidgetType_updateValue_non_empty(
     edit_dialog_mocks: tuple[EditDialog, Mock, Mock, PropertyMock],
 ) -> None:
+    """Tests that updating a value in a widget gets stored in `changed_values`."""
     dialog, mock_tag, mock_edit_widget, mock_widget_value = edit_dialog_mocks
 
     dialog._createWidgetType(mock_tag, None)
@@ -399,6 +345,7 @@ def test_EditDialog_createWidgetType_updateValue_non_empty(
 def test_EditDialog_createWidgetType_updateValue_empty(
     edit_dialog_mocks: tuple[EditDialog, Mock, Mock, PropertyMock],
 ) -> None:
+    """Tests that updating a value to be empty stores None in `changed_values`."""
     dialog, mock_tag, mock_edit_widget, mock_widget_value = edit_dialog_mocks
 
     dialog._createWidgetType(mock_tag, "Initial Value")  # Start with a value
@@ -417,6 +364,7 @@ def test_EditDialog_createWidgetType_updateValue_empty(
 def test_EditDialog_createWidgetType_resetValue_song_none_widget_empty(
     edit_dialog_mocks: tuple[EditDialog, Mock, Mock, PropertyMock],
 ) -> None:
+    """Tests that adding and then removing a change should reflect no changes."""
     dialog, mock_tag, mock_edit_widget, mock_widget_value = edit_dialog_mocks
     mock_tag.getValue.return_value = None  # Value in song is None
 
@@ -430,34 +378,43 @@ def test_EditDialog_createWidgetType_resetValue_song_none_widget_empty(
     reset_slot()
 
     # Assert: Key should be removed from changed_values
-    # as original was None and now widget is empty
+    # as song value was was None and now widget is empty
     assert dialog.changed_values == {}
 
 
 def test_EditDialog_createWidgetType_resetValue_song_none_widget_non_empty(
     edit_dialog_mocks: tuple[EditDialog, Mock, Mock, PropertyMock],
 ) -> None:
+    """Tests that removing a change from the song, and then resetting adds it back.
+
+    The idea here is that it's possible for the song to be updated
+    by clicking the Apply button.
+    And then when we reset, we don't want to get the current value from the song,
+    but the _original_ value that was in the song,
+    which should be the original value for the widget.
+    """
     # This is the case when originally a value was stored in the widget,
     # but the song has been updated since, so we need to store
     # this as a change.
     dialog, mock_tag, mock_edit_widget, mock_widget_value = edit_dialog_mocks
-    mock_tag.getValue.return_value = None  # Value in song is None
+    mock_tag.getValue.return_value = None  # Value currently song is None
 
     dialog._createWidgetType(mock_tag, None)
     reset_slot = mock_edit_widget.value_reset.connect.call_args[0][0]
 
     dialog.changed_values = {}
-    non_empty_value = "New Value"
-    mock_widget_value.return_value = non_empty_value
+    widget_original_value = "Value Originally in Song"
+    mock_widget_value.return_value = widget_original_value
     reset_slot()
 
-    # Assert: Key should be added to changed_values with the new value
-    assert dialog.changed_values == {mock_tag.id3_key: non_empty_value}
+    # Assert: Key should be added to changed_values with the widget's value.
+    assert dialog.changed_values == {mock_tag.id3_key: widget_original_value}
 
 
 def test_EditDialog_createWidgetType_resetValue_song_exists_widget_matches_song(
     edit_dialog_mocks: tuple[EditDialog, Mock, Mock, PropertyMock],
 ) -> None:
+    """Tests resetting widget value when song matches removes from changed_values."""
     dialog, mock_tag, mock_edit_widget, mock_widget_value = edit_dialog_mocks
     song_value = "Song Value"
     mock_tag.getValue.return_value = song_value  # Song value exists
@@ -476,25 +433,41 @@ def test_EditDialog_createWidgetType_resetValue_song_exists_widget_matches_song(
 def test_EditDialog_createWidgetType_resetValue_song_exists_widget_diff_non_empty(
     edit_dialog_mocks: tuple[EditDialog, Mock, Mock, PropertyMock],
 ) -> None:
+    """Tests that changing the value in the song, and then resetting sets it back.
+
+    The idea here is that it's possible for the song to be updated
+    by clicking the Apply button.
+    And then when we reset, we don't want to get the current value from the song,
+    but the _original_ value that was in the song,
+    which should be the original value for the widget.
+    """
     dialog, mock_tag, mock_edit_widget, mock_widget_value = edit_dialog_mocks
-    song_value = "Song Value"
+    song_value = "Song Current Value"
     mock_tag.getValue.return_value = song_value
 
     dialog._createWidgetType(mock_tag, song_value)
     reset_slot = mock_edit_widget.value_reset.connect.call_args[0][0]
 
     dialog.changed_values = {}
-    new_different_value = "New Different Value"
-    mock_widget_value.return_value = new_different_value
+    widget_original_value = "Value Originally in Song"
+    mock_widget_value.return_value = widget_original_value
     reset_slot()
 
-    # Assert: Key should be updated in changed_values with the new different value
-    assert dialog.changed_values == {mock_tag.id3_key: new_different_value}
+    # Assert: Key should be updated in changed_values with the widget value.
+    assert dialog.changed_values == {mock_tag.id3_key: widget_original_value}
 
 
-def test_EditDialog_createWidgetType_resetValue_original_exists_widget_empty(
+def test_EditDialog_createWidgetType_resetValue_song_exists_widget_empty(
     edit_dialog_mocks: tuple[EditDialog, Mock, Mock, PropertyMock],
 ) -> None:
+    """Tests that tags added since initialization are removed on reset.
+
+    The idea here is that it's possible for the song to be updated
+    by clicking the Apply button.
+    And then when we reset, we don't want to get the current value from the song,
+    but the _original_ value that was in the song,
+    which here doesn't exist, so that tag should be removed.
+    """
     dialog, mock_tag, mock_edit_widget, mock_widget_value = edit_dialog_mocks
     song_value = "Original Value"
     mock_tag.getValue.return_value = song_value
@@ -513,6 +486,14 @@ def test_EditDialog_createWidgetType_resetValue_original_exists_widget_empty(
 def test_EditDialog_createWidgetType_resetValue_preexisting_changed_value_still_diff(
     edit_dialog_mocks: tuple[EditDialog, Mock, Mock, PropertyMock],
 ) -> None:
+    """Tests that tags updated since initialization are reset to their original values.
+
+    The idea here is that it's possible for the song to be updated
+    by clicking the Apply button.
+    And then when we reset, we don't want to get the current value from the song,
+    but the _original_ value that was in the song,
+    which is the original value for the widget.
+    """
     dialog, mock_tag, mock_edit_widget, mock_widget_value = edit_dialog_mocks
     song_value = "Original Value"
     mock_tag.getValue.return_value = song_value

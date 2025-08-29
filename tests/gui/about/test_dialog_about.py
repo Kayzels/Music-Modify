@@ -1,3 +1,5 @@
+"""Tests for AboutDialog."""
+
 import datetime
 import logging
 import platform
@@ -15,6 +17,8 @@ from music_modify.gui.about.dialog_about import AboutDialog
 def test_AboutDialog_generateText_no_instance(
     caplog: pytest.LogCaptureFixture, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    """Test that AboutDialog issues warning when there is no QApplication instance."""
+
     def mock_qapplication_instance() -> None:
         return None
 
@@ -32,6 +36,7 @@ def test_AboutDialog_generateText_valid_instance(
     monkeypatch: pytest.MonkeyPatch,
     app_info: tuple[str, str],
 ) -> None:
+    """Test that generateText creates the correct HTML when app info is valid."""
     mock_app_name, mock_app_version = app_info
     mock_python_version = "3.10.0"
     mock_pyside_version = "6.5.0"
@@ -75,6 +80,7 @@ def test_AboutDialog_generateText_valid_instance(
 
 
 def test_AboutDialog_setupUi(qtbot: QtBot) -> None:
+    """Test that setupUi works properly for AboutDialog."""
     dialog = AboutDialog()
     qtbot.addWidget(dialog)
 

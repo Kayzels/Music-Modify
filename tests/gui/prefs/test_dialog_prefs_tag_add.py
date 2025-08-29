@@ -1,3 +1,5 @@
+"""Tests for PrefsTagAddDialog."""
+
 from PySide6.QtWidgets import QMessageBox
 import pytest
 from pytestqt.qtbot import QtBot
@@ -9,6 +11,7 @@ from music_modify.models.tag_model import TagModel
 
 @pytest.fixture
 def tags() -> list[TagInfo]:
+    """Fixture that creates a list of TagInfo, for populating a TagModel."""
     return [
         TagInfo(id3_key="TIT2", display_name="Title", show_in_table=True),
         TagInfo(id3_key="TPE2", display_name="Artist", show_in_table=False),
@@ -17,10 +20,12 @@ def tags() -> list[TagInfo]:
 
 @pytest.fixture
 def model(tags: list[TagInfo]) -> TagModel:
+    """Fixture that creates a TagModel."""
     return TagModel(tags)
 
 
-def createDialog(qtbot: QtBot, monkeypatch: pytest.MonkeyPatch) -> PrefsTagAddDialog:
+def _createDialog(qtbot: QtBot, monkeypatch: pytest.MonkeyPatch) -> PrefsTagAddDialog:
+    """Creates a PrefsTagAddDialog with QMessageBox mocked."""
     dialog = PrefsTagAddDialog()
     qtbot.addWidget(dialog)
 
@@ -34,6 +39,7 @@ def createDialog(qtbot: QtBot, monkeypatch: pytest.MonkeyPatch) -> PrefsTagAddDi
 
 
 def test_PrefsTagAddDialog_init(qtbot: QtBot) -> None:
+    """Test that a PrefsTagAddDialog is created correctly."""
     dialog = PrefsTagAddDialog()
     qtbot.addWidget(dialog)
 
@@ -47,7 +53,8 @@ def test_addToModel_missing_text(
     monkeypatch: pytest.MonkeyPatch,
     model: TagModel,
 ) -> None:
-    dialog = createDialog(qtbot, monkeypatch)
+    """Tests that adding to the model when the tag is missing data doesn't add tag."""
+    dialog = _createDialog(qtbot, monkeypatch)
 
     before_len = model.rowCount()
     dialog.addToModel(model)
@@ -59,7 +66,8 @@ def test_addToModel_already_id3(
     monkeypatch: pytest.MonkeyPatch,
     model: TagModel,
 ) -> None:
-    dialog = createDialog(qtbot, monkeypatch)
+    """Tests that adding to the model when the id3 key already exists doesn't add."""
+    dialog = _createDialog(qtbot, monkeypatch)
 
     dialog.id3_line_edit.setText("TIT2")
     dialog.display_name_line_edit.setText("Other Title")
@@ -74,7 +82,8 @@ def test_addToModel_already_display(
     monkeypatch: pytest.MonkeyPatch,
     model: TagModel,
 ) -> None:
-    dialog = createDialog(qtbot, monkeypatch)
+    """Tests that adding to model when the display name already exists doesn't add."""
+    dialog = _createDialog(qtbot, monkeypatch)
     dialog.id3_line_edit.setText("TIT1")
     dialog.display_name_line_edit.setText("Title")
 
@@ -88,7 +97,8 @@ def test_addToModel_new(
     monkeypatch: pytest.MonkeyPatch,
     model: TagModel,
 ) -> None:
-    dialog = createDialog(qtbot, monkeypatch)
+    """Tests that adding a valid new tag to the model works."""
+    dialog = _createDialog(qtbot, monkeypatch)
     dialog.id3_line_edit.setText("TRCK")
     dialog.display_name_line_edit.setText("Track")
 
