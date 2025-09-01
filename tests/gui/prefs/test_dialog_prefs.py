@@ -60,7 +60,7 @@ def test_PrefsDialog_openChildDialog_logic(qtbot: QtBot) -> None:
     parent_dialog.openChildDialog(child_dialog_class)
 
     cast(MagicMock, child_dialog_class).assert_called_once_with(parent_dialog)
-    cast(MagicMock, child_dialog.setModal).assert_called_once_with(True)  # noqa: FBT003
+    cast(MagicMock, child_dialog.setModal).assert_called_once_with(True)
     cast(MagicMock, child_dialog.show).assert_called_once()
 
     with qtbot.waitSignal(parent_dialog.settings_updated, timeout=1000):
@@ -86,7 +86,7 @@ def test_PrefsDialog_buttonEditTags_opensTagDialog(
     dialog.button_edit_tags.click()
 
     tag_dialog_class.assert_called_once_with(dialog)
-    tag_dialog_instance.setModal.assert_called_once_with(True)  # noqa: FBT003
+    tag_dialog_instance.setModal.assert_called_once_with(True)
     tag_dialog_instance.show.assert_called_once()
 
 
@@ -109,5 +109,5 @@ def test_PrefsDialog_buttonEditTags_opensSplitDialog(
     dialog.button_edit_split.click()
 
     split_dialog_class.assert_called_once_with(dialog)
-    split_dialog_instance.setModal.assert_called_once_with(True)  # noqa: FBT003
+    split_dialog_instance.setModal.assert_called_once_with(True)
     split_dialog_instance.show.assert_called_once()

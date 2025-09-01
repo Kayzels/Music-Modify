@@ -1,4 +1,5 @@
 """Tests for EditDialog."""
+
 # pyright: reportPrivateUsage = false
 
 import logging

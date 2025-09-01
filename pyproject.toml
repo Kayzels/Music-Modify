@@ -48,45 +48,57 @@ docstring-code-format = true
 
 [tool.ruff.lint]
 select = [
-  "E",
-  "F",
-  "ERA",
-  "ANN",
-  "S",
-  "FBT",
-  "B",
-  "A",
-  "COM",
-  "C4",
-  "LOG",
-  "PIE",
-  "PYI",
-  "PT",
-  "Q",
-  "RET",
-  "SIM",
-  "TC",
-  "PTH",
-  "N",
-  "PERF",
-  "W",
-  "UP",
-  "PLC",
-  "PLE",
-  "PLW",
-  "PLR",
-  "C901",
-  "FURB",
-  "RUF",
-  "D",
+  "E",    # pycodestyle error
+  "F",    # pyflakes
+  "ERA",  # commented out code
+  "ANN",  # flake8 annotations
+  "S",    # flake8 bandit
+  "FBT",  # flake8 boolean trap
+  "B",    # flake8 bugbear
+  "A",    # flake8 builtins
+  "COM",  # flake8 commas
+  "C4",   # flake8 comprehensions
+  "LOG",  # flake8 logging
+  "PIE",  # flake8 pie (misc)
+  "PYI",  # flake8 pyi (type stub files)
+  "PT",   # flake8 pytest-style
+  "Q",    # flake8 quotes
+  "RET",  # flake8 return
+  "SIM",  # flake8 simplify
+  "TC",   # flake8 type checking
+  "PTH",  # flake8 use pathlib
+  "N",    # pep8 naming
+  "PERF", # perflint
+  "W",    # pycodestyle warning
+  "UP",   # pyupgrade
+  "PLC",  # pylint convention
+  "PLE",  # pylint error
+  "PLW",  # pylint warning
+  "PLR",  # pylint refactor
+  "C901", # mccabe complexity check
+  "FURB", # refurb
+  "RUF",  # ruff-specific
+  "D",    # pydocstyle
 ]
-ignore = ["N802", "TC006", "COM812"]
+ignore = [
+  "N802",   # invalid function name (as function names are camelCase, not snake_case)
+  "TC006",  # missing quotes around types in cast
+  "COM812", # missing trailing commas
+]
 
 [tool.ruff.lint.per-file-ignores]
 # "test*.py" = ["S101", "B011", "D", "PLR2004", "W505", "E501", "N806"]
-"test*.py" = ["S101", "B011", "PLR2004", "N806"]
-"**.pyi" = ["A", "COM812"]
-"widgets_complete.py" = ["PLC", "PLR", "C901", "D"]
+"test*.py" = [
+  "S101",    # use of assert
+  "B011",    # using assert False
+  "PLR2004", # magic value comparison
+  "N806",    # non-lowercase variable in function
+  "FBT",     # boolean values in calls
+  "PLR0913", # too many args in function definition
+]
+"**.pyi" = [
+  "A", # shadowing builtins
+]
 
 [tool.ruff.lint.pycodestyle]
 max-doc-length = 88

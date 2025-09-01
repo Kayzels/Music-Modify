@@ -1,3 +1,5 @@
+"""Tests for Settings."""
+
 from music_modify.custom_types import SongTag, TagInfo
 from music_modify.prefs.prefs import Settings
 

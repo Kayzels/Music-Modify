@@ -1,3 +1,5 @@
+"""Tests for EditBulkLineWidget."""
+
 from PySide6.QtWidgets import QWidget
 from pytestqt.qtbot import QtBot
 
@@ -7,6 +9,11 @@ from music_modify.gui.edit.bulk.widget_edit_bulk_line import EditBulkLineWidget
 
 
 def test_EditBulkLineWidget_init_not_in_all(qtbot: QtBot) -> None:
+    """Test creating an EditBulkLineWidget where the data isn't in all songs.
+
+    In this case, it should be added to all_items,
+    but the text for the widget should be empty.
+    """
     parent = QWidget()
     qtbot.addWidget(parent)
     tag = SongTag(display_name="Album", id3_key="TALB")
@@ -16,11 +23,11 @@ def test_EditBulkLineWidget_init_not_in_all(qtbot: QtBot) -> None:
     qtbot.addWidget(widget)
     assert "First" in widget.items
     assert "Second" in widget.items
-    assert len(widget.items) == 2  # noqa: PLR2004
+    assert len(widget.items) == 2
 
     assert "First" in widget.main_widget.all_items
     assert "Second" in widget.main_widget.all_items
-    assert len(widget.main_widget.all_items) == 2  # noqa: PLR2004
+    assert len(widget.main_widget.all_items) == 2
     assert widget.main_widget.text() == ""
 
     assert hasattr(widget, "apply_checkbox")
@@ -28,6 +35,11 @@ def test_EditBulkLineWidget_init_not_in_all(qtbot: QtBot) -> None:
 
 
 def test_EditBulkLineWidget_init_in_all(qtbot: QtBot) -> None:
+    """Test creating an EditBulkLineWidget where the data is in all songs.
+
+    In this case, it should be added to all_items,
+    and should be the text for the widget.
+    """
     parent = QWidget()
     qtbot.addWidget(parent)
     tag = SongTag(display_name="Album", id3_key="TALB")
@@ -44,7 +56,7 @@ def test_EditBulkLineWidget_init_in_all(qtbot: QtBot) -> None:
     assert hasattr(widget, "clear_checkbox")
 
 
-def test_EditBulkLineWidget_checkbox_switch(qtbot: QtBot) -> None:
+def _createWidget(qtbot: QtBot) -> tuple[QWidget, SongTag, EditBulkLineWidget]:
     parent = QWidget()
     qtbot.addWidget(parent)
     tag = SongTag(display_name="Album", id3_key="TALB")
@@ -52,6 +64,13 @@ def test_EditBulkLineWidget_checkbox_switch(qtbot: QtBot) -> None:
 
     widget = EditBulkLineWidget(parent, data, tag, in_all=True)
     qtbot.addWidget(widget)
+
+    return parent, tag, widget
+
+
+def test_EditBulkLineWidget_checkbox_switch(qtbot: QtBot) -> None:
+    """Test that checking a checkbox disables the other one."""
+    _, __, widget = _createWidget(qtbot)
 
     widget.apply_checkbox.setChecked(True)
     assert not widget.clear_checkbox.isChecked()
@@ -72,13 +91,8 @@ def test_EditBulkLineWidget_checkbox_switch(qtbot: QtBot) -> None:
 
 
 def test_EditBulkLineWidget_updateTag_no_checkbox(qtbot: QtBot) -> None:
-    parent = QWidget()
-    qtbot.addWidget(parent)
-    tag = SongTag(display_name="Album", id3_key="TALB")
-    data = {"First"}
-
-    widget = EditBulkLineWidget(parent, data, tag, in_all=True)
-    qtbot.addWidget(widget)
+    """Test that updateTag doesn't update the tag when not checked."""
+    _, __, widget = _createWidget(qtbot)
 
     widget.apply_checkbox.setChecked(False)
     widget.clear_checkbox.setChecked(False)
@@ -87,13 +101,8 @@ def test_EditBulkLineWidget_updateTag_no_checkbox(qtbot: QtBot) -> None:
 
 
 def test_EditBulkLineWidget_updateTag_apply_no_songs(qtbot: QtBot) -> None:
-    parent = QWidget()
-    qtbot.addWidget(parent)
-    tag = SongTag(display_name="Album", id3_key="TALB")
-    data = {"First"}
-
-    widget = EditBulkLineWidget(parent, data, tag, in_all=True)
-    qtbot.addWidget(widget)
+    """Test that updateTag returns False when no songs are updated."""
+    _, __, widget = _createWidget(qtbot)
 
     widget.clear_checkbox.setChecked(False)
     widget.apply_checkbox.setChecked(True)
@@ -102,13 +111,8 @@ def test_EditBulkLineWidget_updateTag_apply_no_songs(qtbot: QtBot) -> None:
 
 
 def test_EditBulkLineWidget_updateTag_clear_no_songs(qtbot: QtBot) -> None:
-    parent = QWidget()
-    qtbot.addWidget(parent)
-    tag = SongTag(display_name="Album", id3_key="TALB")
-    data = {"First"}
-
-    widget = EditBulkLineWidget(parent, data, tag, in_all=True)
-    qtbot.addWidget(widget)
+    """Test that updateTag returns False when there are no songs and clear is called."""
+    _, __, widget = _createWidget(qtbot)
 
     widget.apply_checkbox.setChecked(False)
     widget.clear_checkbox.setChecked(True)
@@ -117,13 +121,8 @@ def test_EditBulkLineWidget_updateTag_clear_no_songs(qtbot: QtBot) -> None:
 
 
 def test_EditBulkLineWidget_updateTag_apply_empty_clears(qtbot: QtBot) -> None:
-    parent = QWidget()
-    qtbot.addWidget(parent)
-    tag = SongTag(display_name="Album", id3_key="TALB")
-    data = {"First"}
-
-    widget = EditBulkLineWidget(parent, data, tag, in_all=True)
-    qtbot.addWidget(widget)
+    """Test that updateTag clears the tag if apply is called with an empty widget."""
+    _, tag, widget = _createWidget(qtbot)
 
     widget.clear_checkbox.setChecked(False)
     widget.apply_checkbox.setChecked(True)
@@ -138,13 +137,8 @@ def test_EditBulkLineWidget_updateTag_apply_empty_clears(qtbot: QtBot) -> None:
 
 
 def test_EditBulkLineWidget_updateTag_apply_only_space_clears(qtbot: QtBot) -> None:
-    parent = QWidget()
-    qtbot.addWidget(parent)
-    tag = SongTag(display_name="Album", id3_key="TALB")
-    data = {"First"}
-
-    widget = EditBulkLineWidget(parent, data, tag, in_all=True)
-    qtbot.addWidget(widget)
+    """Test that updateTag clears tag if apply called with widget having only space."""
+    _, tag, widget = _createWidget(qtbot)
 
     widget.clear_checkbox.setChecked(False)
     widget.apply_checkbox.setChecked(True)
@@ -159,13 +153,8 @@ def test_EditBulkLineWidget_updateTag_apply_only_space_clears(qtbot: QtBot) -> N
 
 
 def test_EditBulkLineWidget_updateTag_apply_not_empty_sets(qtbot: QtBot) -> None:
-    parent = QWidget()
-    qtbot.addWidget(parent)
-    tag = SongTag(display_name="Album", id3_key="TALB")
-    data = {"First"}
-
-    widget = EditBulkLineWidget(parent, data, tag, in_all=True)
-    qtbot.addWidget(widget)
+    """Test that calling update when not empty sets the tag value."""
+    _, tag, widget = _createWidget(qtbot)
 
     widget.clear_checkbox.setChecked(False)
     widget.apply_checkbox.setChecked(True)
@@ -187,13 +176,8 @@ def test_EditBulkLineWidget_updateTag_apply_not_empty_sets(qtbot: QtBot) -> None
 def test_EditBulkLineWidget_updateTag_apply_not_empty_sets_stripped(
     qtbot: QtBot,
 ) -> None:
-    parent = QWidget()
-    qtbot.addWidget(parent)
-    tag = SongTag(display_name="Album", id3_key="TALB")
-    data = {"First"}
-
-    widget = EditBulkLineWidget(parent, data, tag, in_all=True)
-    qtbot.addWidget(widget)
+    """Test that calling update when not empty sets the tag value without whitespace."""
+    _, tag, widget = _createWidget(qtbot)
 
     widget.clear_checkbox.setChecked(False)
     widget.apply_checkbox.setChecked(True)
@@ -213,13 +197,8 @@ def test_EditBulkLineWidget_updateTag_apply_not_empty_sets_stripped(
 
 
 def test_EditBulkLineWidget_updateTag_clear(qtbot: QtBot) -> None:
-    parent = QWidget()
-    qtbot.addWidget(parent)
-    tag = SongTag(display_name="Album", id3_key="TALB")
-    data = {"First"}
-
-    widget = EditBulkLineWidget(parent, data, tag, in_all=True)
-    qtbot.addWidget(widget)
+    """Test that clearing works when clear checkbox checked and updating."""
+    _, tag, widget = _createWidget(qtbot)
 
     widget.main_widget.setText("Some Value")
 

@@ -1,5 +1,8 @@
-# pyright: reportPrivateUsage = false, reportArgumentType = false, reportAttributeAccessIssue = false
+"""Tests for EditBulkDialog."""
 
+# pyright: reportPrivateUsage = false
+
+from typing import cast
 from unittest.mock import Mock
 
 from PySide6.QtWidgets import QWidget
@@ -16,12 +19,14 @@ from music_modify.models.song_repository import SongRepository
 
 
 def test_addMultiValues() -> None:
+    """Test adding multiple values from a list."""
     assert _addMultiValues(None, {1}) == {1}
     assert _addMultiValues([22], {3}) == {3, 22}
     assert _addMultiValues(["a"], set()) == {"a"}
 
 
 def test_addSingleValues() -> None:
+    """Test adding single values from a list."""
     assert _addSingleValues(None, {"a"}) == ({"a"}, False)
     assert _addSingleValues("a", {"a"}) == ({"a"}, True)
     assert _addSingleValues("b", {"a"}) == ({"a", "b"}, False)
@@ -30,6 +35,7 @@ def test_addSingleValues() -> None:
 def test_EditBulkDialog_updateSongInfo_no_changes(
     qtbot: QtBot, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    """Tests that save is not called if no changes were made to the song."""
     parent = QWidget()
     qtbot.addWidget(parent)
 
@@ -61,13 +67,14 @@ def test_EditBulkDialog_updateSongInfo_no_changes(
     mock_widget_1.updateTag.assert_called_once_with(dialog.songs)
     mock_widget_2.updateTag.assert_called_once_with(dialog.songs)
 
-    song_1.save.assert_not_called()
-    song_2.save.assert_not_called()
+    cast(Mock, song_1.save).assert_not_called()
+    cast(Mock, song_2.save).assert_not_called()
 
 
 def test_EditBulkDialog_updateSongInfo_with_changes(
     qtbot: QtBot, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    """Test that save is called with the updated changes."""
     parent = QWidget()
     qtbot.addWidget(parent)
 
@@ -102,13 +109,14 @@ def test_EditBulkDialog_updateSongInfo_with_changes(
     mock_widget_1.updateTag.assert_called_once_with(dialog.songs)
     mock_widget_2.updateTag.assert_called_once_with(dialog.songs)
 
-    song_1.save.assert_called_once()
-    song_2.save.assert_called_once()
+    cast(Mock, song_1.save).assert_called_once()
+    cast(Mock, song_2.save).assert_called_once()
 
 
 def test_EditBulkDialog_updateSongInfo_with_changes_single(
     qtbot: QtBot, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    """Test that save is only called for songs that actually change data."""
     parent = QWidget()
     qtbot.addWidget(parent)
 
@@ -143,13 +151,14 @@ def test_EditBulkDialog_updateSongInfo_with_changes_single(
     mock_widget_1.updateTag.assert_called_once_with(dialog.songs)
     mock_widget_2.updateTag.assert_called_once_with(dialog.songs)
 
-    song_1.save.assert_not_called()
-    song_2.save.assert_called_once()
+    cast(Mock, song_1.save).assert_not_called()
+    cast(Mock, song_2.save).assert_called_once()
 
 
 def test_EditBulkDialog_updateSongInfo_no_widgets(
     qtbot: QtBot, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    """Tests that save is not called, without mocking widgets."""
     parent = QWidget()
     qtbot.addWidget(parent)
 
@@ -174,5 +183,5 @@ def test_EditBulkDialog_updateSongInfo_no_widgets(
     with qtbot.assertNotEmitted(dialog.info_updated):
         dialog.updateSongInfo()
 
-    song_1.save.assert_not_called()
-    song_2.save.assert_not_called()
+    cast(Mock, song_1.save).assert_not_called()
+    cast(Mock, song_2.save).assert_not_called()

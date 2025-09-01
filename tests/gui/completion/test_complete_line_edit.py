@@ -1,3 +1,5 @@
+"""Tests EnLineEdit."""
+
 from typing import cast
 from unittest.mock import MagicMock, Mock
 
@@ -13,6 +15,7 @@ from music_modify.prefs import prefs
 
 
 def test_EnLineEdit_init(qtbot: QtBot) -> None:
+    """Tests creating an EnLineEdit, that attributes are set correctly."""
     line_edit = EnLineEdit()
     qtbot.addWidget(line_edit)
 
@@ -21,6 +24,7 @@ def test_EnLineEdit_init(qtbot: QtBot) -> None:
 
 
 def test_EnLineEdit_all_items(qtbot: QtBot) -> None:
+    """Tests setting and getting EnLineEdit all_items property."""
     line_edit = EnLineEdit()
     qtbot.addWidget(line_edit)
 
@@ -29,6 +33,7 @@ def test_EnLineEdit_all_items(qtbot: QtBot) -> None:
 
 
 def test_EnLineEdit_disable_popup(qtbot: QtBot) -> None:
+    """Tests setting and getting EnLineEdit disable_popup property."""
     line_edit = EnLineEdit()
     qtbot.addWidget(line_edit)
 
@@ -37,6 +42,7 @@ def test_EnLineEdit_disable_popup(qtbot: QtBot) -> None:
 
 
 def test_EnLineEdit_setElideMode(qtbot: QtBot) -> None:
+    """Tests that setting the elide mode sets the elide mode for the completer."""
     line_edit = EnLineEdit()
     qtbot.addWidget(line_edit)
 
@@ -49,6 +55,7 @@ def test_EnLineEdit_setElideMode(qtbot: QtBot) -> None:
 
 
 def test_EnLineEdit_updateItemsCache(qtbot: QtBot) -> None:
+    """Tests that updateItemsCache changes the values for all_items."""
     line_edit = EnLineEdit()
     qtbot.addWidget(line_edit)
 
@@ -60,12 +67,13 @@ def test_EnLineEdit_updateItemsCache(qtbot: QtBot) -> None:
 def test_EnLineEdit_event_shortcutOverride_controlKey(
     qtbot: QtBot, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    line_edit = EnLineEdit()
-    qtbot.addWidget(line_edit)
-
+    """Tests that the event is accepted with Ctrl pressed."""
     # Mock the super QLineEdit event call
     mock_super_event = MagicMock(return_value=True)
     monkeypatch.setattr(QLineEdit, "event", mock_super_event)
+
+    line_edit = EnLineEdit()
+    qtbot.addWidget(line_edit)
 
     # Create a mock QKeyEvent
     mock_key_event = MagicMock(spec=QKeyEvent)
@@ -79,13 +87,14 @@ def test_EnLineEdit_event_shortcutOverride_controlKey(
 
     # Assert that event.accept() was called
     mock_key_event.accept.assert_called_once()
-    # Also ensure that super().event was called as well, which is default True
+    # Also ensure that super().event was called as well
     assert result is True
 
 
 def test_EnLineEdit_event_shortcutOverride_noControlKey(
     qtbot: QtBot, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    """Tests that the event is not accepted with Ctrl not pressed."""
     line_edit = EnLineEdit()
     qtbot.addWidget(line_edit)
 
@@ -107,13 +116,14 @@ def test_EnLineEdit_event_shortcutOverride_noControlKey(
 
     # Assert that event.accept() was NOT called
     mock_key_event.accept.assert_not_called()
-    # And that the super().event result is returned (which typically is True for a handled event)
+    # And that the super().event result is returned
     assert result is True
 
 
 def test_EnLineEdit_event_otherEventType(
     qtbot: QtBot, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    """Tests that the event is not accepted when it is not a ShortcutOverride."""
     line_edit = EnLineEdit()
     qtbot.addWidget(line_edit)
 
@@ -138,17 +148,20 @@ def test_EnLineEdit_event_otherEventType(
 def test_EnLineEdit_event_attributeError(
     qtbot: QtBot, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    """Tests that events are processed correctly when attributes missing."""
     line_edit = EnLineEdit()
     qtbot.addWidget(line_edit)
 
     mock_super_event = MagicMock(return_value=True)
     monkeypatch.setattr(QLineEdit, "event", mock_super_event)
 
-    # Create a mock event that will raise AttributeError when key() or modifiers() is accessed
-    # to simulate the scenario where cast(QKeyEvent, event) might fail or the object lacks expected attributes.
+    # Create a mock event that will raise AttributeError when key() or modifiers()
+    # is accessed to simulate the scenario where cast(QKeyEvent, event) might fail
+    # or the object lacks expected attributes.
     mock_bad_event = MagicMock(spec=QEvent)
     mock_bad_event.type.return_value = QEvent.Type.ShortcutOverride
-    # This will ensure accessing 'key' or 'modifiers' on the cast event raises AttributeError
+    # This will ensure accessing 'key' or 'modifiers' on the cast event
+    # raises AttributeError
     type(mock_bad_event).key = MagicMock(
         side_effect=AttributeError("Mock AttributeError for key")
     )
@@ -157,15 +170,17 @@ def test_EnLineEdit_event_attributeError(
     )
     mock_bad_event.accept = MagicMock()
 
-    # The AttributeError should be caught internally, and super().event should still be called.
+    # The AttributeError should be caught internally, and super().event
+    # should still be called.
     result = line_edit.event(mock_bad_event)
 
-    mock_bad_event.accept.assert_not_called()  # Should not be called because of the error before it.
+    mock_bad_event.accept.assert_not_called()  # Should not be called because of the error before it
     mock_super_event.assert_called_once_with(mock_bad_event)
     assert result is True
 
 
 def test_EnLineEdit_complete_noItems(qtbot: QtBot) -> None:
+    """Test that a popup isn't shown when completing when there are no items."""
     line_edit = EnLineEdit()
     qtbot.addWidget(line_edit)
 
@@ -183,6 +198,7 @@ def test_EnLineEdit_complete_noItems(qtbot: QtBot) -> None:
 
 
 def test_EnLineEdit_complete_withItems_default(qtbot: QtBot) -> None:
+    """Tests that a popup shows correctly when there are items in the completer."""
     line_edit = EnLineEdit()
     qtbot.addWidget(line_edit)
 
@@ -206,6 +222,7 @@ def test_EnLineEdit_complete_withItems_default(qtbot: QtBot) -> None:
 
 
 def test_EnLineEdit_complete_showAll(qtbot: QtBot) -> None:
+    """Tests that all items are shown if calling complete with show all."""
     line_edit = EnLineEdit()
     qtbot.addWidget(line_edit)
 
@@ -230,6 +247,7 @@ def test_EnLineEdit_complete_showAll(qtbot: QtBot) -> None:
 
 
 def test_EnLineEdit_complete_selectFirstFalse(qtbot: QtBot) -> None:
+    """Test that the first item does not get selected if select_first is False."""
     line_edit = EnLineEdit()
     qtbot.addWidget(line_edit)
 
@@ -245,6 +263,7 @@ def test_EnLineEdit_complete_selectFirstFalse(qtbot: QtBot) -> None:
 
 
 def test_EnLineEdit_updateCompletions_singleMode(qtbot: QtBot) -> None:
+    """Test that single mode replaces the item when selected."""
     line_edit = EnLineEdit(multiple=False)
     qtbot.addWidget(line_edit)
 
@@ -262,6 +281,7 @@ def test_EnLineEdit_updateCompletions_singleMode(qtbot: QtBot) -> None:
 def test_EnLineEdit_updateCompletions_multipleMode_withSeparator(
     qtbot: QtBot, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    """Test that multiple mode adds separators after the items."""
     line_edit = EnLineEdit(multiple=True)
     qtbot.addWidget(line_edit)
 
@@ -282,6 +302,7 @@ def test_EnLineEdit_updateCompletions_multipleMode_withSeparator(
 def test_EnLineEdit_updateCompletions_multipleMode_noSeparator(
     qtbot: QtBot, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    """Test that multiple mode doesn't add a separator when there is only one item."""
     line_edit = EnLineEdit(multiple=True)
     qtbot.addWidget(line_edit)
 
@@ -300,6 +321,7 @@ def test_EnLineEdit_updateCompletions_multipleMode_noSeparator(
 
 
 def test_EnLineEdit_updateCompletions_emptyText(qtbot: QtBot) -> None:
+    """Tests updating completions with empty text."""
     line_edit = EnLineEdit()
     qtbot.addWidget(line_edit)
 
@@ -317,6 +339,11 @@ def test_EnLineEdit_updateCompletions_emptyText(qtbot: QtBot) -> None:
 def test_EnLineEdit_updateCompletions_cursorInMiddle(
     qtbot: QtBot, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    """Tests that completions are added when updating and the cursor is in the middle.
+
+    The completed item should be added, and a separator put after it,
+    which will split the original item.
+    """
     line_edit = EnLineEdit(multiple=True)
     qtbot.addWidget(line_edit)
 
@@ -335,6 +362,7 @@ def test_EnLineEdit_updateCompletions_cursorInMiddle(
 
 
 def test_EnLineEdit_getCompletedText_singleMode(qtbot: QtBot) -> None:
+    """Tests that selecting a completion in single mode replaces the text."""
     line_edit = EnLineEdit(multiple=False)
     qtbot.addWidget(line_edit)
 
@@ -346,6 +374,7 @@ def test_EnLineEdit_getCompletedText_singleMode(qtbot: QtBot) -> None:
 def test_EnLineEdit_getCompletedText_multipleMode_emptyLineEdit(
     qtbot: QtBot, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    """Tests that selecting the first entry in multiple mode adds a separator after."""
     line_edit = EnLineEdit(multiple=True)
     qtbot.addWidget(line_edit)
 
@@ -363,6 +392,7 @@ def test_EnLineEdit_getCompletedText_multipleMode_emptyLineEdit(
 def test_EnLineEdit_getCompletedText_multipleMode_noOriginalCursorPos(
     qtbot: QtBot, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    """Tests that cursorPosition is used if there is no original cursor position."""
     line_edit = EnLineEdit(multiple=True)
     qtbot.addWidget(line_edit)
 
@@ -383,6 +413,7 @@ def test_EnLineEdit_getCompletedText_multipleMode_noOriginalCursorPos(
 def test_EnLineEdit_getCompletedText_multipleMode_withOriginalCursorPos(
     qtbot: QtBot, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    """Tests that the original cursor position is used if it exists."""
     line_edit = EnLineEdit(multiple=True)
     qtbot.addWidget(line_edit)
 
@@ -403,6 +434,10 @@ def test_EnLineEdit_getCompletedText_multipleMode_withOriginalCursorPos(
 def test_EnLineEdit_getCompletedText_multipleMode_cursorAtEnd(
     qtbot: QtBot, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    """Tests that an item is appened when the cursor is at the end.
+
+    Ensures that a separator is still added.
+    """
     line_edit = EnLineEdit(multiple=True)
     qtbot.addWidget(line_edit)
 
@@ -420,6 +455,11 @@ def test_EnLineEdit_getCompletedText_multipleMode_cursorAtEnd(
 def test_EnLineEdit_getCompletedText_multipleMode_cursorAtStart(
     qtbot: QtBot, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    """Tests that adding an item at the start adds it.
+
+    There still needs to be a separator after the item added,
+    that is before the original items in the list.
+    """
     line_edit = EnLineEdit(multiple=True)
     qtbot.addWidget(line_edit)
 
@@ -437,6 +477,11 @@ def test_EnLineEdit_getCompletedText_multipleMode_cursorAtStart(
 def test_EnLineEdit_completionSelected_singleMode(
     qtbot: QtBot, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    """Tests completionSelected in single mode.
+
+    Ensures that item_selected is emitted,
+    and that setText and setCursorPosition are called with the expected values.
+    """
     line_edit = EnLineEdit(multiple=False)
     qtbot.addWidget(line_edit)
 
@@ -460,6 +505,11 @@ def test_EnLineEdit_completionSelected_singleMode(
 def test_EnLineEdit_completionSelected_multipleMode(
     qtbot: QtBot, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    """Tests completionSelected in multiple mode.
+
+    Ensures that item_selected is emitted,
+    and that setText and setCursorPosition are called with the expected values.
+    """
     line_edit = EnLineEdit(multiple=True)
     qtbot.addWidget(line_edit)
 
@@ -491,6 +541,7 @@ def test_EnLineEdit_completionSelected_multipleMode(
 def test_EnLineEdit_completionSelected_emptySelectedText(
     qtbot: QtBot, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    """Tests that an empty selection for completionSelected works."""
     line_edit = EnLineEdit()
     qtbot.addWidget(line_edit)
 
@@ -512,6 +563,7 @@ def test_EnLineEdit_completionSelected_emptySelectedText(
 
 
 def test_EnLineEdit_applyCurrentText_singleMode(qtbot: QtBot) -> None:
+    """Tests that setting the text in single mode doesn't call completionSelected."""
     line_edit = EnLineEdit(multiple=False)
     qtbot.addWidget(line_edit)
 
@@ -527,6 +579,10 @@ def test_EnLineEdit_applyCurrentText_singleMode(qtbot: QtBot) -> None:
 def test_EnLineEdit_applyCurrentText_multipleMode_withSeparator(
     qtbot: QtBot, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    """Tests applying text in multiple mode when an item is selected after a separator.
+
+    The item that is selected should be added, and completionSelected should be called.
+    """
     line_edit = EnLineEdit(multiple=True)
     qtbot.addWidget(line_edit)
 
@@ -546,6 +602,11 @@ def test_EnLineEdit_applyCurrentText_multipleMode_withSeparator(
 def test_EnLineEdit_applyCurrentText_multipleMode_noSeparator(
     qtbot: QtBot, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    """Tests applying the text when there is a single item with no separator.
+
+    This value isn't in the completer items, so it's not found,
+    but completionSelected should be called.
+    """
     line_edit = EnLineEdit(multiple=True)
     qtbot.addWidget(line_edit)
 
@@ -561,14 +622,13 @@ def test_EnLineEdit_applyCurrentText_multipleMode_noSeparator(
 
     # sep_pos should be -1 (not found), but this is a truthy value,
     # so completionSelected should still be called.
-    # If sep_pos is 0 (first character) or -1 (not found), then the conditional `if sep_pos:`
-    # will evaluate to false and completionSelected won't be called.
     line_edit.completionSelected.assert_called_once_with("single_item_no_separator")
 
 
 def test_EnLineEdit_applyCurrentText_multipleMode_emptyText(
     qtbot: QtBot, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    """Tests applying the text when there are no items, only empty text."""
     line_edit = EnLineEdit(multiple=True)
     qtbot.addWidget(line_edit)
 
@@ -589,6 +649,11 @@ def test_EnLineEdit_applyCurrentText_multipleMode_emptyText(
 def test_EnLineEdit_applyCurrentText_multipleMode_separatorAtStart(
     qtbot: QtBot, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    """Tests applying current text when cursor is right after separator.
+
+    In this case, the user hasn't entered anything,
+    so there are no completion items, so completionSelected should not be called.
+    """
     line_edit = EnLineEdit(multiple=True)
     qtbot.addWidget(line_edit)
 
@@ -598,15 +663,17 @@ def test_EnLineEdit_applyCurrentText_multipleMode_separatorAtStart(
     line_edit.setText("| item")
     line_edit.setCursorPosition(len("| item"))
 
-    line_edit.completionSelected = MagicMock()  # type: ignore[method-assign]
+    line_edit.completionSelected = MagicMock()
 
     line_edit.applyCurrentText()
 
-    # The `if sep_pos:` condition is `if 0:` which is false, so it won't call `completionSelected`
+    # The `if sep_pos:` condition is `if 0:` which is false,
+    # so it won't call `completionSelected`
     line_edit.completionSelected.assert_not_called()
 
 
 def test_EnLineEdit_relayout(qtbot: QtBot, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Tests that relayout calls popup and set focus."""
     line_edit = EnLineEdit()
     qtbot.addWidget(line_edit)
 
@@ -624,6 +691,10 @@ def test_EnLineEdit_relayout(qtbot: QtBot, monkeypatch: pytest.MonkeyPatch) -> N
 def test_EnLineEdit_changeText_noPopup(
     qtbot: QtBot, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    """Tests changeText when popup is disabled.
+
+    Ensures updateCompletions and complete are not called.
+    """
     line_edit = EnLineEdit()
     qtbot.addWidget(line_edit)
 
@@ -643,6 +714,10 @@ def test_EnLineEdit_changeText_noPopup(
 def test_EnLineEdit_changeText_popupEnabled_emptyPrefix(
     qtbot: QtBot, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    """Test changeText when popup is enabled and prefix is empty.
+
+    Ensures updateCompletions, complete, and setCurrentIndex are called.
+    """
     line_edit = EnLineEdit()
     qtbot.addWidget(line_edit)
 
@@ -669,6 +744,10 @@ def test_EnLineEdit_changeText_popupEnabled_emptyPrefix(
 def test_EnLineEdit_changeText_popupEnabled_nonEmptyPrefix(
     qtbot: QtBot, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    """Test changeText when popup is enabled and prefix is non-empty.
+
+    Ensures updateCompletions and complete are called, but setCurrentIndex is not.
+    """
     line_edit = EnLineEdit()
     qtbot.addWidget(line_edit)
 

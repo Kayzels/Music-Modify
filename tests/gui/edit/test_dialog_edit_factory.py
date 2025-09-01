@@ -13,7 +13,7 @@ from music_modify.models.song_repository import SongRepository
 @pytest.mark.parametrize(
     "bulk", [pytest.param(False, id="not_bulk"), pytest.param(True, id="bulk")]
 )
-def test_EditDialogFactory_get(qtbot: QtBot, bulk: bool) -> None:  # noqa: FBT001
+def test_EditDialogFactory_get(qtbot: QtBot, bulk: bool) -> None:
     """Test that the correct dialog type is returned, based on bulk."""
     widget = QWidget()
     qtbot.addWidget(widget)
