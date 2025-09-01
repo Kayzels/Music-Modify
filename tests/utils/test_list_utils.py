@@ -306,6 +306,33 @@ def test_removeMatchingSublistPairs(
             _original_list,
             id="invalid_low_index_no_op",
         ),
+        pytest.param(
+            {"Person2": "Person1"},
+            _original_list,
+            PairIndex.Person.value,
+            [
+                ["role1", "Person1"],
+                ["role2", "Person3"],
+                ["role3", "Person1"],
+            ],
+            id="not_add_if_already_present_and_other",
+        ),
+        pytest.param(
+            {"PersonA": "Person1"},
+            [
+                ["role1", "Person1"],
+                ["role1", "PersonA"],
+                ["role2", "Person3"],
+                ["role3", "Person2"],
+            ],
+            PairIndex.Person.value,
+            [
+                ["role1", "Person1"],
+                ["role2", "Person3"],
+                ["role3", "Person2"],
+            ],
+            id="not_add_if_already_present",
+        ),
     ],
 )
 def test_remapMatchingSublistPairs(
