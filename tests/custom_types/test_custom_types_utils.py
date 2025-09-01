@@ -25,139 +25,195 @@ def tags() -> list[SongTag]:
     ]
 
 
-def test_mapTag(tags: list[SongTag]) -> None:
+@pytest.mark.parametrize(
+    ("name", "expected"),
+    [
+        pytest.param(
+            "Track", SongTag(display_name="Track", id3_key="TRCK"), id="existing_tag"
+        ),
+        pytest.param("Album", None, id="not_found"),
+    ],
+)
+def test_mapTag(name: str, expected: SongTag | None, tags: list[SongTag]) -> None:
     """Test that mapTag returns a SongTag if it exists, or returns None."""
-    result1: SongTag | None = mapTag("Track", tags)
-    assert result1 is not None
-    assert result1.display_name == "Track"
-    result2: SongTag | None = mapTag("Album", tags)
-    assert result2 is None
+    assert mapTag(name, tags) == expected
 
 
-def test_mapKey(tags: list[SongTag]) -> None:
+@pytest.mark.parametrize(
+    ("key", "expected"),
+    [
+        pytest.param(
+            "TIT2", SongTag(display_name="Title", id3_key="TIT2"), id="existing_tag"
+        ),
+        pytest.param("TIT3", None, id="not_found"),
+    ],
+)
+def test_mapKey(key: str, expected: SongTag | None, tags: list[SongTag]) -> None:
     """Test that mapKey returns a SongTag if it exists, or returns None."""
-    result1: SongTag | None = mapKey("TIT2", tags)
-    assert result1 is not None
-    assert result1.display_name == "Title"
-    result2: SongTag | None = mapKey("TIT3", tags)
-    assert result2 is None
+    assert mapKey(key, tags) == expected
 
 
-def test_mapOptionalTag_no_fallback(tags: list[SongTag]) -> None:
-    """Test that mapOptionalTag just returns the tag without fallback, if it exists."""
-    result: SongTag | None = mapOptionalTag("Artist", "Album Artist", tags)
-    assert result is not None
-    assert result.display_name == "Artist"
-
-    result1: SongTag | None = mapOptionalTag("Sort Artist", "Artist", tags)
-    assert result1 is not None
-    assert result1.display_name == "Artist"
-    result2: SongTag | None = mapOptionalTag("Label", "Publisher", tags)
-    assert result2 is None
-
-
-def test_mapOptionalTag_fallback_exists(tags: list[SongTag]) -> None:
-    """Test that mapOptionalTag uses optional_name as fallback, when found."""
-    result: SongTag | None = mapOptionalTag("Sort Artist", "Artist", tags)
-    assert result is not None
-    assert result.display_name == "Artist"
-
-
-def test_mapOptionalTag_fallback_not_exists(tags: list[SongTag]) -> None:
-    """Test that mapOptionalTag returns None when fallback not found."""
-    result: SongTag | None = mapOptionalTag("Label", "Publisher", tags)
-    assert result is None
-
-
-def test_valueToString_empty() -> None:
-    """Tests that the empty string is returned when given empty values."""
-    separator = "; "
-    assert valueToString(None, separator) == ""
-    assert valueToString("", separator) == ""
-
-
-def test_valueToString_single() -> None:
-    """Tests that if only a single value exists, no separator is added."""
-    separator = "; "
-    value = "Some Title"
-    assert valueToString(value, separator) == "Some Title"
-
-
-def test_valueToString_list_one_item() -> None:
-    """Tests that lists with only one item are converted without separators."""
-    separator = "; "
-    value = ["List Value"]
-    assert valueToString(value, separator) == "List Value"
-
-
-def test_valueToString_list_multiple_items() -> None:
-    """Tests that lists with multiple items are converted with separators."""
-    separator = "; "
-    value: list[str] = ["Person 1", "Person 2"]
-    assert valueToString(value, separator) == "Person 1; Person 2"
-
-
-def test_valueToString_people_valid() -> None:
-    """Tests that people values of the correct length are converted with separators."""
-    separator = "; "
-    value: list[list[str]] = [["role1", "Person 1"], ["role2", "Person 2"]]
-    assert valueToString(value, separator) == "role1:Person 1; role2:Person 2"
-
-
-def test_valueToString_people_invalid() -> None:
-    """Tests that people values of the incorrect length are ignored."""
-    separator = "; "
-    value: list[list[str]] = [
-        ["role1", "Person 1"],
-        ["role2", "Person 2"],
-        ["role3", "Person 3", "extra"],
-    ]
-    assert valueToString(value, separator) == "role1:Person 1; role2:Person 2"
-
-
-def test_toTag_string_id3(tags: list[SongTag]) -> None:
-    """Tests that tags are created from an id3 key string, when valid."""
-    result: SongTag | None = toTag("TIT2", tags)
-    assert result is not None
-    assert result.id3_key == "TIT2"
-
-
-def test_toTag_string_display_name(tags: list[SongTag]) -> None:
-    """Tests that tags are created from a display name string, when valid."""
-    result: SongTag | None = toTag("Artist", tags)
-    assert result is not None
-    assert result.display_name == "Artist"
-
-
-def test_toTag_string_not_found(
-    tags: list[SongTag], monkeypatch: pytest.MonkeyPatch
+@pytest.mark.parametrize(
+    ("tag_name", "optional_name", "expected"),
+    [
+        pytest.param(
+            "Artist",
+            "Album Artist",
+            SongTag(display_name="Artist", id3_key="TPE1"),
+            id="found_tag_name",
+        ),
+        pytest.param(
+            "Sort Artist",
+            "Artist",
+            SongTag(display_name="Artist", id3_key="TPE1"),
+            id="found_optional_name",
+        ),
+        pytest.param(
+            "Label",
+            "Publisher",
+            None,
+            id="not_found_tag",
+        ),
+    ],
+)
+def test_mapOptionalTag(
+    tag_name: str, optional_name: str, expected: SongTag | None, tags: list[SongTag]
 ) -> None:
-    """Tests that None is returned when a Tag cannot be found or created."""
-    mock_map_key = MagicMock(return_value=None)
-    mock_map_tag = MagicMock(return_value=None)
+    """Test that mapOptionalTag finds tags if their name or optional_name exist."""
+    assert mapOptionalTag(tag_name, optional_name, tags) == expected
+
+
+@pytest.mark.parametrize(
+    ("value", "separator", "expected"),
+    [
+        pytest.param(None, "; ", "", id="None_value"),
+        pytest.param("", "; ", "", id="empty_value"),
+        pytest.param("Some Title", "; ", "Some Title", id="single_value"),
+        pytest.param(["List Value"], "; ", "List Value", id="list_value_single"),
+        pytest.param(
+            ["Person 1", "Person 2"],
+            "; ",
+            "Person 1; Person 2",
+            id="list_value_multiple",
+        ),
+        pytest.param(
+            [["role1", "Person 1"], ["role2", "Person 2"]],
+            "; ",
+            "role1:Person 1; role2:Person 2",
+            id="people_value_valid",
+        ),
+        pytest.param(
+            [
+                ["role1", "Person 1"],
+                ["role2", "Person 2"],
+                ["role3", "Person 3", "extra"],
+            ],
+            "; ",
+            "role1:Person 1; role2:Person 2",
+            id="people_value_invalid_wrong_length_ignored",
+        ),
+    ],
+)
+def test_valueToString(
+    value: str | list[str] | list[list[str]] | None, separator: str, expected: str
+) -> None:
+    """Tests that the value is converted correctly to a string in different cases."""
+    assert valueToString(value, separator) == expected
+
+
+@pytest.mark.parametrize(
+    (
+        "to_tag_value",
+        "expected_tag",
+        "map_key_return",
+        "map_tag_return",
+        "expected_map_key_call",
+        "expected_map_tag_call",
+    ),
+    [
+        pytest.param(
+            "TIT2",
+            SongTag(display_name="Title", id3_key="TIT2"),
+            SongTag(display_name="Title", id3_key="TIT2"),
+            None,
+            True,
+            False,
+            id="string_id3_key_found",
+        ),
+        pytest.param(
+            "Artist",
+            SongTag(display_name="Artist", id3_key="TPE1"),
+            None,
+            SongTag(display_name="Artist", id3_key="TPE1"),
+            True,
+            True,
+            id="string_display_name_found",
+        ),
+        pytest.param(
+            "TIPL",
+            None,
+            None,
+            None,
+            True,
+            True,
+            id="string_not_found",
+        ),
+        pytest.param(
+            SongTag(display_name="Title", id3_key="TIT2"),
+            SongTag(display_name="Title", id3_key="TIT2"),
+            SongTag(display_name="Title", id3_key="TIT2"),
+            SongTag(display_name="Title", id3_key="TIT2"),
+            False,
+            False,
+            id="from_existing_in_list",
+        ),
+        pytest.param(
+            SongTag(display_name="Involved People", id3_key="TIPL"),
+            None,
+            None,
+            None,
+            False,
+            False,
+            id="from_existing_not_in_list",
+        ),
+    ],
+)
+def test_toTag(
+    to_tag_value: str | SongTag,
+    map_key_return: SongTag | None,
+    map_tag_return: SongTag | None,
+    expected_tag: SongTag | None,
+    expected_map_tag_call: bool,
+    expected_map_key_call: bool,
+    tags: list[SongTag],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Tests that tags are created from id3 keys, display names, or existing tags.
+
+    Args:
+        to_tag_value: The value that should be passed to toTag
+        map_key_return: The value that the mock mapKey method should return
+        map_tag_return: The value that the mock mapTag method should return
+        expected_tag: The expected result of the toTag method
+        expected_map_tag_call: Whether mapTag is expected to be called
+        expected_map_key_call: Whether mapKey is expected to be called
+        tags: The list of SongTags to consider for generating tags
+        monkeypatch: Used for patching and mocking methods
+    """
+    mock_map_tag = MagicMock(return_value=map_tag_return)
+    mock_map_key = MagicMock(return_value=map_key_return)
     monkeypatch.setattr(utils, "mapKey", mock_map_key)
     monkeypatch.setattr(utils, "mapTag", mock_map_tag)
 
-    result: SongTag | None = toTag("TIPL", tags)
+    created_tag = toTag(to_tag_value, tags)
+    assert created_tag == expected_tag
 
-    assert result is None
-    mock_map_key.assert_called_once()
-    mock_map_tag.assert_called_once()
+    if expected_map_key_call:
+        mock_map_key.assert_called_once()
+    else:
+        mock_map_key.assert_not_called()
 
-
-def test_toTag_from_existing(
-    tags: list[SongTag], monkeypatch: pytest.MonkeyPatch
-) -> None:
-    """Tests that an existing tag is just returned if already existing."""
-    created_tag: SongTag | None = toTag("TIT2", tags)
-    assert created_tag is not None
-
-    mock_map_key = MagicMock()
-    mock_map_tag = MagicMock()
-    monkeypatch.setattr(utils, "mapKey", mock_map_key)
-    monkeypatch.setattr(utils, "mapTag", mock_map_tag)
-
-    assert toTag(created_tag, tags) is created_tag
-
-    mock_map_key.assert_not_called()
-    mock_map_tag.assert_not_called()
+    if expected_map_tag_call:
+        mock_map_tag.assert_called_once()
+    else:
+        mock_map_tag.assert_not_called()

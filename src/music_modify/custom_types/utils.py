@@ -86,9 +86,14 @@ def toTag(tag: str | SongTag, tag_list: list[SongTag]) -> SongTag | None:
 
     First searches for the id3 key, and then the display name.
     If it cannot be found, returns None.
+
+    If the tag isn't in tag_list, it's not a tag we manage,
+    so None is returned.
     """
     if isinstance(tag, SongTag):
-        return tag
+        if tag in tag_list:
+            return tag
+        return None
     result = mapKey(tag, tag_list)
     if result is None:
         result = mapTag(tag, tag_list)
