@@ -14,4 +14,4 @@ def tableHeader(value: str) -> str:
 def singularPlural(num: float, word: str) -> str:
     """Creates the singular or plural form of a word, based on the count."""
     end = "" if num == 1 else "s"
-    return f"{num} {word}" + end
+    return f"{num:g} {word}" + end
