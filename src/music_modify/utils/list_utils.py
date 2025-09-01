@@ -114,11 +114,12 @@ def remapMatchingSublistPairs(
         return original
     if index < 0 or index >= constants.PEOPLE_COL_COUNT:
         return original
-    return [
-        [
+    new_values: list[list[str]] = []
+    for item in original:
+        possible_value = [
             replacements.get(item[0], item[0]) if index == 0 else item[0],
             replacements.get(item[1], item[1]) if index == 1 else item[1],
         ]
-        for item in original
-    ]
-    # TODO: Don't add item if already present, remove instead
+        if possible_value not in new_values:
+            new_values.append(possible_value)
+    return new_values
