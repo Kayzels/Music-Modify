@@ -49,32 +49,26 @@ def test_RowOperationMixin_createOperationButton_missing_order(qtbot: QtBot) -> 
     assert str(exc_info.value) == expected_exception_message
 
 
+@pytest.mark.parametrize(
+    ("button_type", "button_name"),
+    [
+        pytest.param(EditButton.Up, "up_button", id="up_button"),
+        pytest.param(EditButton.Down, "down_button", id="down_button"),
+        pytest.param(EditButton.Add, "add_button", id="add_button"),
+        pytest.param(EditButton.Remove, "remove_button", id="remove_button"),
+    ],
+)
 def test_RowOperationMixin_createOperationButton_sets_attributes_individual(
-    qtbot: QtBot,
+    qtbot: QtBot, button_type: EditButton, button_name: str
 ) -> None:
     """Test that createOperationButtons creates attributes with single calls."""
     widget = _OperationWidget()
     qtbot.addWidget(widget)
 
-    assert not hasattr(widget, "up_button")
-    _ = widget.createOperationButtons(widget, EditButton.Up)
-    assert hasattr(widget, "up_button")
-    assert isinstance(widget.up_button, QToolButton)
-
-    assert not hasattr(widget, "down_button")
-    _ = widget.createOperationButtons(widget, EditButton.Down)
-    assert hasattr(widget, "down_button")
-    assert isinstance(widget.up_button, QToolButton)
-
-    assert not hasattr(widget, "remove_button")
-    _ = widget.createOperationButtons(widget, EditButton.Remove)
-    assert hasattr(widget, "remove_button")
-    assert isinstance(widget.remove_button, QToolButton)
-
-    assert not hasattr(widget, "add_button")
-    _ = widget.createOperationButtons(widget, EditButton.Add)
-    assert hasattr(widget, "add_button")
-    assert isinstance(widget.add_button, QToolButton)
+    assert not hasattr(widget, button_name)
+    _ = widget.createOperationButtons(widget, button_type)
+    assert hasattr(widget, button_name)
+    assert isinstance(getattr(widget, button_name), QToolButton)
 
 
 def test_RowOperationMixin_createOperationButton_sets_attributes_multiple(
