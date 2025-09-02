@@ -12,6 +12,18 @@ class TagType(Enum):
     Url = "url"
 
 
+class EditorType(Enum):
+    """The type of widget/display that should be used for editing a tag.
+
+    Should only contain the types that can actually be handled.
+    """
+
+    Automatic = "Determine the editor based on tag data."
+    SingleText = "Tags storing single values."
+    MultipleText = "Tags storing multiple values."
+    PeopleValue = "Tags storing role, person pairs."
+
+
 class RowDirection(Enum):
     """Direction that a row should move, when a button is clicked."""
 

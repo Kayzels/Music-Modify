@@ -9,6 +9,7 @@ from typing import ClassVar, final
 
 from PySide6.QtCore import QSettings
 
+from music_modify.custom_types.enums import EditorType
 from music_modify.custom_types.songtag import SongTag
 from music_modify.custom_types.tag_info import TagInfo
 
@@ -97,50 +98,224 @@ class Settings:
         self._settings.setValue("Split/split_values_at", value)
 
     default_tags: ClassVar[list[TagInfo]] = [
-        TagInfo(display_name="Track", id3_key="TRCK", show_in_table=True),
-        TagInfo(display_name="Title", id3_key="TIT2", show_in_table=True),
-        TagInfo(display_name="Artist", id3_key="TPE1", show_in_table=True),
-        TagInfo(display_name="Album Artist", id3_key="TPE2", show_in_table=True),
-        TagInfo(display_name="Album", id3_key="TALB", show_in_table=True),
-        TagInfo(display_name="Composer", id3_key="TCOM", show_in_table=True),
-        TagInfo(display_name="Lyricist", id3_key="TEXT", show_in_table=True),
-        TagInfo(display_name="Language", id3_key="TLAN", show_in_table=True),
-        TagInfo(display_name="BPM", id3_key="TBPM", show_in_table=True),
-        TagInfo(display_name="Key", id3_key="TKEY", show_in_table=True),
-        TagInfo(display_name="Involved People", id3_key="TIPL", show_in_table=True),
-        TagInfo(display_name="Musician Credits", id3_key="TMCL", show_in_table=True),
-        TagInfo(display_name="Sort Composer", id3_key="TSOC"),
-        TagInfo(display_name="Conductor", id3_key="TPE3"),
-        TagInfo(display_name="Year", id3_key="TDRC"),
-        TagInfo(display_name="Original Album", id3_key="TOAL"),
-        TagInfo(display_name="Original Artist", id3_key="TOPE"),
-        TagInfo(display_name="Subtitle", id3_key="TIT3"),
-        TagInfo(display_name="Disc Number", id3_key="TPOS"),
-        TagInfo(display_name="Set Subtitle", id3_key="TSST"),
-        TagInfo(display_name="Sort Artist", id3_key="TSOP"),
-        TagInfo(display_name="Sort Album Artist", id3_key="TSO2"),
-        TagInfo(display_name="Genre", id3_key="TCON"),
-        TagInfo(display_name="Publisher", id3_key="TPUB"),
-        TagInfo(display_name="Mood", id3_key="TMOO"),
-        TagInfo(display_name="Display Composer", id3_key="TXXX:DISPLAY COMPOSER"),
-        TagInfo(display_name="Release Date", id3_key="TXXX:RELEASE DATE"),
-        TagInfo(display_name="Original Year", id3_key="TXXX:originalyear"),
-        TagInfo(display_name="Scrobble Title", id3_key="TXXX:SCROBBLE TITLE"),
-        TagInfo(display_name="Track Name", id3_key="TXXX:TRACK NAME"),
-        TagInfo(display_name="Song Type", id3_key="TXXX:SONG TYPE"),
-        TagInfo(display_name="Scrobble Album", id3_key="TXXX:SCROBBLE ALBUM"),
-        TagInfo(display_name="Album Name", id3_key="TXXX:ALBUM NAME"),
-        TagInfo(display_name="Album Type", id3_key="TXXX:ALBUM TYPE"),
-        TagInfo(display_name="Album Version", id3_key="TXXX:ALBUM VERSION"),
-        TagInfo(display_name="Scrobble Artist", id3_key="TXXX:SCROBBLE ARTIST"),
-        TagInfo(display_name="Artist Shown", id3_key="TXXX:ARTIST SHOWN"),
-        TagInfo(display_name="Display Artist", id3_key="TXXX:DISPLAY ARTIST"),
-        TagInfo(display_name="Label", id3_key="TXXX:LABEL"),
-        TagInfo(display_name="Performer", id3_key="TXXX:PERFORMER"),
-        TagInfo(display_name="Remixer", id3_key="TXXX:REMIXER"),
-        TagInfo(display_name="Occasion", id3_key="TXXX:OCCASION"),
-        TagInfo(display_name="Keywords", id3_key="TXXX:KEYWORDS"),
-        TagInfo(display_name="Tempo", id3_key="TXXX:TEMPO"),
+        TagInfo(
+            display_name="Track",
+            id3_key="TRCK",
+            show_in_table=True,
+            editor_type=EditorType.SingleText,
+        ),
+        TagInfo(
+            display_name="Title",
+            id3_key="TIT2",
+            show_in_table=True,
+            editor_type=EditorType.SingleText,
+        ),
+        TagInfo(
+            display_name="Artist",
+            id3_key="TPE1",
+            show_in_table=True,
+            editor_type=EditorType.MultipleText,
+        ),
+        TagInfo(
+            display_name="Album Artist",
+            id3_key="TPE2",
+            show_in_table=True,
+            editor_type=EditorType.SingleText,
+        ),
+        TagInfo(
+            display_name="Album",
+            id3_key="TALB",
+            show_in_table=True,
+            editor_type=EditorType.SingleText,
+        ),
+        TagInfo(
+            display_name="Composer",
+            id3_key="TCOM",
+            show_in_table=True,
+            editor_type=EditorType.MultipleText,
+        ),
+        TagInfo(
+            display_name="Lyricist",
+            id3_key="TEXT",
+            show_in_table=True,
+            editor_type=EditorType.MultipleText,
+        ),
+        TagInfo(
+            display_name="Language",
+            id3_key="TLAN",
+            show_in_table=True,
+            editor_type=EditorType.SingleText,
+        ),
+        TagInfo(
+            display_name="BPM",
+            id3_key="TBPM",
+            show_in_table=True,
+            editor_type=EditorType.SingleText,
+        ),
+        TagInfo(
+            display_name="Key",
+            id3_key="TKEY",
+            show_in_table=True,
+            editor_type=EditorType.SingleText,
+        ),
+        TagInfo(
+            display_name="Involved People",
+            id3_key="TIPL",
+            show_in_table=True,
+            editor_type=EditorType.PeopleValue,
+        ),
+        TagInfo(
+            display_name="Musician Credits",
+            id3_key="TMCL",
+            show_in_table=True,
+            editor_type=EditorType.PeopleValue,
+        ),
+        TagInfo(
+            display_name="Sort Composer",
+            id3_key="TSOC",
+            editor_type=EditorType.SingleText,
+        ),
+        TagInfo(
+            display_name="Conductor", id3_key="TPE3", editor_type=EditorType.SingleText
+        ),
+        TagInfo(display_name="Year", id3_key="TDRC", editor_type=EditorType.SingleText),
+        TagInfo(
+            display_name="Original Album",
+            id3_key="TOAL",
+            editor_type=EditorType.SingleText,
+        ),
+        TagInfo(
+            display_name="Original Artist",
+            id3_key="TOPE",
+            editor_type=EditorType.MultipleText,
+        ),
+        TagInfo(
+            display_name="Subtitle", id3_key="TIT3", editor_type=EditorType.SingleText
+        ),
+        TagInfo(
+            display_name="Disc Number",
+            id3_key="TPOS",
+            editor_type=EditorType.SingleText,
+        ),
+        TagInfo(
+            display_name="Set Subtitle",
+            id3_key="TSST",
+            editor_type=EditorType.SingleText,
+        ),
+        TagInfo(
+            display_name="Sort Artist",
+            id3_key="TSOP",
+            editor_type=EditorType.SingleText,
+        ),
+        TagInfo(
+            display_name="Sort Album Artist",
+            id3_key="TSO2",
+            editor_type=EditorType.SingleText,
+        ),
+        TagInfo(
+            display_name="Genre", id3_key="TCON", editor_type=EditorType.MultipleText
+        ),
+        TagInfo(
+            display_name="Publisher", id3_key="TPUB", editor_type=EditorType.SingleText
+        ),
+        TagInfo(
+            display_name="Mood", id3_key="TMOO", editor_type=EditorType.MultipleText
+        ),
+        TagInfo(
+            display_name="Display Composer",
+            id3_key="TXXX:DISPLAY COMPOSER",
+            editor_type=EditorType.SingleText,
+        ),
+        TagInfo(
+            display_name="Release Date",
+            id3_key="TXXX:RELEASE DATE",
+            editor_type=EditorType.SingleText,
+        ),
+        TagInfo(
+            display_name="Original Year",
+            id3_key="TXXX:originalyear",
+            editor_type=EditorType.SingleText,
+        ),
+        TagInfo(
+            display_name="Scrobble Title",
+            id3_key="TXXX:SCROBBLE TITLE",
+            editor_type=EditorType.SingleText,
+        ),
+        TagInfo(
+            display_name="Track Name",
+            id3_key="TXXX:TRACK NAME",
+            editor_type=EditorType.SingleText,
+        ),
+        TagInfo(
+            display_name="Song Type",
+            id3_key="TXXX:SONG TYPE",
+            editor_type=EditorType.SingleText,
+        ),
+        TagInfo(
+            display_name="Scrobble Album",
+            id3_key="TXXX:SCROBBLE ALBUM",
+            editor_type=EditorType.SingleText,
+        ),
+        TagInfo(
+            display_name="Album Name",
+            id3_key="TXXX:ALBUM NAME",
+            editor_type=EditorType.SingleText,
+        ),
+        TagInfo(
+            display_name="Album Type",
+            id3_key="TXXX:ALBUM TYPE",
+            editor_type=EditorType.SingleText,
+        ),
+        TagInfo(
+            display_name="Album Version",
+            id3_key="TXXX:ALBUM VERSION",
+            editor_type=EditorType.SingleText,
+        ),
+        TagInfo(
+            display_name="Scrobble Artist",
+            id3_key="TXXX:SCROBBLE ARTIST",
+            editor_type=EditorType.SingleText,
+        ),
+        TagInfo(
+            display_name="Artist Shown",
+            id3_key="TXXX:ARTIST SHOWN",
+            editor_type=EditorType.SingleText,
+        ),
+        TagInfo(
+            display_name="Display Artist",
+            id3_key="TXXX:DISPLAY ARTIST",
+            editor_type=EditorType.SingleText,
+        ),
+        TagInfo(
+            display_name="Label",
+            id3_key="TXXX:LABEL",
+            editor_type=EditorType.SingleText,
+        ),
+        TagInfo(
+            display_name="Performer",
+            id3_key="TXXX:PERFORMER",
+            editor_type=EditorType.SingleText,
+        ),
+        TagInfo(
+            display_name="Remixer",
+            id3_key="TXXX:REMIXER",
+            editor_type=EditorType.SingleText,
+        ),
+        TagInfo(
+            display_name="Occasion",
+            id3_key="TXXX:OCCASION",
+            editor_type=EditorType.SingleText,
+        ),
+        TagInfo(
+            display_name="Keywords",
+            id3_key="TXXX:KEYWORDS",
+            editor_type=EditorType.SingleText,
+        ),
+        TagInfo(
+            display_name="Tempo",
+            id3_key="TXXX:TEMPO",
+            editor_type=EditorType.SingleText,
+        ),
     ]
     "Default values for known tags, if there are no user changes."
 
@@ -149,7 +324,11 @@ class Settings:
         """The tags shown in the main table."""
         if self._table_tags_cache is None:
             self._table_tags_cache = [
-                SongTag(display_name=tag.display_name, id3_key=tag.id3_key)
+                SongTag(
+                    display_name=tag.display_name,
+                    id3_key=tag.id3_key,
+                    editor_type=tag.editor_type,
+                )
                 for tag in self.info_tags
                 if tag.show_in_table
             ]
@@ -164,7 +343,11 @@ class Settings:
         using `TagInfo` objects.
         """
         return [
-            SongTag(display_name=tag.display_name, id3_key=tag.id3_key)
+            SongTag(
+                display_name=tag.display_name,
+                id3_key=tag.id3_key,
+                editor_type=tag.editor_type,
+            )
             for tag in self.info_tags
         ]
 
@@ -199,6 +382,7 @@ class Settings:
             self._settings.setValue("display_name", tag.display_name)
             self._settings.setValue("id3_key", tag.id3_key)
             self._settings.setValue("show_in_table", str(tag.show_in_table))
+            self._settings.setValue("editor_type", tag.editor_type.name)
         self._settings.endArray()
 
     def _getArray(self, key: str) -> list[TagInfo]:
@@ -214,11 +398,18 @@ class Settings:
             display_name: str = str(self._settings.value("display_name"))
             id3_key: str = str(self._settings.value("id3_key"))
             show_in_table: bool = self._settings.value("show_in_table") == "True"
+            editor_type_str: str = str(
+                self._settings.value("editor_type", EditorType.Automatic.name)
+            )
+            editor_type_enum: EditorType = getattr(
+                EditorType, editor_type_str, EditorType.Automatic
+            )
             tags.append(
                 TagInfo(
                     display_name=display_name,
                     id3_key=id3_key,
                     show_in_table=show_in_table,
+                    editor_type=editor_type_enum,
                 ),
             )
         self._settings.endArray()

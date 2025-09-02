@@ -17,6 +17,7 @@ from PySide6.QtCore import (
 )
 
 from music_modify.custom_types import TagInfo, constants
+from music_modify.custom_types.enums import EditorType
 from music_modify.utils import tableHeader
 
 logger = logging.getLogger(__name__)
@@ -71,7 +72,7 @@ class TagModel(QAbstractTableModel):
         return tableHeader(TAG_MODEL_COLUMNS[section])
 
     @override
-    def data(
+    def data(  # noqa: PLR0911
         self,
         index: QModelIndex | QPersistentModelIndex,
         role: Qt.ItemDataRole | int = Qt.ItemDataRole.DisplayRole,
@@ -95,6 +96,14 @@ class TagModel(QAbstractTableModel):
                 return ""
             return None
 
+        if field == "editor_type":
+            editor_type_enum = getattr(self._tags[row], field)
+            if role == Qt.ItemDataRole.DisplayRole:
+                return editor_type_enum.value
+            if role == Qt.ItemDataRole.EditRole:
+                return editor_type_enum
+            return None
+
         if role in (Qt.ItemDataRole.DisplayRole, Qt.ItemDataRole.EditRole):
             return getattr(self._tags[row], field)
 
@@ -113,7 +122,7 @@ class TagModel(QAbstractTableModel):
         return super().flags(index) | Qt.ItemFlag.ItemIsEditable
 
     @override
-    def setData(
+    def setData(  # noqa: PLR0911
         self,
         index: QModelIndex | QPersistentModelIndex,
         value: str | int,
@@ -153,6 +162,22 @@ class TagModel(QAbstractTableModel):
             # otherwise it's always false.
             self._tags[row].show_in_table = value == Qt.CheckState.Checked.value
             self.dataChanged.emit(index, index, [role])
+            return True
+
+        if field == "editor_type" and role == Qt.ItemDataRole.EditRole:
+            new_editor_type: EditorType | None = None
+            for et in EditorType:
+                if value == et.value:
+                    new_editor_type = et
+                    break
+
+            if new_editor_type is None:
+                logger.warning(f"Could not find EditorType for value: {value}")
+                return False
+
+            if getattr(self._tags[row], field) != new_editor_type:
+                setattr(self._tags[row], field, new_editor_type)
+                self.dataChanged.emit(index, index, [role])
             return True
 
         return False
