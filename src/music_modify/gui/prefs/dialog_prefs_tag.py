@@ -19,8 +19,10 @@ from PySide6.QtWidgets import (
 
 from music_modify.custom_types.enums import RowDirection
 from music_modify.gui.mixins.row_operation_mixin import RowOperationMixin
+from music_modify.gui.prefs.delegate_editor_type import EditorTypeDelegate
 from music_modify.gui.utils import getSelectedRows
 from music_modify.models import TagModel
+from music_modify.models.tag_model import TAG_MODEL_COLUMNS
 from music_modify.prefs import prefs
 
 from .dialog_prefs_abstract import PrefsAbstractDialog
@@ -54,6 +56,11 @@ class PrefsTagDialog(PrefsAbstractDialog, RowOperationMixin):
         self.model: TagModel = TagModel(tags)
         self.tag_table.setModel(self.model)
         self.tag_table.resizeColumnsToContents()
+
+        editor_type_col_index = TAG_MODEL_COLUMNS.index("editor_type")
+        delegate = EditorTypeDelegate()
+        self.tag_table.setItemDelegateForColumn(editor_type_col_index, delegate)
+
         self.model.invalid_input.connect(self.showInvalidInputMessage)
 
     @override

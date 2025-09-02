@@ -10,7 +10,7 @@ from PySide6.QtWidgets import QDialog, QWidget
 import pytest
 from pytestqt.qtbot import QtBot
 
-from music_modify.custom_types.enums import NavDirection
+from music_modify.custom_types.enums import EditorType, NavDirection
 from music_modify.custom_types.song import Song
 from music_modify.custom_types.songtag import SongTag
 from music_modify.gui.edit.dialog_edit import EditDialog
@@ -258,11 +258,13 @@ def test_EditDialog_resetSongInfo(
     mock_tag1.display_name = "Artist"
     mock_tag1.getValue.return_value = "Test Artist"
     mock_tag1.id3_key = "TPE1"
+    mock_tag1.editor_type = EditorType.MultipleText
 
     mock_tag2 = Mock(spec=SongTag)
     mock_tag2.display_name = "Title"
     mock_tag2.getValue.return_value = "Test Title"
     mock_tag2.id3_key = "TIT2"
+    mock_tag2.editor_type = EditorType.SingleText
 
     mock_all_tags = [mock_tag1, mock_tag2]
     mock_prefs_settings = Mock()

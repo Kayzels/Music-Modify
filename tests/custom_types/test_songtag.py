@@ -9,7 +9,7 @@ import pytest
 from pytest_lazy_fixtures import lf
 
 from music_modify.custom_types import constants
-from music_modify.custom_types.enums import TagType
+from music_modify.custom_types.enums import EditorType, TagType
 from music_modify.custom_types.songtag import SongTag
 
 
@@ -34,19 +34,27 @@ def people_value() -> list[list[str]]:
 @pytest.fixture
 def single_tag() -> SongTag:
     """Fixture that returns a tag that stores a single value."""
-    return SongTag(id3_key="TIT2", display_name="Title")
+    return SongTag(
+        id3_key="TIT2", display_name="Title", editor_type=EditorType.SingleText
+    )
 
 
 @pytest.fixture
 def multiple_tag() -> SongTag:
     """Fixture that returns a tag that stores multiple values."""
-    return SongTag(id3_key="TCOM", display_name="Composer")
+    return SongTag(
+        id3_key="TCOM", display_name="Composer", editor_type=EditorType.MultipleText
+    )
 
 
 @pytest.fixture
 def people_tag() -> SongTag:
     """Fixture that returns a tag that stores people values."""
-    return SongTag(id3_key="TIPL", display_name="Involved People")
+    return SongTag(
+        id3_key="TIPL",
+        display_name="Involved People",
+        editor_type=EditorType.PeopleValue,
+    )
 
 
 @pytest.mark.parametrize(
@@ -65,6 +73,112 @@ def test_SongTag_id3_key(tag: SongTag, expected: str) -> None:
 def test_SongTag_display_name(tag: SongTag, expected: str) -> None:
     """Test that the display_name property gets set correctly."""
     assert tag.display_name == expected
+
+
+@pytest.mark.parametrize(
+    ("id3_key", "display_name", "editor_type", "expected"),
+    [
+        pytest.param(
+            "TIT2",
+            "Title",
+            None,
+            EditorType.SingleText,
+            id="single_no_editor_type_sent",
+        ),
+        pytest.param(
+            "TIT2",
+            "Title",
+            EditorType.Automatic,
+            EditorType.SingleText,
+            id="single_auto_editor_type_sent",
+        ),
+        pytest.param(
+            "TIT2",
+            "Title",
+            EditorType.SingleText,
+            EditorType.SingleText,
+            id="single_single_editor_type_sent",
+        ),
+        pytest.param(
+            "TIT2",
+            "Title",
+            EditorType.MultipleText,
+            EditorType.MultipleText,
+            id="single_multiple_editor_type_sent_overrides_default",
+        ),
+        pytest.param(
+            "TCOM",
+            "Composer",
+            None,
+            EditorType.MultipleText,
+            id="multiple_no_editor_type_sent",
+        ),
+        pytest.param(
+            "TCOM",
+            "Composer",
+            EditorType.Automatic,
+            EditorType.MultipleText,
+            id="multiple_auto_editor_type_sent",
+        ),
+        pytest.param(
+            "TCOM",
+            "Composer",
+            EditorType.MultipleText,
+            EditorType.MultipleText,
+            id="multiple_multiple_editor_type_sent",
+        ),
+        pytest.param(
+            "TCOM",
+            "Composer",
+            EditorType.SingleText,
+            EditorType.SingleText,
+            id="multiple_single_editor_type_sent_overrides_default",
+        ),
+        pytest.param(
+            "TIPL",
+            "Involved People",
+            None,
+            EditorType.PeopleValue,
+            id="people_no_editor_type_sent",
+        ),
+        pytest.param(
+            "TIPL",
+            "Involved People",
+            EditorType.Automatic,
+            EditorType.PeopleValue,
+            id="people_auto_editor_type_sent",
+        ),
+        pytest.param(
+            "TIPL",
+            "Involved People",
+            EditorType.PeopleValue,
+            EditorType.PeopleValue,
+            id="people_people_editor_type_sent",
+        ),
+        pytest.param(
+            "TIPL",
+            "Involved People",
+            EditorType.MultipleText,
+            EditorType.MultipleText,
+            id="people_multiple_editor_type_sent_overrides_default",
+        ),
+    ],
+)
+def test_SongTag_editor_type(
+    id3_key: str,
+    display_name: str,
+    editor_type: EditorType | None,
+    expected: EditorType,
+) -> None:
+    """Tests that editor_type property gets set correctly."""
+    if editor_type is None:
+        tag = SongTag(display_name=display_name, id3_key=id3_key)
+    else:
+        tag = SongTag(
+            display_name=display_name, id3_key=id3_key, editor_type=editor_type
+        )
+
+    assert tag.editor_type == expected
 
 
 @pytest.mark.parametrize(
@@ -93,19 +207,6 @@ def test_SongTag_display_name(tag: SongTag, expected: str) -> None:
 def test_SongTag_frame_type(tag: SongTag, expected: TagType) -> None:
     """Test that the frame_type property gets set correctly."""
     assert tag.frame_type == expected
-
-
-@pytest.mark.parametrize(
-    ("tag", "expected"),
-    [
-        pytest.param(lf("single_tag"), False, id="single_tag_False"),
-        pytest.param(lf("multiple_tag"), True, id="multiple_tag_True"),
-        pytest.param(lf("people_tag"), False, id="people_tag_False"),
-    ],
-)
-def test_SongTag_allow_multiple(tag: SongTag, expected: bool) -> None:
-    """Test that the allow_multiple property gets set correctly."""
-    assert tag.allow_multiple is expected
 
 
 @pytest.mark.parametrize(

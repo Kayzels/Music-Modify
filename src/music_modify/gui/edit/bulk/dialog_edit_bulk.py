@@ -15,7 +15,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from music_modify.custom_types.enums import TagType
+from music_modify.custom_types.enums import EditorType
 from music_modify.gui.edit.dialog_edit_abstract import EditAbstractDialog
 from music_modify.gui.utils import createTab
 from music_modify.models.song_repository import SongRepository
@@ -136,48 +136,56 @@ class EditBulkDialog(EditAbstractDialog):
             in_all: bool = True
             for song in self.songs:
                 current_data = copy.deepcopy(tag.getValue(song.id3))
-                if tag.frame_type == TagType.People:
-                    people_values[tag] = addValues(
-                        cast(list[list[str]] | None, current_data),
-                        people_values.get(tag, []),
-                    )
-                    continue
-                if tag.allow_multiple:
-                    normal_values[tag] = _addMultiValues(
-                        cast(list[str] | None, current_data),
-                        normal_values.get(tag, set()),
-                    )
-                    continue
-                normal_values[tag], in_all = _addSingleValues(
-                    cast(str | None, current_data),
-                    normal_values.get(tag, set()),
-                    in_all=in_all,
-                )
+                match tag.editor_type:
+                    case EditorType.PeopleValue:
+                        people_values[tag] = addValues(
+                            cast(list[list[str]] | None, current_data),
+                            people_values.get(tag, []),
+                        )
+                    case EditorType.MultipleText:
+                        normal_values[tag] = _addMultiValues(
+                            cast(list[str] | None, current_data),
+                            normal_values.get(tag, set()),
+                        )
+                    case EditorType.SingleText:
+                        normal_values[tag], in_all = _addSingleValues(
+                            cast(str | None, current_data),
+                            normal_values.get(tag, set()),
+                            in_all=in_all,
+                        )
+                    case _:
+                        logger.warning(
+                            f"editor_type had an unsupported value: {tag.editor_type}"
+                        )
 
             # Create widgets and add to layouts
-            if tag.frame_type == TagType.People:
-                people_widget_layout.addWidget(
-                    EditBulkPeopleWidget(
-                        self,
-                        people_values.get(tag, []),
-                        tag,
-                    ),
-                )
-                continue
-            if tag.allow_multiple:
-                multi_widget_layout.addWidget(
-                    EditBulkMultipleWidget(self, normal_values.get(tag, set()), tag),
-                )
-                continue
-            simple_widget_form_layout.addRow(
-                tag.display_name,
-                EditBulkLineWidget(
-                    self,
-                    normal_values.get(tag, set()),
-                    tag,
-                    in_all=in_all,
-                ),
-            )
+            match tag.editor_type:
+                case EditorType.PeopleValue:
+                    people_widget_layout.addWidget(
+                        EditBulkPeopleWidget(
+                            self,
+                            people_values.get(tag, []),
+                            tag,
+                        ),
+                    )
+                case EditorType.MultipleText:
+                    multi_widget_layout.addWidget(
+                        EditBulkMultipleWidget(
+                            self, normal_values.get(tag, set()), tag
+                        ),
+                    )
+                case EditorType.SingleText:
+                    simple_widget_form_layout.addRow(
+                        tag.display_name,
+                        EditBulkLineWidget(
+                            self,
+                            normal_values.get(tag, set()),
+                            tag,
+                            in_all=in_all,
+                        ),
+                    )
+                case _:
+                    pass
 
         self.resize(600, 400)
 

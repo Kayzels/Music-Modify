@@ -13,7 +13,7 @@ from .aliases import (
     SongListData,
     SongTableData,
 )
-from .enums import TagType
+from .enums import EditorType, TagType
 
 logger = logging.getLogger(__name__)
 
@@ -36,16 +36,26 @@ class SongTag:
     """List of keys that store a list of strings,
     rather than a single value."""
 
-    def __init__(self, *, display_name: str, id3_key: str) -> None:
+    def __init__(
+        self,
+        *,
+        display_name: str,
+        id3_key: str,
+        editor_type: EditorType = EditorType.Automatic,
+    ) -> None:
         """Create a `SongTag` based on a display name and key.
 
         Args:
             display_name: The human-readable name for the tag
             id3_key: The field in an id3 object that this tag refers to
+            editor_type: The kind of widget the data for this tag is displayed with
         """
         self._id3_key: Final[str] = id3_key
         self._display_name: Final[str] = display_name
         self._frame_type: Final[TagType] = SongTag._getFrameType(id3_key)
+        self._editor_type: Final[EditorType] = SongTag._calculateEditorType(
+            editor_type, id3_key
+        )
 
     @override
     def __repr__(self) -> str:
@@ -78,16 +88,16 @@ class SongTag:
         """The kind of metadata that the tag will store."""
         return self._frame_type
 
-    @property
-    def allow_multiple(self) -> bool:
-        """Returns `True` if this tag stores a list of values.
-
-        Tags can either store a list of strings, a string, or a list of string pairs.
-        This property is used to determine when a tag stores a list of strings.
-        Note that it returns `False` if the tag stores a string _or_ string pairs.
-        """
-        # TODO: Consider whether people tags should return True here.
-        return self.id3_key in SongTag.KEYS_ALLOW_MULTIPLE_VALUES
+    @staticmethod
+    def _calculateEditorType(editor_type: EditorType, key: str) -> EditorType:
+        if editor_type != EditorType.Automatic:
+            return editor_type
+        frame_type = SongTag._getFrameType(key)
+        if frame_type == TagType.People:
+            return EditorType.PeopleValue
+        if key in SongTag.KEYS_ALLOW_MULTIPLE_VALUES:
+            return EditorType.MultipleText
+        return EditorType.SingleText
 
     @staticmethod
     def _getFrameType(id3_key: str) -> TagType:
@@ -146,6 +156,11 @@ class SongTag:
             logger.debug(f"KeyError from song for id3_key {self.id3_key}")
             return None
 
+    @property
+    def editor_type(self) -> EditorType:
+        """Stores the kind of widget that should be used for editing the values."""
+        return self._editor_type
+
     def setTag(self, song: ID3, values: SongGroupData) -> None:
         """Sets the tag for this song to contain the values that are sent."""
         if not self.hasTag(song):
@@ -187,12 +202,10 @@ class SongTag:
         song_data = self.getTag(song)
         if song_data is None:
             return None
-        match self.frame_type:
-            case TagType.People:
+        match self.editor_type:
+            case EditorType.PeopleValue:
                 return cast(SongTableData, song_data)
+            case EditorType.MultipleText:
+                return [str(val) for val in cast(SongListData, song_data)]
             case _:
-                # noinspection PyTypeHints
-                song_data = cast(SongLineData | SongListData, song_data)
-                if self.allow_multiple:
-                    return [str(val) for val in song_data]
-                return str(song_data[0])
+                return str(cast(SongLineData, song_data)[0])

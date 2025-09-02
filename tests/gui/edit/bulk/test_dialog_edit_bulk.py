@@ -2,14 +2,17 @@
 
 # pyright: reportPrivateUsage = false
 
+import logging
 from typing import cast
-from unittest.mock import Mock
+from unittest.mock import MagicMock, Mock
 
 from PySide6.QtWidgets import QWidget
 import pytest
 from pytestqt.qtbot import QtBot
 
+from music_modify.custom_types.enums import EditorType
 from music_modify.custom_types.song import Song
+from music_modify.custom_types.songtag import SongTag
 from music_modify.gui.edit.bulk.dialog_edit_bulk import (
     EditBulkDialog,
     _addMultiValues,
@@ -185,3 +188,35 @@ def test_EditBulkDialog_updateSongInfo_no_widgets(
 
     cast(Mock, song_1.save).assert_not_called()
     cast(Mock, song_2.save).assert_not_called()
+
+
+def test_EditBulkDialog_setupSongInfo_unsupported_editor_type_logged(
+    monkeypatch: pytest.MonkeyPatch, qtbot: QtBot, caplog: pytest.LogCaptureFixture
+) -> None:
+    """Test that _setupSongInfo logs unsupported EditorType."""
+    widget = QWidget()
+    qtbot.addWidget(widget)
+
+    mock_repository = MagicMock(spec=SongRepository)
+    mock_song = MagicMock()
+    mock_song.id3 = "dummy_id3"
+    mock_repository.__getitem__.return_value = mock_song
+    rows = [0]
+
+    mock_tag = MagicMock(spec=SongTag)
+    mock_tag.editor_type = EditorType.Automatic
+    mock_tag.getValue.return_value = None
+    mock_tag.display_name = "Automatic Tag"
+
+    mock_prefs_settings = MagicMock()
+    mock_prefs_settings.all_tags = [mock_tag]
+    monkeypatch.setattr("music_modify.prefs.prefs.settings", mock_prefs_settings)
+
+    with caplog.at_level(logging.WARNING):
+        EditBulkDialog(widget, mock_repository, rows)
+
+        assert (
+            f"editor_type had an unsupported value: {EditorType.Automatic}"
+            in caplog.text
+        )
+        assert caplog.records[0].levelname == "WARNING"
