@@ -7,6 +7,7 @@ from typing import Never
 from PySide6.QtWidgets import QApplication
 
 from music_modify.gui import MainWindow
+from music_modify.prefs import prefs
 
 logging.basicConfig(
     level=logging.INFO,
@@ -22,6 +23,8 @@ def main() -> Never:
     app.setOrganizationName("Kayzels")
     app.setApplicationName("Music Modify")
     app.setApplicationVersion("2.0.0")
+
+    prefs.settings.configureForApplication()
 
     window = MainWindow()
     window.show()

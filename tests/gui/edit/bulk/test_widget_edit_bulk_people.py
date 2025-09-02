@@ -1,6 +1,6 @@
 """Tests for EditBulkPeopleWidget."""
 
-# pyright: reportPrivateUsage = false
+# pyright: reportPrivateUsage = false, reportUnusedParameter = false
 
 from typing import TypedDict, cast
 from unittest.mock import MagicMock
@@ -131,7 +131,7 @@ change_params: list[_ChangeParams] = [
     ],
 )
 def test_ActionMapping_performChange_param(
-    qtbot: QtBot, change_param: _ChangeParams
+    qtbot: QtBot, change_param: _ChangeParams, mock_settings: MagicMock
 ) -> None:
     """Tests how performChange works based on different inputs.
 
@@ -245,7 +245,9 @@ def test_EditBulkPeopleWidget_updateTag_unchecked(qtbot: QtBot) -> None:
     assert widget.updateTag(songs) == set()
 
 
-def test_EditBulkPeopleWidget_updateTag_clear_checkbox_checked(qtbot: QtBot) -> None:
+def test_EditBulkPeopleWidget_updateTag_clear_checkbox_checked(
+    qtbot: QtBot, mock_settings: MagicMock
+) -> None:
     """Test that values are cleared when updateTag is called with clear checked."""
     initial_data = [["Role 1", "Person 1"]]
     _, tag, widget = _createWidget(qtbot, initial_data)
@@ -268,7 +270,9 @@ def test_EditBulkPeopleWidget_updateTag_clear_checkbox_checked(qtbot: QtBot) -> 
     assert song2.getValue(tag) is None
 
 
-def test_EditBulkPeopleWidget_updateTag_no_changes_attempted(qtbot: QtBot) -> None:
+def test_EditBulkPeopleWidget_updateTag_no_changes_attempted(
+    qtbot: QtBot, mock_settings: MagicMock
+) -> None:
     """Tests that updateTag isn't called when there are no changes."""
     widget_data = []
     _, tag, widget = _createWidget(qtbot, widget_data)
@@ -531,6 +535,7 @@ def test_EditBulkPeopleWidget_updateTag_multiple_param(
     widget_name: str,
     widget_items: list[str] | list[list[str]],
     song_infos: list[_SongInfo],
+    mock_settings: MagicMock,
 ) -> None:
     """Test updating tag based on the widget details."""
     widget_data = []
@@ -573,6 +578,7 @@ def test_EditBulkPeopleWidget_updateTag_single_param(
     widget_name: str,
     widget_items: list[str] | list[list[str]],
     info: _SongInfo,
+    mock_settings: MagicMock,
 ) -> None:
     """Tests updating tags for a single song, based on the widget details."""
     widget_data = []
@@ -595,7 +601,9 @@ def test_EditBulkPeopleWidget_updateTag_single_param(
     assert song.getValue(tag) == info["expected_items"]
 
 
-def test_EditBulkPeopleWidget_updateTag_multiple_actions(qtbot: QtBot) -> None:
+def test_EditBulkPeopleWidget_updateTag_multiple_actions(
+    qtbot: QtBot, mock_settings: MagicMock
+) -> None:
     """Tests calling updateTag with multiple fields filled."""
     initial_widget_items = [
         ["ExistingRole", "ExistingPerson"],
@@ -654,7 +662,7 @@ def test_EditBulkPeopleWidget_updateTag_multiple_actions(qtbot: QtBot) -> None:
 
 
 def test_EditBulkPeopleWidget_resetView(
-    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch
+    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch, mock_settings: MagicMock
 ) -> None:
     """Tests that the people widget re-displays the original values on reset."""
     initial_widget_data = [["Role1", "Person1"], ["Role2", "Person2"]]

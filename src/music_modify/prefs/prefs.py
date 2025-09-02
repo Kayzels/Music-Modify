@@ -8,6 +8,7 @@ import logging
 from typing import ClassVar, final
 
 from PySide6.QtCore import QSettings
+from PySide6.QtWidgets import QApplication
 
 from music_modify.custom_types.enums import EditorType
 from music_modify.custom_types.songtag import SongTag
@@ -27,17 +28,42 @@ class Settings:
             new_settings: The settings values that should be read, if present.
         """
         logger.info("In init method for Settings object")
-        self._settings: QSettings = (
-            # PERF: Is there a way to get this from the QApplication,
-            # rather than setting it twice?
-            QSettings("Kayzels", "Music Modify")
-            if new_settings is None
-            else new_settings
-        )
+        self._settings: QSettings | None = None
 
         # Store in a cache to prevent needing to call getArray on every cell
         self._table_tags_cache: list[SongTag] | None = None
+
+        if new_settings is not None:
+            self._settings = new_settings
+            self._initializeDefaults()
+
+    def configureForApplication(self) -> None:
+        """Configure the QSettings object using info from the QApplication.
+
+        Uses the organization and application name from the QApplication instance.
+
+        This should only be called once the QApplication has been initialized.
+        """
+        if self._settings is not None:
+            logger.warning("QSettings already configured. Skipping re-configuration.")
+            return
+
+        app = QApplication.instance()
+        if app is None:
+            logger.error("Called configure when there was not a QApplication instance.")
+            return
+
+        self._settings = QSettings(app.organizationName(), app.applicationName())
         self._initializeDefaults()
+
+    def _getQSettings(self) -> QSettings:
+        """Returns insternal QSettings object, raising an error if not initialized."""
+        if self._settings is None:
+            raise RuntimeError(
+                "Settings have not been configured for the application. "
+                + "Call configureForApplication() after QApplication is initialized."
+            )
+        return self._settings
 
     default_split_text_entered = ","
     default_split_values_display = "; "
@@ -51,7 +77,7 @@ class Settings:
         John Smith, Jane Doe should be understood as two separate values.
         """
         return str(
-            self._settings.value(
+            self._getQSettings().value(
                 "Split/split_text_entered",
                 Settings.default_split_text_entered,
             ),
@@ -59,7 +85,7 @@ class Settings:
 
     @split_text_entered.setter
     def split_text_entered(self, value: str) -> None:
-        self._settings.setValue("Split/split_text_entered", value)
+        self._getQSettings().setValue("Split/split_text_entered", value)
 
     @property
     def split_values_display(self) -> str:
@@ -69,7 +95,7 @@ class Settings:
         John Smith\\Jane Doe
         """
         return str(
-            self._settings.value(
+            self._getQSettings().value(
                 "Split/split_values_display",
                 Settings.default_split_values_display,
             ),
@@ -77,7 +103,7 @@ class Settings:
 
     @split_values_display.setter
     def split_values_display(self, value: str) -> None:
-        self._settings.setValue("Split/split_values_display", value)
+        self._getQSettings().setValue("Split/split_values_display", value)
 
     @property
     def split_values_at(self) -> str:
@@ -87,7 +113,7 @@ class Settings:
         this should split it into separate values.
         """
         return str(
-            self._settings.value(
+            self._getQSettings().value(
                 "Split/split_values_at",
                 Settings.default_split_values_at,
             ),
@@ -95,7 +121,7 @@ class Settings:
 
     @split_values_at.setter
     def split_values_at(self, value: str) -> None:
-        self._settings.setValue("Split/split_values_at", value)
+        self._getQSettings().setValue("Split/split_values_at", value)
 
     default_tags: ClassVar[list[TagInfo]] = [
         TagInfo(
@@ -372,18 +398,20 @@ class Settings:
         """
         logger.info(f"Began creating array for {key} with {len(vals)} entries.")
 
-        self._settings.beginGroup(key)
-        self._settings.remove("")
-        self._settings.endGroup()
+        qsettings = self._getQSettings()
 
-        self._settings.beginWriteArray(key)
+        qsettings.beginGroup(key)
+        qsettings.remove("")
+        qsettings.endGroup()
+
+        qsettings.beginWriteArray(key)
         for index, tag in enumerate(vals):
-            self._settings.setArrayIndex(index)
-            self._settings.setValue("display_name", tag.display_name)
-            self._settings.setValue("id3_key", tag.id3_key)
-            self._settings.setValue("show_in_table", str(tag.show_in_table))
-            self._settings.setValue("editor_type", tag.editor_type.name)
-        self._settings.endArray()
+            qsettings.setArrayIndex(index)
+            qsettings.setValue("display_name", tag.display_name)
+            qsettings.setValue("id3_key", tag.id3_key)
+            qsettings.setValue("show_in_table", str(tag.show_in_table))
+            qsettings.setValue("editor_type", tag.editor_type.name)
+        qsettings.endArray()
 
     def _getArray(self, key: str) -> list[TagInfo]:
         """Convert the stored QSettings array into a Python list of tags.
@@ -391,15 +419,17 @@ class Settings:
         Args:
             key: The name of the array to read from settings.
         """
-        size = self._settings.beginReadArray(key)
+        qsettings = self._getQSettings()
+
+        size = qsettings.beginReadArray(key)
         tags: list[TagInfo] = []
         for i in range(size):
-            self._settings.setArrayIndex(i)
-            display_name: str = str(self._settings.value("display_name"))
-            id3_key: str = str(self._settings.value("id3_key"))
-            show_in_table: bool = self._settings.value("show_in_table") == "True"
+            qsettings.setArrayIndex(i)
+            display_name: str = str(qsettings.value("display_name"))
+            id3_key: str = str(qsettings.value("id3_key"))
+            show_in_table: bool = qsettings.value("show_in_table") == "True"
             editor_type_str: str = str(
-                self._settings.value("editor_type", EditorType.Automatic.name)
+                qsettings.value("editor_type", EditorType.Automatic.name)
             )
             editor_type_enum: EditorType = getattr(
                 EditorType, editor_type_str, EditorType.Automatic
@@ -412,33 +442,25 @@ class Settings:
                     editor_type=editor_type_enum,
                 ),
             )
-        self._settings.endArray()
+        qsettings.endArray()
         return tags
 
     def _initializeDefaults(self) -> None:
         """Set the default values for all settings, if they aren't already set."""
-        logger.info("Called initialise defaults")
-        if not self._settings.contains("Split/split_text_entered"):
+        qsettings = self._getQSettings()
+        if not qsettings.contains("Split/split_text_entered"):
             self.split_text_entered = Settings.default_split_text_entered
-        else:
-            logger.info("Split text entered already set")
-        if not self._settings.contains("Split/split_values_display"):
+        if not qsettings.contains("Split/split_values_display"):
             self.split_values_display = Settings.default_split_values_display
-        else:
-            logger.info("Split values display already set")
-        if not self._settings.contains("Split/split_values_at"):
+        if not qsettings.contains("Split/split_values_at"):
             self.split_values_at = Settings.default_split_values_at
-        else:
-            logger.info("Split values at already set")
 
-        size = self._settings.beginReadArray("Tags/info_tags")
-        self._settings.endArray()
+        size = qsettings.beginReadArray("Tags/info_tags")
+        qsettings.endArray()
 
-        if not self._settings.contains("Tags/info_tags") and size == 0:
+        if not qsettings.contains("Tags/info_tags") and size == 0:
             logger.info("Setting info tags")
             self.info_tags = Settings.default_tags
-        else:
-            logger.info("Info Tags already set")
 
     def resetSplit(self) -> None:
         """Reset the value for the split preferences back to default."""

@@ -34,10 +34,10 @@ def test_AboutDialog_generateText_no_instance(
 
 def test_AboutDialog_generateText_valid_instance(
     monkeypatch: pytest.MonkeyPatch,
-    app_info: tuple[str, str],
+    app_info: tuple[str, str, str],
 ) -> None:
     """Test that generateText creates the correct HTML when app info is valid."""
-    mock_app_name, mock_app_version = app_info
+    _, mock_app_name, mock_app_version = app_info
     mock_python_version = "3.10.0"
     mock_pyside_version = "6.5.0"
     mock_mutagen_version = "1.50"
