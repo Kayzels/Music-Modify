@@ -1,5 +1,7 @@
 """Tests for MainWindow."""
 
+# pyright: reportUnusedParameter = false
+
 import logging
 import os
 from os import PathLike
@@ -33,6 +35,7 @@ def test_MainWindow_addFiles(
     qtbot: QtBot,
     song_paths: list[PathLike[str]],
     num_temp_songs: int,
+    mock_settings: MagicMock,
 ) -> None:
     """Test that addFiles correctly adds the files to the model."""
     window = MainWindow()
@@ -45,6 +48,7 @@ def test_MainWindow_clearFiles(
     qtbot: QtBot,
     song_paths: list[PathLike[str]],
     num_temp_songs: int,
+    mock_settings: MagicMock,
 ) -> None:
     """Test that clearFiles removes the songs from the model."""
     window = MainWindow()
@@ -59,6 +63,7 @@ def test_MainWindow_clearFiles_Action(
     qtbot: QtBot,
     song_paths: list[PathLike[str]],
     num_temp_songs: int,
+    mock_settings: MagicMock,
 ) -> None:
     """Test that calling the clearFiles action clears the files."""
     window = MainWindow()
@@ -73,6 +78,7 @@ def test_MainWindow_setFileActionState(
     qtbot: QtBot,
     song_paths: list[PathLike[str]],
     num_temp_songs: int,
+    mock_settings: MagicMock,
 ) -> None:
     """Test that the state of actions changes based on there being files or not."""
     window = MainWindow()
@@ -87,7 +93,7 @@ def test_MainWindow_setFileActionState(
 
 
 def test_MainWindow_setSelectionActionState(
-    qtbot: QtBot, song_paths: list[PathLike[str]]
+    qtbot: QtBot, song_paths: list[PathLike[str]], mock_settings: MagicMock
 ) -> None:
     """Test that the state of actions changes based on there being a selection."""
     window = MainWindow()
@@ -109,6 +115,7 @@ def test_MainWindow_selectAll_Action(
     qtbot: QtBot,
     song_paths: list[PathLike[str]],
     num_temp_songs: int,
+    mock_settings: MagicMock,
 ) -> None:
     """Tests that calling the select all action selects all songs."""
     window = MainWindow()
@@ -123,6 +130,7 @@ def test_MainWindow_selectNone_Action(
     qtbot: QtBot,
     song_paths: list[PathLike[str]],
     num_temp_songs: int,
+    mock_settings: MagicMock,
 ) -> None:
     """Tests that calling the select none action clears the selection."""
     window = MainWindow()
@@ -139,6 +147,7 @@ def test_MainWindow_removeSelectedFiles_normal(
     qtbot: QtBot,
     song_paths: list[PathLike[str]],
     num_temp_songs: int,
+    mock_settings: MagicMock,
 ) -> None:
     """Tests that selected files are removed when there is a selection."""
     window = MainWindow()
@@ -158,6 +167,7 @@ def test_MainWindow_removeSelectedFiles_none_selected(
     song_paths: list[PathLike[str]],
     num_temp_songs: int,
     caplog: pytest.LogCaptureFixture,
+    mock_settings: MagicMock,
 ) -> None:
     """Tests that removing files with none selection creates a log message."""
     window = MainWindow()
@@ -185,6 +195,7 @@ def test_MainWindow_removeSelectedFiles_all_selected(
     qtbot: QtBot,
     song_paths: list[PathLike[str]],
     num_temp_songs: int,
+    mock_settings: MagicMock,
 ) -> None:
     """Tests that clearFiles is called if removeSelected is called with all selected."""
     window = MainWindow()
@@ -209,6 +220,7 @@ def test_MainWindow_removeSelectedFiles_Action(
     qtbot: QtBot,
     song_paths: list[PathLike[str]],
     num_temp_songs: int,
+    mock_settings: MagicMock,
 ) -> None:
     """Tests that the action for remove selected triggers the correct change."""
     window = MainWindow()
@@ -227,6 +239,7 @@ def test_MainWindow_updateStatusbarMessage(
     qtbot: QtBot,
     song_paths: list[PathLike[str]],
     num_temp_songs: int,
+    mock_settings: MagicMock,
 ) -> None:
     """Tests that the statusbar values are updated based on state."""
     window = MainWindow()

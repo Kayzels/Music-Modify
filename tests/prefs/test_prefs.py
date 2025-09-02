@@ -1,5 +1,14 @@
 """Tests for Settings."""
 
+# pyright: reportPrivateUsage = false, reportUnusedParameter = false
+
+import logging
+from unittest.mock import MagicMock
+
+from PySide6.QtCore import QSettings
+from PySide6.QtWidgets import QApplication
+import pytest
+
 from music_modify.custom_types import SongTag, TagInfo
 from music_modify.prefs.prefs import Settings
 
@@ -66,7 +75,7 @@ def test_Settings_resetSplit(temp_settings: Settings) -> None:
     assert temp_settings.split_values_display == Settings.default_split_values_display
 
 
-def test_resetTags(temp_settings: Settings) -> None:
+def test_Settings_resetTags(temp_settings: Settings) -> None:
     """Test that resetting tags changes back to the original default ones."""
     _set_tag_values(temp_settings)
     temp_settings.resetTags()
@@ -83,3 +92,94 @@ def test_resetTags(temp_settings: Settings) -> None:
         for tag in Settings.default_tags
         if tag.show_in_table
     ]
+
+
+def test_Settings_configureForApplication_already_configured_warns(
+    temp_settings: Settings,
+    caplog: pytest.LogCaptureFixture,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Test that configureForApplication warns if already configured.
+
+    The internal QSettings object should not change.
+    `_initializeDefaults` should not be called.
+    """
+    mock_initializeDefaults = MagicMock()
+    monkeypatch.setattr(temp_settings, "_initializeDefaults", mock_initializeDefaults)
+
+    original_settings_obj = temp_settings._settings
+    expected_warning = "QSettings already configured. Skipping re-configuration."
+
+    with caplog.at_level(logging.WARNING):
+        temp_settings.configureForApplication()
+
+    assert expected_warning in caplog.text
+    assert caplog.records[0].levelname == "WARNING"
+    assert caplog.records[0].message == expected_warning
+
+    mock_initializeDefaults.assert_not_called()
+
+    assert original_settings_obj is temp_settings._settings
+
+
+def test_Settings_configureForApplication_no_QApplication_error(
+    monkeypatch: pytest.MonkeyPatch,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Test that configureForApplication errors if QApplication instance is None."""
+    unset_settings = Settings(new_settings=None)
+
+    mock_initializeDefaults = MagicMock()
+    monkeypatch.setattr(unset_settings, "_initializeDefaults", mock_initializeDefaults)
+
+    monkeypatch.setattr(QApplication, "instance", MagicMock(return_value=None))
+
+    expected_error = "Called configure when there was not a QApplication instance."
+
+    with caplog.at_level(logging.ERROR):
+        unset_settings.configureForApplication()
+
+    assert expected_error in caplog.text
+    assert caplog.records[0].levelname == "ERROR"
+    assert caplog.records[0].message == expected_error
+
+    mock_initializeDefaults.assert_not_called()
+    assert unset_settings._settings is None
+
+
+def test_Settings_configureForApplication_initializes_QSettings_and_defaults(
+    qapp: QApplication,
+    app_info: tuple[str, str, str],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Test that configureForApplication inits QSettings; calls _initializeDefaults."""
+    app_org_name, app_app_name, _ = app_info
+
+    unset_settings = Settings(new_settings=None)
+
+    mock_qsettings_instance = MagicMock(spec=QSettings)
+    mock_qsettings_constructor = MagicMock(return_value=mock_qsettings_instance)
+    monkeypatch.setattr(
+        "music_modify.prefs.prefs.QSettings", mock_qsettings_constructor
+    )
+
+    mock_initializeDefaults = MagicMock()
+    monkeypatch.setattr(unset_settings, "_initializeDefaults", mock_initializeDefaults)
+
+    unset_settings.configureForApplication()
+
+    mock_qsettings_constructor.assert_called_once_with(app_org_name, app_app_name)
+    assert unset_settings._settings is mock_qsettings_instance
+    mock_initializeDefaults.assert_called_once()
+
+
+def test_Settings_getQSettings_uninitialized_raises_RuntimeError() -> None:
+    """Test that _getQSettings raises RuntimeError if not configured."""
+    unset_settings = Settings(new_settings=None)
+    expected_exception_message = (
+        "Settings have not been configured for the application."
+    )
+    with pytest.raises(RuntimeError, match=expected_exception_message) as exc_info:
+        unset_settings._getQSettings()
+
+    assert expected_exception_message in str(exc_info.value)

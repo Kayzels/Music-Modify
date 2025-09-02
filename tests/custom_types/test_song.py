@@ -1,5 +1,7 @@
 """Tests for Song."""
 
+# pyright: reportUnusedParameter = false
+
 import logging
 from pathlib import Path
 from unittest.mock import MagicMock
@@ -13,15 +15,15 @@ from music_modify.prefs import prefs
 logger = logging.getLogger(__name__)
 
 
-def test_Song_init_with_None() -> None:
+def test_Song_init_with_None(mock_settings: MagicMock) -> None:
     """Test that a Song object is created correctly when not passed a file."""
     song = Song()
     assert song.file is None
-    info: list[str] = ["" for _ in range(len(prefs.settings.table_tags))]
+    info: list[str] = ["" for _ in range(len(mock_settings.table_tags))]
     assert song.display_info == info
 
 
-def test_Song_init_with_file(song_path: Path) -> None:
+def test_Song_init_with_file(song_path: Path, mock_settings: MagicMock) -> None:
     """Test that a Song object is created correctly when passed a file."""
     song = Song(song_path)
     assert song.file == song_path
@@ -29,7 +31,9 @@ def test_Song_init_with_file(song_path: Path) -> None:
     assert isinstance(song.display_info, list)
 
 
-def test_Song_columns_setTag_removeTag(song_path: Path) -> None:
+def test_Song_columns_setTag_removeTag(
+    song_path: Path, mock_settings: MagicMock
+) -> None:
     """Test that setting and then removing tags works."""
     song = Song(song_path)
     song.setTag("TIT2", ["Some Title"])
@@ -54,7 +58,9 @@ def test_Song_columns_setTag_removeTag(song_path: Path) -> None:
     assert not song.hasTag("TPE2")
 
 
-def test_Song_invalid_tag(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_Song_invalid_tag(
+    monkeypatch: pytest.MonkeyPatch, mock_settings: MagicMock
+) -> None:
     """Test that invalid tags work correctly.
 
     They should return False for hasTag, None for getValue, and don't call removeTag.
@@ -72,7 +78,7 @@ def test_Song_invalid_tag(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def test_Song_save_calls_updateInfo(
-    song_path: Path, monkeypatch: pytest.MonkeyPatch
+    song_path: Path, monkeypatch: pytest.MonkeyPatch, mock_settings: MagicMock
 ) -> None:
     """Test that saving a song updates the file and the displayed info."""
     song = Song(song_path)
@@ -89,7 +95,9 @@ def test_Song_save_calls_updateInfo(
     mock_update.assert_called_once()
 
 
-def test_Song_save_calls_updateInfo_file_None(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_Song_save_calls_updateInfo_file_None(
+    monkeypatch: pytest.MonkeyPatch, mock_settings: MagicMock
+) -> None:
     """Test that saving a song updates the displayed info, but doesn't save a file."""
     song = Song()
     song.setTag("TIT2", ["Some Title"])
@@ -105,7 +113,7 @@ def test_Song_save_calls_updateInfo_file_None(monkeypatch: pytest.MonkeyPatch) -
     mock_update.assert_called_once()
 
 
-def test_Song_load(song_path: Path) -> None:
+def test_Song_load(song_path: Path, mock_settings: MagicMock) -> None:
     """Test that creating a song and loading the file later still populates data."""
     song = Song()
     assert song.file is None

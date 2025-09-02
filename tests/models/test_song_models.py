@@ -1,12 +1,14 @@
 """Tests for SongModel."""
 
+# pyright: reportUnusedParameter = false
+
 from os import PathLike
 from pathlib import Path
+from unittest.mock import MagicMock
 
 from PySide6.QtCore import Qt
 
 from music_modify.models import SongRepository, SongTableModel
-from music_modify.prefs import prefs
 
 
 def test_SongTableModel_init() -> None:
@@ -25,13 +27,13 @@ def test_SongTableModel_init() -> None:
     )
 
 
-def test_SongTableModel_songs_added(song_path: Path) -> None:
+def test_SongTableModel_songs_added(song_path: Path, mock_settings: MagicMock) -> None:
     """Test that the model is updated when songs are added to the repo."""
     repo = SongRepository()
     model = SongTableModel(repo)
     repo.addFile(song_path)
     assert model.rowCount() == 1
-    assert model.columnCount() == len(prefs.settings.table_tags)
+    assert model.columnCount() == len(mock_settings.table_tags)
 
 
 def test_SongTableModel_headerData_no_songs() -> None:
@@ -52,7 +54,9 @@ def test_SongTableModel_headerData_no_songs() -> None:
     )
 
 
-def test_SongTableModel_headerData_songs_added(song_paths: list[PathLike[str]]) -> None:
+def test_SongTableModel_headerData_songs_added(
+    song_paths: list[PathLike[str]], mock_settings: MagicMock
+) -> None:
     """Test that headers display when songs are added."""
     repo = SongRepository()
     model = SongTableModel(repo)
@@ -68,7 +72,7 @@ def test_SongTableModel_headerData_songs_added(song_paths: list[PathLike[str]]) 
     )
     assert (
         model.headerData(0, Qt.Orientation.Horizontal, Qt.ItemDataRole.DisplayRole)
-        == prefs.settings.table_tags[0].display_name
+        == mock_settings.table_tags[0].display_name
     )
     assert (
         model.headerData(0, Qt.Orientation.Horizontal, Qt.ItemDataRole.EditRole) is None
@@ -80,7 +84,7 @@ def test_SongTableModel_headerData_songs_added(song_paths: list[PathLike[str]]) 
     # Invalid section indexes should be None
     assert (
         model.headerData(
-            len(prefs.settings.table_tags),
+            len(mock_settings.table_tags),
             Qt.Orientation.Horizontal,
             Qt.ItemDataRole.DisplayRole,
         )
@@ -104,7 +108,9 @@ def test_SongTableModel_data_no_songs() -> None:
     assert model.data(model.index(0, 0), Qt.ItemDataRole.DisplayRole) is None
 
 
-def test_SongTableModel_data(song_paths: list[PathLike[str]]) -> None:
+def test_SongTableModel_data(
+    song_paths: list[PathLike[str]], mock_settings: MagicMock
+) -> None:
     """Test that data returns the correct type when songs exist.
 
     Assuming that a valid role and index is used.

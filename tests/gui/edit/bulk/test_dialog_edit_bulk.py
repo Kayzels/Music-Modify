@@ -1,6 +1,6 @@
 """Tests for EditBulkDialog."""
 
-# pyright: reportPrivateUsage = false
+# pyright: reportPrivateUsage = false, reportUnusedParameter = false
 
 import logging
 from typing import cast
@@ -36,7 +36,7 @@ def test_addSingleValues() -> None:
 
 
 def test_EditBulkDialog_updateSongInfo_no_changes(
-    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch
+    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch, mock_settings: MagicMock
 ) -> None:
     """Tests that save is not called if no changes were made to the song."""
     parent = QWidget()
@@ -75,7 +75,7 @@ def test_EditBulkDialog_updateSongInfo_no_changes(
 
 
 def test_EditBulkDialog_updateSongInfo_with_changes(
-    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch
+    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch, mock_settings: MagicMock
 ) -> None:
     """Test that save is called with the updated changes."""
     parent = QWidget()
@@ -117,7 +117,7 @@ def test_EditBulkDialog_updateSongInfo_with_changes(
 
 
 def test_EditBulkDialog_updateSongInfo_with_changes_single(
-    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch
+    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch, mock_settings: MagicMock
 ) -> None:
     """Test that save is only called for songs that actually change data."""
     parent = QWidget()
@@ -159,7 +159,7 @@ def test_EditBulkDialog_updateSongInfo_with_changes_single(
 
 
 def test_EditBulkDialog_updateSongInfo_no_widgets(
-    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch
+    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch, mock_settings: MagicMock
 ) -> None:
     """Tests that save is not called, without mocking widgets."""
     parent = QWidget()

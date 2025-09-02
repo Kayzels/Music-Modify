@@ -1,5 +1,9 @@
 """Tests for EditBulkLineWidget."""
 
+# pyright: reportUnusedParameter = false
+
+from unittest.mock import MagicMock
+
 from PySide6.QtWidgets import QWidget
 from pytestqt.qtbot import QtBot
 
@@ -120,7 +124,9 @@ def test_EditBulkLineWidget_updateTag_clear_no_songs(qtbot: QtBot) -> None:
     assert not widget.updateTag([])
 
 
-def test_EditBulkLineWidget_updateTag_apply_empty_clears(qtbot: QtBot) -> None:
+def test_EditBulkLineWidget_updateTag_apply_empty_clears(
+    qtbot: QtBot, mock_settings: MagicMock
+) -> None:
     """Test that updateTag clears the tag if apply is called with an empty widget."""
     _, tag, widget = _createWidget(qtbot)
 
@@ -136,7 +142,9 @@ def test_EditBulkLineWidget_updateTag_apply_empty_clears(qtbot: QtBot) -> None:
     assert song.hasTag(tag) is False
 
 
-def test_EditBulkLineWidget_updateTag_apply_only_space_clears(qtbot: QtBot) -> None:
+def test_EditBulkLineWidget_updateTag_apply_only_space_clears(
+    qtbot: QtBot, mock_settings: MagicMock
+) -> None:
     """Test that updateTag clears tag if apply called with widget having only space."""
     _, tag, widget = _createWidget(qtbot)
 
@@ -152,7 +160,9 @@ def test_EditBulkLineWidget_updateTag_apply_only_space_clears(qtbot: QtBot) -> N
     assert song.hasTag(tag) is False
 
 
-def test_EditBulkLineWidget_updateTag_apply_not_empty_sets(qtbot: QtBot) -> None:
+def test_EditBulkLineWidget_updateTag_apply_not_empty_sets(
+    qtbot: QtBot, mock_settings: MagicMock
+) -> None:
     """Test that calling update when not empty sets the tag value."""
     _, tag, widget = _createWidget(qtbot)
 
@@ -174,7 +184,7 @@ def test_EditBulkLineWidget_updateTag_apply_not_empty_sets(qtbot: QtBot) -> None
 
 
 def test_EditBulkLineWidget_updateTag_apply_not_empty_sets_stripped(
-    qtbot: QtBot,
+    qtbot: QtBot, mock_settings: MagicMock
 ) -> None:
     """Test that calling update when not empty sets the tag value without whitespace."""
     _, tag, widget = _createWidget(qtbot)
@@ -196,7 +206,9 @@ def test_EditBulkLineWidget_updateTag_apply_not_empty_sets_stripped(
     assert widget.main_widget.text() == new_value.strip()
 
 
-def test_EditBulkLineWidget_updateTag_clear(qtbot: QtBot) -> None:
+def test_EditBulkLineWidget_updateTag_clear(
+    qtbot: QtBot, mock_settings: MagicMock
+) -> None:
     """Test that clearing works when clear checkbox checked and updating."""
     _, tag, widget = _createWidget(qtbot)
 
