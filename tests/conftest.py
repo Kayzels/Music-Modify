@@ -37,11 +37,43 @@ def asset_folder(tmp_path_factory: pytest.TempPathFactory) -> Generator[str]:
 
 @pytest.fixture(scope="session")
 def song_path(tmp_path_factory: pytest.TempPathFactory) -> Generator[Path]:
-    """Path for a single song  for testing adding individual songs."""
+    """Path for a single song for testing adding individual songs."""
     original_file = (Path(__file__).parent / "assets/test_song.mp3").absolute()
     temp_dir = tmp_path_factory.mktemp("tmp_song")
     temp_file = temp_dir / "test_song.mp3"
     yield shutil.copyfile(original_file, temp_file)
+    shutil.rmtree(temp_dir)
+
+
+@pytest.fixture
+def image_bytes() -> bytes:
+    """Fixture that returns the binary image data for the test image."""
+    original_file = (Path(__file__).parent / "assets/test_image.jpg").absolute()
+    with original_file.open("rb") as f:
+        return f.read()
+
+
+@pytest.fixture(scope="session")
+def image_path(
+    tmp_path_factory: pytest.TempPathFactory,
+) -> Generator[Path]:
+    """Fixture that returns a Path for an image."""
+    original_file = (Path(__file__).parent / "assets/test_image.jpg").absolute()
+    temp_dir = tmp_path_factory.mktemp("tmp_image")
+    temp_image = temp_dir / "test_image.jpg"
+    yield shutil.copyfile(original_file, temp_image)
+    shutil.rmtree(temp_dir)
+
+
+@pytest.fixture(scope="session")
+def image_path_no_extension(
+    tmp_path_factory: pytest.TempPathFactory,
+) -> Generator[Path]:
+    """Fixture that returns a Path for an image."""
+    original_file = (Path(__file__).parent / "assets/test_image.jpg").absolute()
+    temp_dir = tmp_path_factory.mktemp("tmp_image")
+    temp_image = temp_dir / "test_image"
+    yield shutil.copyfile(original_file, temp_image)
     shutil.rmtree(temp_dir)
 
 
