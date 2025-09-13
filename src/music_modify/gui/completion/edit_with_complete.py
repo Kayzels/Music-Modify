@@ -8,7 +8,6 @@ from PySide6.QtCore import QEvent, QObject, Qt, Signal, SignalInstance
 from PySide6.QtGui import QKeyEvent
 from PySide6.QtWidgets import QComboBox, QSizePolicy, QWidget
 
-from music_modify.prefs import prefs
 from music_modify.utils import getUnique
 
 from ._complete_line_edit import EnLineEdit
@@ -25,6 +24,7 @@ class EditWithComplete(QComboBox):
     def __init__(
         self,
         parent: QWidget,
+        split_text_entered: str = ", ",
         items: tuple[str, ...] | None = None,
         *,
         multiple: bool = True,
@@ -34,15 +34,20 @@ class EditWithComplete(QComboBox):
 
         Args:
             parent: The widget that this widget should be displayed on.
+            split_text_entered: Character used to split values when there are multiple
             items: The completion suggestions for the widget on initialization.
             multiple: Whether multiple values should be allowed as output.
             initial: The initial value to display in the widget.
         """
         super().__init__(parent)
         self.setMinimumContentsLength(20)
+        self.split_text_entered = split_text_entered
 
         self.line_edit: EnLineEdit = EnLineEdit(
-            self, completer_widget=self, multiple=multiple
+            parent=self,
+            completer_widget=self,
+            multiple=multiple,
+            split_text_entered=split_text_entered,
         )
         self.setLineEdit(self.line_edit)
         self.line_edit.item_selected.connect(self.item_selected)
@@ -175,4 +180,4 @@ class EditWithComplete(QComboBox):
         The text is split by the setting value for `split_text_entered`.
         """
         text = self.text()
-        return getUnique(text, prefs.settings.split_text_entered)
+        return getUnique(text, self.split_text_entered)

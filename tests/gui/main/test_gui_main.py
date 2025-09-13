@@ -15,6 +15,7 @@ import pytest
 from pytestqt.qtbot import QtBot
 
 from music_modify.gui import MainWindow
+from music_modify.prefs import Settings
 
 
 def test_MainWindow_getFolderFiles(
@@ -22,9 +23,10 @@ def test_MainWindow_getFolderFiles(
     song_paths: list[PathLike[str]],
     asset_folder: str,
     num_temp_songs: int,
+    temp_settings: Settings,
 ) -> None:
     """Test that getFolderFiles correctly gets the files from a path."""
-    window = MainWindow()
+    window = MainWindow(temp_settings)
     qtbot.addWidget(window)
     files = window.getFolderFiles(asset_folder)
     assert len(files) == num_temp_songs
@@ -35,10 +37,10 @@ def test_MainWindow_addFiles(
     qtbot: QtBot,
     song_paths: list[PathLike[str]],
     num_temp_songs: int,
-    mock_settings: MagicMock,
+    temp_settings: Settings,
 ) -> None:
     """Test that addFiles correctly adds the files to the model."""
-    window = MainWindow()
+    window = MainWindow(temp_settings)
     qtbot.addWidget(window)
     window.addFiles(song_paths)
     assert window.files_table_view.model().rowCount() == num_temp_songs
@@ -48,10 +50,10 @@ def test_MainWindow_clearFiles(
     qtbot: QtBot,
     song_paths: list[PathLike[str]],
     num_temp_songs: int,
-    mock_settings: MagicMock,
+    temp_settings: Settings,
 ) -> None:
     """Test that clearFiles removes the songs from the model."""
-    window = MainWindow()
+    window = MainWindow(temp_settings)
     qtbot.addWidget(window)
     window.addFiles(song_paths)
     assert window.files_table_view.model().rowCount() == num_temp_songs
@@ -63,10 +65,10 @@ def test_MainWindow_clearFiles_Action(
     qtbot: QtBot,
     song_paths: list[PathLike[str]],
     num_temp_songs: int,
-    mock_settings: MagicMock,
+    temp_settings: Settings,
 ) -> None:
     """Test that calling the clearFiles action clears the files."""
-    window = MainWindow()
+    window = MainWindow(temp_settings)
     qtbot.addWidget(window)
     window.addFiles(song_paths)
     assert window.files_table_view.model().rowCount() == num_temp_songs
@@ -78,10 +80,10 @@ def test_MainWindow_setFileActionState(
     qtbot: QtBot,
     song_paths: list[PathLike[str]],
     num_temp_songs: int,
-    mock_settings: MagicMock,
+    temp_settings: Settings,
 ) -> None:
     """Test that the state of actions changes based on there being files or not."""
-    window = MainWindow()
+    window = MainWindow(temp_settings)
     qtbot.addWidget(window)
     assert not window.action_clear_files.isEnabled()
     window.addFiles(song_paths)
@@ -93,10 +95,12 @@ def test_MainWindow_setFileActionState(
 
 
 def test_MainWindow_setSelectionActionState(
-    qtbot: QtBot, song_paths: list[PathLike[str]], mock_settings: MagicMock
+    qtbot: QtBot,
+    song_paths: list[PathLike[str]],
+    temp_settings: Settings,
 ) -> None:
     """Test that the state of actions changes based on there being a selection."""
-    window = MainWindow()
+    window = MainWindow(temp_settings)
     qtbot.addWidget(window)
     window.addFiles(song_paths)
     assert window.action_select_all.isEnabled()
@@ -115,10 +119,10 @@ def test_MainWindow_selectAll_Action(
     qtbot: QtBot,
     song_paths: list[PathLike[str]],
     num_temp_songs: int,
-    mock_settings: MagicMock,
+    temp_settings: Settings,
 ) -> None:
     """Tests that calling the select all action selects all songs."""
-    window = MainWindow()
+    window = MainWindow(temp_settings)
     qtbot.addWidget(window)
     window.addFiles(song_paths)
     assert window.files_table_view.model().rowCount() == num_temp_songs
@@ -130,10 +134,10 @@ def test_MainWindow_selectNone_Action(
     qtbot: QtBot,
     song_paths: list[PathLike[str]],
     num_temp_songs: int,
-    mock_settings: MagicMock,
+    temp_settings: Settings,
 ) -> None:
     """Tests that calling the select none action clears the selection."""
-    window = MainWindow()
+    window = MainWindow(temp_settings)
     qtbot.addWidget(window)
     window.addFiles(song_paths)
     assert window.files_table_view.model().rowCount() == num_temp_songs
@@ -147,10 +151,10 @@ def test_MainWindow_removeSelectedFiles_normal(
     qtbot: QtBot,
     song_paths: list[PathLike[str]],
     num_temp_songs: int,
-    mock_settings: MagicMock,
+    temp_settings: Settings,
 ) -> None:
     """Tests that selected files are removed when there is a selection."""
-    window = MainWindow()
+    window = MainWindow(temp_settings)
     qtbot.addWidget(window)
     window.addFiles(song_paths)
     assert window.files_table_view.model().rowCount() == num_temp_songs
@@ -167,10 +171,10 @@ def test_MainWindow_removeSelectedFiles_none_selected(
     song_paths: list[PathLike[str]],
     num_temp_songs: int,
     caplog: pytest.LogCaptureFixture,
-    mock_settings: MagicMock,
+    temp_settings: Settings,
 ) -> None:
     """Tests that removing files with none selection creates a log message."""
-    window = MainWindow()
+    window = MainWindow(temp_settings)
     qtbot.addWidget(window)
     window.addFiles(song_paths)
 
@@ -195,10 +199,10 @@ def test_MainWindow_removeSelectedFiles_all_selected(
     qtbot: QtBot,
     song_paths: list[PathLike[str]],
     num_temp_songs: int,
-    mock_settings: MagicMock,
+    temp_settings: Settings,
 ) -> None:
     """Tests that clearFiles is called if removeSelected is called with all selected."""
-    window = MainWindow()
+    window = MainWindow(temp_settings)
     qtbot.addWidget(window)
     window.addFiles(song_paths)
 
@@ -220,10 +224,10 @@ def test_MainWindow_removeSelectedFiles_Action(
     qtbot: QtBot,
     song_paths: list[PathLike[str]],
     num_temp_songs: int,
-    mock_settings: MagicMock,
+    temp_settings: Settings,
 ) -> None:
     """Tests that the action for remove selected triggers the correct change."""
-    window = MainWindow()
+    window = MainWindow(temp_settings)
     qtbot.addWidget(window)
     window.addFiles(song_paths)
     assert window.files_table_view.model().rowCount() == num_temp_songs
@@ -239,10 +243,10 @@ def test_MainWindow_updateStatusbarMessage(
     qtbot: QtBot,
     song_paths: list[PathLike[str]],
     num_temp_songs: int,
-    mock_settings: MagicMock,
+    temp_settings: Settings,
 ) -> None:
     """Tests that the statusbar values are updated based on state."""
-    window = MainWindow()
+    window = MainWindow(temp_settings)
     qtbot.addWidget(window)
     assert window.statusLabel.text() == ""
     window.addFiles(song_paths)
@@ -256,7 +260,10 @@ def test_MainWindow_updateStatusbarMessage(
 
 
 def test_MainWindow_addFiles_progress_dialog_canceled(
-    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch, song_paths: list[PathLike[str]]
+    qtbot: QtBot,
+    monkeypatch: pytest.MonkeyPatch,
+    song_paths: list[PathLike[str]],
+    temp_settings: Settings,
 ) -> None:
     """Tests cancelling adding files halfway."""
     # Create a local copy of song paths to avoid modifying the fixture.
@@ -271,7 +278,7 @@ def test_MainWindow_addFiles_progress_dialog_canceled(
         ]
         current_song_paths.extend(new_paths)
 
-    window = MainWindow()
+    window = MainWindow(temp_settings)
     qtbot.addWidget(window)
 
     mock_progress_dialog_cls = MagicMock()
@@ -310,10 +317,10 @@ def test_MainWindow_addFiles_progress_dialog_canceled(
 
 
 def test_MainWindow_getFolderFiles_progress_dialog_canceled(
-    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch
+    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch, temp_settings: Settings
 ) -> None:
     """Tests canceling getFolderFiles halfway."""
-    window = MainWindow()
+    window = MainWindow(temp_settings)
     qtbot.addWidget(window)
 
     mock_base_folder = "/mock/base_folder"
@@ -359,12 +366,14 @@ def test_MainWindow_getFolderFiles_progress_dialog_canceled(
     )
 
 
-def test_MainWindow_processTableDragEvent_has_urls(qtbot: QtBot) -> None:
+def test_MainWindow_processTableDragEvent_has_urls(
+    qtbot: QtBot, temp_settings: Settings
+) -> None:
     """Tests processing drag events when valid urls sent.
 
     The action should be accepted, and the data should be processed.
     """
-    window = MainWindow()
+    window = MainWindow(temp_settings)
     qtbot.addWidget(window)
 
     mock_mime_data = MagicMock(spec=QMimeData)
@@ -380,13 +389,13 @@ def test_MainWindow_processTableDragEvent_has_urls(qtbot: QtBot) -> None:
 
 
 def test_MainWindow_processTableDragEvent_no_urls(
-    qtbot: QtBot, caplog: pytest.LogCaptureFixture
+    qtbot: QtBot, caplog: pytest.LogCaptureFixture, temp_settings: Settings
 ) -> None:
     """Tests processing drag events when no urls are sent.
 
     The action should be rejected, and a log warning should be made.
     """
-    window = MainWindow()
+    window = MainWindow(temp_settings)
     qtbot.addWidget(window)
 
     mock_mime_data = MagicMock(spec=QMimeData)
@@ -405,13 +414,16 @@ def test_MainWindow_processTableDragEvent_no_urls(
 
 
 def test_MainWindow_processTableDropEvents_drop_files(
-    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch, song_paths: list[PathLike[str]]
+    qtbot: QtBot,
+    monkeypatch: pytest.MonkeyPatch,
+    song_paths: list[PathLike[str]],
+    temp_settings: Settings,
 ) -> None:
     """Tests prop events when files are dropped on a table.
 
     Each of the files should be added, if not already present.
     """
-    window = MainWindow()
+    window = MainWindow(temp_settings)
     qtbot.addWidget(window)
 
     mock_urls = []
@@ -442,12 +454,13 @@ def test_MainWindow_processTableDropEvents_drop_folders(
     monkeypatch: pytest.MonkeyPatch,
     song_paths: list[PathLike[str]],
     asset_folder: str,
+    temp_settings: Settings,
 ) -> None:
     """Tests prop events when folders are dropped on a table.
 
     Each of the files in the folders should be added, if not already present.
     """
-    window = MainWindow()
+    window = MainWindow(temp_settings)
     qtbot.addWidget(window)
 
     mock_folder_url = MagicMock(spec=QUrl)
@@ -479,13 +492,14 @@ def test_MainWindow_processTableDropEvents_drop_mixed_files_and_folders(
     song_path: Path,
     song_paths: list[PathLike[str]],
     asset_folder: str,
+    temp_settings: Settings,
 ) -> None:
     """Tests dropping files and folders together on a table.
 
     Each of the individual files should be added, if not already present.
     Each of the files in the folders should be added, if not already present.
     """
-    window = MainWindow()
+    window = MainWindow(temp_settings)
     qtbot.addWidget(window)
 
     # One MP3 file URL
@@ -526,13 +540,13 @@ def test_MainWindow_processTableDropEvents_drop_mixed_files_and_folders(
 
 
 def test_MainWindow_processTableDropEvents_unsupported_mime_data(
-    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch
+    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch, temp_settings: Settings
 ) -> None:
     """Tests drop events where the mimedata isn't valid.
 
     The action should be rejected, and no files or folders should be added.
     """
-    window = MainWindow()
+    window = MainWindow(temp_settings)
     qtbot.addWidget(window)
 
     mock_mime_data = MagicMock(spec=QMimeData)
@@ -554,14 +568,14 @@ def test_MainWindow_processTableDropEvents_unsupported_mime_data(
 
 
 def test_MainWindow_addStatusbarMessage_no_app(
-    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch
+    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch, temp_settings: Settings
 ) -> None:
     """Tests that the status bar message isn't added if invalid.
 
     If there isn't a QApplication instance, the text shouldn't be set.
     This should _never_ happen, though.
     """
-    window = MainWindow()
+    window = MainWindow(temp_settings)
     qtbot.addWidget(window)
 
     monkeypatch.setattr(QApplication, "instance", MagicMock(return_value=None))
@@ -574,10 +588,10 @@ def test_MainWindow_addStatusbarMessage_no_app(
 
 
 def test_MainWindow_showAboutDialog(
-    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch
+    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch, temp_settings: Settings
 ) -> None:
     """Tests that showAboutDialog creates and displays an AboutDialog."""
-    window = MainWindow()
+    window = MainWindow(temp_settings)
     qtbot.addWidget(window)
 
     mock_about_dialog_instance = MagicMock()
@@ -593,10 +607,10 @@ def test_MainWindow_showAboutDialog(
 
 
 def test_MainWindow_showPrefsDialog(
-    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch
+    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch, temp_settings: Settings
 ) -> None:
     """Tests that showPrefsDialog creates and displays an PrefsDialog."""
-    window = MainWindow()
+    window = MainWindow(temp_settings)
     qtbot.addWidget(window)
 
     mock_prefs_dialog_instance = MagicMock()
@@ -610,16 +624,17 @@ def test_MainWindow_showPrefsDialog(
 
     window.showPrefsDialog()
 
-    mock_prefs_dialog_class.assert_called_once_with(parent=window)
-    mock_prefs_dialog_instance.show.assert_called_once()
-    mock_prefs_dialog_instance.settings_updated.connect.assert_called_once_with(
-        mock_refresh_table
+    mock_prefs_dialog_class.assert_called_once_with(
+        parent=window, settings=temp_settings
     )
+    mock_prefs_dialog_instance.show.assert_called_once()
 
 
-def test_MainWindow_refreshTable(qtbot: QtBot, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_MainWindow_refreshTable(
+    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch, temp_settings: Settings
+) -> None:
     """Tests that refreshTable updates the repo, model, and view."""
-    window = MainWindow()
+    window = MainWindow(temp_settings)
     qtbot.addWidget(window)
 
     window.songs_repository.refreshDisplay = MagicMock()
@@ -636,15 +651,15 @@ def test_MainWindow_refreshTable(qtbot: QtBot, monkeypatch: pytest.MonkeyPatch) 
 
     window.songs_repository.refreshDisplay.assert_called_once()
     mock_update_table_view.assert_called_once_with(
-        window.files_table_view, window.songs_repository
+        window.files_table_view, window.songs_repository, temp_settings.table_tags
     )
 
 
 def test_MainWindow_showEditDialog_no_selection(
-    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch
+    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch, temp_settings: Settings
 ) -> None:
     """Tests that an EditDialog is not created if there is no selection."""
-    window = MainWindow()
+    window = MainWindow(temp_settings)
     qtbot.addWidget(window)
 
     mock_get_selected_rows = MagicMock(return_value=[])
@@ -662,14 +677,14 @@ def test_MainWindow_showEditDialog_no_selection(
 
 
 def test_MainWindow_showEditDialog_individual_edit_accepted(
-    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch
+    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch, temp_settings: Settings
 ) -> None:
     """Tests creating an EditDialog for multiple songs, but editing individually.
 
     Tests that the signals for the dialog are connected correctly,
     and that information gets updated when the dialog is accepted.
     """
-    window = MainWindow()
+    window = MainWindow(temp_settings)
     qtbot.addWidget(window)
 
     selected_rows = [0, 2, 1]  # Unsorted
@@ -692,7 +707,12 @@ def test_MainWindow_showEditDialog_individual_edit_accepted(
     window.showEditDialog(bulk=False)
 
     mock_get_selected_rows.assert_called_once_with(window.files_table_view)
-    mock_dialog_factory_get.assert_called_once_with(expected_sorted_rows, bulk=False)
+    mock_dialog_factory_get.assert_called_once_with(
+        expected_sorted_rows,
+        temp_settings.all_tags,
+        temp_settings.split_text_entered,
+        bulk=False,
+    )
 
     # Verify the info_updated signal is connected to the window's refreshTable method
     mock_edit_dialog_instance.info_updated.connect.assert_called_once_with(
@@ -710,14 +730,14 @@ def test_MainWindow_showEditDialog_individual_edit_accepted(
 
 
 def test_MainWindow_showEditDialog_individual_edit_rejected(
-    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch
+    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch, temp_settings: Settings
 ) -> None:
     """Tests creating an EditDialog for multiple songs, but editing individually.
 
     Tests that the signals for the dialog are connected correctly,
     and that information does not get updated when the dialog is rejected.
     """
-    window = MainWindow()
+    window = MainWindow(temp_settings)
     qtbot.addWidget(window)
 
     selected_rows = [0]
@@ -739,7 +759,12 @@ def test_MainWindow_showEditDialog_individual_edit_rejected(
     window.showEditDialog(bulk=False)
 
     mock_get_selected_rows.assert_called_once_with(window.files_table_view)
-    mock_dialog_factory_get.assert_called_once_with(selected_rows, bulk=False)
+    mock_dialog_factory_get.assert_called_once_with(
+        selected_rows,
+        temp_settings.all_tags,
+        temp_settings.split_text_entered,
+        bulk=False,
+    )
     mock_edit_dialog_instance.info_updated.connect.assert_called_once_with(
         window.refreshTable
     )
@@ -753,14 +778,14 @@ def test_MainWindow_showEditDialog_individual_edit_rejected(
 
 
 def test_MainWindow_showEditDialog_bulk_edit_accepted(
-    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch
+    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch, temp_settings: Settings
 ) -> None:
     """Tests creating an EditDialog for multiple songs, edited in bulk.
 
     Tests that the signals for the dialog are connected correctly,
     and that information gets updated when the dialog is accepted.
     """
-    window = MainWindow()
+    window = MainWindow(temp_settings)
     qtbot.addWidget(window)
 
     selected_rows = [0, 1]
@@ -782,7 +807,12 @@ def test_MainWindow_showEditDialog_bulk_edit_accepted(
     window.showEditDialog(bulk=True)
 
     mock_get_selected_rows.assert_called_once_with(window.files_table_view)
-    mock_dialog_factory_get.assert_called_once_with(selected_rows, bulk=True)
+    mock_dialog_factory_get.assert_called_once_with(
+        selected_rows,
+        temp_settings.all_tags,
+        temp_settings.split_text_entered,
+        bulk=True,
+    )
     mock_edit_dialog_instance.info_updated.connect.assert_called_once_with(
         window.refreshTable
     )
@@ -807,10 +837,13 @@ def _getMockQFileDialogClass(mock_instance: MagicMock) -> MagicMock:
 
 
 def test_MainWindow_openAddDialog_existing_files(
-    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch, song_paths: list[PathLike[str]]
+    qtbot: QtBot,
+    monkeypatch: pytest.MonkeyPatch,
+    song_paths: list[PathLike[str]],
+    temp_settings: Settings,
 ) -> None:
     """Test that openAddDialog processes files and calls add correctly."""
-    window = MainWindow()
+    window = MainWindow(temp_settings)
     qtbot.addWidget(window)
 
     mock_file_dialog_instance = MagicMock()
@@ -842,9 +875,10 @@ def test_MainWindow_openAddDialog_directory_mode(
     monkeypatch: pytest.MonkeyPatch,
     song_paths: list[PathLike[str]],
     asset_folder: str,
+    temp_settings: Settings,
 ) -> None:
     """Test that openAddDialog processes folders and calls add correctly."""
-    window = MainWindow()
+    window = MainWindow(temp_settings)
     qtbot.addWidget(window)
 
     mock_file_dialog_instance = MagicMock()
@@ -876,10 +910,10 @@ def test_MainWindow_openAddDialog_directory_mode(
 
 
 def test_MainWindow_openAddDialog_cancelled(
-    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch
+    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch, temp_settings: Settings
 ) -> None:
     """Tests that files aren't added if the AddDialog is cancelled."""
-    window = MainWindow()
+    window = MainWindow(temp_settings)
     qtbot.addWidget(window)
 
     mock_file_dialog_instance = MagicMock()
@@ -927,7 +961,10 @@ class _MockQMenu(MagicMock):
 
 
 def test_MainWindow_showCustomContextMenu_invalid_index(
-    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
+    qtbot: QtBot,
+    monkeypatch: pytest.MonkeyPatch,
+    caplog: pytest.LogCaptureFixture,
+    temp_settings: Settings,
 ) -> None:
     """Tests that a custom context menu isn't created for an invalid index.
 
@@ -935,7 +972,7 @@ def test_MainWindow_showCustomContextMenu_invalid_index(
 
     This should be logged.
     """
-    window = MainWindow()
+    window = MainWindow(temp_settings)
     qtbot.addWidget(window)
 
     mock_index = MagicMock()
@@ -961,13 +998,13 @@ def test_MainWindow_showCustomContextMenu_invalid_index(
 
 
 def test_MainWindow_showCustomContextMenu_single_selection(
-    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch
+    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch, temp_settings: Settings
 ) -> None:
     """Tests creating a custom context menu with only one item selected.
 
     The menu should be created, but there should be no option for bulk editing.
     """
-    window = MainWindow()
+    window = MainWindow(temp_settings)
     qtbot.addWidget(window)
 
     mock_index = MagicMock()
@@ -1005,14 +1042,14 @@ def test_MainWindow_showCustomContextMenu_single_selection(
 
 
 def test_MainWindow_showCustomContextMenu_multiple_selection(
-    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch
+    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch, temp_settings: Settings
 ) -> None:
     """Tests creating a custom context menu with multiple items selected.
 
     The menu should be created, and there should be options for bulk editing
     and individual editing.
     """
-    window = MainWindow()
+    window = MainWindow(temp_settings)
     qtbot.addWidget(window)
 
     mock_index = MagicMock()
@@ -1068,7 +1105,7 @@ def test_MainWindow_showCustomContextMenu_multiple_selection(
 
 
 def test_MainWindow_action_triggers(
-    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch
+    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch, temp_settings: Settings
 ) -> None:
     """Tests that the actions are linked to the correct slots."""
     # These two need to be done before the class is created,
@@ -1080,7 +1117,7 @@ def test_MainWindow_action_triggers(
     monkeypatch.setattr(QTableView, "selectAll", mock_select_all)
     monkeypatch.setattr(QTableView, "clearSelection", mock_select_none)
 
-    window = MainWindow()
+    window = MainWindow(temp_settings)
     qtbot.addWidget(window)
 
     mock_open_add_dialog = MagicMock()

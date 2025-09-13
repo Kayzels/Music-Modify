@@ -34,6 +34,7 @@ from music_modify.gui.edit import EditDialogFactory
 from music_modify.gui.prefs import PrefsDialog
 from music_modify.gui.utils import getSelectedRows, updateTableView
 from music_modify.models import SongRepository, SongTableModel
+from music_modify.prefs import Settings
 from music_modify.utils import formatTime
 
 logger = logging.getLogger(__name__)
@@ -42,10 +43,12 @@ logger = logging.getLogger(__name__)
 class MainWindow(QMainWindow):
     """Main interface window for managing song metadata."""
 
-    def __init__(self) -> None:
+    def __init__(self, settings: Settings) -> None:
         """Creates the main user interface."""
         super().__init__()
         self._setupUi()
+
+        self._settings = settings
 
         # Create separate QLabel widgets instead of using the statbusbar default ones,
         # so that they're not overridden when a QStatusTipEvent happens.
@@ -56,10 +59,18 @@ class MainWindow(QMainWindow):
         "Label that contains information about how many songs are present and selected"
         self.statusbar.addWidget(self.statusLabel)
 
-        self.songs_repository: Final[SongRepository] = SongRepository()
+        self.songs_repository: Final[SongRepository] = SongRepository(
+            self._settings.all_tags,
+            self._settings.table_tags,
+            self._settings.split_values_display,
+        )
         "Repository that stores the songs being managed"
-        self.songs_model: Final[SongTableModel] = SongTableModel(self.songs_repository)
+        self.songs_model: Final[SongTableModel] = SongTableModel(
+            self.songs_repository, self._settings.table_tags
+        )
         "Model that links between the song repository and the display of the metadata"
+
+        self._settings.tags_updated.connect(self.refreshTable)
 
         self.dialog_factory: EditDialogFactory = EditDialogFactory(
             self,
@@ -77,7 +88,9 @@ class MainWindow(QMainWindow):
             self.setSelectionActionState,
         )
         self.songs_repository.songs_updated.connect(
-            lambda: updateTableView(self.files_table_view, self.songs_repository),
+            lambda: updateTableView(
+                self.files_table_view, self.songs_repository, self._settings.table_tags
+            ),
         )
         self.files_table_view.customContextMenuRequested.connect(
             self.showCustomContextMenu,
@@ -286,16 +299,18 @@ class MainWindow(QMainWindow):
 
     def showPrefsDialog(self) -> None:
         """Show a PreferencesDialog."""
-        prefs_dialog = PrefsDialog(parent=self)
+        prefs_dialog = PrefsDialog(parent=self, settings=self._settings)
         prefs_dialog.show()
-        prefs_dialog.settings_updated.connect(self.refreshTable)
 
     def refreshTable(self) -> None:
         """Update the display of the table."""
         self.songs_model.layoutAboutToBeChanged.emit()
+        self.songs_model.updateTableTags(self._settings.table_tags)
         self.songs_repository.refreshDisplay()
         self.songs_model.layoutChanged.emit()
-        updateTableView(self.files_table_view, self.songs_repository)
+        updateTableView(
+            self.files_table_view, self.songs_repository, self._settings.table_tags
+        )
 
     def showEditDialog(self, *, bulk: bool = False) -> None:
         """Create a dialog for editing the metadata in the selected songs.
@@ -313,7 +328,9 @@ class MainWindow(QMainWindow):
         if len(rows) == 0:
             return
 
-        dialog = self.dialog_factory.get(rows, bulk=bulk)
+        dialog = self.dialog_factory.get(
+            rows, self._settings.all_tags, self._settings.split_text_entered, bulk=bulk
+        )
 
         def processDialogResult(result: QDialog.DialogCode) -> None:
             logger.debug("Called process dialog result for edit dialog")

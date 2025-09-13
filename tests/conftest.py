@@ -9,16 +9,13 @@ from os import PathLike
 from pathlib import Path
 import shutil
 import tempfile
-from unittest.mock import MagicMock
 
 from PySide6.QtCore import QSettings
 from PySide6.QtWidgets import QApplication
 import pytest
 
-from music_modify.custom_types.enums import EditorType
 from music_modify.custom_types.songtag import SongTag
-from music_modify.custom_types.tag_info import TagInfo
-from music_modify.prefs.prefs import Settings
+from music_modify.prefs import Settings
 
 NUM_TEMP_SONGS = 3
 "The number of temp songs that should be created."
@@ -90,68 +87,10 @@ def app_info(qapp: QApplication) -> tuple[str, str, str]:
 
 
 @pytest.fixture
-def mock_settings(monkeypatch: pytest.MonkeyPatch) -> MagicMock:
-    """Fixture that mocks the values for prefs.settings."""
-    mock_settings = MagicMock()
-    mock_default_tag_info = [
-        TagInfo(
-            display_name="Track",
-            id3_key="TRCK",
-            show_in_table=True,
-            editor_type=EditorType.SingleText,
-        ),
-        TagInfo(
-            display_name="Title",
-            id3_key="TIT2",
-            show_in_table=True,
-            editor_type=EditorType.SingleText,
-        ),
-        TagInfo(
-            display_name="Artist",
-            id3_key="TPE1",
-            show_in_table=True,
-            editor_type=EditorType.MultipleText,
-        ),
-        TagInfo(
-            display_name="Album Artist",
-            id3_key="TPE2",
-            show_in_table=False,
-            editor_type=EditorType.SingleText,
-        ),
-        TagInfo(
-            display_name="Genre",
-            id3_key="TCON",
-            show_in_table=False,
-            editor_type=EditorType.MultipleText,
-        ),
-        TagInfo(
-            display_name="Involved People",
-            id3_key="TIPL",
-            show_in_table=True,
-            editor_type=EditorType.PeopleValue,
-        ),
+def table_tags() -> list[SongTag]:
+    """Fixture for tags that are used for a SongTableModel."""
+    return [
+        SongTag(display_name="Title", id3_key="TIT2"),
+        SongTag(display_name="Involved People", id3_key="TIPL"),
+        SongTag(display_name="Composer", id3_key="TCOM"),
     ]
-
-    mock_table_tags_list = [
-        SongTag(
-            display_name=ti.display_name, id3_key=ti.id3_key, editor_type=ti.editor_type
-        )
-        for ti in mock_default_tag_info
-        if ti.show_in_table
-    ]
-    mock_settings.table_tags = mock_table_tags_list
-
-    mock_all_tags_list = [
-        SongTag(
-            display_name=ti.display_name, id3_key=ti.id3_key, editor_type=ti.editor_type
-        )
-        for ti in mock_default_tag_info
-    ]
-    mock_settings.all_tags = mock_all_tags_list
-
-    mock_settings.split_values_display = "; "
-    mock_settings.split_text_entered = ","
-
-    monkeypatch.setattr("music_modify.prefs.prefs.settings", mock_settings)
-
-    return mock_settings

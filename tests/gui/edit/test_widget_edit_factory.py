@@ -15,7 +15,7 @@ from music_modify.gui.edit.widget_edit_table import EditTableWidget
 
 
 @pytest.mark.parametrize(
-    ("data", "tag", "empty_data", "expected_type"),
+    ("data", "tag", "expected_data", "expected_type"),
     [
         pytest.param(
             None,
@@ -74,7 +74,7 @@ from music_modify.gui.edit.widget_edit_table import EditTableWidget
             SongTag(
                 display_name="Title", id3_key="TIT2", editor_type=EditorType.SingleText
             ),
-            "",
+            "Name",
             EditLineWidget,
             id="line_tag_with_value",
         ),
@@ -85,7 +85,7 @@ from music_modify.gui.edit.widget_edit_table import EditTableWidget
                 id3_key="TCOM",
                 editor_type=EditorType.MultipleText,
             ),
-            [],
+            ["First Name", "Second Name"],
             EditListWidget,
             id="list_tag_with_multiple_values",
         ),
@@ -96,7 +96,7 @@ from music_modify.gui.edit.widget_edit_table import EditTableWidget
                 id3_key="TCOM",
                 editor_type=EditorType.MultipleText,
             ),
-            [],
+            ["First Name"],
             EditListWidget,
             id="list_tag_with_single_value",
         ),
@@ -107,9 +107,20 @@ from music_modify.gui.edit.widget_edit_table import EditTableWidget
                 id3_key="TIPL",
                 editor_type=EditorType.PeopleValue,
             ),
-            [],
+            [["role1", "Name 1"], ["role2", "Name 2"]],
             EditTableWidget,
             id="people_tag_with_value",
+        ),
+        pytest.param(
+            "First Name",
+            SongTag(
+                display_name="Composer",
+                id3_key="TCOM",
+                editor_type=EditorType.MultipleText,
+            ),
+            ["First Name"],
+            EditListWidget,
+            id="list_tag_with_string_value",
         ),
     ],
 )
@@ -117,7 +128,7 @@ def test_EditWidgetFactory_createWidget_normal(
     qtbot: QtBot,
     data: str | list[str] | list[list[str]] | None,
     tag: SongTag,
-    empty_data: str | list[str] | list[list[str]],
+    expected_data: str | list[str] | list[list[str]],
     expected_type: type[EditLineWidget] | type[EditListWidget] | type[EditTableWidget],
 ) -> None:
     """Tests that the correct widget types are created based on the tag."""
@@ -127,7 +138,7 @@ def test_EditWidgetFactory_createWidget_normal(
     created_widget = EditWidgetFactory.createWidget(widget, tag, data)
     qtbot.addWidget(created_widget)
     assert isinstance(created_widget, expected_type)
-    assert created_widget.value == (data if data is not None else empty_data)
+    assert created_widget.value == expected_data
 
 
 def test_EditWidgetFactory_createWidget_unsupported_type_raises_error() -> None:

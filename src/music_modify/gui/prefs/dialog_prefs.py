@@ -2,7 +2,7 @@
 
 import logging
 
-from PySide6.QtCore import Qt, Signal
+from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
     QDialog,
     QDialogButtonBox,
@@ -11,6 +11,8 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
+
+from music_modify.prefs import Settings
 
 from .dialog_prefs_abstract import PrefsAbstractDialog
 from .dialog_prefs_split import PrefsSplitDialog
@@ -23,17 +25,17 @@ logger.setLevel(logging.INFO)
 class PrefsDialog(QDialog):
     """A dialog that allows the user to change the settings the program uses."""
 
-    settings_updated: Signal = Signal()
-    "Signal that is emitted whenever any setting is changed."
-
-    def __init__(self, parent: QWidget | None = None) -> None:
+    def __init__(self, settings: Settings, parent: QWidget | None = None) -> None:
         """Create a PrefsDialog.
 
         Args:
+            settings: Settings object to read from and update.
             parent: The widget that the dialog should be displayed on.
         """
         super().__init__(parent)
         self.setupUi()
+
+        self._settings: Settings = settings
 
         self.button_edit_tags.clicked.connect(
             lambda: self.openChildDialog(PrefsTagDialog),
@@ -48,10 +50,8 @@ class PrefsDialog(QDialog):
         Args:
             dialog_type: The specific type of child dialog that should be opened.
         """
-        dialog = dialog_type(self)
+        dialog = dialog_type(self._settings, self)
         dialog.setModal(True)
-
-        dialog.settings_updated.connect(lambda: self.settings_updated.emit())
 
         dialog.show()
 

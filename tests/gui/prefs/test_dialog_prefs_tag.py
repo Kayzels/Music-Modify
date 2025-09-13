@@ -12,7 +12,7 @@ from music_modify.custom_types.tag_info import TagInfo
 from music_modify.gui.prefs.dialog_prefs_tag import PrefsTagDialog
 from music_modify.gui.utils import selectRows
 from music_modify.models.tag_model import TagModel
-import music_modify.prefs.prefs as prefs_module
+from music_modify.prefs import Settings
 
 _test_tag_info = TagInfo(
     id3_key="TEST",
@@ -45,19 +45,17 @@ class _MockPrefsTagAddDialog(QObject):
 def _createDialog(
     qtbot: QtBot,
     monkeypatch: pytest.MonkeyPatch,
-    temp_settings: prefs_module.Settings,
+    temp_settings: Settings,
 ) -> PrefsTagDialog:
-    _patchDialogs(monkeypatch, temp_settings)
-    dialog = PrefsTagDialog()
+    _patchDialogs(monkeypatch)
+    dialog = PrefsTagDialog(temp_settings)
     qtbot.addWidget(dialog)
     return dialog
 
 
 def _patchDialogs(
     monkeypatch: pytest.MonkeyPatch,
-    temp_settings: prefs_module.Settings,
 ) -> None:
-    monkeypatch.setattr(prefs_module, "settings", temp_settings)
     monkeypatch.setattr(
         QMessageBox,
         "warning",
@@ -106,7 +104,7 @@ def _makeChanges(
 def test_PrefsTagDialog_init(
     qtbot: QtBot,
     monkeypatch: pytest.MonkeyPatch,
-    temp_settings: prefs_module.Settings,
+    temp_settings: Settings,
 ) -> None:
     """Tests that creating a PrefsTagDialog works correctly."""
     dialog = _createDialog(qtbot, monkeypatch, temp_settings)
@@ -116,7 +114,7 @@ def test_PrefsTagDialog_init(
 def test_PrefsTagDialog_addTag(
     qtbot: QtBot,
     monkeypatch: pytest.MonkeyPatch,
-    temp_settings: prefs_module.Settings,
+    temp_settings: Settings,
 ) -> None:
     """Tests that adding a valid tag to the dialog adds it."""
     dialog = _createDialog(qtbot, monkeypatch, temp_settings)
@@ -132,7 +130,7 @@ def test_PrefsTagDialog_addTag(
 def test_PrefsTagDialog_removeSelectedTags(
     qtbot: QtBot,
     monkeypatch: pytest.MonkeyPatch,
-    temp_settings: prefs_module.Settings,
+    temp_settings: Settings,
 ) -> None:
     """Tests that removing the selected rows works."""
     dialog = _createDialog(qtbot, monkeypatch, temp_settings)
@@ -165,7 +163,7 @@ def test_PrefsTagDialog_removeSelectedTags(
 def test_PrefsTagDialog_moveTagsUp(
     qtbot: QtBot,
     monkeypatch: pytest.MonkeyPatch,
-    temp_settings: prefs_module.Settings,
+    temp_settings: Settings,
 ) -> None:
     """Tests that moving tags up in the model works."""
     dialog = _createDialog(qtbot, monkeypatch, temp_settings)
@@ -202,7 +200,7 @@ def test_PrefsTagDialog_moveTagsUp(
 def test_PrefsTagDialog_moveTagsDown(
     qtbot: QtBot,
     monkeypatch: pytest.MonkeyPatch,
-    temp_settings: prefs_module.Settings,
+    temp_settings: Settings,
 ) -> None:
     """Tests that moving tags down in the model works."""
     dialog = _createDialog(qtbot, monkeypatch, temp_settings)
@@ -239,7 +237,7 @@ def test_PrefsTagDialog_moveTagsDown(
 def test_PrefsTagDialog_updateSettings(
     qtbot: QtBot,
     monkeypatch: pytest.MonkeyPatch,
-    temp_settings: prefs_module.Settings,
+    temp_settings: Settings,
 ) -> None:
     """Tests that calling updateSettings makes changes to the settings values."""
     dialog = _createDialog(qtbot, monkeypatch, temp_settings)
@@ -257,7 +255,7 @@ def test_PrefsTagDialog_updateSettings(
 def test_PrefsTagDialog_restoreDefaults(
     qtbot: QtBot,
     monkeypatch: pytest.MonkeyPatch,
-    temp_settings: prefs_module.Settings,
+    temp_settings: Settings,
 ) -> None:
     """Tests that calling restoreDefaults puts the values back to their defaults."""
     dialog = _createDialog(qtbot, monkeypatch, temp_settings)
@@ -274,7 +272,7 @@ def test_PrefsTagDialog_restoreDefaults(
 def test_PrefsTagDialog_resetSettings(
     qtbot: QtBot,
     monkeypatch: pytest.MonkeyPatch,
-    temp_settings: prefs_module.Settings,
+    temp_settings: Settings,
 ) -> None:
     """Tests that calling resetSettings puts the values back to initial values."""
     dialog1 = _createDialog(qtbot, monkeypatch, temp_settings)
@@ -308,7 +306,7 @@ def test_PrefsTagDialog_resetSettings(
 def test_PrefsTagDialog_restore_then_reset(
     qtbot: QtBot,
     monkeypatch: pytest.MonkeyPatch,
-    temp_settings: prefs_module.Settings,
+    temp_settings: Settings,
 ) -> None:
     """Tests that restoring defaults then calling reset puts initial values back."""
     dialog1 = _createDialog(qtbot, monkeypatch, temp_settings)
@@ -348,7 +346,7 @@ def test_PrefsTagDialog_restore_then_reset(
 def test_PrefsTagDialog_showInvalidInputMessage(
     qtbot: QtBot,
     monkeypatch: pytest.MonkeyPatch,
-    temp_settings: prefs_module.Settings,
+    temp_settings: Settings,
 ) -> None:
     """Test that an invalid input message is shown when needed."""
     dialog = _createDialog(qtbot, monkeypatch, temp_settings)

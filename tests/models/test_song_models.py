@@ -4,10 +4,10 @@
 
 from os import PathLike
 from pathlib import Path
-from unittest.mock import MagicMock
 
 from PySide6.QtCore import Qt
 
+from music_modify.custom_types.songtag import SongTag
 from music_modify.models import SongRepository, SongTableModel
 
 
@@ -17,8 +17,8 @@ def test_SongTableModel_init() -> None:
     It should have no rows, but one column,
     and the header should display the empty message.
     """
-    repo = SongRepository()
-    model = SongTableModel(repo)
+    repo = SongRepository([], [], "")
+    model = SongTableModel(repo, [])
     assert model.rowCount() == 0
     assert model.columnCount() == 1
     assert (
@@ -27,19 +27,19 @@ def test_SongTableModel_init() -> None:
     )
 
 
-def test_SongTableModel_songs_added(song_path: Path, mock_settings: MagicMock) -> None:
+def test_SongTableModel_songs_added(song_path: Path, table_tags: list[SongTag]) -> None:
     """Test that the model is updated when songs are added to the repo."""
-    repo = SongRepository()
-    model = SongTableModel(repo)
+    repo = SongRepository(table_tags, table_tags, "")
+    model = SongTableModel(repo, table_tags)
     repo.addFile(song_path)
     assert model.rowCount() == 1
-    assert model.columnCount() == len(mock_settings.table_tags)
+    assert model.columnCount() == len(table_tags)
 
 
 def test_SongTableModel_headerData_no_songs() -> None:
     """Test that vertical headers don't exist when there is no song data."""
-    repo = SongRepository()
-    model = SongTableModel(repo)
+    repo = SongRepository([], [], "")
+    model = SongTableModel(repo, [])
     assert (
         model.headerData(
             len(repo),
@@ -55,11 +55,11 @@ def test_SongTableModel_headerData_no_songs() -> None:
 
 
 def test_SongTableModel_headerData_songs_added(
-    song_paths: list[PathLike[str]], mock_settings: MagicMock
+    song_paths: list[PathLike[str]], table_tags: list[SongTag]
 ) -> None:
     """Test that headers display when songs are added."""
-    repo = SongRepository()
-    model = SongTableModel(repo)
+    repo = SongRepository(table_tags, table_tags, "")
+    model = SongTableModel(repo, table_tags)
     repo.addFiles(song_paths)
     assert len(repo) > 0
     assert (
@@ -72,7 +72,7 @@ def test_SongTableModel_headerData_songs_added(
     )
     assert (
         model.headerData(0, Qt.Orientation.Horizontal, Qt.ItemDataRole.DisplayRole)
-        == mock_settings.table_tags[0].display_name
+        == table_tags[0].display_name
     )
     assert (
         model.headerData(0, Qt.Orientation.Horizontal, Qt.ItemDataRole.EditRole) is None
@@ -84,7 +84,7 @@ def test_SongTableModel_headerData_songs_added(
     # Invalid section indexes should be None
     assert (
         model.headerData(
-            len(mock_settings.table_tags),
+            len(table_tags),
             Qt.Orientation.Horizontal,
             Qt.ItemDataRole.DisplayRole,
         )
@@ -102,21 +102,21 @@ def test_SongTableModel_headerData_songs_added(
 
 def test_SongTableModel_data_no_songs() -> None:
     """Test that data is None when there are no songs."""
-    repo = SongRepository()
-    model = SongTableModel(repo)
+    repo = SongRepository([], [], "")
+    model = SongTableModel(repo, [])
 
     assert model.data(model.index(0, 0), Qt.ItemDataRole.DisplayRole) is None
 
 
 def test_SongTableModel_data(
-    song_paths: list[PathLike[str]], mock_settings: MagicMock
+    song_paths: list[PathLike[str]], table_tags: list[SongTag]
 ) -> None:
     """Test that data returns the correct type when songs exist.
 
     Assuming that a valid role and index is used.
     """
-    repo = SongRepository()
-    model = SongTableModel(repo)
+    repo = SongRepository(table_tags, table_tags, "")
+    model = SongTableModel(repo, table_tags)
     repo.addFiles(song_paths)
     assert model.rowCount() == len(song_paths)
 

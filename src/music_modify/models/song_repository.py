@@ -8,6 +8,7 @@ from os import PathLike
 from PySide6.QtCore import QObject, Signal
 
 from music_modify.custom_types import Song
+from music_modify.custom_types.songtag import SongTag
 
 
 class SongRepository(QObject):
@@ -19,9 +20,14 @@ class SongRepository(QObject):
     songs_updated: Signal = Signal()
     "Signal that is emitted whenever songs are added or removed."
 
-    def __init__(self) -> None:
+    def __init__(
+        self, all_tags: list[SongTag], table_tags: list[SongTag], display_split: str
+    ) -> None:
         """Create a `SongRepository`, with no songs added yet."""
         super().__init__()
+        self._all_tags: list[SongTag] = all_tags
+        self._table_tags: list[SongTag] = table_tags
+        self._display_split: str = display_split
         self._songs: list[Song] = []
 
     def getSong(self, index: int) -> Song | None:
@@ -52,7 +58,9 @@ class SongRepository(QObject):
     def addFile(self, file: str | PathLike[str]) -> None:
         """Add file to the list of songs, if not already present."""
         if file not in self:
-            self._songs.append(Song(file))
+            self._songs.append(
+                Song(self._all_tags, self._table_tags, self._display_split, file)
+            )
             self.songs_updated.emit()
 
     def addFiles(self, files: list[str] | list[PathLike[str]]) -> None:
@@ -65,7 +73,9 @@ class SongRepository(QObject):
         if song:
             self._songs.append(song)
         else:
-            self._songs.append(Song())
+            self._songs.append(
+                Song(self._all_tags, self._table_tags, self._display_split)
+            )
         self.songs_updated.emit()
 
     def clearFiles(self) -> None:
