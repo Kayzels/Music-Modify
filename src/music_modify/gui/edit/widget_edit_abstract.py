@@ -13,9 +13,9 @@ from PySide6.QtCore import Signal
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QBoxLayout, QHBoxLayout, QToolButton, QWidget
 
+from music_modify.core.meta import ABCQMeta
 from music_modify.custom_types.aliases import SongEditData
 from music_modify.custom_types.enums import EditButton
-from music_modify.gui.meta import ABCQMeta
 
 logger = logging.getLogger(__name__)
 

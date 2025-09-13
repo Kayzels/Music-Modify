@@ -9,8 +9,8 @@ import logging
 
 from PySide6.QtWidgets import QWidget
 
+from music_modify.core.meta import ABCQMeta
 from music_modify.custom_types import Song, SongTag
-from music_modify.gui.meta import ABCQMeta
 
 logger = logging.getLogger(__name__)
 

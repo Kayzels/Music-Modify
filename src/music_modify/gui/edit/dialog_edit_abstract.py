@@ -9,7 +9,7 @@ from abc import ABC, abstractmethod
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import QDialog, QDialogButtonBox, QVBoxLayout, QWidget
 
-from music_modify.gui.meta import ABCQMeta
+from music_modify.core.meta import ABCQMeta
 from music_modify.models.song_repository import SongRepository
 
 

@@ -11,7 +11,7 @@ from typing import final
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QDialog, QDialogButtonBox, QWidget
 
-from music_modify.gui.meta import ABCQMeta
+from music_modify.core.meta import ABCQMeta
 from music_modify.prefs import Settings
 
 logger = logging.getLogger(__name__)
