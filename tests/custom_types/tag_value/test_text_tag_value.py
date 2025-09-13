@@ -4,6 +4,7 @@ from typing import Any
 
 from mutagen import id3
 import pytest
+from pytestqt.qtbot import QtBot
 
 from music_modify.custom_types.tag_value.text_tag_value import (
     TextTagValue,
@@ -53,7 +54,7 @@ def test_TextTagValue_toId3Frame_valid(
 
 def test_TextTagValue_toId3Frame_txxx_ValueError() -> None:
     """Tests trying to create a TXXX frame with a missing desc raises ValueError."""
-    created_value = TextTagValue(["Test"])
+    created_value = TextTagValue(["Test"], ", ")
     with pytest.raises(ValueError, match="Cannot create a TXXX frame without a desc."):
         created_value.toId3Frame("TXXX")
     with pytest.raises(ValueError, match="Cannot create a TXXX frame without a desc."):
@@ -62,7 +63,7 @@ def test_TextTagValue_toId3Frame_txxx_ValueError() -> None:
 
 def test_TextTagValue_toId3Frame_not_text_frame_ValueError() -> None:
     """Tests that trying to create a non-text ID3 frame raises ValueError."""
-    created_value = TextTagValue(["Test"])
+    created_value = TextTagValue(["Test"], ", ")
     with pytest.raises(
         ValueError, match="Tried to create a text frame with an invalid id3 key: TIPL"
     ):
@@ -70,32 +71,40 @@ def test_TextTagValue_toId3Frame_not_text_frame_ValueError() -> None:
 
 
 @pytest.mark.parametrize(
-    ("value", "expected"),
+    ("value", "join_character", "expected"),
     [
-        pytest.param([], "", id="empty_text"),
+        pytest.param([], ", ", "", id="empty_text"),
         pytest.param(
             ["Single"],
+            "; ",
             "Single",
             id="single_text",
         ),
         pytest.param(
             ["First", "Second"],
+            "; ",
+            "First; Second",
+            id="multiple_text_split_semicolon",
+        ),
+        pytest.param(
+            ["First", "Second"],
+            ", ",
             "First, Second",
-            id="multiple_text",
+            id="multiple_text_split_comma",
         ),
         pytest.param(
             [id3.ID3TimeStamp("2000")],
+            ", ",
             "2000",
             id="timestamp",
         ),
     ],
 )
 def test_TextTagValue_getDisplayValue(
-    value: list[str | id3.ID3TimeStamp], expected: str
+    value: list[str | id3.ID3TimeStamp], join_character: str, expected: str
 ) -> None:
     """Tests that the display value is calculated correctly."""
-    # TODO: Use prefs separator
-    created_value = TextTagValue(value)
+    created_value = TextTagValue(value, join_character)
     assert created_value.getDisplayValue() == expected
 
 
@@ -187,3 +196,31 @@ def test_TextTagValue_hash_raises_TypeError() -> None:
     created_value = TextTagValue(["Test"])
     with pytest.raises(TypeError, match="TagValue objects are not hashable."):
         hash(created_value)
+
+
+def test_TextTagValue_join_diff_char_update_and_signal(qtbot: QtBot) -> None:
+    """Tests that the join character is updated when sent a different character.
+
+    The value should be updated, it should reflect in getDisplayValue,
+    and a signal should be emitted.
+    """
+    created_value = TextTagValue(["First", "Second"], ", ")
+    assert created_value.join_character == ", "
+    with qtbot.waitSignal(created_value.join_character_changed, timeout=1000):
+        created_value.join_character = "; "
+    assert created_value.join_character == "; "
+    assert created_value.getDisplayValue() == "First; Second"
+
+
+def test_TextTagValue_join_same_char_no_signal(qtbot: QtBot) -> None:
+    """Tests that the join character is not updated when sent the same character.
+
+    The value should not be updated, getDisplayValue should not change,
+    and a signal should not be emitted.
+    """
+    created_value = TextTagValue(["First", "Second"], ", ")
+    assert created_value.join_character == ", "
+    with qtbot.assertNotEmitted(created_value.join_character_changed):
+        created_value.join_character = ", "
+    assert created_value.join_character == ", "
+    assert created_value.getDisplayValue() == "First, Second"

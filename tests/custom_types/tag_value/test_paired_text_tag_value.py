@@ -4,6 +4,7 @@ from typing import Any
 
 from mutagen import id3
 import pytest
+from pytestqt.qtbot import QtBot
 
 from music_modify.custom_types.tag_value.paired_text_tag_value import PairedTextTagValue
 
@@ -57,32 +58,40 @@ def test_PairedTextTagValue_toId3Frame_not_pair_frame_ValueError() -> None:
 
 
 @pytest.mark.parametrize(
-    ("value", "expected"),
+    ("value", "join_character", "expected"),
     [
-        pytest.param([], "", id="empty_text"),
+        pytest.param([], ", ", "", id="empty_text"),
         pytest.param(
             [["Single"]],
+            ", ",
             "",
             id="invalid_not_pair",
         ),
         pytest.param(
             [["First", "Second"]],
+            "; ",
             "First: Second",
             id="single_pair",
         ),
         pytest.param(
             [["First", "Second"], ["Third", "Fourth"]],
+            ", ",
             "First: Second, Third: Fourth",
-            id="multiple_pairs",
+            id="multiple_pairs_join_comma",
+        ),
+        pytest.param(
+            [["First", "Second"], ["Third", "Fourth"]],
+            "; ",
+            "First: Second; Third: Fourth",
+            id="multiple_pairs_join_semicolon",
         ),
     ],
 )
 def test_PairedTextTagValue_getDisplayValue(
-    value: list[list[str]], expected: str
+    value: list[list[str]], join_character: str, expected: str
 ) -> None:
     """Tests that the display value is calculated correctly."""
-    # TODO: Use prefs separator
-    created_value = PairedTextTagValue(value)
+    created_value = PairedTextTagValue(value, join_character)
     assert created_value.getDisplayValue() == expected
 
 
@@ -173,3 +182,31 @@ def test_PairedTextTagValue_hash_raises_TypeError() -> None:
     created_value = PairedTextTagValue([])
     with pytest.raises(TypeError, match="TagValue objects are not hashable."):
         hash(created_value)
+
+
+def test_PairedTextTagValue_join_diff_char_update_and_signal(qtbot: QtBot) -> None:
+    """Tests that the join character is updated when sent a different character.
+
+    The value should be updated, it should reflect in getDisplayValue,
+    and a signal should be emitted.
+    """
+    created_value = PairedTextTagValue([["First", "Second"], ["Third", "Fourth"]], ", ")
+    assert created_value.join_character == ", "
+    with qtbot.waitSignal(created_value.join_character_changed, timeout=1000):
+        created_value.join_character = "; "
+    assert created_value.join_character == "; "
+    assert created_value.getDisplayValue() == "First: Second; Third: Fourth"
+
+
+def test_PairedTextTagValue_join_same_char_no_signal(qtbot: QtBot) -> None:
+    """Tests that the join character is not updated when sent the same character.
+
+    The value should not be updated, getDisplayValue should not change,
+    and a signal should not be emitted.
+    """
+    created_value = PairedTextTagValue([["First", "Second"], ["Third", "Fourth"]], ", ")
+    assert created_value.join_character == ", "
+    with qtbot.assertNotEmitted(created_value.join_character_changed):
+        created_value.join_character = ", "
+    assert created_value.join_character == ", "
+    assert created_value.getDisplayValue() == "First: Second, Third: Fourth"

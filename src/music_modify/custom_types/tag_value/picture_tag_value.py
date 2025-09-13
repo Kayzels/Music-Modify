@@ -4,6 +4,7 @@ import logging
 from typing import override
 
 from mutagen import id3
+from PySide6.QtCore import QObject
 
 from .abstract_tag_value import AbstractTagValue
 
@@ -13,12 +14,14 @@ logger = logging.getLogger(__name__)
 class PictureTagValue(AbstractTagValue):
     """Class for managing tags that store image values."""
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         data: bytes = b"",
         mime: str = "",
         picture_type: id3.PictureType = id3.PictureType.COVER_FRONT,
         *,
+        parent: QObject | None = None,
+        join_character: str = ", ",
         desc: str = "",
         salt: str | None = None,
     ) -> None:
@@ -28,9 +31,14 @@ class PictureTagValue(AbstractTagValue):
             data: Raw image data, as a byte string.
             mime: The mimetype for the image. Use "->" if the data is a URI.
             picture_type: What the image being stored is of; the source of the image.
+            parent: The QObject that owns this one. When that object is deleted,
+                this object is too.
+            join_character: The character used for joining the details
+                in the string representation.
             desc: Text description of the image.
             salt: Value used to ensure unique frames with the same description.
         """
+        super().__init__(join_character, parent)
         self._data: bytes = data
         self.mime: str = mime
         self.picture_type: id3.PictureType = picture_type
@@ -60,7 +68,7 @@ class PictureTagValue(AbstractTagValue):
 
     @override
     def getDisplayValue(self) -> str:
-        # NOTE: They don't use the builtin enum type,
+        # They don't use the builtin enum type,
         # so no name or value attributes.
         picture_type = (
             str(self.picture_type)
@@ -69,10 +77,15 @@ class PictureTagValue(AbstractTagValue):
             .title()
         )
         result = f"Attached Picture: {picture_type}"
+        suffix = ""
         if self.desc:
-            result += f" ({self.desc})"
+            suffix += self.desc
         if self.mime:
-            result += f" ({self.mime})"
+            if suffix:
+                suffix += self.join_character
+            suffix += self.mime
+        if suffix:
+            result += f" ({suffix})"
         return result
 
     @override

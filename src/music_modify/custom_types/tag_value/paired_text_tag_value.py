@@ -3,6 +3,7 @@
 from typing import override
 
 from mutagen import id3
+from PySide6.QtCore import QObject
 
 from music_modify.custom_types import constants
 
@@ -12,8 +13,14 @@ from .abstract_tag_value import AbstractTagValue
 class PairedTextTagValue(AbstractTagValue):
     """Class for managing values stored in pairs."""
 
-    def __init__(self, value: list[list[str]]) -> None:
+    def __init__(
+        self,
+        value: list[list[str]],
+        join_character: str = ", ",
+        parent: QObject | None = None,
+    ) -> None:
         """Creates a PairedTextTagValue for storing pair values."""
+        super().__init__(join_character, parent)
         self._value: list[list[str]] = [
             pair for pair in value if len(pair) == constants.PAIR_SIZE
         ]
@@ -42,8 +49,7 @@ class PairedTextTagValue(AbstractTagValue):
         for pair in self.value:
             role, person = pair
             text_pairs.append(f"{role}: {person}")
-        # TODO: Get join character from prefs
-        return ", ".join(text_pairs)
+        return self.join_character.join(text_pairs)
 
     @override
     def __eq__(self, other: object, /) -> bool:

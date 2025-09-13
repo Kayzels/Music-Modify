@@ -3,9 +3,10 @@
 import logging
 import mimetypes
 from pathlib import Path
-from typing import Any, cast
+from typing import Any, TypedDict, cast
 
 from mutagen import id3
+from PySide6.QtCore import QObject, SignalInstance
 
 from music_modify.custom_types import constants
 
@@ -21,7 +22,9 @@ class TagValueFactory:
     """Factory for creating AbstractTagValue subclass instances."""
 
     @staticmethod
-    def fromId3Frame(frame: id3.Frame) -> AbstractTagValue | None:
+    def fromId3Frame(
+        frame: id3.Frame, join_character: str = ", ", parent: QObject | None = None
+    ) -> AbstractTagValue | None:
         """Converts a mutagen id3.Frame object into an AbstractTagValue instance.
 
         Returns None if the frame stores data in an unknown format.
@@ -29,14 +32,17 @@ class TagValueFactory:
         # NOTE: Using getattr because static analysis doesn't find attributes.
         match frame:
             case id3.TextFrame():
-                return TextTagValue(getattr(frame, "text", []))
+                return TextTagValue(getattr(frame, "text", []), join_character, parent)
             case id3.PairedTextFrame():
-                return PairedTextTagValue(getattr(frame, "people", []))
+                return PairedTextTagValue(
+                    getattr(frame, "people", []), join_character, parent
+                )
             case id3.APIC():
                 return PictureTagValue(
                     data=getattr(frame, "data", b""),
                     mime=getattr(frame, "mime", ""),
                     picture_type=getattr(frame, "type", id3.PictureType.COVER_FRONT),
+                    parent=parent,
                     desc=getattr(frame, "desc", ""),
                     salt=getattr(frame, "salt", None),
                 )
@@ -44,7 +50,9 @@ class TagValueFactory:
                 return None
 
     @staticmethod
-    def _generateApicValue(path: Path) -> PictureTagValue | None:
+    def _generateApicValue(
+        path: Path, join_character: str = ", ", parent: QObject | None = None
+    ) -> PictureTagValue | None:
         """Generate a PictureTagValue from the file path, if valid."""
         if not path.exists():
             logger.error("No file existed at the path sent.")
@@ -56,17 +64,21 @@ class TagValueFactory:
             if mime_type is None:
                 logger.warning(f"Could not guess mimetype for '{path}'.")
                 mime_type = ""
-            return PictureTagValue(image_data, mime_type)
+            return PictureTagValue(
+                image_data, mime_type, parent=parent, join_character=join_character
+            )
         except OSError:
             logger.exception(f"Error reading image file '{path}' for APIC tag.")
             return None
 
     @staticmethod
-    def _generateFromListValue(values: list[Any]) -> AbstractTagValue | None:
+    def _generateFromListValue(
+        values: list[Any], join_character: str, parent: QObject | None = None
+    ) -> AbstractTagValue | None:
         v = values
         if all(isinstance(item, str) for item in v):
             v = cast(list[str], v)
-            return TextTagValue(v)
+            return TextTagValue(v, join_character, parent)
         if all(
             isinstance(item, list)
             and len(item) == constants.PAIR_SIZE
@@ -74,50 +86,76 @@ class TagValueFactory:
             for item in v
         ):
             v = cast(list[list[str]], v)
-            return PairedTextTagValue(v)
+            return PairedTextTagValue(v, join_character, parent)
         return None
+
+    @staticmethod
+    def _generateFromEmptyValue(
+        id3_key: str | None, join_character: str, parent: QObject | None = None
+    ) -> AbstractTagValue | None:
+        match id3_key:
+            case None:
+                return None
+            case "APIC":
+                return PictureTagValue(parent=parent)
+            case "TIPL" | "TMCL":
+                return PairedTextTagValue([], join_character, parent)
+            case t if t.startswith("T"):
+                return TextTagValue([], join_character, parent)
+            case _:
+                return None
 
     @staticmethod
     def createTagValue(
         value_input: Any,  # noqa: ANN401
         id3_key: str | None = None,
+        join_character: str = ",",
+        change_signal: SignalInstance | None = None,
+        parent: QObject | None = None,
     ) -> AbstractTagValue | None:
         """Creates an AbstractTagValue instance from raw user input.
 
         Args:
-            value_input: The data that should be stored, used for determining the type.
-            id3_key: The key that the data will be stored for.
+            value_input: Data that should be stored, used for determining the type.
+            id3_key: Key that the data will be stored for.
                 If sending in a path to an image, id3_key __must__ be set to "APIC",
                 otherwise it will be interpreted as a string.
+            join_character: Character used to join multiple values in string displays
+            change_signal: Signal that should be linked to updating the join character
+                in created TagValue object.
+            parent: Owns the created object. When it is deleted, the created object
+                will be too.
 
         Returns None if the value input is not a known format
         or if a precise format can't be determined.
 
         Falls back to using the id3 key if sent, to determine which type should be used.
         """
+
+        class _ExtraArgs(TypedDict):
+            join_character: str
+            parent: QObject | None
+
+        extra_args: _ExtraArgs = {
+            "join_character": join_character,
+            "parent": parent,
+        }
         match value_input:
             case str() as value:
                 if id3_key == "APIC":
                     path = Path(value)
-                    result = TagValueFactory._generateApicValue(path)
+                    result = TagValueFactory._generateApicValue(path, **extra_args)
                 else:
-                    result = TextTagValue([value])
+                    result = TextTagValue([value], **extra_args)
             case Path() as path:
-                result = TagValueFactory._generateApicValue(path)
+                result = TagValueFactory._generateApicValue(path, **extra_args)
             case _ if not value_input:
-                match id3_key:
-                    case None:
-                        result = None
-                    case "APIC":
-                        result = PictureTagValue()
-                    case "TIPL" | "TMCL":
-                        result = PairedTextTagValue([])
-                    case t if t.startswith("T"):
-                        result = TextTagValue([])
-                    case _:
-                        result = None
+                result = TagValueFactory._generateFromEmptyValue(id3_key, **extra_args)
             case list() as values:
-                result = TagValueFactory._generateFromListValue(values)
+                result = TagValueFactory._generateFromListValue(values, **extra_args)
             case _:
                 result = None
+
+        if result is not None and change_signal is not None:
+            change_signal.connect(result.setJoinCharacter)
         return result

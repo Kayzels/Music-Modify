@@ -5,6 +5,7 @@ from typing import Any, TypedDict
 
 from mutagen import id3
 import pytest
+from pytestqt.qtbot import QtBot
 
 from music_modify.custom_types.tag_value.picture_tag_value import PictureTagValue
 
@@ -15,6 +16,7 @@ class _PictureParams(TypedDict, total=False):
     picture_type: id3.PictureType
     desc: str
     salt: str | None
+    join_character: str
 
 
 @pytest.mark.parametrize(
@@ -120,7 +122,7 @@ def test_PictureTagValue_toId3Frame_logs_when_wrong_id3_key(
                 "mime": "image/jpeg",
                 "desc": "Word",
             },
-            "Attached Picture: Cover Front (Word) (image/jpeg)",
+            "Attached Picture: Cover Front (Word, image/jpeg)",
             id="set_desc_mime",
         ),
         pytest.param(
@@ -144,8 +146,9 @@ def test_PictureTagValue_toId3Frame_logs_when_wrong_id3_key(
                 "mime": "image/jpeg",
                 "picture_type": id3.PictureType.LEAD_ARTIST,
                 "desc": "Artist",
+                "join_character": "; ",
             },
-            "Attached Picture: Lead Artist (Artist) (image/jpeg)",
+            "Attached Picture: Lead Artist (Artist; image/jpeg)",
             id="set_mime_type_desc",
         ),
     ],
@@ -223,3 +226,39 @@ def test_PictureTagValue_hash_raises_TypeError() -> None:
     created_value = PictureTagValue()
     with pytest.raises(TypeError, match="TagValue objects are not hashable."):
         hash(created_value)
+
+
+def test_PictureTagValue_join_diff_char_update_and_signal(qtbot: QtBot) -> None:
+    """Tests that the join character is updated when sent a different character.
+
+    The value should be updated, it should reflect in getDisplayValue,
+    and a signal should be emitted.
+    """
+    created_value = PictureTagValue(
+        mime="image/jpeg", desc="Image", join_character=", "
+    )
+    with qtbot.waitSignal(created_value.join_character_changed, timeout=1000):
+        created_value.join_character = "; "
+    assert created_value.join_character == "; "
+    assert (
+        created_value.getDisplayValue()
+        == "Attached Picture: Cover Front (Image; image/jpeg)"
+    )
+
+
+def test_PictureTagValue_join_same_char_no_signal(qtbot: QtBot) -> None:
+    """Tests that the join character is not updated when sent the same character.
+
+    The value should not be updated, getDisplayValue should not change,
+    and a signal should not be emitted.
+    """
+    created_value = PictureTagValue(
+        mime="image/jpeg", desc="Image", join_character=", "
+    )
+    with qtbot.assertNotEmitted(created_value.join_character_changed):
+        created_value.join_character = ", "
+    assert created_value.join_character == ", "
+    assert (
+        created_value.getDisplayValue()
+        == "Attached Picture: Cover Front (Image, image/jpeg)"
+    )

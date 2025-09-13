@@ -4,6 +4,7 @@ from collections.abc import Sequence
 from typing import override
 
 from mutagen import id3
+from PySide6.QtCore import QObject
 
 from .abstract_tag_value import AbstractTagValue
 
@@ -11,8 +12,14 @@ from .abstract_tag_value import AbstractTagValue
 class TextTagValue(AbstractTagValue):
     """Class for managing text values (single or multiple)."""
 
-    def __init__(self, value: Sequence[str | id3.ID3TimeStamp]) -> None:
+    def __init__(
+        self,
+        value: Sequence[str | id3.ID3TimeStamp],
+        join_character: str = ", ",
+        parent: QObject | None = None,
+    ) -> None:
         """Creates a TextTagValue for storing text values."""
+        super().__init__(join_character, parent)
         self._value = [str(t) for t in value]
 
     @property
@@ -40,8 +47,7 @@ class TextTagValue(AbstractTagValue):
 
     @override
     def getDisplayValue(self) -> str:
-        # TODO: Get join character from prefs
-        return ", ".join(self.value)
+        return self.join_character.join(self.value)
 
     @override
     def __eq__(self, other: object, /) -> bool:
