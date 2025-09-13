@@ -17,7 +17,6 @@ from PySide6.QtWidgets import (
 from music_modify.custom_types import Song, SongTag
 from music_modify.custom_types.qt_types import QLineEditArgs
 from music_modify.gui.completion import EditWithComplete
-from music_modify.prefs import prefs
 from music_modify.utils import getUnique
 
 from .widget_edit_bulk_abstract_group import EditBulkAbstractGroupWidget
@@ -31,32 +30,39 @@ class _MultipleLineEdit(QLineEdit):
     def __init__(
         self,
         value: str,
+        split_text_entered: str,
         parent: QWidget | None = None,
         **kwargs: Unpack[QLineEditArgs],
     ) -> None:
         super().__init__(value, parent, **kwargs)
+        self._split_text_entered = split_text_entered
 
     @property
     def items(self) -> list[str]:
         """The list of strings that is displayed."""
         text = self.text()
-        return getUnique(text, prefs.settings.split_text_entered)
+        return getUnique(text, self._split_text_entered)
 
 
 class EditBulkMultipleWidget(EditBulkAbstractGroupWidget):
     """Widget used for bulk editing data when the tag contains multiple values."""
 
-    def __init__(self, parent: QWidget, data: set[str], tag: SongTag) -> None:
+    def __init__(
+        self, parent: QWidget, data: set[str], tag: SongTag, split_text_entered: str
+    ) -> None:
         """Create a widget for bulk editing multiple value keys.
 
         Args:
-            parent: The widget that this widget shouldbe displayed on.
+            parent: The widget that this widget should be displayed on.
             data: The data to be displayed.
             tag: The field in the song that should be updated.
+            split_text_entered: The string that is used to split values
+                when multiple are entered.
         """
         super().__init__(parent, tag)
 
         self.items: tuple[str, ...] = tuple(data)
+        self._split_text_entered = split_text_entered
         self.setupUi()
 
         self.add_line: _MultipleLineEdit
@@ -71,7 +77,7 @@ class EditBulkMultipleWidget(EditBulkAbstractGroupWidget):
         form_layout.setContentsMargins(0, 0, 0, 0)
 
         add_layout = QHBoxLayout()
-        self.add_line = _MultipleLineEdit("")
+        self.add_line = _MultipleLineEdit("", self._split_text_entered)
         add_layout.addWidget(self.add_line)
         form_layout.addRow("Add", add_layout)
 

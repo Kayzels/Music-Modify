@@ -131,7 +131,7 @@ change_params: list[_ChangeParams] = [
     ],
 )
 def test_ActionMapping_performChange_param(
-    qtbot: QtBot, change_param: _ChangeParams, mock_settings: MagicMock
+    qtbot: QtBot, change_param: _ChangeParams, table_tags: list[SongTag]
 ) -> None:
     """Tests how performChange works based on different inputs.
 
@@ -150,7 +150,7 @@ def test_ActionMapping_performChange_param(
 
     _, tag, widget = _createWidget(qtbot, widget_items)
 
-    song = Song()
+    song = Song(table_tags, table_tags, "")
     if song_items is not None:
         song.setTag(tag, song_items)
 
@@ -246,15 +246,15 @@ def test_EditBulkPeopleWidget_updateTag_unchecked(qtbot: QtBot) -> None:
 
 
 def test_EditBulkPeopleWidget_updateTag_clear_checkbox_checked(
-    qtbot: QtBot, mock_settings: MagicMock
+    qtbot: QtBot, table_tags: list[SongTag]
 ) -> None:
     """Test that values are cleared when updateTag is called with clear checked."""
     initial_data = [["Role 1", "Person 1"]]
     _, tag, widget = _createWidget(qtbot, initial_data)
 
-    song1 = Song()
+    song1 = Song(table_tags, table_tags, "")
     song1.setTag(tag, initial_data)
-    song2 = Song()
+    song2 = Song(table_tags, table_tags, "")
     song2.setTag(tag, initial_data)
     songs = [song1, song2]
 
@@ -271,13 +271,13 @@ def test_EditBulkPeopleWidget_updateTag_clear_checkbox_checked(
 
 
 def test_EditBulkPeopleWidget_updateTag_no_changes_attempted(
-    qtbot: QtBot, mock_settings: MagicMock
+    qtbot: QtBot, table_tags: list[SongTag]
 ) -> None:
     """Tests that updateTag isn't called when there are no changes."""
     widget_data = []
     _, tag, widget = _createWidget(qtbot, widget_data)
 
-    song = Song()
+    song = Song(table_tags, table_tags, ",")
     assert not song.hasTag(tag)
     songs = [song]
 
@@ -535,7 +535,7 @@ def test_EditBulkPeopleWidget_updateTag_multiple_param(
     widget_name: str,
     widget_items: list[str] | list[list[str]],
     song_infos: list[_SongInfo],
-    mock_settings: MagicMock,
+    table_tags: list[SongTag],
 ) -> None:
     """Test updating tag based on the widget details."""
     widget_data = []
@@ -545,7 +545,7 @@ def test_EditBulkPeopleWidget_updateTag_multiple_param(
     expected_updated_songs: set[Song] = set()
     expected_song_values: list[list[list[str]]] = []
     for info in song_infos:
-        song = Song()
+        song = Song(table_tags, table_tags, "")
         song.setTag(tag, info["items"])
         songs.append(song)
         if info["updated"]:
@@ -578,13 +578,13 @@ def test_EditBulkPeopleWidget_updateTag_single_param(
     widget_name: str,
     widget_items: list[str] | list[list[str]],
     info: _SongInfo,
-    mock_settings: MagicMock,
+    table_tags: list[SongTag],
 ) -> None:
     """Tests updating tags for a single song, based on the widget details."""
     widget_data = []
     _, tag, widget = _createWidget(qtbot, widget_data)
 
-    song = Song()
+    song = Song(table_tags, table_tags, "")
     song.setTag(tag, info["items"])
 
     expected_update_result: set[Song] = {song} if info["updated"] else set()
@@ -602,7 +602,7 @@ def test_EditBulkPeopleWidget_updateTag_single_param(
 
 
 def test_EditBulkPeopleWidget_updateTag_multiple_actions(
-    qtbot: QtBot, mock_settings: MagicMock
+    qtbot: QtBot, table_tags: list[SongTag]
 ) -> None:
     """Tests calling updateTag with multiple fields filled."""
     initial_widget_items = [
@@ -611,7 +611,7 @@ def test_EditBulkPeopleWidget_updateTag_multiple_actions(
     ]
     _, tag, widget = _createWidget(qtbot, initial_widget_items)
 
-    song = Song()
+    song = Song(table_tags, table_tags, "")
     # Initial state of song: contains an existing item, one to be removed by pair,
     # one by role, one by person,
     # one whose role will be remapped, one whose person will be remapped.
@@ -662,7 +662,7 @@ def test_EditBulkPeopleWidget_updateTag_multiple_actions(
 
 
 def test_EditBulkPeopleWidget_resetView(
-    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch, mock_settings: MagicMock
+    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """Tests that the people widget re-displays the original values on reset."""
     initial_widget_data = [["Role1", "Person1"], ["Role2", "Person2"]]

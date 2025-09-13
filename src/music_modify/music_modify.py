@@ -24,9 +24,10 @@ def main() -> Never:
     app.setApplicationName("Music Modify")
     app.setApplicationVersion("2.0.0")
 
-    prefs.settings.configureForApplication()
+    settings = prefs.Settings()
+    settings.configureForApplication()
 
-    window = MainWindow()
+    window = MainWindow(settings)
     window.show()
     sys.exit(app.exec())
 

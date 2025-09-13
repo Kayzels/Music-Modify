@@ -1,7 +1,5 @@
 """Tests EnLineEdit."""
 
-# pyright: reportUnusedParameter = false
-
 from typing import cast
 from unittest.mock import MagicMock, Mock
 
@@ -13,7 +11,6 @@ from pytestqt.qtbot import QtBot
 
 from music_modify.gui.completion._complete_line_edit import EnLineEdit
 from music_modify.gui.completion._completer import Completer
-from music_modify.prefs import prefs
 
 
 def test_EnLineEdit_init(qtbot: QtBot) -> None:
@@ -266,7 +263,7 @@ def test_EnLineEdit_complete_selectFirstFalse(qtbot: QtBot) -> None:
 
 def test_EnLineEdit_updateCompletions_singleMode(qtbot: QtBot) -> None:
     """Test that single mode replaces the item when selected."""
-    line_edit = EnLineEdit(multiple=False)
+    line_edit = EnLineEdit(multiple=False, split_text_entered=",")
     qtbot.addWidget(line_edit)
 
     line_edit.setText("  hello world")
@@ -280,15 +277,11 @@ def test_EnLineEdit_updateCompletions_singleMode(qtbot: QtBot) -> None:
     line_edit.mcompleter.setCompletionPrefix.assert_called_once_with("hello")
 
 
-def test_EnLineEdit_updateCompletions_multipleMode_withSeparator(
-    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch, mock_settings: MagicMock
-) -> None:
+def test_EnLineEdit_updateCompletions_multipleMode_withSeparator(qtbot: QtBot) -> None:
     """Test that multiple mode adds separators after the items."""
-    line_edit = EnLineEdit(multiple=True)
-    qtbot.addWidget(line_edit)
-
     test_separator = ","
-    monkeypatch.setattr(prefs.settings, "split_text_entered", test_separator)
+    line_edit = EnLineEdit(multiple=True, split_text_entered=test_separator)
+    qtbot.addWidget(line_edit)
 
     line_edit.setText("item1, item2, prefix")
     line_edit.setCursorPosition(len("item1, item2, prefix"))
@@ -301,15 +294,11 @@ def test_EnLineEdit_updateCompletions_multipleMode_withSeparator(
     line_edit.mcompleter.setCompletionPrefix.assert_called_once_with("prefix")
 
 
-def test_EnLineEdit_updateCompletions_multipleMode_noSeparator(
-    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch, mock_settings: MagicMock
-) -> None:
+def test_EnLineEdit_updateCompletions_multipleMode_noSeparator(qtbot: QtBot) -> None:
     """Test that multiple mode doesn't add a separator when there is only one item."""
-    line_edit = EnLineEdit(multiple=True)
-    qtbot.addWidget(line_edit)
-
     test_separator = ","
-    monkeypatch.setattr(prefs.settings, "split_text_entered", test_separator)
+    line_edit = EnLineEdit(multiple=True, split_text_entered=test_separator)
+    qtbot.addWidget(line_edit)
 
     line_edit.setText("just_one_item")
     line_edit.setCursorPosition(len("just_one_item"))
@@ -322,9 +311,7 @@ def test_EnLineEdit_updateCompletions_multipleMode_noSeparator(
     line_edit.mcompleter.setCompletionPrefix.assert_called_once_with("just_one_item")
 
 
-def test_EnLineEdit_updateCompletions_emptyText(
-    qtbot: QtBot, mock_settings: MagicMock
-) -> None:
+def test_EnLineEdit_updateCompletions_emptyText(qtbot: QtBot) -> None:
     """Tests updating completions with empty text."""
     line_edit = EnLineEdit()
     qtbot.addWidget(line_edit)
@@ -340,19 +327,15 @@ def test_EnLineEdit_updateCompletions_emptyText(
     line_edit.mcompleter.setCompletionPrefix.assert_called_once_with("")
 
 
-def test_EnLineEdit_updateCompletions_cursorInMiddle(
-    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch, mock_settings: MagicMock
-) -> None:
+def test_EnLineEdit_updateCompletions_cursorInMiddle(qtbot: QtBot) -> None:
     """Tests that completions are added when updating and the cursor is in the middle.
 
     The completed item should be added, and a separator put after it,
     which will split the original item.
     """
-    line_edit = EnLineEdit(multiple=True)
-    qtbot.addWidget(line_edit)
-
     test_separator = ";"
-    monkeypatch.setattr(prefs.settings, "split_text_entered", test_separator)
+    line_edit = EnLineEdit(multiple=True, split_text_entered=test_separator)
+    qtbot.addWidget(line_edit)
 
     line_edit.setText("first; second; third")
     line_edit.setCursorPosition(len("first; sec"))  # Cursor after 'sec' in 'second'
@@ -375,15 +358,11 @@ def test_EnLineEdit_getCompletedText_singleMode(qtbot: QtBot) -> None:
     assert after_text == ""
 
 
-def test_EnLineEdit_getCompletedText_multipleMode_emptyLineEdit(
-    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch, mock_settings: MagicMock
-) -> None:
+def test_EnLineEdit_getCompletedText_multipleMode_emptyLineEdit(qtbot: QtBot) -> None:
     """Tests that selecting the first entry in multiple mode adds a separator after."""
-    line_edit = EnLineEdit(multiple=True)
-    qtbot.addWidget(line_edit)
-
     test_separator = "|"
-    monkeypatch.setattr(prefs.settings, "split_text_entered", test_separator)
+    line_edit = EnLineEdit(multiple=True, split_text_entered=test_separator)
+    qtbot.addWidget(line_edit)
 
     line_edit.setText("")
     line_edit.setCursorPosition(0)
@@ -394,14 +373,12 @@ def test_EnLineEdit_getCompletedText_multipleMode_emptyLineEdit(
 
 
 def test_EnLineEdit_getCompletedText_multipleMode_noOriginalCursorPos(
-    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch, mock_settings: MagicMock
+    qtbot: QtBot,
 ) -> None:
     """Tests that cursorPosition is used if there is no original cursor position."""
-    line_edit = EnLineEdit(multiple=True)
-    qtbot.addWidget(line_edit)
-
     test_separator = ","
-    monkeypatch.setattr(prefs.settings, "split_text_entered", test_separator)
+    line_edit = EnLineEdit(multiple=True, split_text_entered=test_separator)
+    qtbot.addWidget(line_edit)
 
     line_edit.setText("item1, prefix, suffix")
     line_edit.setCursorPosition(len("item1, prefix"))  # Cursor after 'prefix'
@@ -415,14 +392,12 @@ def test_EnLineEdit_getCompletedText_multipleMode_noOriginalCursorPos(
 
 
 def test_EnLineEdit_getCompletedText_multipleMode_withOriginalCursorPos(
-    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch, mock_settings: MagicMock
+    qtbot: QtBot,
 ) -> None:
     """Tests that the original cursor position is used if it exists."""
-    line_edit = EnLineEdit(multiple=True)
-    qtbot.addWidget(line_edit)
-
     test_separator = ";"
-    monkeypatch.setattr(prefs.settings, "split_text_entered", test_separator)
+    line_edit = EnLineEdit(multiple=True, split_text_entered=test_separator)
+    qtbot.addWidget(line_edit)
 
     line_edit.setText("alpha; beta; gamma")
     line_edit.original_cursor_pos = len(
@@ -435,18 +410,14 @@ def test_EnLineEdit_getCompletedText_multipleMode_withOriginalCursorPos(
     assert line_edit.original_cursor_pos is None  # Should be reset
 
 
-def test_EnLineEdit_getCompletedText_multipleMode_cursorAtEnd(
-    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch, mock_settings: MagicMock
-) -> None:
+def test_EnLineEdit_getCompletedText_multipleMode_cursorAtEnd(qtbot: QtBot) -> None:
     """Tests that an item is appened when the cursor is at the end.
 
     Ensures that a separator is still added.
     """
-    line_edit = EnLineEdit(multiple=True)
-    qtbot.addWidget(line_edit)
-
     test_separator = ","
-    monkeypatch.setattr(prefs.settings, "split_text_entered", test_separator)
+    line_edit = EnLineEdit(multiple=True, split_text_entered=test_separator)
+    qtbot.addWidget(line_edit)
 
     line_edit.setText("words, are, here, and, the")
     line_edit.setCursorPosition(len("words, are, here, and, the"))
@@ -456,19 +427,15 @@ def test_EnLineEdit_getCompletedText_multipleMode_cursorAtEnd(
     assert after == ""
 
 
-def test_EnLineEdit_getCompletedText_multipleMode_cursorAtStart(
-    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch, mock_settings: MagicMock
-) -> None:
+def test_EnLineEdit_getCompletedText_multipleMode_cursorAtStart(qtbot: QtBot) -> None:
     """Tests that adding an item at the start adds it.
 
     There still needs to be a separator after the item added,
     that is before the original items in the list.
     """
-    line_edit = EnLineEdit(multiple=True)
-    qtbot.addWidget(line_edit)
-
     test_separator = ","
-    monkeypatch.setattr(prefs.settings, "split_text_entered", test_separator)
+    line_edit = EnLineEdit(multiple=True, split_text_entered=test_separator)
+    qtbot.addWidget(line_edit)
 
     line_edit.setText("suffix_only")
     line_edit.setCursorPosition(0)
@@ -580,18 +547,14 @@ def test_EnLineEdit_applyCurrentText_singleMode(qtbot: QtBot) -> None:
     line_edit.completionSelected.assert_not_called()
 
 
-def test_EnLineEdit_applyCurrentText_multipleMode_withSeparator(
-    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch, mock_settings: MagicMock
-) -> None:
+def test_EnLineEdit_applyCurrentText_multipleMode_withSeparator(qtbot: QtBot) -> None:
     """Tests applying text in multiple mode when an item is selected after a separator.
 
     The item that is selected should be added, and completionSelected should be called.
     """
-    line_edit = EnLineEdit(multiple=True)
-    qtbot.addWidget(line_edit)
-
     test_separator = ","
-    monkeypatch.setattr(prefs.settings, "split_text_entered", test_separator)
+    line_edit = EnLineEdit(multiple=True, split_text_entered=test_separator)
+    qtbot.addWidget(line_edit)
 
     line_edit.setText("item1, item2, new_item ")
     line_edit.setCursorPosition(len("item1, item2, new_item "))
@@ -603,19 +566,15 @@ def test_EnLineEdit_applyCurrentText_multipleMode_withSeparator(
     line_edit.completionSelected.assert_called_once_with("new_item")
 
 
-def test_EnLineEdit_applyCurrentText_multipleMode_noSeparator(
-    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch, mock_settings: MagicMock
-) -> None:
+def test_EnLineEdit_applyCurrentText_multipleMode_noSeparator(qtbot: QtBot) -> None:
     """Tests applying the text when there is a single item with no separator.
 
     This value isn't in the completer items, so it's not found,
     but completionSelected should be called.
     """
-    line_edit = EnLineEdit(multiple=True)
-    qtbot.addWidget(line_edit)
-
     test_separator = ","
-    monkeypatch.setattr(prefs.settings, "split_text_entered", test_separator)
+    line_edit = EnLineEdit(multiple=True, split_text_entered=test_separator)
+    qtbot.addWidget(line_edit)
 
     line_edit.setText("single_item_no_separator")
     line_edit.setCursorPosition(len("single_item_no_separator"))
@@ -630,14 +589,12 @@ def test_EnLineEdit_applyCurrentText_multipleMode_noSeparator(
 
 
 def test_EnLineEdit_applyCurrentText_multipleMode_emptyText(
-    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch, mock_settings: MagicMock
+    qtbot: QtBot,
 ) -> None:
     """Tests applying the text when there are no items, only empty text."""
-    line_edit = EnLineEdit(multiple=True)
-    qtbot.addWidget(line_edit)
-
     test_separator = ";"
-    monkeypatch.setattr(prefs.settings, "split_text_entered", test_separator)
+    line_edit = EnLineEdit(multiple=True, split_text_entered=test_separator)
+    qtbot.addWidget(line_edit)
 
     line_edit.setText("")
     line_edit.setCursorPosition(0)
@@ -651,18 +608,16 @@ def test_EnLineEdit_applyCurrentText_multipleMode_emptyText(
 
 
 def test_EnLineEdit_applyCurrentText_multipleMode_separatorAtStart(
-    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch, mock_settings: MagicMock
+    qtbot: QtBot,
 ) -> None:
     """Tests applying current text when cursor is right after separator.
 
     In this case, the user hasn't entered anything,
     so there are no completion items, so completionSelected should not be called.
     """
-    line_edit = EnLineEdit(multiple=True)
-    qtbot.addWidget(line_edit)
-
     test_separator = "|"
-    monkeypatch.setattr(prefs.settings, "split_text_entered", test_separator)
+    line_edit = EnLineEdit(multiple=True, split_text_entered=test_separator)
+    qtbot.addWidget(line_edit)
 
     line_edit.setText("| item")
     line_edit.setCursorPosition(len("| item"))

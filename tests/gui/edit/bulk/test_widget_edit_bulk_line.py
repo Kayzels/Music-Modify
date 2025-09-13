@@ -1,9 +1,5 @@
 """Tests for EditBulkLineWidget."""
 
-# pyright: reportUnusedParameter = false
-
-from unittest.mock import MagicMock
-
 from PySide6.QtWidgets import QWidget
 from pytestqt.qtbot import QtBot
 
@@ -23,7 +19,7 @@ def test_EditBulkLineWidget_init_not_in_all(qtbot: QtBot) -> None:
     tag = SongTag(display_name="Album", id3_key="TALB")
     data = {"First", "Second"}
 
-    widget = EditBulkLineWidget(parent, data, tag, in_all=False)
+    widget = EditBulkLineWidget(parent, data, tag, in_all=False, split_text_entered="")
     qtbot.addWidget(widget)
     assert "First" in widget.items
     assert "Second" in widget.items
@@ -49,7 +45,7 @@ def test_EditBulkLineWidget_init_in_all(qtbot: QtBot) -> None:
     tag = SongTag(display_name="Album", id3_key="TALB")
     data = {"First"}
 
-    widget = EditBulkLineWidget(parent, data, tag, in_all=True)
+    widget = EditBulkLineWidget(parent, data, tag, in_all=True, split_text_entered="")
     qtbot.addWidget(widget)
     assert widget.items == ("First",)
 
@@ -66,7 +62,7 @@ def _createWidget(qtbot: QtBot) -> tuple[QWidget, SongTag, EditBulkLineWidget]:
     tag = SongTag(display_name="Album", id3_key="TALB")
     data = {"First"}
 
-    widget = EditBulkLineWidget(parent, data, tag, in_all=True)
+    widget = EditBulkLineWidget(parent, data, tag, in_all=True, split_text_entered="")
     qtbot.addWidget(widget)
 
     return parent, tag, widget
@@ -125,7 +121,7 @@ def test_EditBulkLineWidget_updateTag_clear_no_songs(qtbot: QtBot) -> None:
 
 
 def test_EditBulkLineWidget_updateTag_apply_empty_clears(
-    qtbot: QtBot, mock_settings: MagicMock
+    qtbot: QtBot, table_tags: list[SongTag]
 ) -> None:
     """Test that updateTag clears the tag if apply is called with an empty widget."""
     _, tag, widget = _createWidget(qtbot)
@@ -133,7 +129,7 @@ def test_EditBulkLineWidget_updateTag_apply_empty_clears(
     widget.clear_checkbox.setChecked(False)
     widget.apply_checkbox.setChecked(True)
 
-    song = Song()
+    song = Song(table_tags, table_tags, "")
     song.setTag(tag, ["First"])
     assert song.hasTag(tag)
     widget.main_widget.setText("")
@@ -143,7 +139,7 @@ def test_EditBulkLineWidget_updateTag_apply_empty_clears(
 
 
 def test_EditBulkLineWidget_updateTag_apply_only_space_clears(
-    qtbot: QtBot, mock_settings: MagicMock
+    qtbot: QtBot, table_tags: list[SongTag]
 ) -> None:
     """Test that updateTag clears tag if apply called with widget having only space."""
     _, tag, widget = _createWidget(qtbot)
@@ -151,7 +147,7 @@ def test_EditBulkLineWidget_updateTag_apply_only_space_clears(
     widget.clear_checkbox.setChecked(False)
     widget.apply_checkbox.setChecked(True)
 
-    song = Song()
+    song = Song(table_tags, table_tags, "")
     song.setTag(tag, ["First"])
     assert song.hasTag(tag)
     widget.main_widget.setText("     ")
@@ -161,7 +157,7 @@ def test_EditBulkLineWidget_updateTag_apply_only_space_clears(
 
 
 def test_EditBulkLineWidget_updateTag_apply_not_empty_sets(
-    qtbot: QtBot, mock_settings: MagicMock
+    qtbot: QtBot, table_tags: list[SongTag]
 ) -> None:
     """Test that calling update when not empty sets the tag value."""
     _, tag, widget = _createWidget(qtbot)
@@ -169,7 +165,7 @@ def test_EditBulkLineWidget_updateTag_apply_not_empty_sets(
     widget.clear_checkbox.setChecked(False)
     widget.apply_checkbox.setChecked(True)
 
-    song = Song()
+    song = Song(table_tags, table_tags, "")
     song.setTag(tag, ["First"])
     assert song.hasTag(tag)
 
@@ -184,7 +180,7 @@ def test_EditBulkLineWidget_updateTag_apply_not_empty_sets(
 
 
 def test_EditBulkLineWidget_updateTag_apply_not_empty_sets_stripped(
-    qtbot: QtBot, mock_settings: MagicMock
+    qtbot: QtBot, table_tags: list[SongTag]
 ) -> None:
     """Test that calling update when not empty sets the tag value without whitespace."""
     _, tag, widget = _createWidget(qtbot)
@@ -192,7 +188,7 @@ def test_EditBulkLineWidget_updateTag_apply_not_empty_sets_stripped(
     widget.clear_checkbox.setChecked(False)
     widget.apply_checkbox.setChecked(True)
 
-    song = Song()
+    song = Song(table_tags, table_tags, "")
     song.setTag(tag, ["First"])
     assert song.hasTag(tag)
 
@@ -207,7 +203,7 @@ def test_EditBulkLineWidget_updateTag_apply_not_empty_sets_stripped(
 
 
 def test_EditBulkLineWidget_updateTag_clear(
-    qtbot: QtBot, mock_settings: MagicMock
+    qtbot: QtBot, table_tags: list[SongTag]
 ) -> None:
     """Test that clearing works when clear checkbox checked and updating."""
     _, tag, widget = _createWidget(qtbot)
@@ -217,7 +213,7 @@ def test_EditBulkLineWidget_updateTag_clear(
     widget.apply_checkbox.setChecked(False)
     widget.clear_checkbox.setChecked(True)
 
-    song = Song()
+    song = Song(table_tags, table_tags, "")
     song.setTag(tag, ["First"])
     assert song.hasTag(tag)
 

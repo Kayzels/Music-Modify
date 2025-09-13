@@ -1,16 +1,16 @@
 """Tests for EditDialog."""
 
-# pyright: reportPrivateUsage = false, reportUnusedParameter = false
+# pyright: reportPrivateUsage = false
 
 import logging
 from typing import cast
-from unittest.mock import MagicMock, Mock, PropertyMock
+from unittest.mock import Mock, PropertyMock
 
 from PySide6.QtWidgets import QDialog, QWidget
 import pytest
 from pytestqt.qtbot import QtBot
 
-from music_modify.custom_types.enums import EditorType, NavDirection
+from music_modify.custom_types.enums import NavDirection
 from music_modify.custom_types.song import Song
 from music_modify.custom_types.songtag import SongTag
 from music_modify.gui.edit.dialog_edit import EditDialog
@@ -19,39 +19,41 @@ from music_modify.models.song_repository import SongRepository
 
 
 def _createParentAndRepo(
-    qtbot: QtBot, num_songs: int = 0
+    qtbot: QtBot,
+    table_tags: list[SongTag],
+    num_songs: int = 0,
 ) -> tuple[QWidget, SongRepository]:
     widget = QWidget()
     qtbot.addWidget(widget)
-    repo = SongRepository()
+    repo = SongRepository(table_tags, table_tags, ", ")
     for _ in range(num_songs):
         repo.addSong()
     return widget, repo
 
 
 def _createDialog(
-    qtbot: QtBot, rows: list[int], *, num_songs: int = 0
+    qtbot: QtBot, rows: list[int], table_tags: list[SongTag], *, num_songs: int = 0
 ) -> tuple[QWidget, EditDialog]:
-    widget, repo = _createParentAndRepo(qtbot, num_songs)
-    dialog = EditDialog(widget, repo, rows)
+    widget, repo = _createParentAndRepo(qtbot, table_tags, num_songs)
+    dialog = EditDialog(widget, repo, rows, table_tags)
     return widget, dialog
 
 
-def test_EditDialog_init_no_rows(qtbot: QtBot) -> None:
+def test_EditDialog_init_no_rows(qtbot: QtBot, table_tags: list[SongTag]) -> None:
     """Tests that passing no rows through rejects the dialog."""
-    _, dialog = _createDialog(qtbot, [], num_songs=0)
+    _, dialog = _createDialog(qtbot, [], table_tags, num_songs=0)
     assert dialog.result() == QDialog.DialogCode.Rejected
 
 
-def test_EditDialog_init_song_None(qtbot: QtBot) -> None:
+def test_EditDialog_init_song_None(qtbot: QtBot, table_tags: list[SongTag]) -> None:
     """Tests that the dialog is rejected if there is no song at that index."""
-    _, dialog = _createDialog(qtbot, [0], num_songs=0)
+    _, dialog = _createDialog(qtbot, [0], table_tags, num_songs=0)
     assert dialog.result() == QDialog.DialogCode.Rejected
 
 
-def test_EditDialog_init_song_single(qtbot: QtBot, mock_settings: MagicMock) -> None:
+def test_EditDialog_init_song_single(qtbot: QtBot, table_tags: list[SongTag]) -> None:
     """Tests that the song is found at the index, and nav buttons aren't created."""
-    _, dialog = _createDialog(qtbot, [0], num_songs=1)
+    _, dialog = _createDialog(qtbot, [0], table_tags, num_songs=1)
 
     assert dialog.song_info is not None
     assert isinstance(dialog.song_info, Song)
@@ -60,9 +62,9 @@ def test_EditDialog_init_song_single(qtbot: QtBot, mock_settings: MagicMock) -> 
     assert not hasattr(dialog, "next_button")
 
 
-def test_EditDialog_init_song_multiple(qtbot: QtBot, mock_settings: MagicMock) -> None:
+def test_EditDialog_init_song_multiple(qtbot: QtBot, table_tags: list[SongTag]) -> None:
     """Tests that the songs are found at the indexes, and nav buttons are created."""
-    _, dialog = _createDialog(qtbot, [0, 1], num_songs=2)
+    _, dialog = _createDialog(qtbot, [0, 1], table_tags, num_songs=2)
 
     assert dialog.song_info is not None
     assert isinstance(dialog.song_info, Song)
@@ -92,10 +94,10 @@ def test_EditDialog_init_song_multiple(qtbot: QtBot, mock_settings: MagicMock) -
 
 
 def test_EditDialog_updateSongInfo_setsValue(
-    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch, mock_settings: MagicMock
+    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch, table_tags: list[SongTag]
 ) -> None:
     """Tests that calling updateSongInfo saves the values to the song."""
-    _, dialog = _createDialog(qtbot, [0], num_songs=1)
+    _, dialog = _createDialog(qtbot, [0], table_tags, num_songs=1)
 
     mock_tag = Mock(spec=SongTag)
     test_key: str = "TIT2"
@@ -123,10 +125,10 @@ def test_EditDialog_updateSongInfo_setsValue(
 
 
 def test_EditDialog_updateSongInfo_removesValue(
-    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch, mock_settings: MagicMock
+    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch, table_tags: list[SongTag]
 ) -> None:
     """Tests that calling updateSongInfo removes values when needed."""
-    _, dialog = _createDialog(qtbot, [0], num_songs=1)
+    _, dialog = _createDialog(qtbot, [0], table_tags, num_songs=1)
 
     mock_tag = Mock(spec=SongTag)
     test_key: str = "TPE1"
@@ -157,10 +159,10 @@ def test_EditDialog_updateSongInfo_unknownTag(
     qtbot: QtBot,
     monkeypatch: pytest.MonkeyPatch,
     caplog: pytest.LogCaptureFixture,
-    mock_settings: MagicMock,
+    table_tags: list[SongTag],
 ) -> None:
     """Tests that updating an unknown tag logs, and doesn't save."""
-    _, dialog = _createDialog(qtbot, [0], num_songs=1)
+    _, dialog = _createDialog(qtbot, [0], table_tags, num_songs=1)
 
     mock_tag = Mock(spec=SongTag)
     test_key: str = "TPE1"
@@ -194,10 +196,10 @@ def test_EditDialog_updateSongInfo_unknownTag(
 
 
 def test_EditDialog_switchButtonState_no_buttons_logged(
-    qtbot: QtBot, caplog: pytest.LogCaptureFixture
+    qtbot: QtBot, table_tags: list[SongTag], caplog: pytest.LogCaptureFixture
 ) -> None:
     """Tests logging when trying to change button state for non-existing buttons."""
-    _, dialog = _createDialog(qtbot, [], num_songs=0)
+    _, dialog = _createDialog(qtbot, [], table_tags, num_songs=0)
 
     assert not hasattr(dialog, "next_button")
     assert not hasattr(dialog, "previous_button")
@@ -210,10 +212,10 @@ def test_EditDialog_switchButtonState_no_buttons_logged(
 
 
 def test_EditDialog_showSongInDirection_last_or_first_logged(
-    qtbot: QtBot, caplog: pytest.LogCaptureFixture, mock_settings: MagicMock
+    qtbot: QtBot, caplog: pytest.LogCaptureFixture, table_tags: list[SongTag]
 ) -> None:
     """Tests that invalid navigation on first or last is logged."""
-    _, dialog = _createDialog(qtbot, [0, 1], num_songs=2)
+    _, dialog = _createDialog(qtbot, [0, 1], table_tags, num_songs=2)
 
     assert dialog.current_index == 0
 
@@ -238,10 +240,10 @@ def test_EditDialog_showSongInDirection_last_or_first_logged(
 
 
 def test_EditDialog_showSongInDirection_no_song(
-    qtbot: QtBot, caplog: pytest.LogCaptureFixture, mock_settings: MagicMock
+    qtbot: QtBot, caplog: pytest.LogCaptureFixture, table_tags: list[SongTag]
 ) -> None:
     """Tests that trying to display a song at an invalid index closes the dialog."""
-    _, dialog = _createDialog(qtbot, [0, 1], num_songs=1)
+    _, dialog = _createDialog(qtbot, [0, 1], table_tags, num_songs=1)
 
     with caplog.at_level(logging.WARNING):
         dialog.showSongInDirection(NavDirection.Next)
@@ -251,50 +253,33 @@ def test_EditDialog_showSongInDirection_no_song(
 
 
 def test_EditDialog_resetSongInfo(
-    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch, mock_settings: MagicMock
+    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch, table_tags: list[SongTag]
 ) -> None:
     """Tests that the song values can be reset."""
-    widget, repo = _createParentAndRepo(qtbot, 1)
+    widget, repo = _createParentAndRepo(qtbot, table_tags, 1)
     rows: list[int] = [0]
-
-    mock_tag1 = Mock(spec=SongTag)
-    mock_tag1.display_name = "Artist"
-    mock_tag1.getValue.return_value = "Test Artist"
-    mock_tag1.id3_key = "TPE1"
-    mock_tag1.editor_type = EditorType.MultipleText
-
-    mock_tag2 = Mock(spec=SongTag)
-    mock_tag2.display_name = "Title"
-    mock_tag2.getValue.return_value = "Test Title"
-    mock_tag2.id3_key = "TIT2"
-    mock_tag2.editor_type = EditorType.SingleText
-
-    mock_all_tags = [mock_tag1, mock_tag2]
-    mock_prefs_settings = Mock()
-    mock_prefs_settings.all_tags = mock_all_tags
-    monkeypatch.setattr("music_modify.prefs.prefs.settings", mock_prefs_settings)
 
     mock_reset_method = Mock()
     monkeypatch.setattr(EditAbstractWidget, "reset", mock_reset_method)
 
-    dialog = EditDialog(widget, repo, rows)
+    dialog = EditDialog(widget, repo, rows, table_tags)
     qtbot.addWidget(dialog)
 
     found_widgets = dialog.findChildren(EditAbstractWidget)
-    assert len(found_widgets) == len(mock_all_tags)
+    assert len(found_widgets) == len(table_tags)
     mock_reset_method.assert_not_called()
 
     dialog.resetSongInfo()
 
-    assert mock_reset_method.call_count == len(mock_all_tags)
+    assert mock_reset_method.call_count == len(table_tags)
 
 
 @pytest.fixture
 def edit_dialog_mocks(
-    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch, mock_settings: MagicMock
+    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch, table_tags: list[SongTag]
 ) -> tuple[EditDialog, Mock, Mock, PropertyMock]:
     """Fixture for creating multiple mocks for EditDialogs."""
-    _, dialog = _createDialog(qtbot, [0], num_songs=1)
+    _, dialog = _createDialog(qtbot, [0], table_tags, num_songs=1)
 
     mock_tag = Mock(spec=SongTag)
     mock_tag.id3_key = "TEST"

@@ -7,7 +7,7 @@ which should be used when wanting to access user preferences.
 import logging
 from typing import ClassVar, final
 
-from PySide6.QtCore import QSettings
+from PySide6.QtCore import QObject, QSettings, Signal
 from PySide6.QtWidgets import QApplication
 
 from music_modify.custom_types.enums import EditorType
@@ -18,15 +18,24 @@ logger = logging.getLogger(__name__)
 
 
 @final
-class Settings:
+class Settings(QObject):
     """Wrapper for QSettings that provides easier access to defined setting keys."""
 
-    def __init__(self, new_settings: QSettings | None = None) -> None:
+    split_text_entered_changed: Signal = Signal(str)
+    split_values_display_changed: Signal = Signal(str)
+    split_values_at_changed: Signal = Signal(str)
+    tags_updated: Signal = Signal()
+
+    def __init__(
+        self, new_settings: QSettings | None = None, parent: QObject | None = None
+    ) -> None:
         """Create a new Settings object.
 
         Args:
             new_settings: The settings values that should be read, if present.
+            parent: The object that determines the lifetime of the settings object.
         """
+        super().__init__(parent)
         logger.info("In init method for Settings object")
         self._settings: QSettings | None = None
 
@@ -86,6 +95,7 @@ class Settings:
     @split_text_entered.setter
     def split_text_entered(self, value: str) -> None:
         self._getQSettings().setValue("Split/split_text_entered", value)
+        self.split_text_entered_changed.emit(value)
 
     @property
     def split_values_display(self) -> str:
@@ -104,6 +114,7 @@ class Settings:
     @split_values_display.setter
     def split_values_display(self, value: str) -> None:
         self._getQSettings().setValue("Split/split_values_display", value)
+        self.split_values_display_changed.emit(value)
 
     @property
     def split_values_at(self) -> str:
@@ -122,6 +133,7 @@ class Settings:
     @split_values_at.setter
     def split_values_at(self, value: str) -> None:
         self._getQSettings().setValue("Split/split_values_at", value)
+        self.split_values_at_changed.emit(value)
 
     default_tags: ClassVar[list[TagInfo]] = [
         TagInfo(
@@ -389,6 +401,7 @@ class Settings:
     def info_tags(self, value: list[TagInfo]) -> None:
         self._table_tags_cache = None  # Invalidate cache
         self._setArray("Tags/info_tags", value)
+        self.tags_updated.emit()
 
     def _setArray(self, key: str, vals: list[TagInfo]) -> None:
         """Set the QSettings array based on the list of TagInfo.
@@ -473,6 +486,3 @@ class Settings:
         """Reset the value for the tag list back to default."""
         logger.info("Called reset tags")
         self.info_tags = Settings.default_tags
-
-
-settings = Settings()

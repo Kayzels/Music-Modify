@@ -1,7 +1,5 @@
 """Tests for SongRepository."""
 
-# pyright: reportUnusedParameter = false, reportMissingSuperCall = false
-
 from os import PathLike
 from pathlib import Path
 from unittest.mock import MagicMock
@@ -10,42 +8,29 @@ import pytest
 from pytestqt.qtbot import QtBot
 
 from music_modify.custom_types.song import Song
+from music_modify.custom_types.songtag import SongTag
 from music_modify.models.song_repository import SongRepository
 
 
-class _MockSong(Song):
-    """Mock the Song class to not call __init__."""
-
-    def __init__(self, file: str | PathLike[str] | None = None) -> None:
-        """Deliberately _not_ calling super, so we don't need to stress about prefs."""
-        self.file = file
-
-
-@pytest.fixture
-def mock_song(monkeypatch: pytest.MonkeyPatch) -> None:
-    """Fixture for mocking the Song class."""
-    monkeypatch.setattr("music_modify.models.song_repository.Song", _MockSong)
-
-
-def test_SongRepository_getSong_invalid_index() -> None:
+def test_SongRepository_getSong_invalid_index(table_tags: list[SongTag]) -> None:
     """Test that None is returned when trying to get a song at an invalid index."""
-    repo = SongRepository()
+    repo = SongRepository(table_tags, table_tags, ", ")
     assert repo.getSong(0) is None
     assert repo[1] is None
 
 
-def test_SongRepository_getSong_valid_index(mock_song: None) -> None:
+def test_SongRepository_getSong_valid_index(table_tags: list[SongTag]) -> None:
     """Test that a Song is returned when using a valid index."""
-    repo = SongRepository()
+    repo = SongRepository(table_tags, table_tags, ", ")
     repo.addSong()
     assert isinstance(repo.getSong(0), Song)
     assert isinstance(repo[0], Song)
 
 
-def test_SongRepository_contains(song_path: Path, mock_song: None) -> None:
+def test_SongRepository_contains(song_path: Path, table_tags: list[SongTag]) -> None:
     """Test that contains returns True if the song is present, otherwise False."""
-    repo = SongRepository()
-    song1 = _MockSong()
+    repo = SongRepository(table_tags, table_tags, ", ")
+    song1 = Song(table_tags, table_tags, ", ")
     assert (song1 in repo) is False
     repo.addSong(song1)
     assert (song1 in repo) is True
@@ -55,10 +40,10 @@ def test_SongRepository_contains(song_path: Path, mock_song: None) -> None:
 
 
 def test_SongRepository_addFile_single(
-    song_path: Path, qtbot: QtBot, mock_song: None
+    song_path: Path, qtbot: QtBot, table_tags: list[SongTag]
 ) -> None:
     """Test that adding a file that doesn't exist works."""
-    repo = SongRepository()
+    repo = SongRepository(table_tags, table_tags, ", ")
     with qtbot.waitSignal(repo.songs_updated, timeout=1000):
         repo.addFile(song_path)
     assert len(repo) == 1
@@ -67,10 +52,10 @@ def test_SongRepository_addFile_single(
 
 
 def test_SongRepository_addFile_exists_rejected(
-    song_path: Path, qtbot: QtBot, mock_song: None
+    song_path: Path, qtbot: QtBot, table_tags: list[SongTag]
 ) -> None:
     """Tests that adding a file that exists doesn't add it again."""
-    repo = SongRepository()
+    repo = SongRepository(table_tags, table_tags, ", ")
     with qtbot.waitSignal(repo.songs_updated, timeout=1000):
         repo.addFile(song_path)
     with qtbot.assertNotEmitted(repo.songs_updated):
@@ -80,19 +65,23 @@ def test_SongRepository_addFile_exists_rejected(
     assert song.file == song_path
 
 
-def test_SongRepository_addSong_with_song(qtbot: QtBot, mock_song: None) -> None:
+def test_SongRepository_addSong_with_song(
+    qtbot: QtBot, table_tags: list[SongTag]
+) -> None:
     """Tests that calling addSong with a song adds it the repo."""
-    repo = SongRepository()
-    song = _MockSong()
+    repo = SongRepository(table_tags, table_tags, ", ")
+    song = Song(table_tags, table_tags, ", ")
     with qtbot.waitSignal(repo.songs_updated, timeout=1000):
         repo.addSong(song)
     assert len(repo) == 1
     assert repo[0] == song
 
 
-def test_SongRepository_addSong_with_None(qtbot: QtBot, mock_song: None) -> None:
+def test_SongRepository_addSong_with_None(
+    qtbot: QtBot, table_tags: list[SongTag]
+) -> None:
     """Tests that calling addSong with None creates a song and adds it."""
-    repo = SongRepository()
+    repo = SongRepository(table_tags, table_tags, ", ")
     with qtbot.waitSignal(repo.songs_updated, timeout=1000):
         repo.addSong()
     assert len(repo) == 1
@@ -100,10 +89,10 @@ def test_SongRepository_addSong_with_None(qtbot: QtBot, mock_song: None) -> None
 
 
 def test_SongRepository_addFiles_adds_multiple(
-    song_paths: list[PathLike[str]], mock_song: None
+    song_paths: list[PathLike[str]], table_tags: list[SongTag]
 ) -> None:
     """Test that multiple songs are added when calling addFiles."""
-    repo = SongRepository()
+    repo = SongRepository(table_tags, table_tags, ", ")
     repo.songs_updated = MagicMock()
     repo.songs_updated.emit = MagicMock()
     repo.addFiles(song_paths)
@@ -115,10 +104,10 @@ def test_SongRepository_addFiles_adds_multiple(
 
 
 def test_SongRepository_clearFiles(
-    song_path: Path, qtbot: QtBot, mock_song: None
+    song_path: Path, qtbot: QtBot, table_tags: list[SongTag]
 ) -> None:
     """Test that clearing files makes the repo empty."""
-    repo = SongRepository()
+    repo = SongRepository(table_tags, table_tags, ", ")
     repo.addFile(song_path)
     assert len(repo) > 0
     with qtbot.waitSignal(repo.songs_updated, timeout=1000):
@@ -127,10 +116,12 @@ def test_SongRepository_clearFiles(
 
 
 def test_SongRepository_removeSongs_single(
-    song_paths: list[PathLike[str]], qtbot: QtBot, mock_song: None
+    song_paths: list[PathLike[str]],
+    qtbot: QtBot,
+    table_tags: list[SongTag],
 ) -> None:
     """Test that removing a single song from the repo works."""
-    repo = SongRepository()
+    repo = SongRepository(table_tags, table_tags, ", ")
     repo.addFiles(song_paths)
     with qtbot.waitSignal(repo.songs_updated, timeout=1000):
         repo.removeSongs([0])
@@ -139,10 +130,12 @@ def test_SongRepository_removeSongs_single(
 
 
 def test_SongRepository_removeSongs_multiple(
-    song_paths: list[PathLike[str]], qtbot: QtBot, mock_song: None
+    song_paths: list[PathLike[str]],
+    qtbot: QtBot,
+    table_tags: list[SongTag],
 ) -> None:
     """Test that removing multiple songs from the repo works."""
-    repo = SongRepository()
+    repo = SongRepository(table_tags, table_tags, ", ")
     repo.addFiles(song_paths)
     with qtbot.waitSignal(repo.songs_updated, timeout=1000):
         repo.removeSongs([0, 1])
@@ -151,10 +144,12 @@ def test_SongRepository_removeSongs_multiple(
 
 
 def test_SongRepository_removeSongs_empty_indexes(
-    song_paths: list[PathLike[str]], qtbot: QtBot, mock_song: None
+    song_paths: list[PathLike[str]],
+    qtbot: QtBot,
+    table_tags: list[SongTag],
 ) -> None:
     """Test that the repo doesn't change, and songs_updated isn't emitted."""
-    repo = SongRepository()
+    repo = SongRepository(table_tags, table_tags, ", ")
     repo.addFiles(song_paths)
     with qtbot.assertNotEmitted(repo.songs_updated):
         repo.removeSongs([])
@@ -162,7 +157,7 @@ def test_SongRepository_removeSongs_empty_indexes(
 
 
 def test_SongRepository_refreshDisplay(
-    monkeypatch: pytest.MonkeyPatch, mock_song: None
+    monkeypatch: pytest.MonkeyPatch, table_tags: list[SongTag]
 ) -> None:
     """Test that refreshDisplay calls updateInfo for each song in songs."""
     mock_update_info = MagicMock()
@@ -170,7 +165,7 @@ def test_SongRepository_refreshDisplay(
 
     num_songs = 3
 
-    repo = SongRepository()
+    repo = SongRepository(table_tags, table_tags, ", ")
     for _ in range(num_songs):
         repo.addSong()
 

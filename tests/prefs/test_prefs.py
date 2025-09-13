@@ -10,7 +10,7 @@ from PySide6.QtWidgets import QApplication
 import pytest
 
 from music_modify.custom_types import SongTag, TagInfo
-from music_modify.prefs.prefs import Settings
+from music_modify.prefs import Settings
 
 
 def _set_split_values(settings: Settings) -> None:

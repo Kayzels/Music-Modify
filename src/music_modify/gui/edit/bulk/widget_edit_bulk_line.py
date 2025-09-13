@@ -29,6 +29,7 @@ class EditBulkLineWidget(EditBulkAbstractWidget):
         parent: QWidget,
         data: set[str],
         tag: SongTag,
+        split_text_entered: str,
         *,
         in_all: bool = False,
     ) -> None:
@@ -39,6 +40,7 @@ class EditBulkLineWidget(EditBulkAbstractWidget):
             data: The data to be displayed.
             tag: The field in the song that should be updated.
             in_all: Whether the data appears in all songs being edited or not.
+            split_text_entered: Character used to split values when multiple entered
         """
         super().__init__(parent, tag)
 
@@ -53,6 +55,7 @@ class EditBulkLineWidget(EditBulkAbstractWidget):
             items=self.items,
             multiple=False,
             initial=initial,
+            split_text_entered=split_text_entered,
         )
 
         self.setupUi()

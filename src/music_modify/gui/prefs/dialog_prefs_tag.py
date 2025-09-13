@@ -23,7 +23,7 @@ from music_modify.gui.prefs.delegate_editor_type import EditorTypeDelegate
 from music_modify.gui.utils import getSelectedRows
 from music_modify.models import TagModel
 from music_modify.models.tag_model import TAG_MODEL_COLUMNS
-from music_modify.prefs import prefs
+from music_modify.prefs import Settings
 
 from .dialog_prefs_abstract import PrefsAbstractDialog
 from .dialog_prefs_tag_add import PrefsTagAddDialog
@@ -41,17 +41,18 @@ class PrefsTagDialog(PrefsAbstractDialog, RowOperationMixin):
     and displayed for songs.
     """
 
-    def __init__(self, parent: QWidget | None = None) -> None:
+    def __init__(self, settings: Settings, parent: QWidget | None = None) -> None:
         """Create a PrefsTagDialog.
 
         Args:
+            settings: Settings object to read from and update.
             parent: The widget that this dialog should be displayed on.
         """
-        super().__init__(parent)
+        super().__init__(settings, parent)
         self.setWindowTitle("Edit Tags")
 
-        tags: list[TagInfo] = copy.deepcopy(prefs.settings.info_tags)
-        self.original_tags: list[TagInfo] = copy.deepcopy(prefs.settings.info_tags)
+        tags: list[TagInfo] = copy.deepcopy(self._settings.info_tags)
+        self.original_tags: list[TagInfo] = copy.deepcopy(self._settings.info_tags)
 
         self.model: TagModel = TagModel(tags)
         self.tag_table.setModel(self.model)
@@ -133,13 +134,12 @@ class PrefsTagDialog(PrefsAbstractDialog, RowOperationMixin):
     @override
     def updateSettings(self) -> None:
         logger.info("Called update settings inside tag dialog")
-        prefs.settings.info_tags = self.model.tags
-        self.settings_updated.emit()
+        self._settings.info_tags = self.model.tags
 
     @override
     def restoreDefaults(self) -> None:
         logger.debug("Restore defaults called for tag")
-        self.model.tags = prefs.settings.default_tags
+        self.model.tags = self._settings.default_tags
 
     @override
     def resetSettings(self) -> None:

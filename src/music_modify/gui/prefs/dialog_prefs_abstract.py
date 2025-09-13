@@ -8,10 +8,11 @@ from abc import ABC, abstractmethod
 import logging
 from typing import final
 
-from PySide6.QtCore import Qt, Signal
+from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QDialog, QDialogButtonBox, QWidget
 
 from music_modify.gui.meta import ABCQMeta
+from music_modify.prefs import Settings
 
 logger = logging.getLogger(__name__)
 
@@ -19,19 +20,18 @@ logger = logging.getLogger(__name__)
 class PrefsAbstractDialog(QDialog, ABC, metaclass=ABCQMeta):
     """Defines the required functionality for all child preference dialogs."""
 
-    settings_updated: Signal = Signal()
-    "Signal that is emitted whenever any setting is changed."
-
     @abstractmethod
     def setupUi(self) -> None:
         """Set up the display of the dialog."""
 
-    def __init__(self, parent: QWidget | None = None) -> None:
+    def __init__(self, settings: Settings, parent: QWidget | None = None) -> None:
         """Creates a dialog for managing preferences.
 
         Args:
+            settings: Settings object to read from and update.
             parent: The widget that the dialog should be displayed on.
         """
+        self._settings = settings
         QDialog.__init__(self, parent)
         self.setupUi()
         self.button_box: QDialogButtonBox = self._createButtonBox()

@@ -5,6 +5,7 @@ This is the factory class for creating different types of Edit dialogs.
 
 from PySide6.QtWidgets import QWidget
 
+from music_modify.custom_types.songtag import SongTag
 from music_modify.models.song_repository import SongRepository
 
 from .bulk.dialog_edit_bulk import EditBulkDialog
@@ -24,12 +25,20 @@ class EditDialogFactory:
         Args:
             parent: The widget the new widget should be created on.
             repository: The list of songs the app is managing.
+            all_tags:
         """
         self.parent: QWidget = parent
         self.repository: SongRepository = repository
         "The list of songs that the app is managing"
 
-    def get(self, rows: list[int], *, bulk: bool = False) -> EditAbstractDialog:
+    def get(
+        self,
+        rows: list[int],
+        all_tags: list[SongTag],
+        split_text_entered: str,
+        *,
+        bulk: bool = False,
+    ) -> EditAbstractDialog:
         """Generates an EditAbstractDialog.
 
         The dialog generated is based on whether multiple files should be edited.
@@ -38,6 +47,8 @@ class EditDialogFactory:
 
         Args:
             rows: List of indexes in the repository for the songs to edit
+            all_tags: Tags that can be viewed and edited.
+            split_text_entered: Character used to split multiple values.
             bulk (optional): Whether the songs should be edited in bulk or individually.
                 Default False.
 
@@ -45,5 +56,7 @@ class EditDialogFactory:
             A dialog for editing the metadata, of the correct form.
         """
         if bulk:
-            return EditBulkDialog(self.parent, self.repository, rows)
-        return EditDialog(self.parent, self.repository, rows)
+            return EditBulkDialog(
+                self.parent, self.repository, rows, split_text_entered, all_tags
+            )
+        return EditDialog(self.parent, self.repository, rows, all_tags)

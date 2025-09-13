@@ -16,10 +16,10 @@ from PySide6.QtWidgets import (
 )
 
 from music_modify.custom_types.enums import EditorType
+from music_modify.custom_types.songtag import SongTag
 from music_modify.gui.edit.dialog_edit_abstract import EditAbstractDialog
 from music_modify.gui.utils import createTab
 from music_modify.models.song_repository import SongRepository
-from music_modify.prefs import prefs
 from music_modify.utils.list_utils import addValues
 
 from .widget_edit_bulk_abstract import EditBulkAbstractWidget
@@ -29,7 +29,6 @@ from .widget_edit_bulk_people import EditBulkPeopleWidget
 
 if TYPE_CHECKING:
     from music_modify.custom_types.song import Song
-    from music_modify.custom_types.songtag import SongTag
 
 logger = logging.getLogger(__name__)
 
@@ -77,6 +76,8 @@ class EditBulkDialog(EditAbstractDialog):
         parent: QWidget,
         repository: SongRepository,
         rows: list[int],
+        split_text_entered: str,
+        all_tags: list[SongTag],
     ) -> None:
         """Create a dialog for bulk editing songs.
 
@@ -84,8 +85,13 @@ class EditBulkDialog(EditAbstractDialog):
             parent: The widget that the dialog should be displayed on
             repository: The list of songs being managed
             rows: The indexes of the songs to edit, in the `repository`
+            split_text_entered: Character used to split values when multiple are entered
+            all_tags: Tags that are available for reading and editing
         """
         super().__init__(parent, repository, rows)
+
+        self._split_text_entered: str = split_text_entered
+        self._all_tags: list[SongTag] = all_tags
 
         if len(rows) == 0:
             self.reject()
@@ -131,7 +137,7 @@ class EditBulkDialog(EditAbstractDialog):
         people_values: dict[SongTag, list[list[str]]] = {}
         normal_values: dict[SongTag, set[str]] = {}
 
-        for tag in prefs.settings.all_tags:
+        for tag in self._all_tags:
             # Get values from all songs, and store in dicts
             in_all: bool = True
             for song in self.songs:
@@ -171,7 +177,10 @@ class EditBulkDialog(EditAbstractDialog):
                 case EditorType.MultipleText:
                     multi_widget_layout.addWidget(
                         EditBulkMultipleWidget(
-                            self, normal_values.get(tag, set()), tag
+                            self,
+                            normal_values.get(tag, set()),
+                            tag,
+                            self._split_text_entered,
                         ),
                     )
                 case EditorType.SingleText:
@@ -182,6 +191,7 @@ class EditBulkDialog(EditAbstractDialog):
                             normal_values.get(tag, set()),
                             tag,
                             in_all=in_all,
+                            split_text_entered=self._split_text_entered,
                         ),
                     )
                 case _:

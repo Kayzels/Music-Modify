@@ -6,9 +6,12 @@ import pytest
 from pytestqt.qtbot import QtBot
 
 from music_modify.gui.prefs.dialog_prefs_abstract import PrefsAbstractDialog
+from music_modify.prefs import Settings
 
 
-def test_prefsAbstractDialog_missingLayout(qtbot: QtBot) -> None:
+def test_prefsAbstractDialog_missingLayout(
+    qtbot: QtBot, temp_settings: Settings
+) -> None:
     """Test that if the dialog doesn't set layout, there is an exception."""
 
     class TestDialogWithoutLayout(PrefsAbstractDialog):
@@ -34,7 +37,7 @@ def test_prefsAbstractDialog_missingLayout(qtbot: QtBot) -> None:
 
     w: TestDialogWithoutLayout | None = None
     with pytest.raises(Exception, match=expected_exception_message) as excinfo:
-        w = TestDialogWithoutLayout()
+        w = TestDialogWithoutLayout(temp_settings)
     if w:
         qtbot.addWidget(w)
 

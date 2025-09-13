@@ -20,7 +20,6 @@ from music_modify.custom_types.enums import NavDirection
 from music_modify.custom_types.utils import mapKey
 from music_modify.gui.utils import clearLayout
 from music_modify.models.song_repository import SongRepository
-from music_modify.prefs import prefs
 
 from .dialog_edit_abstract import EditAbstractDialog
 from .widget_edit_abstract import EditAbstractWidget
@@ -37,6 +36,7 @@ class EditDialog(EditAbstractDialog):
         parent: QWidget,
         repository: SongRepository,
         rows: list[int],
+        all_tags: list[SongTag],
     ) -> None:
         """Creates a dialog for editing songs individually.
 
@@ -44,8 +44,11 @@ class EditDialog(EditAbstractDialog):
             parent: The widget that the dialog should be displayed on.
             repository: The list of songs being managed by the app.
             rows: The indexes of the songs to be edited in the `repository`.
+            all_tags: Tags that are available for reading and editing
         """
         super().__init__(parent, repository, rows)
+
+        self._all_tags: list[SongTag] = all_tags
 
         if len(rows) == 0:
             self.reject()
@@ -109,7 +112,7 @@ class EditDialog(EditAbstractDialog):
         else:
             self.song_layout = QFormLayout(scroll_widget)
 
-        for tag in prefs.settings.all_tags:
+        for tag in self._all_tags:
             # Needs to be a copy to avoid editing the tag prematurely.
             current_data = copy.deepcopy(tag.getValue(self.song_info.id3))
             widget = self._createWidgetType(tag, current_data)
@@ -219,7 +222,7 @@ class EditDialog(EditAbstractDialog):
         logger.debug("Called updateSong")
         any_updated = False
         for id3_key, value in self.changed_values.items():
-            tag: SongTag | None = mapKey(id3_key, prefs.settings.all_tags)
+            tag: SongTag | None = mapKey(id3_key, self._all_tags)
             if tag is None:
                 logger.debug(f"Unknown id3 key: {id3_key}")
                 continue

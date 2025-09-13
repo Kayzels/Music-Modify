@@ -5,7 +5,7 @@ how multiple values should be entered, and displayed.
 """
 
 import logging
-from typing import override
+from typing import Literal, override
 
 from PySide6.QtWidgets import (
     QFormLayout,
@@ -15,7 +15,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from music_modify.prefs import prefs
+from music_modify.prefs import Settings
 
 from .dialog_prefs_abstract import PrefsAbstractDialog
 
@@ -29,13 +29,14 @@ class PrefsSplitDialog(PrefsAbstractDialog):
     when there are multiple values.
     """
 
-    def __init__(self, parent: QWidget | None = None) -> None:
+    def __init__(self, settings: Settings, parent: QWidget | None = None) -> None:
         """Create a PrefsSplitDialog.
 
         Args:
+            settings: Settings object to read from and update.
             parent: The widget that this dialog should be displayed on.
         """
-        super().__init__(parent)
+        super().__init__(settings, parent)
 
         self.changed_settings: dict[str, str] = {}
         """Stores the name of the setting that has been changed,
@@ -63,11 +64,17 @@ class PrefsSplitDialog(PrefsAbstractDialog):
 
     def _initializeDisplay(self) -> None:
         """Displays current values for split settings before the user changes them."""
-        self.line_edit_split_text_entered.setText(prefs.settings.split_text_entered)
-        self.line_edit_split_values_display.setText(prefs.settings.split_values_display)
-        self.line_edit_split_values_at.setText(prefs.settings.split_values_at)
+        self.line_edit_split_text_entered.setText(self._settings.split_text_entered)
+        self.line_edit_split_values_display.setText(self._settings.split_values_display)
+        self.line_edit_split_values_at.setText(self._settings.split_values_at)
 
-    def _getSettingChange(self, setting_name: str, setting_value: str) -> None:
+    def _getSettingChange(
+        self,
+        setting_name: Literal[
+            "split_text_entered", "split_values_display", "split_values_at"
+        ],
+        setting_value: str,
+    ) -> None:
         """Gets the value a specific setting has been changed to.
 
         Stores this in the list of settings to change, which will be reflected
@@ -88,7 +95,7 @@ class PrefsSplitDialog(PrefsAbstractDialog):
             _ = self.changed_settings.pop(setting_name, None)
             return
 
-        if getattr(prefs.settings, setting_name) != setting_value:
+        if getattr(self._settings, setting_name) != setting_value:
             # Set the value in changed_settings if it's different
             _ = self.changed_settings[setting_name] = setting_value
         else:
@@ -101,17 +108,16 @@ class PrefsSplitDialog(PrefsAbstractDialog):
         logger.debug("Called update settings inside split dialog")
         if len(self.changed_settings) > 0:
             for setting_name, setting_value in self.changed_settings.items():
-                setattr(prefs.settings, setting_name, setting_value)
-            self.settings_updated.emit()
+                setattr(self._settings, setting_name, setting_value)
 
     @override
     def restoreDefaults(self) -> None:
         logger.debug("Restore defaults called for split")
 
         split_defaults: dict[QLineEdit, str] = {
-            self.line_edit_split_text_entered: prefs.settings.default_split_text_entered,
-            self.line_edit_split_values_at: prefs.settings.default_split_values_at,
-            self.line_edit_split_values_display: prefs.settings.default_split_values_display,
+            self.line_edit_split_text_entered: self._settings.default_split_text_entered,
+            self.line_edit_split_values_at: self._settings.default_split_values_at,
+            self.line_edit_split_values_display: self._settings.default_split_values_display,
         }
 
         for line_edit, text in split_defaults.items():

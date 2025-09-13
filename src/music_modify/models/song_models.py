@@ -10,11 +10,12 @@ from PySide6.QtCore import (
     QModelIndex,
     QPersistentModelIndex,
     Qt,
+    Slot,
 )
 
 from music_modify.custom_types import constants
 from music_modify.custom_types.song import Song
-from music_modify.prefs import prefs
+from music_modify.custom_types.songtag import SongTag
 
 from .song_repository import SongRepository
 
@@ -29,15 +30,22 @@ class SongTableModel(QAbstractTableModel):
 
     empty_message: Final[str] = "Files will show here when added. Drag files here."
 
-    def __init__(self, repository: SongRepository) -> None:
+    def __init__(self, repository: SongRepository, table_tags: list[SongTag]) -> None:
         """Create a new model for the songs that should be managed.
 
         Args:
             repository: The list of songs that can be edited.
+            table_tags: The tags that should be used to populate the columns.
         """
         super().__init__()
         self.repository: SongRepository = repository
         self.repository.songs_updated.connect(self.layoutChanged.emit)
+        self._table_tags: list[SongTag] = table_tags
+
+    @Slot()
+    def updateTableTags(self, table_tags: list[SongTag]) -> None:
+        """Updatae the tags that should be used for the columns."""
+        self._table_tags = table_tags
 
     @override
     def data(
@@ -69,7 +77,7 @@ class SongTableModel(QAbstractTableModel):
         if self.rowCount(parent) == 0:
             # NOTE: Uses 1 to keep a column for info
             return 1
-        return len(prefs.settings.table_tags)
+        return len(self._table_tags)
 
     @override
     def headerData(
@@ -85,9 +93,9 @@ class SongTableModel(QAbstractTableModel):
                 if orientation == Qt.Orientation.Vertical:
                     return None
             if orientation == Qt.Orientation.Horizontal and section < len(
-                prefs.settings.table_tags,
+                self._table_tags
             ):
-                return prefs.settings.table_tags[section].display_name
+                return self._table_tags[section].display_name
             if orientation == Qt.Orientation.Vertical and section < len(
                 self.repository,
             ):

@@ -169,15 +169,24 @@ AllowedActionMapping = (
 class EditBulkPeopleWidget(EditBulkAbstractGroupWidget):
     """Widget used for bulk editing values that are [role, person] pairs."""
 
-    def __init__(self, parent: QWidget, data: list[list[str]], tag: SongTag) -> None:
+    def __init__(
+        self,
+        parent: QWidget,
+        data: list[list[str]],
+        tag: SongTag,
+        split_text_entered: str = ", ",
+    ) -> None:
         """Create an EditBulkPeopleWidget.
 
         Args:
             parent: The widget that this widget should be displayed on.
             data: The data to be displayed.
             tag: The field in the song that should be updated.
+            split_text_entered: Character used to separate values when multiple
         """
         super().__init__(parent, tag)
+
+        self._split_text_entered = split_text_entered
 
         self.items: list[tuple[str, str]] = [(role, person) for role, person in data]
         self.setupUi()
@@ -203,15 +212,13 @@ class EditBulkPeopleWidget(EditBulkAbstractGroupWidget):
             {f"{role}{PAIR_SEPARATOR}{person}" for (role, person) in self.items},
         )
         self.remove_pair_widget = EditWithComplete(
-            parent=self,
-            items=tuple(pairs),
+            parent=self, items=tuple(pairs), split_text_entered=self._split_text_entered
         )
         form_layout.addRow("Remove Pair", self.remove_pair_widget)
 
         roles = list({role for (role, _) in self.items})
         self.remove_role_widget = EditWithComplete(
-            parent=self,
-            items=tuple(roles),
+            parent=self, items=tuple(roles), split_text_entered=self._split_text_entered
         )
         form_layout.addRow("Remove Role", self.remove_role_widget)
 
@@ -219,6 +226,7 @@ class EditBulkPeopleWidget(EditBulkAbstractGroupWidget):
         self.remove_person_widget = EditWithComplete(
             parent=self,
             items=tuple(people),
+            split_text_entered=self._split_text_entered,
         )
         form_layout.addRow("Remove Person", self.remove_person_widget)
 
