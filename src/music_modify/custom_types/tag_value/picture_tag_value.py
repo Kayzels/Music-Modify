@@ -63,6 +63,19 @@ class PictureTagValue(AbstractTagValue):
         return apic
 
     @override
+    def updateId3Frame(self, frame: id3.Frame) -> id3.Frame:
+        if frame.FrameID != "APIC":
+            raise ValueError("Tried to update a frame that wasn't an image frame.")
+        frame.data = self.value
+        frame.type = self.picture_type
+        frame.mime = self.mime
+        if self.desc:
+            frame.desc = self.desc
+        if self.salt:
+            frame.salt = self.salt
+        return frame
+
+    @override
     def getDisplayValue(self) -> str:
         # They don't use the builtin enum type,
         # so no name or value attributes.

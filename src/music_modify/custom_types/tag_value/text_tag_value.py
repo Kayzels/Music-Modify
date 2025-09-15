@@ -46,6 +46,16 @@ class TextTagValue(AbstractTagValue):
         return AbstractTagValue.join_character.join(self.value)
 
     @override
+    def updateId3Frame(self, frame: id3.Frame) -> id3.Frame:
+        if not hasattr(frame, "text"):
+            raise ValueError(
+                "Tried to update a frame that was expected to be a text frame, "
+                + "but didn't have a text attribute."
+            )
+        frame.text = self.value
+        return frame
+
+    @override
     def __eq__(self, other: object, /) -> bool:
         if isinstance(other, AbstractTagValue) and isinstance(other.value, list):
             return self.value == other.value

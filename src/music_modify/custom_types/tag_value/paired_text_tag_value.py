@@ -40,6 +40,16 @@ class PairedTextTagValue(AbstractTagValue):
         return id3_frame
 
     @override
+    def updateId3Frame(self, frame: id3.Frame) -> id3.Frame:
+        if not hasattr(frame, "text"):
+            raise ValueError(
+                "Tried to update a frame that was expected to be a paired text frame, "
+                + "but didn't have a people attribute."
+            )
+        frame.people = self.value
+        return frame
+
+    @override
     def getDisplayValue(self) -> str:
         text_pairs: list[str] = []
         for pair in self.value:

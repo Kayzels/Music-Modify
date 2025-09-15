@@ -29,6 +29,10 @@ class AbstractTagValue(ABC):
     def getDisplayValue(self) -> str:
         """Returns a string representation of the stored value."""
 
+    @abstractmethod
+    def updateId3Frame(self, frame: id3.Frame) -> id3.Frame:
+        """Update an existing id3 frame to store the new values."""
+
     @override
     def __eq__(self, other: object, /) -> bool:
         raise NotImplementedError
