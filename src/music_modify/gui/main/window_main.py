@@ -10,7 +10,7 @@ from pathlib import Path
 import time
 from typing import Final, final
 
-from PySide6.QtCore import QPoint, QRect, Qt
+from PySide6.QtCore import QPoint, QRect, Qt, Slot
 from PySide6.QtGui import QAction, QDragEnterEvent, QDragMoveEvent, QDropEvent, QIcon
 from PySide6.QtWidgets import (
     QAbstractItemView,
@@ -29,6 +29,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from music_modify.custom_types.tag_value.abstract_tag_value import AbstractTagValue
 from music_modify.gui.about import AboutDialog
 from music_modify.gui.edit import EditDialogFactory
 from music_modify.gui.prefs import PrefsDialog
@@ -59,6 +60,13 @@ class MainWindow(QMainWindow):
         "Label that contains information about how many songs are present and selected"
         self.statusbar.addWidget(self.statusLabel)
 
+        AbstractTagValue.join_character = self._settings.split_values_display
+
+        @Slot(str)
+        def updateTagValueJoin(character: str) -> None:
+            AbstractTagValue.join_character = character
+            self.refreshTableData()
+
         self.songs_repository: Final[SongRepository] = SongRepository(
             self._settings.all_tags,
             self._settings.table_tags,
@@ -70,7 +78,8 @@ class MainWindow(QMainWindow):
         )
         "Model that links between the song repository and the display of the metadata"
 
-        self._settings.tags_updated.connect(self.refreshTable)
+        self._settings.tags_updated.connect(self.refreshTableLayout)
+        self._settings.split_values_display_changed.connect(updateTagValueJoin)
 
         self.dialog_factory: EditDialogFactory = EditDialogFactory(
             self,
@@ -302,7 +311,7 @@ class MainWindow(QMainWindow):
         prefs_dialog = PrefsDialog(parent=self, settings=self._settings)
         prefs_dialog.show()
 
-    def refreshTable(self) -> None:
+    def refreshTableLayout(self) -> None:
         """Update the display of the table."""
         self.songs_model.layoutAboutToBeChanged.emit()
         self.songs_model.updateTableTags(self._settings.table_tags)
@@ -310,6 +319,17 @@ class MainWindow(QMainWindow):
         self.songs_model.layoutChanged.emit()
         updateTableView(
             self.files_table_view, self.songs_repository, self._settings.table_tags
+        )
+
+    def refreshTableData(self) -> None:
+        """Update the data for each item in the table."""
+        if self.songs_model.rowCount() == 0 or self.songs_model.columnCount() == 0:
+            return
+        self.songs_model.dataChanged.emit(
+            self.songs_model.index(0, 0),
+            self.songs_model.index(
+                self.songs_model.rowCount() - 1, self.songs_model.columnCount() - 1
+            ),
         )
 
     def showEditDialog(self, *, bulk: bool = False) -> None:
@@ -337,7 +357,7 @@ class MainWindow(QMainWindow):
             if result == QDialog.DialogCode.Accepted:
                 dialog.updateSongInfo()
 
-        dialog.info_updated.connect(self.refreshTable)
+        dialog.info_updated.connect(self.refreshTableLayout)
         dialog.finished.connect(processDialogResult)
 
         dialog.show()

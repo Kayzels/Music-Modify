@@ -16,11 +16,10 @@ class PairedTextTagValue(AbstractTagValue):
     def __init__(
         self,
         value: list[list[str]],
-        join_character: str = ", ",
         parent: QObject | None = None,
     ) -> None:
         """Creates a PairedTextTagValue for storing pair values."""
-        super().__init__(join_character, parent)
+        super().__init__(parent)
         self._value: list[list[str]] = [
             pair for pair in value if len(pair) == constants.PAIR_SIZE
         ]
@@ -49,7 +48,7 @@ class PairedTextTagValue(AbstractTagValue):
         for pair in self.value:
             role, person = pair
             text_pairs.append(f"{role}: {person}")
-        return self.join_character.join(text_pairs)
+        return AbstractTagValue.join_character.join(text_pairs)
 
     @override
     def __eq__(self, other: object, /) -> bool:

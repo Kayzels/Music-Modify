@@ -21,7 +21,6 @@ class PictureTagValue(AbstractTagValue):
         picture_type: id3.PictureType = id3.PictureType.COVER_FRONT,
         *,
         parent: QObject | None = None,
-        join_character: str = ", ",
         desc: str = "",
         salt: str | None = None,
     ) -> None:
@@ -38,7 +37,7 @@ class PictureTagValue(AbstractTagValue):
             desc: Text description of the image.
             salt: Value used to ensure unique frames with the same description.
         """
-        super().__init__(join_character, parent)
+        super().__init__(parent)
         self._data: bytes = data
         self.mime: str = mime
         self.picture_type: id3.PictureType = picture_type
@@ -82,7 +81,7 @@ class PictureTagValue(AbstractTagValue):
             suffix += self.desc
         if self.mime:
             if suffix:
-                suffix += self.join_character
+                suffix += AbstractTagValue.join_character
             suffix += self.mime
         if suffix:
             result += f" ({suffix})"

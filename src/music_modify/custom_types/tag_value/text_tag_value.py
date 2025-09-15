@@ -15,11 +15,10 @@ class TextTagValue(AbstractTagValue):
     def __init__(
         self,
         value: Sequence[str | id3.ID3TimeStamp],
-        join_character: str = ", ",
         parent: QObject | None = None,
     ) -> None:
         """Creates a TextTagValue for storing text values."""
-        super().__init__(join_character, parent)
+        super().__init__(parent)
         self._value = [str(t) for t in value]
 
     @property
@@ -47,7 +46,7 @@ class TextTagValue(AbstractTagValue):
 
     @override
     def getDisplayValue(self) -> str:
-        return self.join_character.join(self.value)
+        return AbstractTagValue.join_character.join(self.value)
 
     @override
     def __eq__(self, other: object, /) -> bool:
