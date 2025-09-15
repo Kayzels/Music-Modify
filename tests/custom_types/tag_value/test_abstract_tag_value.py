@@ -5,7 +5,7 @@ from typing import Any, override
 from mutagen import id3
 import pytest
 
-from music_modify.custom_types.tag_value.abstract_tag_value import AbstractTagValue
+from music_modify.custom_types.tag_value import AbstractTagValue
 
 
 def test_AbstractTagValue_eq_NotImplemented_raised() -> None:

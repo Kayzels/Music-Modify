@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from typing import Any, override
 
 from mutagen import id3
-from PySide6.QtCore import QObject, Signal
+from PySide6.QtCore import QObject
 
 from music_modify.core.meta import ABCQMeta
 
@@ -16,7 +16,6 @@ class AbstractTagValue(QObject, ABC, metaclass=ABCQMeta):
     """
 
     join_character = ", "
-    join_character_changed: Signal = Signal()
 
     def __init__(self, /, parent: QObject | None = None) -> None:
         """Creates an AbstractTagValue."""

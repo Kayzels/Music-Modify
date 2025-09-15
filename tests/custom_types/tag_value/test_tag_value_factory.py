@@ -6,15 +6,15 @@ from typing import Any
 from unittest.mock import MagicMock
 
 from mutagen import id3
-from PySide6.QtCore import QObject, Signal
 import pytest
-from pytestqt.qtbot import QtBot
 
-from music_modify.custom_types.tag_value.abstract_tag_value import AbstractTagValue
-from music_modify.custom_types.tag_value.paired_text_tag_value import PairedTextTagValue
-from music_modify.custom_types.tag_value.picture_tag_value import PictureTagValue
-from music_modify.custom_types.tag_value.tag_value_factory import TagValueFactory
-from music_modify.custom_types.tag_value.text_tag_value import TextTagValue
+from music_modify.custom_types.tag_value import (
+    AbstractTagValue,
+    PairedTextTagValue,
+    PictureTagValue,
+    TagValueFactory,
+    TextTagValue,
+)
 
 
 @pytest.mark.parametrize(
@@ -206,25 +206,3 @@ def test_TagValueFactory_createTagValue_image_error_reading_logs_error(
     assert result is None
     assert f"Error reading image file '{image_path}' for APIC tag." in caplog.text
     assert caplog.records[0].levelname == "ERROR"
-
-
-def test_TagValueFactory_emit_update(qtbot: QtBot) -> None:
-    """Tests that when a signal is received for updating, it updates the TagValues."""
-
-    class _TestObject(QObject):
-        value_updated: Signal = Signal(str)
-
-        def __init__(self, /, parent: QObject | None = None) -> None:
-            super().__init__(parent)
-
-    test_object = _TestObject()
-    first_join_character = "; "
-    second_join_character = ", "
-    created_object = TagValueFactory.createTagValue(
-        ["Text"], "TIT2", first_join_character, test_object.value_updated
-    )
-    assert created_object is not None
-    assert created_object.join_character == first_join_character
-    with qtbot.waitSignal(created_object.join_character_changed, timeout=1000):
-        test_object.value_updated.emit(second_join_character)
-    assert created_object.join_character == second_join_character

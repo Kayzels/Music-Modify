@@ -5,9 +5,8 @@ from typing import Any, TypedDict
 
 from mutagen import id3
 import pytest
-from pytestqt.qtbot import QtBot
 
-from music_modify.custom_types.tag_value.picture_tag_value import PictureTagValue
+from music_modify.custom_types.tag_value import AbstractTagValue, PictureTagValue
 
 
 class _PictureParams(TypedDict, total=False):
@@ -16,7 +15,6 @@ class _PictureParams(TypedDict, total=False):
     picture_type: id3.PictureType
     desc: str
     salt: str | None
-    join_character: str
 
 
 @pytest.mark.parametrize(
@@ -95,25 +93,29 @@ def test_PictureTagValue_toId3Frame_logs_when_wrong_id3_key(
 
 
 @pytest.mark.parametrize(
-    ("params", "expected"),
+    ("params", "join_character", "expected"),
     [
         pytest.param(
             {},
+            None,
             "Attached Picture: Cover Front",
             id="default_values",
         ),
         pytest.param(
             {"desc": "Word"},
+            None,
             "Attached Picture: Cover Front (Word)",
             id="set_desc",
         ),
         pytest.param(
             {"picture_type": id3.PictureType.LEAD_ARTIST},
+            None,
             "Attached Picture: Lead Artist",
             id="set_type",
         ),
         pytest.param(
             {"mime": "image/jpeg"},
+            None,
             "Attached Picture: Cover Front (image/jpeg)",
             id="set_mime",
         ),
@@ -122,6 +124,7 @@ def test_PictureTagValue_toId3Frame_logs_when_wrong_id3_key(
                 "mime": "image/jpeg",
                 "desc": "Word",
             },
+            ", ",
             "Attached Picture: Cover Front (Word, image/jpeg)",
             id="set_desc_mime",
         ),
@@ -130,6 +133,7 @@ def test_PictureTagValue_toId3Frame_logs_when_wrong_id3_key(
                 "mime": "image/jpeg",
                 "picture_type": id3.PictureType.LEAD_ARTIST,
             },
+            None,
             "Attached Picture: Lead Artist (image/jpeg)",
             id="set_mime_type",
         ),
@@ -138,6 +142,7 @@ def test_PictureTagValue_toId3Frame_logs_when_wrong_id3_key(
                 "picture_type": id3.PictureType.LEAD_ARTIST,
                 "desc": "Artist",
             },
+            None,
             "Attached Picture: Lead Artist (Artist)",
             id="set_desc_type",
         ),
@@ -146,15 +151,19 @@ def test_PictureTagValue_toId3Frame_logs_when_wrong_id3_key(
                 "mime": "image/jpeg",
                 "picture_type": id3.PictureType.LEAD_ARTIST,
                 "desc": "Artist",
-                "join_character": "; ",
             },
+            "; ",
             "Attached Picture: Lead Artist (Artist; image/jpeg)",
             id="set_mime_type_desc",
         ),
     ],
 )
-def test_PictureTagValue_getDisplayValue(params: _PictureParams, expected: str) -> None:
+def test_PictureTagValue_getDisplayValue(
+    params: _PictureParams, join_character: str | None, expected: str
+) -> None:
     """Tests that the display value is calculated correctly."""
+    if join_character:
+        AbstractTagValue.join_character = join_character
     created_value = PictureTagValue(**params)
     assert created_value.getDisplayValue() == expected
 
@@ -224,41 +233,5 @@ def test_TextTagValue_eq(
 def test_PictureTagValue_hash_raises_TypeError() -> None:
     """Tests that PictureTagValues aren't hashable."""
     created_value = PictureTagValue()
-    with pytest.raises(TypeError, match="TagValue objects are not hashable."):
+    with pytest.raises(TypeError, match="TagValue objects are not hashable\\."):
         hash(created_value)
-
-
-def test_PictureTagValue_join_diff_char_update_and_signal(qtbot: QtBot) -> None:
-    """Tests that the join character is updated when sent a different character.
-
-    The value should be updated, it should reflect in getDisplayValue,
-    and a signal should be emitted.
-    """
-    created_value = PictureTagValue(
-        mime="image/jpeg", desc="Image", join_character=", "
-    )
-    with qtbot.waitSignal(created_value.join_character_changed, timeout=1000):
-        created_value.join_character = "; "
-    assert created_value.join_character == "; "
-    assert (
-        created_value.getDisplayValue()
-        == "Attached Picture: Cover Front (Image; image/jpeg)"
-    )
-
-
-def test_PictureTagValue_join_same_char_no_signal(qtbot: QtBot) -> None:
-    """Tests that the join character is not updated when sent the same character.
-
-    The value should not be updated, getDisplayValue should not change,
-    and a signal should not be emitted.
-    """
-    created_value = PictureTagValue(
-        mime="image/jpeg", desc="Image", join_character=", "
-    )
-    with qtbot.assertNotEmitted(created_value.join_character_changed):
-        created_value.join_character = ", "
-    assert created_value.join_character == ", "
-    assert (
-        created_value.getDisplayValue()
-        == "Attached Picture: Cover Front (Image, image/jpeg)"
-    )
