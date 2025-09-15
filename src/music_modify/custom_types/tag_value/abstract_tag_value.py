@@ -4,22 +4,15 @@ from abc import ABC, abstractmethod
 from typing import Any, override
 
 from mutagen import id3
-from PySide6.QtCore import QObject
-
-from music_modify.core.meta import ABCQMeta
 
 
-class AbstractTagValue(QObject, ABC, metaclass=ABCQMeta):
+class AbstractTagValue(ABC):
     """Abstract class for application-level tag-value representations.
 
     Supports storing values, equality checks, and converting to id3 frames.
     """
 
     join_character = ", "
-
-    def __init__(self, /, parent: QObject | None = None) -> None:
-        """Creates an AbstractTagValue."""
-        super().__init__(parent)
 
     @property
     @abstractmethod

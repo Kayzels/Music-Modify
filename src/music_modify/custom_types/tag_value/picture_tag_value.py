@@ -4,7 +4,6 @@ import logging
 from typing import override
 
 from mutagen import id3
-from PySide6.QtCore import QObject
 
 from .abstract_tag_value import AbstractTagValue
 
@@ -14,13 +13,12 @@ logger = logging.getLogger(__name__)
 class PictureTagValue(AbstractTagValue):
     """Class for managing tags that store image values."""
 
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
         data: bytes = b"",
         mime: str = "",
         picture_type: id3.PictureType = id3.PictureType.COVER_FRONT,
         *,
-        parent: QObject | None = None,
         desc: str = "",
         salt: str | None = None,
     ) -> None:
@@ -37,7 +35,6 @@ class PictureTagValue(AbstractTagValue):
             desc: Text description of the image.
             salt: Value used to ensure unique frames with the same description.
         """
-        super().__init__(parent)
         self._data: bytes = data
         self.mime: str = mime
         self.picture_type: id3.PictureType = picture_type

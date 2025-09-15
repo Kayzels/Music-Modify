@@ -4,7 +4,6 @@ from collections.abc import Sequence
 from typing import override
 
 from mutagen import id3
-from PySide6.QtCore import QObject
 
 from .abstract_tag_value import AbstractTagValue
 
@@ -15,10 +14,8 @@ class TextTagValue(AbstractTagValue):
     def __init__(
         self,
         value: Sequence[str | id3.ID3TimeStamp],
-        parent: QObject | None = None,
     ) -> None:
         """Creates a TextTagValue for storing text values."""
-        super().__init__(parent)
         self._value = [str(t) for t in value]
 
     @property
