@@ -3,6 +3,7 @@
 This works as a way of interacting with the list of songs.
 """
 
+from collections.abc import Sequence
 from os import PathLike
 
 from PySide6.QtCore import QObject, Signal
@@ -30,18 +31,16 @@ class SongRepository(QObject):
         self._display_split: str = display_split
         self._songs: list[Song] = []
 
-    def getSong(self, index: int) -> Song | None:
-        """Gets the song at a specific index."""
-        if index < 0 or index >= len(self._songs):
-            return None
-        return self._songs[index]
-
-    def __getitem__(self, index: int) -> Song | None:
+    def __getitem__(self, index: int) -> Song:
         """Returns the song at the index.
 
-        Returns `None` if the index is invalid, rather than raising an IndexError.
+        Raises:
+            IndexError if the index isn't valid.
         """
-        return self.getSong(index)
+        try:
+            return self._songs[index]
+        except IndexError as err:
+            raise IndexError from err
 
     def __len__(self) -> int:
         """Returns the number of songs in the repository."""
@@ -55,35 +54,44 @@ class SongRepository(QObject):
             return file_matches or song_matches
         return any(song.file == new_song for song in self._songs)
 
-    def addFile(self, file: str | PathLike[str]) -> None:
-        """Add file to the list of songs, if not already present."""
-        if file not in self:
-            self._songs.append(
-                Song(self._all_tags, self._table_tags, self._display_split, file)
-            )
-            self.songs_updated.emit()
+    def add(
+        self,
+        new: Song
+        | str
+        | PathLike[str]
+        | Sequence[str | PathLike[str] | Song]
+        | None = None,
+    ) -> None:
+        """Adds a Song to the list of songs, if not already present.
 
-    def addFiles(self, files: list[str] | list[PathLike[str]]) -> None:
-        """Adds the list of files to the repository."""
-        for file in files:
-            self.addFile(file)
-
-    def addSong(self, song: Song | None = None) -> None:
-        """Add the song to the repository, not necessarily linked to a file."""
-        if song:
-            self._songs.append(song)
-        else:
-            self._songs.append(
-                Song(self._all_tags, self._table_tags, self._display_split)
-            )
+        If passed in a list of file paths, adds all the files that aren't present.
+        """
+        if isinstance(new, Sequence):
+            for file in new:
+                self.add(file)
+            return
+        if isinstance(new, Song):
+            if new not in self:
+                self._songs.append(new)
+                self.songs_updated.emit()
+            return
+        if new is not None and new in self:
+            return
+        song = Song(
+            all_tags=self._all_tags,
+            table_tags=self._table_tags,
+            display_split=self._display_split,
+            file=new,
+        )
+        self._songs.append(song)
         self.songs_updated.emit()
 
-    def clearFiles(self) -> None:
+    def clear(self) -> None:
         """Remove all songs from the repository."""
         self._songs.clear()
         self.songs_updated.emit()
 
-    def removeSongs(self, indexes: list[int]) -> None:
+    def removeAtIndexes(self, indexes: list[int]) -> None:
         """Remove the songs at the specific indexes from the repository."""
         if not indexes:
             return

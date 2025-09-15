@@ -3,7 +3,7 @@
 Defines a `SongTableModel`.
 """
 
-from typing import Final, cast, override
+from typing import Final, override
 
 from PySide6.QtCore import (
     QAbstractTableModel,
@@ -14,7 +14,6 @@ from PySide6.QtCore import (
 )
 
 from music_modify.custom_types import constants
-from music_modify.custom_types.song import Song
 from music_modify.custom_types.songtag import SongTag
 
 from .song_repository import SongRepository
@@ -57,8 +56,7 @@ class SongTableModel(QAbstractTableModel):
             return None
 
         if role == Qt.ItemDataRole.DisplayRole:
-            # We know Song always exists, as otherwise index would be invalid
-            song = cast(Song, self.repository.getSong(index.row()))
+            song = self.repository[index.row()]
             return song.display_info[index.column()]
         return None
 

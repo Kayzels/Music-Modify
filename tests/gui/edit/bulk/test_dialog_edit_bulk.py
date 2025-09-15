@@ -48,8 +48,8 @@ def test_EditBulkDialog_updateSongInfo_no_changes(
     monkeypatch.setattr(song_2, "save", Mock())
 
     repo = SongRepository(table_tags, table_tags, ", ")
-    repo.addSong(song_1)
-    repo.addSong(song_2)
+    repo.add(song_1)
+    repo.add(song_2)
     rows = [0, 1]
 
     mock_widget_1 = Mock()
@@ -87,8 +87,8 @@ def test_EditBulkDialog_updateSongInfo_with_changes(
     monkeypatch.setattr(song_2, "save", Mock())
 
     repo = SongRepository(table_tags, table_tags, ", ")
-    repo.addSong(song_1)
-    repo.addSong(song_2)
+    repo.add(song_1)
+    repo.add(song_2)
     rows = [0, 1]
 
     mock_widget_1 = Mock()
@@ -131,8 +131,8 @@ def test_EditBulkDialog_updateSongInfo_with_changes_single(
     monkeypatch.setattr(song_2, "save", Mock())
 
     repo = SongRepository(table_tags, table_tags, ", ")
-    repo.addSong(song_1)
-    repo.addSong(song_2)
+    repo.add(song_1)
+    repo.add(song_2)
     rows = [0, 1]
 
     mock_widget_1 = Mock()
@@ -173,8 +173,8 @@ def test_EditBulkDialog_updateSongInfo_no_widgets(
     monkeypatch.setattr(song_2, "save", Mock())
 
     repo = SongRepository(table_tags, table_tags, ", ")
-    repo.addSong(song_1)
-    repo.addSong(song_2)
+    repo.add(song_1)
+    repo.add(song_2)
     rows = [0, 1]
 
     dialog = EditBulkDialog(parent, repo, rows, ", ", table_tags)
@@ -205,7 +205,7 @@ def test_EditBulkDialog_setupSongInfo_unsupported_editor_type_logged(
     mock_tag.display_name = "Automatic Tag"
 
     repo = SongRepository([mock_tag], [mock_tag], ", ")
-    repo.addSong()
+    repo.add()
     rows = [0]
 
     with caplog.at_level(logging.WARNING):

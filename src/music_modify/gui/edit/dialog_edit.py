@@ -57,8 +57,10 @@ class EditDialog(EditAbstractDialog):
         self.current_index: int = 0
         "The index of this specific song in the song repository"
 
-        song_info = self._getSong()
-        if song_info is None:
+        try:
+            song_info = self._getSong()
+        except IndexError:
+            logger.warning("Closing dialog, as no song found at index.")
             self.reject()
             return
 
@@ -254,16 +256,17 @@ class EditDialog(EditAbstractDialog):
         for widget in widgets:
             widget.reset()
 
-    def _getSong(self) -> Song | None:
+    def _getSong(self) -> Song:
         """Gets the song based on the index of the list of indexes.
 
-        Returns `None` if not valid.
+        Raises:
+            IndexError if invalid index (no song at that row number).
         """
         row = self.rows[self.current_index]
-        song_info = self.repository.getSong(row)
-        if song_info is None:
-            logger.warning(f"Couldn't find a song at row number {row}")
-            return None
+        try:
+            song_info = self.repository[row]
+        except IndexError as err:
+            raise IndexError from err
         return song_info
 
     def _switchButtonState(self) -> None:
@@ -295,8 +298,9 @@ class EditDialog(EditAbstractDialog):
                 self.current_index -= 1
         self.updateSongInfo()
         logger.debug(f"Called show song in direction with {nav_direction}")
-        song_info = self._getSong()
-        if song_info is None:
+        try:
+            song_info = self._getSong()
+        except IndexError:
             logger.warning("Invalid song, closing dialog")
             self.reject()
             return

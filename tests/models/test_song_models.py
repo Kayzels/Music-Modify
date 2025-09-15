@@ -31,7 +31,7 @@ def test_SongTableModel_songs_added(song_path: Path, table_tags: list[SongTag]) 
     """Test that the model is updated when songs are added to the repo."""
     repo = SongRepository(table_tags, table_tags, "")
     model = SongTableModel(repo, table_tags)
-    repo.addFile(song_path)
+    repo.add(song_path)
     assert model.rowCount() == 1
     assert model.columnCount() == len(table_tags)
 
@@ -60,7 +60,7 @@ def test_SongTableModel_headerData_songs_added(
     """Test that headers display when songs are added."""
     repo = SongRepository(table_tags, table_tags, "")
     model = SongTableModel(repo, table_tags)
-    repo.addFiles(song_paths)
+    repo.add(song_paths)
     assert len(repo) > 0
     assert (
         model.headerData(
@@ -117,13 +117,12 @@ def test_SongTableModel_data(
     """
     repo = SongRepository(table_tags, table_tags, "")
     model = SongTableModel(repo, table_tags)
-    repo.addFiles(song_paths)
+    repo.add(song_paths)
     assert model.rowCount() == len(song_paths)
 
-    assert (song := repo.getSong(0)) is not None
     assert (
         model.data(model.index(0, 0), Qt.ItemDataRole.DisplayRole)
-        == song.display_info[0]
+        == repo[0].display_info[0]
     )
     # Invalid index is None
     assert (

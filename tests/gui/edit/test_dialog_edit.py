@@ -27,7 +27,7 @@ def _createParentAndRepo(
     qtbot.addWidget(widget)
     repo = SongRepository(table_tags, table_tags, ", ")
     for _ in range(num_songs):
-        repo.addSong()
+        repo.add()
     return widget, repo
 
 

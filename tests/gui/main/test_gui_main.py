@@ -178,7 +178,7 @@ def test_MainWindow_removeSelectedFiles_none_selected(
     qtbot.addWidget(window)
     window.addFiles(song_paths)
 
-    window.songs_repository.removeSongs = MagicMock()
+    window.songs_repository.removeAtIndexes = MagicMock()
     window.files_table_view.clearSelection = MagicMock()
 
     assert window.files_table_view.model().rowCount() == num_temp_songs
@@ -191,7 +191,7 @@ def test_MainWindow_removeSelectedFiles_none_selected(
         assert caplog.records[0].levelname == "DEBUG"
 
     assert window.files_table_view.model().rowCount() == num_temp_songs
-    window.songs_repository.removeSongs.assert_not_called()
+    window.songs_repository.removeAtIndexes.assert_not_called()
     window.files_table_view.clearSelection.assert_not_called()
 
 
@@ -206,8 +206,8 @@ def test_MainWindow_removeSelectedFiles_all_selected(
     qtbot.addWidget(window)
     window.addFiles(song_paths)
 
-    window.songs_repository.removeSongs = MagicMock()
-    window.songs_repository.clearFiles = MagicMock()
+    window.songs_repository.removeAtIndexes = MagicMock()
+    window.songs_repository.clear = MagicMock()
     window.files_table_view.clearSelection = MagicMock()
 
     assert window.files_table_view.model().rowCount() == num_temp_songs
@@ -215,8 +215,8 @@ def test_MainWindow_removeSelectedFiles_all_selected(
 
     window.removeSelectedFiles()
 
-    window.songs_repository.clearFiles.assert_called_once()
-    window.songs_repository.removeSongs.assert_not_called()
+    window.songs_repository.clear.assert_called_once()
+    window.songs_repository.removeAtIndexes.assert_not_called()
     window.files_table_view.clearSelection.assert_not_called()
 
 

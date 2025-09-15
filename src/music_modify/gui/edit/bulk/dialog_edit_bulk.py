@@ -100,9 +100,11 @@ class EditBulkDialog(EditAbstractDialog):
         self.songs: list[Song] = []
         "The list of song objects that should be changed."
         for index in rows:
-            song = repository[index]
-            if song is not None:
+            try:
+                song = repository[index]
                 self.songs.append(song)
+            except IndexError:
+                logger.warning(f"Tried to get a song at an invalid index: {index}")
 
         self.setWindowTitle(f"Bulk editing {len(self.songs)} songs")
 

@@ -187,7 +187,7 @@ class MainWindow(QMainWindow):
         progress_dialog.setWindowTitle("Add Files")
         for index, file in enumerate(files):
             progress_dialog.setValue(index)
-            self.songs_repository.addFile(file)
+            self.songs_repository.add(file)
             time_taken_seconds: float = time.time() - start_time
             time_taken: str = formatTime(datetime.timedelta(seconds=time_taken_seconds))
             estimated_time: float = (time_taken_seconds / (index + 1)) * len(files)
@@ -246,7 +246,7 @@ class MainWindow(QMainWindow):
     def clearFiles(self) -> None:
         """Remove all files from the model."""
         self.songs_model.layoutAboutToBeChanged.emit()
-        self.songs_repository.clearFiles()
+        self.songs_repository.clear()
         self.files_table_view.clearSelection()
         self.action_clear_files.setEnabled(False)
 
@@ -275,12 +275,12 @@ class MainWindow(QMainWindow):
             logger.debug("Called clear selection with a length of 0.")
             return
         if selection_length == len(self.songs_repository):
-            self.songs_repository.clearFiles()
+            self.songs_repository.clear()
             return
 
         rows = getSelectedRows(self.files_table_view)
 
-        self.songs_repository.removeSongs(rows)
+        self.songs_repository.removeAtIndexes(rows)
         self.files_table_view.clearSelection()
 
     def addStatusbarAppMessage(self) -> None:
