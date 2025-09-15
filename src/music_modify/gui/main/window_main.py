@@ -67,11 +67,7 @@ class MainWindow(QMainWindow):
             AbstractTagValue.join_character = character
             self.refreshTableData()
 
-        self.songs_repository: Final[SongRepository] = SongRepository(
-            self._settings.all_tags,
-            self._settings.table_tags,
-            self._settings.split_values_display,
-        )
+        self.songs_repository: Final[SongRepository] = SongRepository()
         "Repository that stores the songs being managed"
         self.songs_model: Final[SongTableModel] = SongTableModel(
             self.songs_repository, self._settings.table_tags

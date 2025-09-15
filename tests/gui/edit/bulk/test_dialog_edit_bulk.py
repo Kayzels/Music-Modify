@@ -42,12 +42,12 @@ def test_EditBulkDialog_updateSongInfo_no_changes(
     parent = QWidget()
     qtbot.addWidget(parent)
 
-    song_1 = Song(table_tags, table_tags, ", ")
+    song_1 = Song()
     monkeypatch.setattr(song_1, "save", Mock())
-    song_2 = Song(table_tags, table_tags, ", ")
+    song_2 = Song()
     monkeypatch.setattr(song_2, "save", Mock())
 
-    repo = SongRepository(table_tags, table_tags, ", ")
+    repo = SongRepository()
     repo.add(song_1)
     repo.add(song_2)
     rows = [0, 1]
@@ -81,12 +81,12 @@ def test_EditBulkDialog_updateSongInfo_with_changes(
     parent = QWidget()
     qtbot.addWidget(parent)
 
-    song_1 = Song(table_tags, table_tags, ", ")
+    song_1 = Song()
     monkeypatch.setattr(song_1, "save", Mock())
-    song_2 = Song(table_tags, table_tags, ", ")
+    song_2 = Song()
     monkeypatch.setattr(song_2, "save", Mock())
 
-    repo = SongRepository(table_tags, table_tags, ", ")
+    repo = SongRepository()
     repo.add(song_1)
     repo.add(song_2)
     rows = [0, 1]
@@ -125,12 +125,12 @@ def test_EditBulkDialog_updateSongInfo_with_changes_single(
     parent = QWidget()
     qtbot.addWidget(parent)
 
-    song_1 = Song(table_tags, table_tags, ", ")
+    song_1 = Song()
     monkeypatch.setattr(song_1, "save", Mock())
-    song_2 = Song(table_tags, table_tags, ", ")
+    song_2 = Song()
     monkeypatch.setattr(song_2, "save", Mock())
 
-    repo = SongRepository(table_tags, table_tags, ", ")
+    repo = SongRepository()
     repo.add(song_1)
     repo.add(song_2)
     rows = [0, 1]
@@ -167,12 +167,12 @@ def test_EditBulkDialog_updateSongInfo_no_widgets(
     parent = QWidget()
     qtbot.addWidget(parent)
 
-    song_1 = Song(table_tags, table_tags, ", ")
+    song_1 = Song()
     monkeypatch.setattr(song_1, "save", Mock())
-    song_2 = Song(table_tags, table_tags, ", ")
+    song_2 = Song()
     monkeypatch.setattr(song_2, "save", Mock())
 
-    repo = SongRepository(table_tags, table_tags, ", ")
+    repo = SongRepository()
     repo.add(song_1)
     repo.add(song_2)
     rows = [0, 1]
@@ -204,7 +204,7 @@ def test_EditBulkDialog_setupSongInfo_unsupported_editor_type_logged(
     mock_tag.getValue.return_value = None
     mock_tag.display_name = "Automatic Tag"
 
-    repo = SongRepository([mock_tag], [mock_tag], ", ")
+    repo = SongRepository()
     repo.add()
     rows = [0]
 

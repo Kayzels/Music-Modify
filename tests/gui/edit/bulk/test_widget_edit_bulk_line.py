@@ -120,16 +120,14 @@ def test_EditBulkLineWidget_updateTag_clear_no_songs(qtbot: QtBot) -> None:
     assert not widget.updateTag([])
 
 
-def test_EditBulkLineWidget_updateTag_apply_empty_clears(
-    qtbot: QtBot, table_tags: list[SongTag]
-) -> None:
+def test_EditBulkLineWidget_updateTag_apply_empty_clears(qtbot: QtBot) -> None:
     """Test that updateTag clears the tag if apply is called with an empty widget."""
     _, tag, widget = _createWidget(qtbot)
 
     widget.clear_checkbox.setChecked(False)
     widget.apply_checkbox.setChecked(True)
 
-    song = Song(table_tags, table_tags, "")
+    song = Song()
     song.setTag(tag, ["First"])
     assert song.hasTag(tag)
     widget.main_widget.setText("")
@@ -138,16 +136,14 @@ def test_EditBulkLineWidget_updateTag_apply_empty_clears(
     assert song.hasTag(tag) is False
 
 
-def test_EditBulkLineWidget_updateTag_apply_only_space_clears(
-    qtbot: QtBot, table_tags: list[SongTag]
-) -> None:
+def test_EditBulkLineWidget_updateTag_apply_only_space_clears(qtbot: QtBot) -> None:
     """Test that updateTag clears tag if apply called with widget having only space."""
     _, tag, widget = _createWidget(qtbot)
 
     widget.clear_checkbox.setChecked(False)
     widget.apply_checkbox.setChecked(True)
 
-    song = Song(table_tags, table_tags, "")
+    song = Song()
     song.setTag(tag, ["First"])
     assert song.hasTag(tag)
     widget.main_widget.setText("     ")
@@ -156,16 +152,14 @@ def test_EditBulkLineWidget_updateTag_apply_only_space_clears(
     assert song.hasTag(tag) is False
 
 
-def test_EditBulkLineWidget_updateTag_apply_not_empty_sets(
-    qtbot: QtBot, table_tags: list[SongTag]
-) -> None:
+def test_EditBulkLineWidget_updateTag_apply_not_empty_sets(qtbot: QtBot) -> None:
     """Test that calling update when not empty sets the tag value."""
     _, tag, widget = _createWidget(qtbot)
 
     widget.clear_checkbox.setChecked(False)
     widget.apply_checkbox.setChecked(True)
 
-    song = Song(table_tags, table_tags, "")
+    song = Song()
     song.setTag(tag, ["First"])
     assert song.hasTag(tag)
 
@@ -180,7 +174,7 @@ def test_EditBulkLineWidget_updateTag_apply_not_empty_sets(
 
 
 def test_EditBulkLineWidget_updateTag_apply_not_empty_sets_stripped(
-    qtbot: QtBot, table_tags: list[SongTag]
+    qtbot: QtBot,
 ) -> None:
     """Test that calling update when not empty sets the tag value without whitespace."""
     _, tag, widget = _createWidget(qtbot)
@@ -188,7 +182,7 @@ def test_EditBulkLineWidget_updateTag_apply_not_empty_sets_stripped(
     widget.clear_checkbox.setChecked(False)
     widget.apply_checkbox.setChecked(True)
 
-    song = Song(table_tags, table_tags, "")
+    song = Song()
     song.setTag(tag, ["First"])
     assert song.hasTag(tag)
 
@@ -213,7 +207,7 @@ def test_EditBulkLineWidget_updateTag_clear(
     widget.apply_checkbox.setChecked(False)
     widget.clear_checkbox.setChecked(True)
 
-    song = Song(table_tags, table_tags, "")
+    song = Song()
     song.setTag(tag, ["First"])
     assert song.hasTag(tag)
 

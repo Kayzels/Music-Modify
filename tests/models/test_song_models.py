@@ -1,13 +1,13 @@
 """Tests for SongModel."""
 
-# pyright: reportUnusedParameter = false
-
 from os import PathLike
 from pathlib import Path
 
 from PySide6.QtCore import Qt
 
+from music_modify.custom_types.song import Song
 from music_modify.custom_types.songtag import SongTag
+from music_modify.custom_types.tag_value import TextTagValue
 from music_modify.models import SongRepository, SongTableModel
 
 
@@ -17,7 +17,7 @@ def test_SongTableModel_init() -> None:
     It should have no rows, but one column,
     and the header should display the empty message.
     """
-    repo = SongRepository([], [], "")
+    repo = SongRepository()
     model = SongTableModel(repo, [])
     assert model.rowCount() == 0
     assert model.columnCount() == 1
@@ -29,7 +29,7 @@ def test_SongTableModel_init() -> None:
 
 def test_SongTableModel_songs_added(song_path: Path, table_tags: list[SongTag]) -> None:
     """Test that the model is updated when songs are added to the repo."""
-    repo = SongRepository(table_tags, table_tags, "")
+    repo = SongRepository()
     model = SongTableModel(repo, table_tags)
     repo.add(song_path)
     assert model.rowCount() == 1
@@ -38,7 +38,7 @@ def test_SongTableModel_songs_added(song_path: Path, table_tags: list[SongTag]) 
 
 def test_SongTableModel_headerData_no_songs() -> None:
     """Test that vertical headers don't exist when there is no song data."""
-    repo = SongRepository([], [], "")
+    repo = SongRepository()
     model = SongTableModel(repo, [])
     assert (
         model.headerData(
@@ -58,7 +58,7 @@ def test_SongTableModel_headerData_songs_added(
     song_paths: list[PathLike[str]], table_tags: list[SongTag]
 ) -> None:
     """Test that headers display when songs are added."""
-    repo = SongRepository(table_tags, table_tags, "")
+    repo = SongRepository()
     model = SongTableModel(repo, table_tags)
     repo.add(song_paths)
     assert len(repo) > 0
@@ -100,33 +100,39 @@ def test_SongTableModel_headerData_songs_added(
     )
 
 
-def test_SongTableModel_data_no_songs() -> None:
-    """Test that data is None when there are no songs."""
-    repo = SongRepository([], [], "")
-    model = SongTableModel(repo, [])
-
-    assert model.data(model.index(0, 0), Qt.ItemDataRole.DisplayRole) is None
-
-
-def test_SongTableModel_data(
-    song_paths: list[PathLike[str]], table_tags: list[SongTag]
-) -> None:
-    """Test that data returns the correct type when songs exist.
-
-    Assuming that a valid role and index is used.
-    """
-    repo = SongRepository(table_tags, table_tags, "")
+def test_SongTableModel_data_no_data_in_field(table_tags: list[SongTag]) -> None:
+    """Test that data returns an empty string when the song doesn't have the tag."""
+    repo = SongRepository()
+    repo.add()
     model = SongTableModel(repo, table_tags)
-    repo.add(song_paths)
-    assert model.rowCount() == len(song_paths)
+    song = repo[0]
+    assert song is not None
 
+    assert model.data(model.index(0, 0), Qt.ItemDataRole.DisplayRole) == ""
+
+
+def test_SongTableModel_data_invalid(table_tags: list[SongTag]) -> None:
+    """Test that data returns None when the role or index is invalid."""
+    repo = SongRepository()
+    repo.add()
+    model = SongTableModel(repo, table_tags)
+
+    # Invalid index, valid role
+    assert model.data(model.index(len(repo), 0), Qt.ItemDataRole.DisplayRole) is None
+
+    # Valid index, invalid role
+    assert model.data(model.index(0, 0), Qt.ItemDataRole.CheckStateRole) is None
+
+
+def test_SongTableModel_data_has_value(table_tags: list[SongTag]) -> None:
+    """Test that data returns a string representation when there is a value stored."""
+    repo = SongRepository()
+    song = Song()
+    tag_value = TextTagValue(["Title"])
+    song.setTag(table_tags[0].id3_key, tag_value)
+    repo.add(song)
+    model = SongTableModel(repo, table_tags)
     assert (
         model.data(model.index(0, 0), Qt.ItemDataRole.DisplayRole)
-        == repo[0].display_info[0]
+        == tag_value.getDisplayValue()
     )
-    # Invalid index is None
-    assert (
-        model.data(model.index(len(song_paths), 0), Qt.ItemDataRole.DisplayRole) is None
-    )
-    # Invalid role is None
-    assert model.data(model.index(0, 0), Qt.ItemDataRole.EditRole) is None

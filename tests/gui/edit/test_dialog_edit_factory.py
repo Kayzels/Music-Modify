@@ -20,7 +20,7 @@ def test_EditDialogFactory_get(
     """Test that the correct dialog type is returned, based on bulk."""
     widget = QWidget()
     qtbot.addWidget(widget)
-    repo = SongRepository(table_tags, table_tags, ", ")
+    repo = SongRepository()
     factory = EditDialogFactory(widget, repo)
 
     dialog = factory.get([], table_tags, ", ", bulk=bulk)

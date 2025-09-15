@@ -20,12 +20,11 @@ from music_modify.models.song_repository import SongRepository
 
 def _createParentAndRepo(
     qtbot: QtBot,
-    table_tags: list[SongTag],
     num_songs: int = 0,
 ) -> tuple[QWidget, SongRepository]:
     widget = QWidget()
     qtbot.addWidget(widget)
-    repo = SongRepository(table_tags, table_tags, ", ")
+    repo = SongRepository()
     for _ in range(num_songs):
         repo.add()
     return widget, repo
@@ -34,7 +33,7 @@ def _createParentAndRepo(
 def _createDialog(
     qtbot: QtBot, rows: list[int], table_tags: list[SongTag], *, num_songs: int = 0
 ) -> tuple[QWidget, EditDialog]:
-    widget, repo = _createParentAndRepo(qtbot, table_tags, num_songs)
+    widget, repo = _createParentAndRepo(qtbot, num_songs)
     dialog = EditDialog(widget, repo, rows, table_tags)
     return widget, dialog
 
@@ -256,7 +255,7 @@ def test_EditDialog_resetSongInfo(
     qtbot: QtBot, monkeypatch: pytest.MonkeyPatch, table_tags: list[SongTag]
 ) -> None:
     """Tests that the song values can be reset."""
-    widget, repo = _createParentAndRepo(qtbot, table_tags, 1)
+    widget, repo = _createParentAndRepo(qtbot, 1)
     rows: list[int] = [0]
 
     mock_reset_method = Mock()

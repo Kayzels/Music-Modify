@@ -1,122 +1,86 @@
 """Tests for Song."""
 
-# pyright: reportUnusedParameter = false
-
 import logging
 from pathlib import Path
-from unittest.mock import MagicMock
-
-import pytest
 
 from music_modify.custom_types import Song
-from music_modify.custom_types.songtag import SongTag
+from music_modify.custom_types.tag_value import TextTagValue
 
 logger = logging.getLogger(__name__)
 
 
-def test_Song_init_with_None(table_tags: list[SongTag]) -> None:
+def test_Song_init_with_None() -> None:
     """Test that a Song object is created correctly when not passed a file."""
-    song = Song(table_tags, table_tags, "")
+    song = Song()
     assert song.file is None
-    info: list[str] = ["" for _ in range(len(table_tags))]
-    assert song.display_info == info
+    assert song.id3 is not None
+    assert song.id3.filename is None
 
 
 def test_Song_init_with_file(song_path: Path) -> None:
     """Test that a Song object is created correctly when passed a file."""
-    song = Song([], [], "", file=song_path)
+    song = Song(song_path)
     assert song.file == song_path
-    assert hasattr(song, "display_info")
-    assert isinstance(song.display_info, list)
+    assert song.id3.filename == str(song_path)
 
 
-def test_Song_columns_setTag_removeTag(
-    song_path: Path, table_tags: list[SongTag]
-) -> None:
+def test_Song_columns_setTag_removeTag(song_path: Path) -> None:
     """Test that setting and then removing tags works."""
-    song = Song(table_tags, table_tags, "; ", song_path)
-    song.setTag("TIT2", ["Some Title"])
-    song.setTag("TCOM", ["Some Composer", "Another Composer"])
+    song = Song(song_path)
+    song.setTag("TIT2", TextTagValue(["Some Title"]))
+    song.setTag("TCOM", TextTagValue(["Some Composer", "Another Composer"]))
     assert song.hasTag("TIT2")
     assert song.hasTag("TCOM")
-    song.updateInfo()
-    expected_output: list[str] = []
-    for col in table_tags:
-        if col.id3_key == "TIT2":
-            expected_output.append("Some Title")
-        elif col.id3_key == "TCOM":
-            expected_output.append("Some Composer; Another Composer")
-        else:
-            expected_output.append("")
-    assert song.display_info == expected_output
     song.removeTag("TIT2")
     song.removeTag("TCOM")
     assert not song.hasTag("TIT2")
     assert not song.hasTag("TCOM")
 
 
-def test_Song_invalid_tag(
-    monkeypatch: pytest.MonkeyPatch, table_tags: list[SongTag]
-) -> None:
+def test_Song_invalid_tag() -> None:
     """Test that invalid tags work correctly.
 
-    They should return False for hasTag, None for getValue, and don't call removeTag.
+    They should return False for hasTag and None for getTag.
     """
-    song = Song(table_tags, table_tags, "")
+    song = Song()
 
-    mock_songtag_remove = MagicMock()
-    monkeypatch.setattr(SongTag, "removeTag", mock_songtag_remove)
-
-    assert not song.hasTag("ABCD")
-    assert song.getValue("ABCD") is None
-
-    song.removeTag("ABCD")
-    mock_songtag_remove.assert_not_called()
+    assert song.hasTag("ABCD") is False
+    assert song.getTag("ABCD") is None
 
 
-def test_Song_save_calls_updateInfo(
-    song_path: Path, monkeypatch: pytest.MonkeyPatch, table_tags: list[SongTag]
-) -> None:
-    """Test that saving a song updates the file and the displayed info."""
-    song = Song(table_tags, table_tags, "", song_path)
-    song.setTag("TIT2", ["Some Title"])
-
-    mock_save = MagicMock()
-    monkeypatch.setattr(song.id3, "save", mock_save)
-    mock_update = MagicMock()
-    monkeypatch.setattr(song, "updateInfo", mock_update)
-
+def test_Song_setTag_save_no_file() -> None:
+    """Test that setting a tag and saving stores it in the ID3."""
+    song = Song()
+    assert not song.hasTag("TIT2")
+    song.setTag("TIT2", TextTagValue(["Some Title"]))
+    assert song.hasTag("TIT2")
+    assert "TIT2" not in song.id3
     song.save()
+    assert "TIT2" in song.id3
+    assert song.id3["TIT2"].text == ["Some Title"]
 
-    mock_save.assert_called_once()
-    mock_update.assert_called_once()
 
-
-def test_Song_save_calls_updateInfo_file_None(
-    monkeypatch: pytest.MonkeyPatch, table_tags: list[SongTag]
-) -> None:
-    """Test that saving a song updates the displayed info, but doesn't save a file."""
-    song = Song(table_tags, table_tags, "")
-    song.setTag("TIT2", ["Some Title"])
-
-    mock_save = MagicMock()
-    monkeypatch.setattr(song.id3, "save", mock_save)
-    mock_update = MagicMock()
-    monkeypatch.setattr(song, "updateInfo", mock_update)
-
+def test_Song_setTag_save_removeTag_save() -> None:
+    """Test that setting a tag and saving stores it, and removing it removes it."""
+    song = Song()
+    assert not song.hasTag("TIT2")
+    song.setTag("TIT2", TextTagValue(["Some Title"]))
+    assert song.hasTag("TIT2")
+    assert "TIT2" not in song.id3
     song.save()
+    assert "TIT2" in song.id3
+    assert song.id3["TIT2"].text == ["Some Title"]
+    song.removeTag("TIT2")
+    assert not song.hasTag("TIT2")
+    song.save()
+    assert "TIT2" not in song.id3
 
-    mock_save.assert_not_called()
-    mock_update.assert_called_once()
 
-
-def test_Song_load(song_path: Path, table_tags: list[SongTag]) -> None:
-    """Test that creating a song and loading the file later still populates data."""
-    song = Song(table_tags, table_tags, "")
-    assert song.file is None
-
-    song.updateInfo = MagicMock()
-    song.load(song_path)
-    assert song.file == song_path
-
-    song.updateInfo.assert_called_once()
+# TODO: Tests for
+# 1. loading a file with no ID3 header
+# 2. loading a file that isn't found
+# 3. loading a file with an ID3 header, but no tags
+# 4. loading a file with an ID3 header and tags
+# 5. Saving a file with file property set
+# 6. reset changes
+# 7. get all tag keys, with loaded and staged values

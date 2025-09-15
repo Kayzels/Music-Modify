@@ -1,6 +1,6 @@
 """Tests for EditBulkMultipleWidget."""
 
-# pyright: reportPrivateUsage = false, reportUnusedParameter = false
+# pyright: reportPrivateUsage = false
 
 from typing import NotRequired, TypedDict
 
@@ -16,7 +16,7 @@ from music_modify.gui.edit.bulk.widget_edit_bulk_multiple import (
 )
 
 
-def test_MultipleLineEdit_items(qtbot: QtBot, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_MultipleLineEdit_items(qtbot: QtBot) -> None:
     """Tests that items are set properly for a _MultipleLineEdit."""
     text_to_split = "First, Second, Third"
     line_edit = _MultipleLineEdit(text_to_split, ", ")
@@ -86,17 +86,15 @@ def test_EditBulkMultipleWidget_adds_to_line(qtbot: QtBot) -> None:
     assert widget.items == ("One",)
 
 
-def test_EditBulkMultipleWidget_updateTag_clear_checkbox_checked(
-    qtbot: QtBot, table_tags: list[SongTag]
-) -> None:
+def test_EditBulkMultipleWidget_updateTag_clear_checkbox_checked(qtbot: QtBot) -> None:
     """Tests that tags are removed if updateTag is called with clear checked."""
     _, tag, widget = _createWidget(qtbot)
 
     widget.group_box.setChecked(True)
 
-    song1 = Song(table_tags, table_tags, ", ")
+    song1 = Song()
     song1.setTag(tag, ["One Composer"])
-    song2 = Song(table_tags, table_tags, ", ")
+    song2 = Song()
     song2.setTag(tag, ["One Composer", "Another Composer"])
     songs = [song1, song2]
 
@@ -107,17 +105,15 @@ def test_EditBulkMultipleWidget_updateTag_clear_checkbox_checked(
     assert not song2.hasTag(tag)
 
 
-def test_EditBulkMultipleWidget_updateTag_empty_add_empty_remove(
-    qtbot: QtBot, table_tags: list[SongTag]
-) -> None:
+def test_EditBulkMultipleWidget_updateTag_empty_add_empty_remove(qtbot: QtBot) -> None:
     """Tests adding or removing empty values doesn't change the song value."""
     _, tag, widget = _createWidget(qtbot)
 
     widget.group_box.setChecked(True)
 
-    song1 = Song(table_tags, table_tags, ", ")
+    song1 = Song()
     song1.setTag(tag, ["One Composer"])
-    song2 = Song(table_tags, table_tags, ", ")
+    song2 = Song()
     song2.setTag(tag, ["One Composer", "Another Composer"])
     songs = [song1, song2]
 
@@ -132,15 +128,13 @@ def test_EditBulkMultipleWidget_updateTag_empty_add_empty_remove(
     assert song2.getValue(tag) == ["One Composer", "Another Composer"]
 
 
-def test_EditBulkMultipleWidget_updateTag_single_song_empty_add(
-    qtbot: QtBot, table_tags: list[SongTag]
-) -> None:
+def test_EditBulkMultipleWidget_updateTag_single_song_empty_add(qtbot: QtBot) -> None:
     """Tests adding values to a song that doesn't have the tag at start."""
     _, tag, widget = _createWidget(qtbot)
 
     widget.group_box.setChecked(True)
 
-    song1 = Song(table_tags, table_tags, ", ")
+    song1 = Song()
 
     assert widget.items == ()
     assert widget.remove_line.all_items == ()
@@ -158,14 +152,14 @@ def test_EditBulkMultipleWidget_updateTag_single_song_empty_add(
 
 
 def test_EditBulkMultipleWidget_updateTag_single_song_and_widget_same(
-    qtbot: QtBot, table_tags: list[SongTag]
+    qtbot: QtBot,
 ) -> None:
     """Tests that setting text for adding a value already present doesn't add it."""
     _, tag, widget = _createWidget(qtbot)
 
     widget.group_box.setChecked(True)
 
-    song = Song(table_tags, table_tags, ", ")
+    song = Song()
     song.setTag(tag, ["Some Name", "And Another"])
     songs = [song]
 
@@ -178,9 +172,7 @@ def test_EditBulkMultipleWidget_updateTag_single_song_and_widget_same(
     assert song.getValue(tag) == ["Some Name", "And Another"]
 
 
-def test_EditBulkMultipleWidget_updateTag_single_widget_has_extra(
-    qtbot: QtBot, table_tags: list[SongTag]
-) -> None:
+def test_EditBulkMultipleWidget_updateTag_single_widget_has_extra(qtbot: QtBot) -> None:
     """Tests that any items not in the song are correctly added.
 
     Tests that the items that are already present aren't added again,
@@ -190,7 +182,7 @@ def test_EditBulkMultipleWidget_updateTag_single_widget_has_extra(
 
     widget.group_box.setChecked(True)
 
-    song = Song(table_tags, table_tags, ", ")
+    song = Song()
     song.setTag(tag, ["Some Name"])
 
     assert isinstance(song.getValue(tag), list)
@@ -261,14 +253,13 @@ def test_EditBulkMultipleWidget_updateTag_songs_param(
     value: list[str] | None,
     expected_updated: bool,
     expected_value: list[str],
-    table_tags: list[SongTag],
 ) -> None:
     """Tests that updateTag changes values that it should."""
     _, tag, widget = _createWidget(qtbot)
 
     widget.group_box.setChecked(True)
 
-    song = Song(table_tags, table_tags, ", ")
+    song = Song()
     if value is not None:
         song.setTag(tag, value)
     songs: list[Song] = [song]
@@ -282,9 +273,7 @@ def test_EditBulkMultipleWidget_updateTag_songs_param(
     assert song.getValue(tag) == expected_value
 
 
-def test_EditBulkMultipleWidget_updateTag_multiple_add(
-    qtbot: QtBot, table_tags: list[SongTag]
-) -> None:
+def test_EditBulkMultipleWidget_updateTag_multiple_add(qtbot: QtBot) -> None:
     """Tests adding values to multiple songs, with different conditions."""
     _, tag, widget = _createWidget(qtbot)
 
@@ -294,7 +283,7 @@ def test_EditBulkMultipleWidget_updateTag_multiple_add(
     expected_final_values: list[list[str]] = []
 
     for case in _SONG_CASES:
-        song = Song(table_tags, table_tags, ", ")
+        song = Song()
         if (value := case["initial_value"]) is not None:
             song.setTag(tag, value)
         songs.append(song)
@@ -310,9 +299,7 @@ def test_EditBulkMultipleWidget_updateTag_multiple_add(
         assert song.getValue(tag) == expected_final_values[i]
 
 
-def test_EditBulkMultipleWidget_updateTag_song_empty_remove(
-    qtbot: QtBot, table_tags: list[SongTag]
-) -> None:
+def test_EditBulkMultipleWidget_updateTag_song_empty_remove(qtbot: QtBot) -> None:
     """Tests that removing tag values for songs that don't have that tag works.
 
     The tag shouldn't be added, and updateTag should return an empty set.
@@ -321,7 +308,7 @@ def test_EditBulkMultipleWidget_updateTag_song_empty_remove(
 
     widget.group_box.setChecked(True)
 
-    song = Song(table_tags, table_tags, ", ")
+    song = Song()
     assert not song.hasTag(tag)
 
     widget.remove_line.setText("First Name")
@@ -388,7 +375,6 @@ def test_EditBulkMultipleWidget_updateTag_remove_param(
     widget_text: str,
     expected_updated: bool,
     expected_final_value: list[str],
-    table_tags: list[SongTag],
 ) -> None:
     """Tests removing tag values in different conditions.
 
@@ -403,7 +389,7 @@ def test_EditBulkMultipleWidget_updateTag_remove_param(
 
     widget.group_box.setChecked(True)
 
-    song = Song(table_tags, table_tags, ", ")
+    song = Song()
     song.setTag(tag, song_initial_values)
 
     widget.remove_line.setText(widget_text)
@@ -413,9 +399,7 @@ def test_EditBulkMultipleWidget_updateTag_remove_param(
     assert song.getValue(tag) == expected_final_value
 
 
-def test_EditBulkMultipleWidget_updateTag_add_remove(
-    qtbot: QtBot, table_tags: list[SongTag]
-) -> None:
+def test_EditBulkMultipleWidget_updateTag_add_remove(qtbot: QtBot) -> None:
     """Tests that both adding and removing values works if done together.
 
     Items should be added, and then removed.
@@ -424,7 +408,7 @@ def test_EditBulkMultipleWidget_updateTag_add_remove(
 
     widget.group_box.setChecked(True)
 
-    song = Song(table_tags, table_tags, ", ")
+    song = Song()
     song.setTag(tag, ["Song Value", "Extra Value"])
 
     widget.add_line.setText("New Value, And Another, Removed")
@@ -437,15 +421,13 @@ def test_EditBulkMultipleWidget_updateTag_add_remove(
     assert song.getValue(tag) == ["Extra Value", "New Value", "And Another"]
 
 
-def test_EditBulkMultipleWidget_resetView(
-    qtbot: QtBot, table_tags: list[SongTag]
-) -> None:
+def test_EditBulkMultipleWidget_resetView(qtbot: QtBot) -> None:
     """Test that resetView restores the original state for the widget."""
     _, tag, widget = _createWidget(qtbot, set())
 
     widget.group_box.setChecked(True)
 
-    song = Song(table_tags, table_tags, ", ")
+    song = Song()
     song.setTag(tag, ["Song Value", "Extra Value"])
 
     widget.add_line.setText("Another Value")

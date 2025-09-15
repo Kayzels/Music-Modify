@@ -9,7 +9,6 @@ from os import PathLike
 from PySide6.QtCore import QObject, Signal
 
 from music_modify.custom_types import Song
-from music_modify.custom_types.songtag import SongTag
 
 
 class SongRepository(QObject):
@@ -21,14 +20,9 @@ class SongRepository(QObject):
     songs_updated: Signal = Signal()
     "Signal that is emitted whenever songs are added or removed."
 
-    def __init__(
-        self, all_tags: list[SongTag], table_tags: list[SongTag], display_split: str
-    ) -> None:
+    def __init__(self) -> None:
         """Create a `SongRepository`, with no songs added yet."""
         super().__init__()
-        self._all_tags: list[SongTag] = all_tags
-        self._table_tags: list[SongTag] = table_tags
-        self._display_split: str = display_split
         self._songs: list[Song] = []
 
     def __getitem__(self, index: int) -> Song:
@@ -81,9 +75,6 @@ class SongRepository(QObject):
         if new is not None and new in self:
             return
         song = Song(
-            all_tags=self._all_tags,
-            table_tags=self._table_tags,
-            display_split=self._display_split,
             file=new,
         )
         self._songs.append(song)
@@ -110,5 +101,4 @@ class SongRepository(QObject):
 
         Should be called after any metadata is updated, to keep the view in sync.
         """
-        for song in self._songs:
-            song.updateInfo()
+        # TODO: Is this function needed?

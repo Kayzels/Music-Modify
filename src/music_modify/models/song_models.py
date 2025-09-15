@@ -57,7 +57,11 @@ class SongTableModel(QAbstractTableModel):
 
         if role == Qt.ItemDataRole.DisplayRole:
             song = self.repository[index.row()]
-            return song.display_info[index.column()]
+            id3_key = self._table_tags[index.column()].id3_key
+            tag_value = song.getTag(id3_key)
+            if tag_value:
+                return tag_value.getDisplayValue()
+            return ""
         return None
 
     @override
@@ -73,7 +77,7 @@ class SongTableModel(QAbstractTableModel):
         parent: QModelIndex | QPersistentModelIndex = constants.Q_MODEL_INDEX,
     ) -> int:
         if self.rowCount(parent) == 0:
-            # NOTE: Uses 1 to keep a column for info
+            # Uses 1 to keep a column for info
             return 1
         return len(self._table_tags)
 
@@ -100,3 +104,6 @@ class SongTableModel(QAbstractTableModel):
                 return f"{section + 1}"
             return None
         return None
+
+
+# TODO: setData and flags

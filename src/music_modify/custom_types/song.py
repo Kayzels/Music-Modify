@@ -5,12 +5,14 @@ Manages the metadata for an mp3 file.
 
 import logging
 import os
+from typing import cast
 
+from mutagen import MutagenError, id3
 from mutagen.id3 import ID3
 
-from .aliases import SongEditData, SongGroupData
+from music_modify.custom_types.tag_value import AbstractTagValue, TagValueFactory
+
 from .songtag import SongTag
-from .utils import toTag, valueToString
 
 logger = logging.getLogger(__name__)
 
@@ -20,9 +22,6 @@ class Song:
 
     def __init__(
         self,
-        all_tags: list[SongTag],
-        table_tags: list[SongTag],
-        display_split: str,
         file: str | os.PathLike[str] | None = None,
     ) -> None:
         """Creates a Song object from a provided file.
@@ -37,74 +36,136 @@ class Song:
                 store multiple items.
             file: The file that the metadata should be loaded from.
         """
-        self._all_tags: list[SongTag] = all_tags
-        self._table_tags: list[SongTag] = table_tags
-        self._display_split: str = display_split
-        self.file: str | os.PathLike[str] | None = file
-        "The file on disk that this `Song` object represents."
-        self.id3: ID3 = ID3()
-        "The metadata structure and values stored in the song."
+        self._filepath: str | os.PathLike[str] | None = file
+
+        self._staged_changes: dict[str, AbstractTagValue | None] = {}
+        "Changes that should be made to the ID3 values when saving."
+        self._loaded_values: dict[str, AbstractTagValue] = {}
+        "Values that are read from the ID3 object."
+
+        # TODO: Make this variable private, and don't use externally.
+        self._id3: ID3 = ID3()
+
         if file is not None:
             self.load(file)
-        self.display_info: list[str]
-        "The displayed values for the tags that are present in the song."
-        self.updateInfo()
 
-    def _generateColumns(self) -> list[str]:
-        """Generate display values for the columns that should be shown in the table."""
-        info: list[str] = []
-        for column in self._table_tags:
-            data_string = valueToString(
-                value=self.getValue(column), display_split=self._display_split
-            )
-            info.append(data_string)
-        return info
+    @property
+    def file(self) -> str | os.PathLike[str] | None:
+        """The file on disk that this `Song` object represents."""
+        return self._filepath
 
-    def updateInfo(self) -> None:
-        """Update the displayed values.
-
-        Ensures the values are in sync with what is stored in the file.
-        """
-        self.display_info = self._generateColumns()
+    @property
+    def id3(self) -> ID3:
+        """The metadata structure and values stored in the song."""
+        return self._id3
 
     def save(self) -> None:
         """Save the changed values for the song, and refresh the display."""
-        if self.file is not None:
-            self.id3.save(v2_version=4)
-        self.updateInfo()
+        for id3_key, tag_value in self._staged_changes.items():
+            if tag_value is None:
+                if id3_key in self._id3:
+                    self._id3.delall(id3_key)
+            else:
+                if id3_key in self._id3:
+                    frame = tag_value.updateId3Frame(self._id3[id3_key])
+                else:
+                    frame = tag_value.toId3Frame(id3_key)
+                self._id3.setall(id3_key, [frame])
+
+        if not self.file:
+            logger.warning("No file path defined for saving.")
+            return
+
+        try:
+            self._id3.save(self.file)
+            logger.debug(f"Tags saved successfully to '{self.file}'.")
+        except MutagenError:
+            logger.exception(f"Error saving ID3 tags to '{self.file}'.")
+            return
+
+        self.load(self.file)  # Reload to update to new state
 
     def load(self, file: str | os.PathLike[str]) -> None:
         """Load the metadata from this specific file."""
-        self.file = file
-        self.id3.load(file)
-        self.updateInfo()
+        self._filepath = file
+        self._staged_changes.clear()
+        self._loaded_values.clear()
+        try:
+            self._id3.load(file)
+        except id3.ID3NoHeaderError:
+            # Header doesn't exist, but will be added when saving
+            self._id3 = ID3()
+        except FileNotFoundError:
+            logger.exception(
+                f"File not found at '{file}'. Initializing with empty tags."
+            )
+            self._id3 = ID3()
 
-    def setTag(self, tag: str | SongTag, value: SongGroupData) -> None:
-        """Set the tag within the file to have the value specified."""
-        found_tag = toTag(tag, self._all_tags) if not isinstance(tag, SongTag) else tag
-        if found_tag is not None:
-            found_tag.setTag(self.id3, value)
+        for id3_key, frame in self._id3.items():
+            id3_key = cast(str, id3_key)
+            frame = cast(id3.Frame, frame)
+            tag_value: AbstractTagValue | None = TagValueFactory.fromId3Frame(frame)
+            if tag_value:
+                self._loaded_values[id3_key] = tag_value
 
-    def getValue(self, tag: str | SongTag) -> SongEditData | None:
+    def setTag(self, id3_key: str, value: AbstractTagValue | None) -> None:
+        """Stages a change for a tag.
+
+        If `value` is `None`, the tag will be removed on save.
+        """
+        self._staged_changes[id3_key] = value
+
+    def getTag(self, id3_key: str) -> AbstractTagValue | None:
         """Return the value stored in the song for that specific tag.
+
+        Prioritizes staged changes, then loaded/cached values.
 
         Returns `None`, if the tag is not present.
         """
-        found_tag = toTag(tag, self._all_tags) if not isinstance(tag, SongTag) else tag
-        if found_tag is None:
-            return None
-        return found_tag.getValue(self.id3)
+        if id3_key in self._staged_changes:
+            return self._staged_changes[id3_key]
+        if id3_key in self._loaded_values:
+            return self._loaded_values[id3_key]
+        if id3_key in self._id3:
+            frame = cast(id3.Frame, self._id3[id3_key])
+            tag_value: AbstractTagValue | None = TagValueFactory.fromId3Frame(frame)
+            if tag_value:
+                self._loaded_values[id3_key] = tag_value
+            return tag_value
+        return None
 
-    def removeTag(self, tag: str | SongTag) -> None:
-        """Remove the tag from the stored metadata for a song, if it exists."""
-        found_tag = toTag(tag, self._all_tags) if not isinstance(tag, SongTag) else tag
-        if found_tag is None:
-            return
-        found_tag.removeTag(self.id3)
+    def removeTag(self, id3_key: str) -> None:
+        """Marks a tag for removal when the song is saved."""
+        self.setTag(id3_key, None)
 
     def hasTag(self, tag: str | SongTag) -> bool:
         """Returns `True` if the tag is defined in the metadata for the song."""
-        found_tag = toTag(tag, self._all_tags) if not isinstance(tag, SongTag) else tag
-        if found_tag is None:
-            return False
-        return found_tag.hasTag(self.id3)
+        return tag in self.getAllTagKeys()
+
+    def getAllTagKeys(self) -> list[str]:
+        """Returns a list of all tag keys present, considering staged changes."""
+        all_keys = set(self._loaded_values.keys())
+        for key, value in self._staged_changes.items():
+            if value is None:
+                all_keys.discard(key)
+            else:
+                all_keys.add(key)
+        return list(all_keys)
+
+    def resetChanges(self, id3_key: str | None = None) -> None:
+        """Removes a staged change for a given identifier.
+
+        This will revert the value to its state when the file loaded,
+        or make it non-existent if it was a new tag.
+
+        Not passing in an `id3_key` will clear all changes.
+        """
+        if not id3_key:
+            self._staged_changes.clear()
+            return
+
+        if id3_key in self._staged_changes:
+            del self._staged_changes[id3_key]
+            logger.debug(f"Staged changes for '{id3_key}' cleared.")
+        else:
+            logger.debug(f"No staged changes found for '{id3_key}'.")

@@ -1,6 +1,6 @@
 """Tests for EditBulkPeopleWidget."""
 
-# pyright: reportPrivateUsage = false, reportUnusedParameter = false
+# pyright: reportPrivateUsage = false
 
 from typing import TypedDict, cast
 from unittest.mock import MagicMock
@@ -131,7 +131,7 @@ change_params: list[_ChangeParams] = [
     ],
 )
 def test_ActionMapping_performChange_param(
-    qtbot: QtBot, change_param: _ChangeParams, table_tags: list[SongTag]
+    qtbot: QtBot, change_param: _ChangeParams
 ) -> None:
     """Tests how performChange works based on different inputs.
 
@@ -150,7 +150,7 @@ def test_ActionMapping_performChange_param(
 
     _, tag, widget = _createWidget(qtbot, widget_items)
 
-    song = Song(table_tags, table_tags, "")
+    song = Song()
     if song_items is not None:
         song.setTag(tag, song_items)
 
@@ -245,16 +245,14 @@ def test_EditBulkPeopleWidget_updateTag_unchecked(qtbot: QtBot) -> None:
     assert widget.updateTag(songs) == set()
 
 
-def test_EditBulkPeopleWidget_updateTag_clear_checkbox_checked(
-    qtbot: QtBot, table_tags: list[SongTag]
-) -> None:
+def test_EditBulkPeopleWidget_updateTag_clear_checkbox_checked(qtbot: QtBot) -> None:
     """Test that values are cleared when updateTag is called with clear checked."""
     initial_data = [["Role 1", "Person 1"]]
     _, tag, widget = _createWidget(qtbot, initial_data)
 
-    song1 = Song(table_tags, table_tags, "")
+    song1 = Song()
     song1.setTag(tag, initial_data)
-    song2 = Song(table_tags, table_tags, "")
+    song2 = Song()
     song2.setTag(tag, initial_data)
     songs = [song1, song2]
 
@@ -270,14 +268,12 @@ def test_EditBulkPeopleWidget_updateTag_clear_checkbox_checked(
     assert song2.getValue(tag) is None
 
 
-def test_EditBulkPeopleWidget_updateTag_no_changes_attempted(
-    qtbot: QtBot, table_tags: list[SongTag]
-) -> None:
+def test_EditBulkPeopleWidget_updateTag_no_changes_attempted(qtbot: QtBot) -> None:
     """Tests that updateTag isn't called when there are no changes."""
     widget_data = []
     _, tag, widget = _createWidget(qtbot, widget_data)
 
-    song = Song(table_tags, table_tags, ",")
+    song = Song()
     assert not song.hasTag(tag)
     songs = [song]
 
@@ -535,7 +531,6 @@ def test_EditBulkPeopleWidget_updateTag_multiple_param(
     widget_name: str,
     widget_items: list[str] | list[list[str]],
     song_infos: list[_SongInfo],
-    table_tags: list[SongTag],
 ) -> None:
     """Test updating tag based on the widget details."""
     widget_data = []
@@ -545,7 +540,7 @@ def test_EditBulkPeopleWidget_updateTag_multiple_param(
     expected_updated_songs: set[Song] = set()
     expected_song_values: list[list[list[str]]] = []
     for info in song_infos:
-        song = Song(table_tags, table_tags, "")
+        song = Song()
         song.setTag(tag, info["items"])
         songs.append(song)
         if info["updated"]:
@@ -578,13 +573,12 @@ def test_EditBulkPeopleWidget_updateTag_single_param(
     widget_name: str,
     widget_items: list[str] | list[list[str]],
     info: _SongInfo,
-    table_tags: list[SongTag],
 ) -> None:
     """Tests updating tags for a single song, based on the widget details."""
     widget_data = []
     _, tag, widget = _createWidget(qtbot, widget_data)
 
-    song = Song(table_tags, table_tags, "")
+    song = Song()
     song.setTag(tag, info["items"])
 
     expected_update_result: set[Song] = {song} if info["updated"] else set()
@@ -601,9 +595,7 @@ def test_EditBulkPeopleWidget_updateTag_single_param(
     assert song.getValue(tag) == info["expected_items"]
 
 
-def test_EditBulkPeopleWidget_updateTag_multiple_actions(
-    qtbot: QtBot, table_tags: list[SongTag]
-) -> None:
+def test_EditBulkPeopleWidget_updateTag_multiple_actions(qtbot: QtBot) -> None:
     """Tests calling updateTag with multiple fields filled."""
     initial_widget_items = [
         ["ExistingRole", "ExistingPerson"],
@@ -611,7 +603,7 @@ def test_EditBulkPeopleWidget_updateTag_multiple_actions(
     ]
     _, tag, widget = _createWidget(qtbot, initial_widget_items)
 
-    song = Song(table_tags, table_tags, "")
+    song = Song()
     # Initial state of song: contains an existing item, one to be removed by pair,
     # one by role, one by person,
     # one whose role will be remapped, one whose person will be remapped.
