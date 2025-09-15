@@ -50,6 +50,17 @@ def test_SongRepository_add_file_single(
     assert repo[0].file == song_path
 
 
+def test_SongRepository_add_file_as_string_single(
+    song_path: Path, qtbot: QtBot, table_tags: list[SongTag]
+) -> None:
+    """Test that adding a file as a string adds it."""
+    repo = SongRepository(table_tags, table_tags, ", ")
+    with qtbot.waitSignal(repo.songs_updated, timeout=1000):
+        repo.add(str(song_path))
+    assert len(repo) == 1
+    assert repo[0].file == str(song_path)
+
+
 def test_SongRepository_add_file_exists_rejected(
     song_path: Path, table_tags: list[SongTag]
 ) -> None:

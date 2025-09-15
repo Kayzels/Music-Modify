@@ -66,7 +66,7 @@ class SongRepository(QObject):
 
         If passed in a list of file paths, adds all the files that aren't present.
         """
-        if isinstance(new, Sequence):
+        if isinstance(new, Sequence) and not isinstance(new, str):
             for file in new:
                 self.add(file)
             return
