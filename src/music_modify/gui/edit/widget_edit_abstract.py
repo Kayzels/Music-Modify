@@ -5,7 +5,6 @@ inside an EditDialog.
 """
 
 from abc import ABC, abstractmethod
-import copy
 import logging
 from typing import final
 
@@ -14,15 +13,13 @@ from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QBoxLayout, QHBoxLayout, QToolButton, QWidget
 
 from music_modify.core.meta import ABCQMeta
-from music_modify.custom_types.aliases import SongEditData
 from music_modify.custom_types.enums import EditButton
+from music_modify.custom_types.tag_value import AbstractTagValue
 
 logger = logging.getLogger(__name__)
 
 
-class EditAbstractWidget[ValueT: SongEditData, WidgetT: QWidget](
-    QWidget, ABC, metaclass=ABCQMeta
-):
+class EditAbstractWidget(QWidget, ABC, metaclass=ABCQMeta):
     """Defines the required functionality for a widget inside an EditDialog."""
 
     value_updated: Signal = Signal()
@@ -31,12 +28,16 @@ class EditAbstractWidget[ValueT: SongEditData, WidgetT: QWidget](
     """Signal that indicates that  a value has been set back to the value
     it had when the widget was initialised."""
 
-    def __init__(self, parent: QWidget, data: ValueT | None = None) -> None:
+    def __init__(
+        self,
+        initial_value: AbstractTagValue | None = None,
+        parent: QWidget | None = None,
+    ) -> None:
         """Creates an EditAbstractWidget.
 
         Args:
-            parent: The widget that this widget should be displayed on.
-            data: The data to be displayed.
+            initial_value: Original value that should be displayed.
+            parent: Widget this widget should be displayed on.
         """
         super().__init__(parent)
         self.clear_button: QToolButton | None = None
@@ -45,21 +46,8 @@ class EditAbstractWidget[ValueT: SongEditData, WidgetT: QWidget](
         "Button that restores the value to what it was at initialization."
         self.main_layout: QHBoxLayout
         "The layout that the main widget should be placed on."
-        self.main_widget: WidgetT
-        "Main widget used to display the values currently stored."
-        self._original_data: ValueT
-        self._initValue(data)
+        self._initial_value: AbstractTagValue | None = initial_value
         self._setupCommonUi()
-
-    @final
-    def _initValue(self, data: ValueT | None, /) -> None:
-        """Sets the original value that the widget should store."""
-        if data is None:
-            self.value = self.empty
-        else:
-            self.value = data
-
-        self._original_data = copy.deepcopy(self.value)
 
     @abstractmethod
     def _setupUi(self) -> None:
@@ -72,65 +60,36 @@ class EditAbstractWidget[ValueT: SongEditData, WidgetT: QWidget](
         layout of `main_layout`. Any other UI initialization should be done here.
         """
 
-    @abstractmethod
-    def _displayValue(self) -> None:
-        """Sets the values for the table based on the current value property."""
-
-    @abstractmethod
-    def _updateValue(self) -> None:
-        """Updates the value that is stored in the widget, and displayed."""
-
-    @abstractmethod
-    def _isReset(self) -> bool:
-        """Returns whether the value has been set back to its original state."""
-
-    @abstractmethod
-    def _setMainWidget(self) -> WidgetT:
-        """Set the widget that should be used for the main widget.
-
-        This function _must_ set the `main_widget` instance variable.
-
-        It also should not call other private methods like `_displayValue`.
-        It is better for that function to be called in `_setupUi`.
-        """
+    @final
+    def isModified(self) -> bool:
+        """Returns True if current value in the widget differs from initial value."""
+        return self.value != self.original
 
     @property
-    @final
-    def value(self) -> ValueT:
+    @abstractmethod
+    def value(self) -> AbstractTagValue | None:
         """The value displayed and stored inside the widget, based on the data type."""
-        return self._value
 
     @value.setter
-    @final
-    def value(self, value: ValueT) -> None:
-        """The value displayed and stored inside the widget, based on the data type."""
-        self._value: ValueT = value
-
-    @property
-    @final
-    def original(self) -> ValueT:
-        """The original value that was stored inside the widget, before changes."""
-        return self._original_data
-
-    @property
     @abstractmethod
-    def empty(self) -> ValueT:
-        """The empty value for the data type, for example, the empty list or string."""
+    def value(self, value: AbstractTagValue | None) -> None:
+        pass
+
+    @property
+    @final
+    def original(self) -> AbstractTagValue | None:
+        """The original value that was stored inside the widget, before changes."""
+        return self._initial_value
 
     @final
     def clear(self) -> None:
         """Clears the value stored and displayed in the widget."""
-        self.value = self.empty
-        self._displayValue()
-        self._emitUpdate()
+        self.value = None
 
     @final
     def reset(self) -> None:
         """Reset to the originally stored value, before any changes were made."""
-        if not self._isReset():
-            self.value = copy.deepcopy(self.original)
-            self._displayValue()
-            self._emitUpdate()
+        self.value = self.original
 
     # noinspection PyTypeChecker
     def createButtons(
@@ -171,14 +130,6 @@ class EditAbstractWidget[ValueT: SongEditData, WidgetT: QWidget](
         return layout
 
     @final
-    def _emitUpdate(self) -> None:
-        """Emit a signal indicating whether the data has changed, or been reset."""
-        if self._isReset():
-            self.value_reset.emit()
-        else:
-            self.value_updated.emit()
-
-    @final
     def _setupCommonUi(self) -> None:
         """Ensures the layout and widget are created in the correct order.
 
@@ -186,5 +137,4 @@ class EditAbstractWidget[ValueT: SongEditData, WidgetT: QWidget](
         when they are run, but the attributes can be defined in child classes.
         """
         self.main_layout = self._setMainLayout()
-        self.main_widget = self._setMainWidget()
         self._setupUi()

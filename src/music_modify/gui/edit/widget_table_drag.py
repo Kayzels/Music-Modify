@@ -25,12 +25,12 @@ class DragTableWidget(QTableWidget):
         super().resizeEvent(event)
         self.adjustColumnWidths()
 
-    def adjustColumnWidths(self, length: int | None = None) -> None:
+    def adjustColumnWidths(self, *, proportional: bool = True) -> None:
         """Adjusts the widths of the table to the specified length.
 
         Except for the last column, which is stretched.
         """
-        if self.rowCount() <= 1 or length == 0:
+        if proportional:
             column_width = int(self.width() / self.columnCount())
             for column in range(self.columnCount() - 1):
                 self.setColumnWidth(column, column_width)

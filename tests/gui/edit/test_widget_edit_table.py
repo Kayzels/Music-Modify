@@ -1,28 +1,18 @@
 """Tests for EditTableWidget."""
 
-from unittest.mock import MagicMock
+import logging
 
-from PySide6.QtWidgets import QWidget
 import pytest
 from pytestqt.qtbot import QtBot
 
-from music_modify.custom_types import constants
+from music_modify.custom_types.tag_value import (
+    AbstractTagValue,
+    PairedTextTagValue,
+    TextTagValue,
+)
 from music_modify.gui.edit.widget_edit_table import EditTableWidget
 from music_modify.gui.edit.widget_table_drag import DragTableWidget
 from music_modify.gui.utils import selectRows
-
-
-def _createTableWidget(
-    qtbot: QtBot,
-    data: list[list[str]] | None = None,
-    *,
-    labels: list[str] | None = None,
-) -> tuple[QWidget, EditTableWidget]:
-    widget = QWidget()
-    qtbot.addWidget(widget)
-    table_widget = EditTableWidget(widget, data=data, labels=labels)
-    qtbot.addWidget(table_widget)
-    return widget, table_widget
 
 
 def test_EditTableWidget_init_plain(qtbot: QtBot) -> None:
@@ -30,84 +20,125 @@ def test_EditTableWidget_init_plain(qtbot: QtBot) -> None:
 
     This is done in case there is an issue with the _createTableWidget helper function.
     """
-    widget = QWidget()
-    qtbot.addWidget(widget)
-    table_widget = EditTableWidget(widget, data=None)
+    table_widget = EditTableWidget(None)
     qtbot.addWidget(table_widget)
     assert isinstance(table_widget.main_widget, DragTableWidget)
+    assert table_widget.main_widget.rowCount() == 1
+    assert table_widget.value is None
+    assert table_widget.original is None
 
 
 @pytest.mark.parametrize(
-    ("data", "labels"),
+    ("initial_value", "expected"),
     [
-        pytest.param(None, None, id="data_None_labels_None"),
-        pytest.param([["Some Role", "Some Name"]], None, id="data_set_labels_None"),
-        pytest.param([], None, id="data_empty_labels_None"),
-        pytest.param(None, ["First", "Second"], id="data_None_labels_set"),
+        pytest.param(None, None, id="initial_None"),
+        pytest.param(PairedTextTagValue([]), None, id="initial_pair_empty"),
         pytest.param(
-            None, ["First", "Second", "Third"], id="data_None_labels_wrong_size"
+            PairedTextTagValue([["first", "second"]]),
+            PairedTextTagValue([["first", "second"]]),
+            id="initial_pair_value",
         ),
         pytest.param(
-            [["Some Role", "Some Name"], ["Another Role", "Another Name"]],
-            ["First", "Second"],
-            id="data_set_labels_set",
+            PairedTextTagValue([["first", "second"], ["third", "fourth"]]),
+            PairedTextTagValue([["first", "second"], ["third", "fourth"]]),
+            id="initial_pair_value_multiple",
         ),
-        pytest.param(
-            [["Some Role", "Some Name"]],
-            ["First", "Second", "Third"],
-            id="data_set_labels_wrong_size",
-        ),
-        pytest.param([], ["First", "Second"], id="data_empty_labels_set"),
-        pytest.param(
-            [], ["First", "Second", "Third"], id="data_empty_labels_wrong_size"
-        ),
+        pytest.param(TextTagValue(["Text"]), None, id="invalid_initial_value"),
     ],
 )
 def test_EditTableWidget_init(
-    qtbot: QtBot, data: list[list[str]] | None, labels: list[str] | None
+    qtbot: QtBot,
+    initial_value: AbstractTagValue | None,
+    expected: PairedTextTagValue | None,
 ) -> None:
-    """Test creating an EditTableWidget with different data or labels."""
-    expected_labels = (
-        ["Role", "Person"]
-        if labels is None or len(labels) != constants.PEOPLE_COL_COUNT
-        else labels
-    )
-    expected_data = [] if data is None else data
-    expected_row_count = 1 if not data else len(data)
+    """Tests that initial values are calculated and set correctly."""
+    table_widget = EditTableWidget(initial_value)
+    qtbot.addWidget(table_widget)
+    assert table_widget.value == expected
+    assert table_widget.original == expected
+    if expected is not None:
+        assert table_widget.main_widget.rowCount() == max(len(expected.value), 1)
+        for row, pair in enumerate(expected.value):
+            for col, text in enumerate(pair):
+                item = table_widget.main_widget.item(row, col)
+                assert item is not None
+                assert item.text() == text
+    else:
+        assert table_widget.main_widget.rowCount() == 1
 
-    _, table_widget = _createTableWidget(qtbot, data=data, labels=labels)
-    assert table_widget.value == expected_data
-    assert table_widget.original == expected_data
-    assert table_widget.labels == expected_labels
-    assert isinstance(table_widget.main_widget, DragTableWidget)
-    assert table_widget.main_widget.columnCount() == 2
-    assert table_widget.main_widget.rowCount() == expected_row_count
+
+def test_EditTableWidget_value_set(qtbot: QtBot) -> None:
+    """Tests updating the value directly."""
+    data = PairedTextTagValue([["initial", "first"]])
+    table_widget = EditTableWidget(data)
+    qtbot.addWidget(table_widget)
+
+    assert table_widget.value == data
+    new_value = PairedTextTagValue([["new", "second"]])
+    table_widget.value = new_value
+    assert table_widget.value == new_value
+    for row, pair in enumerate(new_value.value):
+        for col, text in enumerate(pair):
+            item = table_widget.main_widget.item(row, col)
+            assert item is not None
+            assert item.text() == text
+
+
+def test_EditTableWidget_value_None(qtbot: QtBot) -> None:
+    """Tests setting the value to None directly."""
+    data = PairedTextTagValue([["Original", "More"]])
+    table_widget = EditTableWidget(data)
+    qtbot.addWidget(table_widget)
+
+    table_widget.value = None
+    assert table_widget.main_widget.rowCount() == 1
+    for i in range(2):
+        item = table_widget.main_widget.item(0, i)
+        assert item is not None
+        assert item.text() == ""
+    assert table_widget.value is None
+
+
+def test_EditTableWidget_value_invalid(
+    qtbot: QtBot, caplog: pytest.LogCaptureFixture
+) -> None:
+    """Tests that setting an invalid value logs and clears."""
+    data = PairedTextTagValue([["Original", "More"]])
+    table_widget = EditTableWidget(data)
+    qtbot.addWidget(table_widget)
+    assert table_widget.value == data
+    new_value = TextTagValue(["first", "second"])
+    with caplog.at_level(logging.WARNING):
+        table_widget.value = new_value
+
+    assert table_widget.value is None
+    assert table_widget.main_widget.rowCount() == 1
+    for i in range(2):
+        item = table_widget.main_widget.item(0, i)
+        assert item is not None
+        assert item.text() == ""
+    assert "EditTableWidget received unexpected value type" in caplog.text
 
 
 @pytest.mark.parametrize(
-    "data",
+    "input_data",
     [
-        pytest.param(None, id="None_value"),
-        pytest.param([], id="empty_value"),
-        pytest.param([["Some Role", "Some Person"]], id="single_value"),
-        pytest.param(
-            [["Some Role", "Some Person"], ["Another Role", "Another Person"]],
-            id="multiple_value",
-        ),
+        pytest.param([], id="addRow_empty"),
+        pytest.param([["first", "second"]], id="addRow_single"),
+        pytest.param([["One", "Two"], ["Three", "Four"]], id="addRow_multiple"),
     ],
 )
-def test_EditTableWidget_addRow(qtbot: QtBot, data: list[list[str]] | None) -> None:
-    """Test adding a row to the widget, when there are values or not."""
-    # Always have at least one row for editing
-    original_row_count = max(len(data or []), 1)
-    expected_row_count = original_row_count + 1
+def test_EditListWidget_addRow(qtbot: QtBot, input_data: list[list[str]]) -> None:
+    """Test adding a row for different stored data."""
+    initial_row_count = max(len(input_data or []), 1)
 
-    _, table_widget = _createTableWidget(qtbot, data=data)
+    table_widget = EditTableWidget(PairedTextTagValue(input_data))
+    qtbot.addWidget(table_widget)
 
-    assert table_widget.main_widget.rowCount() == original_row_count
+    assert table_widget.main_widget.rowCount() == initial_row_count
     assert table_widget.add_button is not None
     table_widget.add_button.click()
-    assert table_widget.main_widget.rowCount() == expected_row_count
+    assert table_widget.main_widget.rowCount() == initial_row_count + 1
 
 
 @pytest.mark.parametrize(
@@ -212,67 +243,39 @@ def test_EditTableWidget_moveRowsUp(
     If contiguous, they should move together.
     If none selected, they shouldn't move.
     """
-    _, table_widget = _createTableWidget(qtbot, input_data)
+    data = PairedTextTagValue(input_data)
+    expected = PairedTextTagValue(expected_value)
+    table_widget = EditTableWidget(data)
+    qtbot.addWidget(table_widget)
 
-    assert table_widget.value == input_data
-    assert table_widget.original == input_data
+    assert table_widget.value == data
+    assert table_widget.original == data
 
     selectRows(table_widget.main_widget, rows)
 
     assert table_widget.up_button is not None
     table_widget.up_button.click()
 
-    assert table_widget.value == expected_value
-    assert table_widget.original == input_data
+    assert table_widget.value == expected
+    assert table_widget.original == data
 
 
-def test_EditTableWidget_moveRows_no_selection(
-    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_EditTableWidget_moveRows_no_selection(qtbot: QtBot) -> None:
     """Tests moving rows with no selection."""
-    data = [
-        ["First Role", "First Person"],
-        ["Second Role", "Second Person"],
-        ["Third Role", "Third Person"],
-    ]
-    _, table_widget = _createTableWidget(qtbot, data)
+    data = PairedTextTagValue(
+        [
+            ["First Role", "First Person"],
+            ["Second Role", "Second Person"],
+            ["Third Role", "Third Person"],
+        ]
+    )
+    table_widget = EditTableWidget(data)
+    qtbot.addWidget(table_widget)
 
-    mock_take_item = MagicMock()
-    mock_remove_row = MagicMock()
-    mock_insert_row = MagicMock()
-    mock_set_item = MagicMock()
-
-    monkeypatch.setattr(table_widget.main_widget, "takeItem", mock_take_item)
-    monkeypatch.setattr(table_widget.main_widget, "removeRow", mock_remove_row)
-    monkeypatch.setattr(table_widget.main_widget, "insertRow", mock_insert_row)
-    monkeypatch.setattr(table_widget.main_widget, "setItem", mock_set_item)
-
-    assert table_widget.value == [
-        ["First Role", "First Person"],
-        ["Second Role", "Second Person"],
-        ["Third Role", "Third Person"],
-    ]
-
-    # Ensure that nothing breaks when nothing selected and trying to move rows
+    assert table_widget.value == data
     assert table_widget.up_button is not None
     table_widget.up_button.click()
-    assert table_widget.value == [
-        ["First Role", "First Person"],
-        ["Second Role", "Second Person"],
-        ["Third Role", "Third Person"],
-    ]
-    assert table_widget.down_button is not None
-    table_widget.down_button.click()
-    assert table_widget.value == [
-        ["First Role", "First Person"],
-        ["Second Role", "Second Person"],
-        ["Third Role", "Third Person"],
-    ]
-
-    mock_take_item.assert_not_called()
-    mock_remove_row.assert_not_called()
-    mock_insert_row.assert_not_called()
-    mock_set_item.assert_not_called()
+    assert table_widget.value == data
 
 
 @pytest.mark.parametrize(
@@ -377,45 +380,43 @@ def test_EditTableWidget_moveRowsDown(
     If contiguous, they should move together.
     If none selected, they shouldn't move.
     """
-    _, table_widget = _createTableWidget(qtbot, input_data)
+    data = PairedTextTagValue(input_data)
+    expected = PairedTextTagValue(expected_value)
+    table_widget = EditTableWidget(data)
+    qtbot.addWidget(table_widget)
 
-    assert table_widget.value == input_data
-    assert table_widget.original == input_data
+    assert table_widget.value == data
+    assert table_widget.original == data
 
     selectRows(table_widget.main_widget, rows)
 
     assert table_widget.down_button is not None
     table_widget.down_button.click()
 
-    assert table_widget.value == expected_value
-    assert table_widget.original == input_data
+    assert table_widget.value == expected
+    assert table_widget.original == data
 
 
 def test_EditTableWidget_removeRows(qtbot: QtBot) -> None:
     """Tests removing row when multiple rows are selected."""
-    data = [
-        ["First Role", "First Person"],
-        ["Second Role", "Second Person"],
-        ["Third Role", "Third Person"],
-    ]
-    _, table_widget = _createTableWidget(qtbot, data)
+    data = PairedTextTagValue(
+        [
+            ["First Role", "First Person"],
+            ["Second Role", "Second Person"],
+            ["Third Role", "Third Person"],
+        ]
+    )
+    table_widget = EditTableWidget(data)
+    qtbot.addWidget(table_widget)
 
-    assert table_widget.value == [
-        ["First Role", "First Person"],
-        ["Second Role", "Second Person"],
-        ["Third Role", "Third Person"],
-    ]
+    assert table_widget.value == data
 
     selectRows(table_widget.main_widget, [0, 1])
     assert table_widget.remove_button is not None
     table_widget.remove_button.click()
 
-    assert table_widget.value == [["Third Role", "Third Person"]]
-    assert table_widget.original == [
-        ["First Role", "First Person"],
-        ["Second Role", "Second Person"],
-        ["Third Role", "Third Person"],
-    ]
+    assert table_widget.value == PairedTextTagValue([["Third Role", "Third Person"]])
+    assert table_widget.original == data
     first_item = table_widget.main_widget.item(0, 0)
     assert first_item is not None
     assert first_item.text() == "Third Role"
@@ -425,46 +426,34 @@ def test_EditTableWidget_removeRows(qtbot: QtBot) -> None:
     assert second_item.text() == "Third Person"
 
 
-def test_EditTableWidget_removeRow_no_selection(
-    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_EditTableWidget_removeRow_no_selection(qtbot: QtBot) -> None:
     """Tests that no rows are removed if none are selected."""
-    data = [["First Role", "First Person"], ["Second Role", "Second Person"]]
-    _, table_widget = _createTableWidget(qtbot, data)
-
-    mock_remove_row = MagicMock()
-    monkeypatch.setattr(table_widget.main_widget, "removeRow", mock_remove_row)
-
-    assert table_widget.value == [
-        ["First Role", "First Person"],
-        ["Second Role", "Second Person"],
-    ]
+    data = PairedTextTagValue(
+        [["First Role", "First Person"], ["Second Role", "Second Person"]]
+    )
+    table_widget = EditTableWidget(data)
+    qtbot.addWidget(table_widget)
+    assert table_widget.value == data
 
     assert table_widget.remove_button is not None
     table_widget.remove_button.click()
-    assert table_widget.value == [
-        ["First Role", "First Person"],
-        ["Second Role", "Second Person"],
-    ]
-
-    mock_remove_row.assert_not_called()
+    assert table_widget.value == data
 
 
 def test_EditTableWidget_removeRow_last_remaining(qtbot: QtBot) -> None:
     """Tests that the row is cleared when there's one left, but the row stays."""
-    data = [["First Role", "First Person"]]
-    _, table_widget = _createTableWidget(qtbot, data)
+    data = PairedTextTagValue([["First Role", "First Person"]])
+    table_widget = EditTableWidget(data)
+    qtbot.addWidget(table_widget)
 
-    assert table_widget.value == [
-        ["First Role", "First Person"],
-    ]
+    assert table_widget.value == data
 
     selectRows(table_widget.main_widget, [0])
     assert table_widget.remove_button is not None
     table_widget.remove_button.click()
 
-    assert table_widget.value == []
-    assert table_widget.original == [["First Role", "First Person"]]
+    assert table_widget.value is None
+    assert table_widget.original == data
 
     assert table_widget.main_widget.rowCount() == 1
     first_item = table_widget.main_widget.item(0, 0)
@@ -477,149 +466,146 @@ def test_EditTableWidget_removeRow_last_remaining(qtbot: QtBot) -> None:
 
 def test_EditTableWidget_clear(qtbot: QtBot) -> None:
     """Tests that data is cleared from the widget when clear is clicked."""
-    data = [["First Role", "First Person"], ["Second Role", "Second Person"]]
-    _, table_widget = _createTableWidget(qtbot, data)
+    data = PairedTextTagValue(
+        [["First Role", "First Person"], ["Second Role", "Second Person"]]
+    )
+    table_widget = EditTableWidget(data)
+    qtbot.addWidget(table_widget)
 
-    assert table_widget.value == [
-        ["First Role", "First Person"],
-        ["Second Role", "Second Person"],
-    ]
+    assert table_widget.value == data
 
     assert table_widget.clear_button is not None
     table_widget.clear_button.click()
-    assert table_widget.value == []
-    assert table_widget.original == [
-        ["First Role", "First Person"],
-        ["Second Role", "Second Person"],
-    ]
+    assert table_widget.value is None
+    assert table_widget.main_widget.rowCount() == 1
+    first_item = table_widget.main_widget.item(0, 0)
+    assert first_item is not None
+    assert first_item.text() == ""
+    second_item = table_widget.main_widget.item(0, 1)
+    assert second_item is not None
+    assert second_item.text() == ""
+    assert table_widget.original == data
 
 
 def test_EditTableWidget_reset(qtbot: QtBot) -> None:
     """Tests that data is reset when reset button is clicked."""
-    data = [
-        ["First Role", "First Person"],
-        ["Second Role", "Second Person"],
-        ["Third Role", "Third Person"],
-    ]
-    _, table_widget = _createTableWidget(qtbot, data)
+    data = PairedTextTagValue(
+        [
+            ["First Role", "First Person"],
+            ["Second Role", "Second Person"],
+            ["Third Role", "Third Person"],
+        ]
+    )
+    table_widget = EditTableWidget(data)
+    qtbot.addWidget(table_widget)
 
-    assert table_widget.value == [
-        ["First Role", "First Person"],
-        ["Second Role", "Second Person"],
-        ["Third Role", "Third Person"],
-    ]
+    assert table_widget.value == data
     assert table_widget.clear_button is not None
     table_widget.clear_button.click()
-    assert table_widget.value == []
-    assert table_widget.original == [
-        ["First Role", "First Person"],
-        ["Second Role", "Second Person"],
-        ["Third Role", "Third Person"],
-    ]
+    assert table_widget.value is None
+    assert table_widget.original == data
     assert table_widget.reset_button is not None
     table_widget.reset_button.click()
-    assert table_widget.value == [
-        ["First Role", "First Person"],
-        ["Second Role", "Second Person"],
-        ["Third Role", "Third Person"],
-    ]
+    assert table_widget.value == data
 
 
 def test_EditTableWidget_update_existing(qtbot: QtBot) -> None:
     """Tests that existing values are updated if changed."""
-    data = [
-        ["First Role", "First Person"],
-        ["Second Role", "Second Person"],
-        ["Third Role", "Third Person"],
-    ]
-    _, table_widget = _createTableWidget(qtbot, data)
+    data = PairedTextTagValue(
+        [
+            ["First Role", "First Person"],
+            ["Second Role", "Second Person"],
+            ["Third Role", "Third Person"],
+        ]
+    )
+    table_widget = EditTableWidget(data)
+    qtbot.addWidget(table_widget)
 
-    assert table_widget.value == [
-        ["First Role", "First Person"],
-        ["Second Role", "Second Person"],
-        ["Third Role", "Third Person"],
-    ]
+    assert table_widget.value == data
 
     first_row_person = table_widget.main_widget.item(0, 1)
     assert first_row_person is not None
     first_row_person.setText("New Person")
-    assert table_widget.value == [
-        ["First Role", "New Person"],
-        ["Second Role", "Second Person"],
-        ["Third Role", "Third Person"],
-    ]
-    assert table_widget.original == [
-        ["First Role", "First Person"],
-        ["Second Role", "Second Person"],
-        ["Third Role", "Third Person"],
-    ]
+    assert table_widget.value == PairedTextTagValue(
+        [
+            ["First Role", "New Person"],
+            ["Second Role", "Second Person"],
+            ["Third Role", "Third Person"],
+        ]
+    )
+    assert table_widget.original == data
 
     first_row_role = table_widget.main_widget.item(0, 0)
     assert first_row_role is not None
     first_row_role.setText("New Role")
-    assert table_widget.value == [
-        ["New Role", "New Person"],
-        ["Second Role", "Second Person"],
-        ["Third Role", "Third Person"],
-    ]
-    assert table_widget.original == [
-        ["First Role", "First Person"],
-        ["Second Role", "Second Person"],
-        ["Third Role", "Third Person"],
-    ]
+    assert table_widget.value == PairedTextTagValue(
+        [
+            ["New Role", "New Person"],
+            ["Second Role", "Second Person"],
+            ["Third Role", "Third Person"],
+        ]
+    )
+    assert table_widget.original == data
 
     second_row_role = table_widget.main_widget.item(1, 0)
     assert second_row_role is not None
     second_row_role.setText("New Role")
-    assert table_widget.value == [
-        ["New Role", "New Person"],
-        ["New Role", "Second Person"],
-        ["Third Role", "Third Person"],
-    ]
-    assert table_widget.original == [
-        ["First Role", "First Person"],
-        ["Second Role", "Second Person"],
-        ["Third Role", "Third Person"],
-    ]
+    assert table_widget.value == PairedTextTagValue(
+        [
+            ["New Role", "New Person"],
+            ["New Role", "Second Person"],
+            ["Third Role", "Third Person"],
+        ]
+    )
+    assert table_widget.original == data
 
 
 def test_EditTableWidget_update_add_new(qtbot: QtBot) -> None:
     """Tests that adding new values updates correctly."""
-    data = [
-        ["First Role", "First Person"],
-        ["Second Role", "Second Person"],
-        ["Third Role", "Third Person"],
-    ]
-    _, table_widget = _createTableWidget(qtbot, data)
+    data = PairedTextTagValue(
+        [
+            ["First Role", "First Person"],
+            ["Second Role", "Second Person"],
+            ["Third Role", "Third Person"],
+        ]
+    )
+    table_widget = EditTableWidget(data)
+    qtbot.addWidget(table_widget)
 
-    assert table_widget.value == [
-        ["First Role", "First Person"],
-        ["Second Role", "Second Person"],
-        ["Third Role", "Third Person"],
-    ]
+    assert table_widget.value == data
 
     assert table_widget.add_button is not None
     table_widget.add_button.click()
-    assert table_widget.main_widget.rowCount() == 4
-    last_row_role = table_widget.main_widget.item(3, 0)
+    assert table_widget.main_widget.rowCount() == len(data.value) + 1
+    last_row_role = table_widget.main_widget.item(len(data.value), 0)
     assert last_row_role is not None
     last_row_role.setText("Extra Role")
-    assert table_widget.value == [
-        ["First Role", "First Person"],
-        ["Second Role", "Second Person"],
-        ["Third Role", "Third Person"],
-    ]
-    last_row_person = table_widget.main_widget.item(3, 1)
+    assert table_widget.value == data
+    last_row_person = table_widget.main_widget.item(len(data.value), 1)
     assert last_row_person is not None
     last_row_person.setText("Extra Person")
-    assert table_widget.value == [
-        ["First Role", "First Person"],
-        ["Second Role", "Second Person"],
-        ["Third Role", "Third Person"],
-        ["Extra Role", "Extra Person"],
-    ]
-    assert table_widget.original == [
-        ["First Role", "First Person"],
-        ["Second Role", "Second Person"],
-        ["Third Role", "Third Person"],
-    ]
+    assert table_widget.value == PairedTextTagValue(
+        [
+            ["First Role", "First Person"],
+            ["Second Role", "Second Person"],
+            ["Third Role", "Third Person"],
+            ["Extra Role", "Extra Person"],
+        ]
+    )
+    assert table_widget.original == data
+
+
+def test_EditTableWidget_isModified(qtbot: QtBot) -> None:
+    """Tests that isModified calculates the correct values."""
+    initial = PairedTextTagValue([["initial", "first"]])
+    second = PairedTextTagValue([["second", "third"]])
+
+    table_widget = EditTableWidget(initial)
+    qtbot.addWidget(table_widget)
+    assert table_widget.isModified() is False
+    table_widget.value = second
+    assert table_widget.isModified() is True
+    table_widget.value = initial
+    assert table_widget.isModified() is False
+    table_widget.value = None
+    assert table_widget.isModified() is True

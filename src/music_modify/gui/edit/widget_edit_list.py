@@ -16,8 +16,12 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from music_modify.custom_types.aliases import SongListData
 from music_modify.custom_types.enums import EditButton, RowDirection
+from music_modify.custom_types.tag_value import (
+    AbstractTagValue,
+    TagValueFactory,
+    TextTagValue,
+)
 from music_modify.gui.utils import getSelectedRows
 
 from .widget_edit_abstract_group import EditAbstractGroupWidget
@@ -25,37 +29,53 @@ from .widget_edit_abstract_group import EditAbstractGroupWidget
 logger = logging.getLogger(__name__)
 
 
-class EditListWidget(EditAbstractGroupWidget[SongListData, QListWidget]):
+class EditListWidget(EditAbstractGroupWidget):
     """Displays data in a list widget, with each row being a string."""
 
-    def __init__(self, parent: QWidget, data: SongListData | None) -> None:
+    def __init__(
+        self,
+        initial_value: AbstractTagValue | None = None,
+        parent: QWidget | None = None,
+    ) -> None:
         """Create an EditListWidget.
 
         Args:
-            parent: The widget that this widget should be displayed on.
-            data: The data to be displayed on this widget.
+            initial_value: Original value that should be displayed.
+            parent: Widget this widget should be displayed on.
         """
-        super().__init__(parent, data)
+        if initial_value is not None and not isinstance(initial_value, TextTagValue):
+            logger.warning(
+                "Got an invalid initial_value for an EditListWidget. "
+                + f"Expected None or a TextTagValue. Got {type(initial_value)}. "
+                + "Setting to None."
+            )
+            initial_value = None
+        if initial_value is not None and not initial_value.value:
+            initial_value = None
+        super().__init__(initial_value, parent)
 
-    @override
+        self.main_widget: QListWidget
+        "Main widget used to display the values currently being stored."
+
+        self._cached_value: TextTagValue | None = initial_value
+
     def _setMainWidget(self) -> QListWidget:
         main_widget = QListWidget()
         main_widget.setMinimumHeight(200)
         main_widget.setDragDropMode(QAbstractItemView.DragDropMode.InternalMove)
-        main_widget.model().rowsMoved.connect(self._updateValue)
         main_widget.setSelectionMode(
             QAbstractItemView.SelectionMode.ExtendedSelection,
         )
-        main_widget.itemChanged.connect(self._updateValue)
         main_widget.setAlternatingRowColors(True)
         return main_widget
 
     @override
     def _setupUi(self) -> None:
         layout = self.main_layout
+        self.main_widget = self._setMainWidget()
         layout.addWidget(self.main_widget)
 
-        self._displayValue()
+        self.value = self.original
 
         button_layout = QVBoxLayout()
         layout.addLayout(button_layout)
@@ -72,29 +92,44 @@ class EditListWidget(EditAbstractGroupWidget[SongListData, QListWidget]):
             )
             button_layout.addLayout(child_layout)
 
+    @property
     @override
-    def _isReset(self) -> bool:
-        if len(self.value) != len(self.original):
-            return False
-        return all(self.value[i] == self.original[i] for i in range(len(self.value)))
-
-    @override
-    def _updateValue(self) -> None:
-        self.value = [
-            self.main_widget.item(row).text().strip()
+    def value(self) -> AbstractTagValue | None:
+        texts: list[str] = [
+            text
             for row in range(self.main_widget.count())
-            if self.main_widget.item(row).text().strip() != ""
+            if (text := self.main_widget.item(row).text().strip()) != ""
         ]
-        self._emitUpdate()
+        if not texts:
+            return None
+        if self._cached_value is None or texts != self._cached_value.value:
+            new_value: AbstractTagValue | None = TagValueFactory.createTagValue(texts)
+            if isinstance(new_value, TextTagValue):
+                self._cached_value = new_value
+            else:
+                logger.warning(
+                    "Creating a new value in EditListWidget didn't produce a TextTagValue. "
+                    + f" Got {type(new_value)}."
+                )
+                self._cached_value = None
+        return self._cached_value
 
+    @value.setter
     @override
-    def _displayValue(self) -> None:
+    def value(self, value: AbstractTagValue | None) -> None:
         # Remove all current items and rebuild the list.
         self.main_widget.clear()
-        for val in self.value:
-            item = QListWidgetItem(val)
-            item.setFlags(item.flags() | Qt.ItemFlag.ItemIsEditable)
-            self.main_widget.addItem(item)
+        if isinstance(value, TextTagValue):
+            for val in value.value:
+                item = QListWidgetItem(val)
+                item.setFlags(item.flags() | Qt.ItemFlag.ItemIsEditable)
+                self.main_widget.addItem(item)
+        elif value is not None:
+            logger.warning(
+                f"EditListWidget received unexpected value type: {type(value)}. "
+                + "Expected TextTagValue or None. "
+                + "Clearing the stored value."
+            )
 
         # Ensure there's always one row available for editing
         if self.main_widget.model().rowCount() == 0:
@@ -117,7 +152,6 @@ class EditListWidget(EditAbstractGroupWidget[SongListData, QListWidget]):
 
         for row in selected_rows:
             _ = self.main_widget.takeItem(row)
-        self._updateValue()
         if self.main_widget.model().rowCount() == 0:
             self._addRow()
 
@@ -147,10 +181,3 @@ class EditListWidget(EditAbstractGroupWidget[SongListData, QListWidget]):
             item = self.main_widget.takeItem(index)
             self.main_widget.insertItem(index + direction_num, item)
             item.setSelected(True)
-
-        self._updateValue()
-
-    @property
-    @override
-    def empty(self) -> SongListData:
-        return []

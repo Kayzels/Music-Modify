@@ -11,8 +11,8 @@ from typing import TYPE_CHECKING, override
 from PySide6.QtWidgets import QBoxLayout, QWidget
 
 from music_modify.core.meta import ABCQMeta
-from music_modify.custom_types.aliases import SongListData, SongTableData
 from music_modify.custom_types.enums import EditButton
+from music_modify.custom_types.tag_value.abstract_tag_value import AbstractTagValue
 from music_modify.gui.mixins.row_operation_mixin import RowOperationMixin
 
 from .widget_edit_abstract import EditAbstractWidget
@@ -21,8 +21,8 @@ if TYPE_CHECKING:
     from PySide6.QtWidgets import QToolButton
 
 
-class EditAbstractGroupWidget[ValueG: SongListData | SongTableData, WidgetT: QWidget](
-    EditAbstractWidget[ValueG, WidgetT],
+class EditAbstractGroupWidget(
+    EditAbstractWidget,
     RowOperationMixin,
     ABC,
     metaclass=ABCQMeta,
@@ -32,14 +32,18 @@ class EditAbstractGroupWidget[ValueG: SongListData | SongTableData, WidgetT: QWi
     These items can be displayed in lists or tables.
     """
 
-    def __init__(self, parent: QWidget, data: ValueG | None) -> None:
+    def __init__(
+        self,
+        initial_value: AbstractTagValue | None = None,
+        parent: QWidget | None = None,
+    ) -> None:
         """Create an EditAbstractGroupWidget.
 
         Args:
-            parent: The widget that this widget should be displayed on.
-            data: The data to be displayed on this widget.
+            initial_value: Original value that should be displayed.
+            parent: Widget this widget should be displayed on.
         """
-        super().__init__(parent, data)
+        super().__init__(initial_value, parent)
 
         self.down_button: QToolButton
         "Button used for moving rows down in the widget."
