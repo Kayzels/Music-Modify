@@ -84,6 +84,19 @@ def test_SongRepository_add_with_song(qtbot: QtBot, table_tags: list[SongTag]) -
     assert repo[0] == song
 
 
+def test_SongRepository_add_with_song_multiple(table_tags: list[SongTag]) -> None:
+    """Tests that calling addSong with multiple songs adds them to the repo."""
+    repo = SongRepository(table_tags, table_tags, ", ")
+    song1 = Song(table_tags, table_tags, ", ")
+    song2 = Song(table_tags, table_tags, ", ")
+    assert song1 != song2
+    repo.add(song1)
+    repo.add(song2)
+    assert len(repo) == 2
+    assert repo[0] == song1
+    assert repo[1] == song2
+
+
 def test_SongRepository_add_with_None(qtbot: QtBot, table_tags: list[SongTag]) -> None:
     """Tests that calling addSong with None creates a song and adds it."""
     repo = SongRepository(table_tags, table_tags, ", ")

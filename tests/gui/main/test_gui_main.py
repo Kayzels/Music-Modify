@@ -295,7 +295,7 @@ def test_MainWindow_addFiles_progress_dialog_canceled(
     )
 
     mock_add_file = MagicMock()
-    monkeypatch.setattr(window.songs_repository, "addFile", mock_add_file)
+    monkeypatch.setattr(window.songs_repository, "add", mock_add_file)
 
     files_to_add = song_paths[:3]
 
@@ -620,7 +620,7 @@ def test_MainWindow_showPrefsDialog(
     )
 
     mock_refresh_table = MagicMock()
-    monkeypatch.setattr(window, "refreshTable", mock_refresh_table)
+    monkeypatch.setattr(window, "refreshTableLayout", mock_refresh_table)
 
     window.showPrefsDialog()
 

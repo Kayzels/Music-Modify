@@ -49,7 +49,10 @@ class SongRepository(QObject):
     def __contains__(self, new_song: Song | str | PathLike[str]) -> bool:
         """Returns True if a song with that file path already exists in the repo."""
         if isinstance(new_song, Song):
-            file_matches = any(song.file == new_song.file for song in self._songs)
+            file_matches = any(
+                song.file == new_song.file and new_song.file is not None
+                for song in self._songs
+            )
             song_matches = new_song in self._songs
             return file_matches or song_matches
         return any(song.file == new_song for song in self._songs)
