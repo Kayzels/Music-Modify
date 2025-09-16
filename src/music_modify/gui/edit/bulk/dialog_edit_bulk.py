@@ -73,11 +73,11 @@ class EditBulkDialog(EditAbstractDialog):
 
     def __init__(
         self,
-        parent: QWidget,
         repository: SongRepository,
         rows: list[int],
         split_text_entered: str,
         all_tags: list[SongTag],
+        parent: QWidget | None = None,
     ) -> None:
         """Create a dialog for bulk editing songs.
 
@@ -88,7 +88,7 @@ class EditBulkDialog(EditAbstractDialog):
             split_text_entered: Character used to split values when multiple are entered
             all_tags: Tags that are available for reading and editing
         """
-        super().__init__(parent, repository, rows)
+        super().__init__(repository, rows, parent)
 
         self._split_text_entered: str = split_text_entered
         self._all_tags: list[SongTag] = all_tags

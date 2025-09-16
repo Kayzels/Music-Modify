@@ -31,10 +31,10 @@ class EditDialog(EditAbstractDialog):
 
     def __init__(
         self,
-        parent: QWidget,
         repository: SongRepository,
         rows: list[int],
         all_tags: list[SongTag],
+        parent: QWidget | None = None,
     ) -> None:
         """Creates a dialog for editing songs individually.
 
@@ -44,7 +44,7 @@ class EditDialog(EditAbstractDialog):
             rows: The indexes of the songs to be edited in the `repository`.
             all_tags: Tags that are available for reading and editing
         """
-        super().__init__(parent, repository, rows)
+        super().__init__(repository, rows, parent)
 
         self._all_tags: list[SongTag] = all_tags
 

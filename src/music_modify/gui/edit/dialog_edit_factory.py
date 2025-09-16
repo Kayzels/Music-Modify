@@ -57,6 +57,6 @@ class EditDialogFactory:
         """
         if bulk:
             return EditBulkDialog(
-                self.parent, self.repository, rows, split_text_entered, all_tags
+                self.repository, rows, split_text_entered, all_tags, self.parent
             )
-        return EditDialog(self.parent, self.repository, rows, all_tags)
+        return EditDialog(self.repository, rows, all_tags, self.parent)

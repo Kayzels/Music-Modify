@@ -22,9 +22,9 @@ class EditAbstractDialog(QDialog, ABC, metaclass=ABCQMeta):
 
     def __init__(
         self,
-        parent: QWidget,
         repository: SongRepository,
         rows: list[int],
+        parent: QWidget | None = None,
     ) -> None:
         """Creates an EditAbstractDialog.
 
