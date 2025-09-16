@@ -135,7 +135,7 @@ class EditDialog(EditAbstractDialog):
         logger.debug("Called updateSong")
         any_updated = False
         for id3_key, widget in self._edit_widgets.items():
-            if widget.isModified():
+            if widget.isModified() or self.song_info.getTag(id3_key) != widget.value:
                 any_updated = True
                 new_value = widget.value
                 self.song_info.setTag(id3_key, new_value)

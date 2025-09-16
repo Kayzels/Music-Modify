@@ -105,6 +105,32 @@ def test_EditDialog_updateSongInfo_setsValue(
     mock_song.save.assert_called_once()
 
 
+def test_EditDialog_updateSongInfo_afterReset(
+    qtbot: QtBot, table_tags: list[SongTag]
+) -> None:
+    """Tests that calling updateSongInfo saves values to the song after resetting."""
+    song = Song()
+    initial_value = TextTagValue(["First"])
+    new_value = TextTagValue(["New"])
+    song.setTag("TIT2", initial_value)
+    repo = SongRepository()
+    repo.add(song)
+    widget = QWidget()
+    qtbot.addWidget(widget)
+    dialog = EditDialog(widget, repo, [0], table_tags)
+    line_widget = dialog._edit_widgets["TIT2"]
+    line_widget.value = new_value
+    with qtbot.waitSignal(dialog.info_updated, timeout=1000):
+        dialog.updateSongInfo()
+    assert song.getTag("TIT2") == new_value
+    dialog.resetSongInfo()
+    assert line_widget.value == initial_value
+    assert song.getTag("TIT2") == new_value
+    with qtbot.waitSignal(dialog.info_updated, timeout=1000):
+        dialog.updateSongInfo()
+    assert song.getTag("TIT2") == initial_value
+
+
 def test_EditDialog_switchButtonState_no_buttons_logged(
     qtbot: QtBot, table_tags: list[SongTag], caplog: pytest.LogCaptureFixture
 ) -> None:
