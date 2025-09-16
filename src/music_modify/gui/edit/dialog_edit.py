@@ -1,10 +1,8 @@
 """Module that defines a dialog that allows editing the metadata for a song."""
 
-import copy
 import logging
-from typing import override
+from typing import TYPE_CHECKING, override
 
-from PySide6.QtCore import Slot
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (
     QDialogButtonBox,
@@ -15,15 +13,15 @@ from PySide6.QtWidgets import (
 )
 
 from music_modify.custom_types import Song, SongTag
-from music_modify.custom_types.aliases import SongEditData
 from music_modify.custom_types.enums import NavDirection
-from music_modify.custom_types.utils import mapKey
 from music_modify.gui.utils import clearLayout
 from music_modify.models.song_repository import SongRepository
 
 from .dialog_edit_abstract import EditAbstractDialog
-from .widget_edit_abstract import EditAbstractWidget
-from .widget_edit_factory import EditAbstractWidgetType, EditWidgetFactory
+from .widget_edit_factory import EditWidgetFactory
+
+if TYPE_CHECKING:
+    from .widget_edit_abstract import EditAbstractWidget
 
 logger = logging.getLogger(__name__)
 
@@ -65,9 +63,8 @@ class EditDialog(EditAbstractDialog):
             return
 
         self.song_info: Song = song_info
+        self._edit_widgets: dict[str, EditAbstractWidget] = {}
         self.setupUi()
-
-        self.changed_values: dict[str, SongEditData | None] = {}
 
         # Add reset button here rather than in abstract.
         self.button_box.addButton(QDialogButtonBox.StandardButton.Reset)
@@ -115,10 +112,13 @@ class EditDialog(EditAbstractDialog):
             self.song_layout = QFormLayout(scroll_widget)
 
         for tag in self._all_tags:
+            widget = EditWidgetFactory.createWidget(
+                tag.id3_key, tag.editor_type, self.song_info.getTag(tag.id3_key), self
+            )
+            if widget is not None:
+                self._edit_widgets[tag.id3_key] = widget
+                self.song_layout.addRow(tag.display_name, widget)
             # Needs to be a copy to avoid editing the tag prematurely.
-            current_data = copy.deepcopy(tag.getValue(self.song_info.id3))
-            widget = self._createWidgetType(tag, current_data)
-            self.song_layout.addRow(tag.display_name, widget)
 
         if not hasattr(self, "scroll_area"):
             self.scroll_area: QScrollArea = QScrollArea(self)
@@ -129,131 +129,25 @@ class EditDialog(EditAbstractDialog):
 
         self.resize(600, 300)
 
-    def _createWidgetType(self, tag: SongTag, data: SongEditData | None) -> QWidget:
-        """Creates the widget of the required type based on the tag and data.
-
-        It also links the signals needed for updating and resetting it.
-        """
-        # noinspection PyTypeHints
-        widget: EditAbstractWidgetType = EditWidgetFactory.createWidget(self, tag, data)
-
-        @Slot()
-        def updateValue() -> None:
-            """Stores the updated value of the widget."""
-            # We want to remove values if they are empty,
-            # which is marked by making the changed_value for that key None.
-            value = widget.value
-            if len(value) == 0:
-                value = None
-            self.changed_values[tag.id3_key] = value
-            logger.debug(f"Value is {widget.value}")
-            logger.debug(f"Changed values are {self.changed_values}")
-
-        @Slot()
-        def resetValue() -> None:
-            """Clears value if it's the same as the original, and currently in the song.
-
-            Otherwise, stores the change.
-            """
-            # This is needed because after a user clicks Apply,
-            # the value stored in the song is now no longer the same as the original,
-            # so we can't just clear it.
-
-            # widget.value holds the original value for the widget,
-            # as this slot is only called after value_reset,
-            # which only happens if the widget has been reset
-            # to store the original value.
-            value = widget.value
-
-            # Need to get the value inside the song and compare
-            song_value = tag.getValue(self.song_info.id3)
-            if song_value is None and len(value) != 0:
-                # The value in the song was cleared, but we have a value now that isn't
-                logger.debug(
-                    (
-                        f"Value for key {tag.id3_key} previously removed, "
-                        "but being reset now."
-                    ),
-                )
-                self.changed_values[tag.id3_key] = value
-                logger.debug(f"Changed values are now {self.changed_values}")
-            elif song_value is None and len(value) == 0:
-                # Same empty value, no need to remember
-                logger.debug(
-                    (
-                        f"Song doesn't store the key {tag.id3_key} "
-                        "and the value for it is being set to empty."
-                    ),
-                )
-                self.changed_values.pop(tag.id3_key, None)
-                logger.debug(f"Changed values are now {self.changed_values}")
-            elif song_value != value:
-                # New value than what is stored in the song (same as original value)
-                logger.debug(
-                    (
-                        f"Value stored in song for key {tag.id3_key} "
-                        "is different from the value being reset to, so storing."
-                    ),
-                )
-                if len(value) == 0:
-                    self.changed_values[tag.id3_key] = None
-                else:
-                    self.changed_values[tag.id3_key] = value
-                logger.debug(f"Changed values are now {self.changed_values}")
-            else:
-                # Value matches existing song value, remove from change list.
-                logger.debug(
-                    (
-                        f"Value matches the value in the song for {tag.id3_key}, "
-                        "so removing from changed values."
-                    ),
-                )
-                self.changed_values.pop(tag.id3_key, None)
-                logger.debug(f"Changed values are now {self.changed_values}")
-
-        widget.value_updated.connect(updateValue)
-        widget.value_reset.connect(resetValue)
-
-        return widget
-
     @override
     def updateSongInfo(self) -> None:
-        """Adds the changes to the song, and saves it."""
-        if len(self.changed_values) == 0:
-            return
+        """Update the data being stored in the song."""
         logger.debug("Called updateSong")
         any_updated = False
-        for id3_key, value in self.changed_values.items():
-            tag: SongTag | None = mapKey(id3_key, self._all_tags)
-            if tag is None:
-                logger.debug(f"Unknown id3 key: {id3_key}")
-                continue
-            any_updated = True
-            if value is None:
-                # Remove tag from song
-                logger.debug(f"Value was None, so removing key {id3_key}")
-                tag.removeTag(self.song_info.id3)
-                continue
-            new_value = value
-
-            # Mutagen ID3 frames always store their values in a list,
-            # so need to convert to that format.
-            if isinstance(new_value, str):
-                new_value = [new_value]
-            logger.debug(f"Setting tag for {id3_key} to {new_value}")
-            tag.setTag(self.song_info.id3, new_value)
+        for id3_key, widget in self._edit_widgets.items():
+            if widget.isModified():
+                any_updated = True
+                new_value = widget.value
+                self.song_info.setTag(id3_key, new_value)
         if any_updated:
             self.song_info.save()
+            # PERF: Can we make this signal work with a row number,
+            # and then use that to update the table?
             self.info_updated.emit()
-
-        # Clear the values: they've been changed in the song,
-        # so don't need to be stored in this list anymore
-        self.changed_values = {}
 
     def resetSongInfo(self) -> None:
         """Sets values for the song back to original ones before changes occurred."""
-        widgets = self.findChildren(EditAbstractWidget)
-        for widget in widgets:
+        for widget in self._edit_widgets.values():
             widget.reset()
 
     def _getSong(self) -> Song:

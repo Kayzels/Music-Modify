@@ -4,30 +4,25 @@ This class is used to generate widgets for editing metadata,
 based on the format of the data.
 """
 
-import copy
-from typing import cast
+import logging
+from typing import TypedDict
 
-from PySide6.QtWidgets import QLineEdit, QListWidget, QWidget
+from PySide6.QtWidgets import QWidget
 
-from music_modify.custom_types.aliases import (
-    SongEditData,
-    SongListData,
-    SongTableData,
-)
 from music_modify.custom_types.enums import EditorType
-from music_modify.custom_types.songtag import SongTag
+from music_modify.custom_types.tag_value import (
+    AbstractTagValue,
+    PairedTextTagValue,
+    TagValueFactory,
+    TextTagValue,
+)
 
 from .widget_edit_abstract import EditAbstractWidget
 from .widget_edit_line import EditLineWidget
 from .widget_edit_list import EditListWidget
 from .widget_edit_table import EditTableWidget
-from .widget_table_drag import DragTableWidget
 
-type EditAbstractWidgetType = (
-    EditAbstractWidget[SongListData, QListWidget]
-    | EditAbstractWidget[SongTableData, DragTableWidget]
-    | EditAbstractWidget[str, QLineEdit]
-)
+logger = logging.getLogger(__name__)
 
 
 class EditWidgetFactory:
@@ -36,37 +31,70 @@ class EditWidgetFactory:
     # Having a class here is probably overkill.
     # But it makes it neater when calling, and keeps it in scope.
 
-    # noinspection PyTypeHints
     @staticmethod
     def createWidget(
-        parent: QWidget,
-        tag: SongTag,
-        data: SongEditData | None,
-    ) -> EditAbstractWidgetType:
+        id3_key: str,
+        editor_type: EditorType,
+        current_value: AbstractTagValue | None,
+        parent: QWidget | None = None,
+    ) -> EditAbstractWidget | None:
         """Creates the required widget based on the tag and data format.
 
         Args:
+            id3_key: Key used to access and set the tag in an ID3 object.
+            editor_type: Fallback type used if there is ambiguity based on the data.
+            current_value: Value that should be sotred and displayed in the widget.
             parent: Widget that the created widget should be owned by.
-            tag: Holds the format that the data should take, and other information.
-            data: The actual value that the tag currently stores.
+
+        It uses the type of `current_value` and the internals if available.
+        If `current_value` is None, it falls back to generating an AbstractTagValue
+        for a specific id3 key.
+
+        This allows the correct widget to be based on the data,
+        in cases where (for example) the `editor_type` is said to be single text,
+        but the tag has multiple values, which would work better in a list.
+
+        If `current_value` stores a list containing one string, it is possible
+        that the widget to be created is either a line widget or a list widget.
+        So it uses the editor type to determine which,
+        and falls back to line if uncertain.
         """
-        match tag.editor_type:
-            case EditorType.PeopleValue:
-                data = cast(
-                    SongTableData | None,
-                    copy.deepcopy(data) if data is not None else None,
+        created_widget: EditAbstractWidget | None = None
+        if current_value is None:
+            current_value = TagValueFactory.createTagValue(
+                value_input=None, id3_key=id3_key
+            )
+
+        class _WidgetArgs(TypedDict):
+            initial_value: AbstractTagValue | None
+            parent: QWidget | None
+
+        widget_args: _WidgetArgs = {"initial_value": current_value, "parent": parent}
+        match current_value:
+            case TextTagValue():
+                if (
+                    len(current_value.value) > 1
+                    or editor_type == EditorType.MultipleText
+                ):
+                    created_widget = EditListWidget(**widget_args)
+                else:
+                    created_widget = EditLineWidget(**widget_args)
+            case PairedTextTagValue():
+                created_widget = EditTableWidget(**widget_args)
+            case None:
+                logger.warning(
+                    f"Unable to find a valid AbstractTagValue to make a widget for {id3_key}."
                 )
-                return EditTableWidget(parent, data)
-            case EditorType.MultipleText:
-                if isinstance(data, str):
-                    data = [data]
-                data = cast(SongListData | None, data)
-                data = data.copy() if data is not None else None
-                return EditListWidget(parent, data)
-            case EditorType.SingleText:
-                data = cast(str | None, data)
-                return EditLineWidget(parent, data)
+                created_widget = None
             case _:
-                raise ValueError(
-                    f"editor_type had an unsupported value: {tag.editor_type}"
+                logger.info(
+                    f"TagValue instance {type(current_value)} is valid, "
+                    + "but no widget for this type exists yet."
                 )
+                created_widget = None
+        return created_widget
+
+
+# TODO: Should we have a "blank" widget for the values we don't support/know
+# TODO: Should we make it a class method and store the list of tags,
+# so no need to pass in editor type?

@@ -1,13 +1,18 @@
 """Tests for EditWidgetFactory."""
 
-from unittest.mock import MagicMock
+import logging
 
-from PySide6.QtWidgets import QWidget
 import pytest
 from pytestqt.qtbot import QtBot
 
 from music_modify.custom_types.enums import EditorType
-from music_modify.custom_types.songtag import SongTag
+from music_modify.custom_types.tag_value import (
+    AbstractTagValue,
+    PairedTextTagValue,
+    PictureTagValue,
+    TextTagValue,
+)
+from music_modify.gui.edit.widget_edit_abstract import EditAbstractWidget
 from music_modify.gui.edit.widget_edit_factory import EditWidgetFactory
 from music_modify.gui.edit.widget_edit_line import EditLineWidget
 from music_modify.gui.edit.widget_edit_list import EditListWidget
@@ -15,141 +20,129 @@ from music_modify.gui.edit.widget_edit_table import EditTableWidget
 
 
 @pytest.mark.parametrize(
-    ("data", "tag", "expected_data", "expected_type"),
+    ("id3_key", "editor_type", "current_value", "expected_widget"),
     [
         pytest.param(
-            None,
-            SongTag(
-                display_name="Title", id3_key="TIT2", editor_type=EditorType.SingleText
-            ),
-            "",
+            "TIT2",
+            EditorType.SingleText,
+            TextTagValue(["Title"]),
             EditLineWidget,
-            id="line_tag_with_None",
+            id="single_text_normal",
         ),
         pytest.param(
+            "TCOM",
+            EditorType.MultipleText,
+            TextTagValue(["First", "Second"]),
+            EditListWidget,
+            id="multi_text_normal",
+        ),
+        pytest.param(
+            "TIPL",
+            EditorType.PeopleValue,
+            PairedTextTagValue([["First", "Second"]]),
+            EditTableWidget,
+            id="people_tag_normal",
+        ),
+        pytest.param(
+            "TPE1",
+            EditorType.SingleText,
+            TextTagValue(["First", "Second"]),
+            EditListWidget,
+            id="multi_with_single_editor_type",
+        ),
+        pytest.param(
+            "TIT2",
+            EditorType.SingleText,
             None,
-            SongTag(
-                display_name="Composer",
-                id3_key="TCOM",
-                editor_type=EditorType.MultipleText,
-            ),
-            [],
-            EditListWidget,
-            id="list_tag_with_None",
+            EditLineWidget,
+            id="empty_value_single_tag",
         ),
         pytest.param(
+            "TCOM",
+            EditorType.MultipleText,
             None,
-            SongTag(
-                display_name="Involved People",
-                id3_key="TIPL",
-                editor_type=EditorType.PeopleValue,
-            ),
-            [],
+            EditListWidget,
+            id="empty_value_multiple_tag",
+        ),
+        pytest.param(
+            "TMCL",
+            EditorType.PeopleValue,
+            None,
             EditTableWidget,
-            id="people_tag_with_None",
+            id="empty_value_people_tag",
         ),
         pytest.param(
-            "",
-            SongTag(display_name="Title", id3_key="TIT2"),
-            "",
-            EditLineWidget,
-            id="line_tag_auto_with_empty_value",
+            "ABCD", EditorType.SingleText, None, None, id="unknown_tag_makes_none"
         ),
         pytest.param(
-            [],
-            SongTag(display_name="Composer", id3_key="TCOM"),
-            [],
-            EditListWidget,
-            id="list_tag_auto_with_empty_value",
+            "APIC",
+            EditorType.Automatic,
+            PictureTagValue(),
+            None,
+            id="picture_tag_makes_none",
         ),
         pytest.param(
-            [],
-            SongTag(display_name="Involved People", id3_key="TIPL"),
-            [],
-            EditTableWidget,
-            id="people_tag_auto_with_empty_value",
-        ),
-        pytest.param(
-            "Name",
-            SongTag(
-                display_name="Title", id3_key="TIT2", editor_type=EditorType.SingleText
-            ),
-            "Name",
-            EditLineWidget,
-            id="line_tag_with_value",
-        ),
-        pytest.param(
-            ["First Name", "Second Name"],
-            SongTag(
-                display_name="Composer",
-                id3_key="TCOM",
-                editor_type=EditorType.MultipleText,
-            ),
-            ["First Name", "Second Name"],
-            EditListWidget,
-            id="list_tag_with_multiple_values",
-        ),
-        pytest.param(
-            ["First Name"],
-            SongTag(
-                display_name="Composer",
-                id3_key="TCOM",
-                editor_type=EditorType.MultipleText,
-            ),
-            ["First Name"],
-            EditListWidget,
-            id="list_tag_with_single_value",
-        ),
-        pytest.param(
-            [["role1", "Name 1"], ["role2", "Name 2"]],
-            SongTag(
-                display_name="Involved People",
-                id3_key="TIPL",
-                editor_type=EditorType.PeopleValue,
-            ),
-            [["role1", "Name 1"], ["role2", "Name 2"]],
-            EditTableWidget,
-            id="people_tag_with_value",
-        ),
-        pytest.param(
-            "First Name",
-            SongTag(
-                display_name="Composer",
-                id3_key="TCOM",
-                editor_type=EditorType.MultipleText,
-            ),
-            ["First Name"],
-            EditListWidget,
-            id="list_tag_with_string_value",
+            "APIC",
+            EditorType.Automatic,
+            None,
+            None,
+            id="picture_tag_from_id3_makes_none",
         ),
     ],
 )
 def test_EditWidgetFactory_createWidget_normal(
     qtbot: QtBot,
-    data: str | list[str] | list[list[str]] | None,
-    tag: SongTag,
-    expected_data: str | list[str] | list[list[str]],
-    expected_type: type[EditLineWidget] | type[EditListWidget] | type[EditTableWidget],
+    id3_key: str,
+    editor_type: EditorType,
+    current_value: AbstractTagValue | None,
+    expected_widget: type[EditAbstractWidget] | None,
 ) -> None:
-    """Tests that the correct widget types are created based on the tag."""
-    widget = QWidget()
-    qtbot.addWidget(widget)
+    """Test that the correct widget types are created based on inputs."""
+    created_widget: EditAbstractWidget | None = EditWidgetFactory.createWidget(
+        id3_key, editor_type, current_value
+    )
+    if created_widget is not None:
+        qtbot.addWidget(created_widget)
+    if expected_widget is None:
+        assert created_widget is None
+    else:
+        assert isinstance(created_widget, expected_widget)
+        assert created_widget.original == current_value
+        assert created_widget.value == current_value
 
-    created_widget = EditWidgetFactory.createWidget(widget, tag, data)
-    qtbot.addWidget(created_widget)
-    assert isinstance(created_widget, expected_type)
-    assert created_widget.value == expected_data
+
+def test_EditWidgetFactory_createWidget_logs_when_unknown_key(
+    caplog: pytest.LogCaptureFixture, qtbot: QtBot
+) -> None:
+    """Test that a widget isn't created when unknown key, but this is logged."""
+    with caplog.at_level(logging.WARNING):
+        created_widget: EditAbstractWidget | None = EditWidgetFactory.createWidget(
+            "ABCD", EditorType.Automatic, None
+        )
+    if created_widget is not None:
+        qtbot.addWidget(created_widget)
+        pytest.fail("Created widget was not None.")
+    assert (
+        "Unable to find a valid AbstractTagValue to make a widget for ABCD."
+        in caplog.text
+    )
+    assert caplog.records[0].levelname == "WARNING"
 
 
-def test_EditWidgetFactory_createWidget_unsupported_type_raises_error() -> None:
-    """Test createWidget raises ValueError when SongTag has unsupported EditorType."""
-    mock_parent = MagicMock(spec=QWidget)
-
-    mock_tag = MagicMock(spec=SongTag)
-    mock_tag.editor_type = EditorType.Automatic
-
-    with pytest.raises(
-        ValueError,
-        match=f"editor_type had an unsupported value: {EditorType.Automatic}",
-    ):
-        EditWidgetFactory.createWidget(mock_parent, mock_tag, None)
+def test_EditWidgetFactory_createWidget_logs_when_valid_value_no_widget_type(
+    caplog: pytest.LogCaptureFixture, qtbot: QtBot
+) -> None:
+    """Test that a widget isn't created when no known widget type for value type."""
+    with caplog.at_level(logging.INFO):
+        created_widget: EditAbstractWidget | None = EditWidgetFactory.createWidget(
+            "APIC", EditorType.Automatic, PictureTagValue()
+        )
+    if created_widget is not None:
+        qtbot.addWidget(created_widget)
+        pytest.fail("Created widget was not None.")
+    assert (
+        f"TagValue instance {type(PictureTagValue())} is valid, "
+        + "but no widget for this type exists yet."
+        in caplog.text
+    )
+    assert caplog.records[0].levelname == "INFO"
