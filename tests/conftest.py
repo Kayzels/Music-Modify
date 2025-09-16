@@ -126,3 +126,16 @@ def table_tags() -> list[SongTag]:
         SongTag(display_name="Involved People", id3_key="TIPL"),
         SongTag(display_name="Composer", id3_key="TCOM"),
     ]
+
+
+@pytest.fixture
+def song_with_tags_path(tmp_path: Path) -> Path:
+    """Fixture providing unique copy of MP3 file with pre-existing tags."""
+    original_file: Path = (
+        Path(__file__).parent / "assets/test_song_with_tags.mp3"
+    ).absolute()
+
+    temp_file: Path = tmp_path / "test_song_with_tags_copy.mp3"
+
+    shutil.copyfile(original_file, temp_file)
+    return temp_file

@@ -65,12 +65,18 @@ class Song:
             if tag_value is None:
                 if id3_key in self._id3:
                     self._id3.delall(id3_key)
+                if id3_key in self._loaded_values:
+                    del self._loaded_values[id3_key]
+            elif id3_key in self._id3:
+                frame = tag_value.updateId3Frame(self._id3[id3_key])
+                self._id3[id3_key] = frame
+                self._loaded_values[id3_key] = tag_value
             else:
-                if id3_key in self._id3:
-                    frame = tag_value.updateId3Frame(self._id3[id3_key])
-                else:
-                    frame = tag_value.toId3Frame(id3_key)
-                self._id3.setall(id3_key, [frame])
+                frame = tag_value.toId3Frame(id3_key)
+                self._id3.add(frame)
+                self._loaded_values[id3_key] = tag_value
+
+        self._staged_changes = {}
 
         if not self.file:
             logger.warning("No file path defined for saving.")
@@ -83,8 +89,6 @@ class Song:
             logger.exception(f"Error saving ID3 tags to '{self.file}'.")
             return
 
-        self.load(self.file)  # Reload to update to new state
-
     def load(self, file: str | os.PathLike[str]) -> None:
         """Load the metadata from this specific file."""
         self._filepath = file
@@ -92,13 +96,11 @@ class Song:
         self._loaded_values.clear()
         try:
             self._id3.load(file)
-        except id3.ID3NoHeaderError:
-            # Header doesn't exist, but will be added when saving
-            self._id3 = ID3()
-        except FileNotFoundError:
+        except MutagenError:
             logger.exception(
-                f"File not found at '{file}'. Initializing with empty tags."
+                f"Error loading '{file}' for mutagen. Initializing with empty tags."
             )
+            self._filepath = None
             self._id3 = ID3()
 
         for id3_key, frame in self._id3.items():
