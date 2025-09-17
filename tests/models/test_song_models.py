@@ -5,8 +5,7 @@ from pathlib import Path
 
 from PySide6.QtCore import Qt
 
-from music_modify.custom_types.song import Song
-from music_modify.custom_types.songtag import SongTag
+from music_modify.custom_types import Song, TagInfo
 from music_modify.custom_types.tag_value import TextTagValue
 from music_modify.models import SongRepository, SongTableModel
 
@@ -27,13 +26,13 @@ def test_SongTableModel_init() -> None:
     )
 
 
-def test_SongTableModel_songs_added(song_path: Path, table_tags: list[SongTag]) -> None:
+def test_SongTableModel_songs_added(song_path: Path, info_tags: list[TagInfo]) -> None:
     """Test that the model is updated when songs are added to the repo."""
     repo = SongRepository()
-    model = SongTableModel(repo, table_tags)
+    model = SongTableModel(repo, info_tags)
     repo.add(song_path)
     assert model.rowCount() == 1
-    assert model.columnCount() == len(table_tags)
+    assert model.columnCount() == len(info_tags)
 
 
 def test_SongTableModel_headerData_no_songs() -> None:
@@ -55,11 +54,11 @@ def test_SongTableModel_headerData_no_songs() -> None:
 
 
 def test_SongTableModel_headerData_songs_added(
-    song_paths: list[PathLike[str]], table_tags: list[SongTag]
+    song_paths: list[PathLike[str]], info_tags: list[TagInfo]
 ) -> None:
     """Test that headers display when songs are added."""
     repo = SongRepository()
-    model = SongTableModel(repo, table_tags)
+    model = SongTableModel(repo, info_tags)
     repo.add(song_paths)
     assert len(repo) > 0
     assert (
@@ -72,7 +71,7 @@ def test_SongTableModel_headerData_songs_added(
     )
     assert (
         model.headerData(0, Qt.Orientation.Horizontal, Qt.ItemDataRole.DisplayRole)
-        == table_tags[0].display_name
+        == info_tags[0].display_name
     )
     assert (
         model.headerData(0, Qt.Orientation.Horizontal, Qt.ItemDataRole.EditRole) is None
@@ -84,7 +83,7 @@ def test_SongTableModel_headerData_songs_added(
     # Invalid section indexes should be None
     assert (
         model.headerData(
-            len(table_tags),
+            len(info_tags),
             Qt.Orientation.Horizontal,
             Qt.ItemDataRole.DisplayRole,
         )
@@ -100,22 +99,22 @@ def test_SongTableModel_headerData_songs_added(
     )
 
 
-def test_SongTableModel_data_no_data_in_field(table_tags: list[SongTag]) -> None:
+def test_SongTableModel_data_no_data_in_field(info_tags: list[TagInfo]) -> None:
     """Test that data returns an empty string when the song doesn't have the tag."""
     repo = SongRepository()
     repo.add()
-    model = SongTableModel(repo, table_tags)
+    model = SongTableModel(repo, info_tags)
     song = repo[0]
     assert song is not None
 
     assert model.data(model.index(0, 0), Qt.ItemDataRole.DisplayRole) == ""
 
 
-def test_SongTableModel_data_invalid(table_tags: list[SongTag]) -> None:
+def test_SongTableModel_data_invalid(info_tags: list[TagInfo]) -> None:
     """Test that data returns None when the role or index is invalid."""
     repo = SongRepository()
     repo.add()
-    model = SongTableModel(repo, table_tags)
+    model = SongTableModel(repo, info_tags)
 
     # Invalid index, valid role
     assert model.data(model.index(len(repo), 0), Qt.ItemDataRole.DisplayRole) is None
@@ -124,14 +123,14 @@ def test_SongTableModel_data_invalid(table_tags: list[SongTag]) -> None:
     assert model.data(model.index(0, 0), Qt.ItemDataRole.CheckStateRole) is None
 
 
-def test_SongTableModel_data_has_value(table_tags: list[SongTag]) -> None:
+def test_SongTableModel_data_has_value(info_tags: list[TagInfo]) -> None:
     """Test that data returns a string representation when there is a value stored."""
     repo = SongRepository()
     song = Song()
     tag_value = TextTagValue(["Title"])
-    song.setTag(table_tags[0].id3_key, tag_value)
+    song.setTag(info_tags[0].id3_key, tag_value)
     repo.add(song)
-    model = SongTableModel(repo, table_tags)
+    model = SongTableModel(repo, info_tags)
     assert (
         model.data(model.index(0, 0), Qt.ItemDataRole.DisplayRole)
         == tag_value.getDisplayValue()

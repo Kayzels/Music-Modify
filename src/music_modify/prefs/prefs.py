@@ -11,7 +11,6 @@ from PySide6.QtCore import QObject, QSettings, Signal
 from PySide6.QtWidgets import QApplication
 
 from music_modify.custom_types.enums import EditorType
-from music_modify.custom_types.songtag import SongTag
 from music_modify.custom_types.tag_info import TagInfo
 
 logger = logging.getLogger(__name__)
@@ -40,7 +39,7 @@ class Settings(QObject):
         self._settings: QSettings | None = None
 
         # Store in a cache to prevent needing to call getArray on every cell
-        self._table_tags_cache: list[SongTag] | None = None
+        self._table_tags_cache: list[TagInfo] | None = None
 
         if new_settings is not None:
             self._settings = new_settings
@@ -358,43 +357,17 @@ class Settings(QObject):
     "Default values for known tags, if there are no user changes."
 
     @property
-    def table_tags(self) -> list[SongTag]:
+    def table_tags(self) -> list[TagInfo]:
         """The tags shown in the main table."""
         if self._table_tags_cache is None:
             self._table_tags_cache = [
-                SongTag(
-                    display_name=tag.display_name,
-                    id3_key=tag.id3_key,
-                    editor_type=tag.editor_type,
-                )
-                for tag in self.info_tags
-                if tag.show_in_table
+                tag for tag in self.info_tags if tag.show_in_table
             ]
         return self._table_tags_cache
 
     @property
-    def all_tags(self) -> list[SongTag]:
-        """`SongTag` version of the tags that are stored in settings.
-
-        Used when a `SongTag` specifically needs to be checked,
-        but the majority of the time, we can use `info_tags` instead,
-        using `TagInfo` objects.
-        """
-        return [
-            SongTag(
-                display_name=tag.display_name,
-                id3_key=tag.id3_key,
-                editor_type=tag.editor_type,
-            )
-            for tag in self.info_tags
-        ]
-
-    @property
     def info_tags(self) -> list[TagInfo]:
-        """`TagInfo` version of the tags that are stored in settings.
-
-        Use `all_tags` if needing `SongTag` objects.
-        """
+        """`TagInfo` version of the tags that are stored in settings."""
         return self._getArray("Tags/info_tags")
 
     @info_tags.setter

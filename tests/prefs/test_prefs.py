@@ -9,7 +9,8 @@ from PySide6.QtCore import QSettings
 from PySide6.QtWidgets import QApplication
 import pytest
 
-from music_modify.custom_types import SongTag, TagInfo
+from music_modify.custom_types import TagInfo
+from music_modify.custom_types.enums import EditorType
 from music_modify.prefs import Settings
 
 
@@ -34,17 +35,9 @@ def test_Settings_init(temp_settings: Settings) -> None:
     assert temp_settings.split_values_at == Settings.default_split_values_at
     assert temp_settings.info_tags == Settings.default_tags
 
-    # Test all_tags
-    assert temp_settings.all_tags == [
-        SongTag(display_name=tag.display_name, id3_key=tag.id3_key)
-        for tag in Settings.default_tags
-    ]
-
     # Test table tags
     assert temp_settings.table_tags == [
-        SongTag(display_name=tag.display_name, id3_key=tag.id3_key)
-        for tag in Settings.default_tags
-        if tag.show_in_table
+        tag for tag in Settings.default_tags if tag.show_in_table
     ]
 
 
@@ -63,7 +56,14 @@ def test_Settings_set_tag(temp_settings: Settings) -> None:
         TagInfo(id3_key="TIT2", display_name="Title", show_in_table=True),
         TagInfo(id3_key="TPE2", display_name="Artist", show_in_table=False),
     ]
-    assert temp_settings.table_tags == [SongTag(id3_key="TIT2", display_name="Title")]
+    assert temp_settings.table_tags == [
+        TagInfo(
+            id3_key="TIT2",
+            display_name="Title",
+            show_in_table=True,
+            editor_type=EditorType.Automatic,
+        )
+    ]
 
 
 def test_Settings_resetSplit(temp_settings: Settings) -> None:
@@ -81,16 +81,11 @@ def test_Settings_resetTags(temp_settings: Settings) -> None:
     temp_settings.resetTags()
 
     # Test all_tags
-    assert temp_settings.all_tags == [
-        SongTag(display_name=tag.display_name, id3_key=tag.id3_key)
-        for tag in Settings.default_tags
-    ]
+    assert temp_settings.info_tags == Settings.default_tags
 
     # Test table tags
     assert temp_settings.table_tags == [
-        SongTag(display_name=tag.display_name, id3_key=tag.id3_key)
-        for tag in Settings.default_tags
-        if tag.show_in_table
+        tag for tag in Settings.default_tags if tag.show_in_table
     ]
 
 

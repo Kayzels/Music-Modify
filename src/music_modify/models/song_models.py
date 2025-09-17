@@ -13,8 +13,7 @@ from PySide6.QtCore import (
     Slot,
 )
 
-from music_modify.custom_types import constants
-from music_modify.custom_types.songtag import SongTag
+from music_modify.custom_types import TagInfo, constants
 
 from .song_repository import SongRepository
 
@@ -29,7 +28,7 @@ class SongTableModel(QAbstractTableModel):
 
     empty_message: Final[str] = "Files will show here when added. Drag files here."
 
-    def __init__(self, repository: SongRepository, table_tags: list[SongTag]) -> None:
+    def __init__(self, repository: SongRepository, table_tags: list[TagInfo]) -> None:
         """Create a new model for the songs that should be managed.
 
         Args:
@@ -39,10 +38,10 @@ class SongTableModel(QAbstractTableModel):
         super().__init__()
         self.repository: SongRepository = repository
         self.repository.songs_updated.connect(self.layoutChanged.emit)
-        self._table_tags: list[SongTag] = table_tags
+        self._table_tags: list[TagInfo] = table_tags
 
     @Slot()
-    def updateTableTags(self, table_tags: list[SongTag]) -> None:
+    def updateTableTags(self, table_tags: list[TagInfo]) -> None:
         """Updatae the tags that should be used for the columns."""
         self._table_tags = table_tags
 

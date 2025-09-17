@@ -15,7 +15,6 @@ from PySide6.QtWidgets import QApplication
 import pytest
 
 from music_modify.custom_types.enums import EditorType
-from music_modify.custom_types.songtag import SongTag
 from music_modify.custom_types.tag_info import TagInfo
 from music_modify.prefs import Settings
 
@@ -118,16 +117,6 @@ def app_info(qapp: QApplication) -> tuple[str, str, str]:
     qapp.setApplicationName(name)
     qapp.setApplicationVersion(version)
     return (org, name, version)
-
-
-@pytest.fixture
-def table_tags() -> list[SongTag]:
-    """Fixture for tags that are used for a SongTableModel."""
-    return [
-        SongTag(display_name="Title", id3_key="TIT2"),
-        SongTag(display_name="Involved People", id3_key="TIPL"),
-        SongTag(display_name="Composer", id3_key="TCOM"),
-    ]
 
 
 @pytest.fixture

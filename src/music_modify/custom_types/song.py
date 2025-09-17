@@ -10,9 +10,7 @@ from typing import cast
 from mutagen import MutagenError, id3
 from mutagen.id3 import ID3
 
-from music_modify.custom_types.tag_value import AbstractTagValue, TagValueFactory
-
-from .songtag import SongTag
+from .tag_value import AbstractTagValue, TagValueFactory
 
 logger = logging.getLogger(__name__)
 
@@ -140,9 +138,9 @@ class Song:
         """Marks a tag for removal when the song is saved."""
         self.setTag(id3_key, None)
 
-    def hasTag(self, tag: str | SongTag) -> bool:
+    def hasTag(self, id3_key: str) -> bool:
         """Returns `True` if the tag is defined in the metadata for the song."""
-        return tag in self.getAllTagKeys()
+        return id3_key in self.getAllTagKeys()
 
     def getAllTagKeys(self) -> list[str]:
         """Returns a list of all tag keys present, considering staged changes."""

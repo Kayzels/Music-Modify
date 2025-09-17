@@ -1,7 +1,6 @@
 """Module that stores the `TagInfo` dataclass.
 
-This dataclass represents basic information about a tag,
-before it is converted to a `SongTag`.
+This dataclass represents basic information about a tag.
 """
 
 from dataclasses import KW_ONLY, dataclass
@@ -11,11 +10,7 @@ from .enums import EditorType
 
 @dataclass
 class TagInfo:
-    """Basic tag information.
-
-    Used when constructing a `SongTag` object,
-    and in places where only basic data is needed.
-    """
+    """Basic tag information."""
 
     _: KW_ONLY
     id3_key: str

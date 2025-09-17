@@ -12,13 +12,14 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from music_modify.custom_types import TagInfo
 from music_modify.custom_types.constants import PEOPLE_TAG_WIDTH
-from music_modify.custom_types.songtag import SongTag
+from music_modify.custom_types.enums import EditorType
 from music_modify.models import SongRepository
 
 
 def updateTableView(
-    table_view: QTableView, repository: SongRepository, table_tags: list[SongTag]
+    table_view: QTableView, repository: SongRepository, table_tags: list[TagInfo]
 ) -> None:
     """Updates the appearance of the table view.
 
@@ -29,10 +30,10 @@ def updateTableView(
         return
 
     for index, tag in enumerate(table_tags):
-        if len(tag) == 1:
-            table_view.resizeColumnToContents(index)
-        else:
+        if tag.editor_type == EditorType.PeopleValue:
             table_view.setColumnWidth(index, PEOPLE_TAG_WIDTH)
+        else:
+            table_view.resizeColumnToContents(index)
 
 
 def clearLayout(layout: QLayout) -> None:
