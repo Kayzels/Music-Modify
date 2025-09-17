@@ -63,6 +63,12 @@ class EditWithComplete(QComboBox):
             self.updateItemsCache(items)
         self.showInitialValue(initial)
 
+    @classmethod
+    def updateJoinCharacter(cls, character: str) -> None:
+        """Update the split/join character used."""
+        cls.split_text_entered = character
+        EnLineEdit.split_text_entered = character
+
     @override
     def showPopup(self) -> None:
         orig = self.disable_popup

@@ -29,12 +29,11 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from music_modify.custom_types.tag_value.abstract_tag_value import AbstractTagValue
+from music_modify.custom_types.tag_value import AbstractTagValue
 from music_modify.gui.about import AboutDialog
-from music_modify.gui.completion._complete_line_edit import EnLineEdit
-from music_modify.gui.completion.edit_with_complete import EditWithComplete
+from music_modify.gui.completion import EditWithComplete
 from music_modify.gui.edit import EditDialogFactory
-from music_modify.gui.edit.bulk.widget_edit_bulk_abstract import EditBulkAbstractWidget
+from music_modify.gui.edit.bulk import EditBulkAbstractWidget
 from music_modify.gui.prefs import PrefsDialog
 from music_modify.gui.utils import getSelectedRows, updateTableView
 from music_modify.models import SongRepository, SongTableModel
@@ -67,9 +66,8 @@ class MainWindow(QMainWindow):
         def updateJoinCharacter(character: str) -> None:
             AbstractTagValue.join_character = character
             self.refreshTableData()
-            EditWithComplete.split_text_entered = character
+            EditWithComplete.updateJoinCharacter(character)
             EditBulkAbstractWidget.split_text_entered = character
-            EnLineEdit.split_text_entered = character
 
         self.songs_repository: Final[SongRepository] = SongRepository()
         "Repository that stores the songs being managed"
