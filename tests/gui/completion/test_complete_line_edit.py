@@ -263,7 +263,8 @@ def test_EnLineEdit_complete_selectFirstFalse(qtbot: QtBot) -> None:
 
 def test_EnLineEdit_updateCompletions_singleMode(qtbot: QtBot) -> None:
     """Test that single mode replaces the item when selected."""
-    line_edit = EnLineEdit(multiple=False, split_text_entered=",")
+    EnLineEdit.split_text_entered = ","
+    line_edit = EnLineEdit(multiple=False)
     qtbot.addWidget(line_edit)
 
     line_edit.setText("  hello world")
@@ -280,7 +281,8 @@ def test_EnLineEdit_updateCompletions_singleMode(qtbot: QtBot) -> None:
 def test_EnLineEdit_updateCompletions_multipleMode_withSeparator(qtbot: QtBot) -> None:
     """Test that multiple mode adds separators after the items."""
     test_separator = ","
-    line_edit = EnLineEdit(multiple=True, split_text_entered=test_separator)
+    EnLineEdit.split_text_entered = test_separator
+    line_edit = EnLineEdit(multiple=True)
     qtbot.addWidget(line_edit)
 
     line_edit.setText("item1, item2, prefix")
@@ -297,7 +299,8 @@ def test_EnLineEdit_updateCompletions_multipleMode_withSeparator(qtbot: QtBot) -
 def test_EnLineEdit_updateCompletions_multipleMode_noSeparator(qtbot: QtBot) -> None:
     """Test that multiple mode doesn't add a separator when there is only one item."""
     test_separator = ","
-    line_edit = EnLineEdit(multiple=True, split_text_entered=test_separator)
+    EnLineEdit.split_text_entered = test_separator
+    line_edit = EnLineEdit(multiple=True)
     qtbot.addWidget(line_edit)
 
     line_edit.setText("just_one_item")
@@ -334,7 +337,8 @@ def test_EnLineEdit_updateCompletions_cursorInMiddle(qtbot: QtBot) -> None:
     which will split the original item.
     """
     test_separator = ";"
-    line_edit = EnLineEdit(multiple=True, split_text_entered=test_separator)
+    EnLineEdit.split_text_entered = test_separator
+    line_edit = EnLineEdit(multiple=True)
     qtbot.addWidget(line_edit)
 
     line_edit.setText("first; second; third")
@@ -361,7 +365,8 @@ def test_EnLineEdit_getCompletedText_singleMode(qtbot: QtBot) -> None:
 def test_EnLineEdit_getCompletedText_multipleMode_emptyLineEdit(qtbot: QtBot) -> None:
     """Tests that selecting the first entry in multiple mode adds a separator after."""
     test_separator = "|"
-    line_edit = EnLineEdit(multiple=True, split_text_entered=test_separator)
+    EnLineEdit.split_text_entered = test_separator
+    line_edit = EnLineEdit(multiple=True)
     qtbot.addWidget(line_edit)
 
     line_edit.setText("")
@@ -377,7 +382,8 @@ def test_EnLineEdit_getCompletedText_multipleMode_noOriginalCursorPos(
 ) -> None:
     """Tests that cursorPosition is used if there is no original cursor position."""
     test_separator = ","
-    line_edit = EnLineEdit(multiple=True, split_text_entered=test_separator)
+    EnLineEdit.split_text_entered = test_separator
+    line_edit = EnLineEdit(multiple=True)
     qtbot.addWidget(line_edit)
 
     line_edit.setText("item1, prefix, suffix")
@@ -396,7 +402,8 @@ def test_EnLineEdit_getCompletedText_multipleMode_withOriginalCursorPos(
 ) -> None:
     """Tests that the original cursor position is used if it exists."""
     test_separator = ";"
-    line_edit = EnLineEdit(multiple=True, split_text_entered=test_separator)
+    EnLineEdit.split_text_entered = test_separator
+    line_edit = EnLineEdit(multiple=True)
     qtbot.addWidget(line_edit)
 
     line_edit.setText("alpha; beta; gamma")
@@ -416,7 +423,8 @@ def test_EnLineEdit_getCompletedText_multipleMode_cursorAtEnd(qtbot: QtBot) -> N
     Ensures that a separator is still added.
     """
     test_separator = ","
-    line_edit = EnLineEdit(multiple=True, split_text_entered=test_separator)
+    EnLineEdit.split_text_entered = test_separator
+    line_edit = EnLineEdit(multiple=True)
     qtbot.addWidget(line_edit)
 
     line_edit.setText("words, are, here, and, the")
@@ -434,7 +442,8 @@ def test_EnLineEdit_getCompletedText_multipleMode_cursorAtStart(qtbot: QtBot) ->
     that is before the original items in the list.
     """
     test_separator = ","
-    line_edit = EnLineEdit(multiple=True, split_text_entered=test_separator)
+    EnLineEdit.split_text_entered = test_separator
+    line_edit = EnLineEdit(multiple=True)
     qtbot.addWidget(line_edit)
 
     line_edit.setText("suffix_only")
@@ -553,7 +562,8 @@ def test_EnLineEdit_applyCurrentText_multipleMode_withSeparator(qtbot: QtBot) ->
     The item that is selected should be added, and completionSelected should be called.
     """
     test_separator = ","
-    line_edit = EnLineEdit(multiple=True, split_text_entered=test_separator)
+    EnLineEdit.split_text_entered = test_separator
+    line_edit = EnLineEdit(multiple=True)
     qtbot.addWidget(line_edit)
 
     line_edit.setText("item1, item2, new_item ")
@@ -573,7 +583,8 @@ def test_EnLineEdit_applyCurrentText_multipleMode_noSeparator(qtbot: QtBot) -> N
     but completionSelected should be called.
     """
     test_separator = ","
-    line_edit = EnLineEdit(multiple=True, split_text_entered=test_separator)
+    EnLineEdit.split_text_entered = test_separator
+    line_edit = EnLineEdit(multiple=True)
     qtbot.addWidget(line_edit)
 
     line_edit.setText("single_item_no_separator")
@@ -593,7 +604,8 @@ def test_EnLineEdit_applyCurrentText_multipleMode_emptyText(
 ) -> None:
     """Tests applying the text when there are no items, only empty text."""
     test_separator = ";"
-    line_edit = EnLineEdit(multiple=True, split_text_entered=test_separator)
+    EnLineEdit.split_text_entered = test_separator
+    line_edit = EnLineEdit(multiple=True)
     qtbot.addWidget(line_edit)
 
     line_edit.setText("")
@@ -616,7 +628,8 @@ def test_EnLineEdit_applyCurrentText_multipleMode_separatorAtStart(
     so there are no completion items, so completionSelected should not be called.
     """
     test_separator = "|"
-    line_edit = EnLineEdit(multiple=True, split_text_entered=test_separator)
+    EnLineEdit.split_text_entered = test_separator
+    line_edit = EnLineEdit(multiple=True)
     qtbot.addWidget(line_edit)
 
     line_edit.setText("| item")

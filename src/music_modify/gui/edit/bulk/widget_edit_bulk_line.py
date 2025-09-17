@@ -54,7 +54,6 @@ class EditBulkLineWidget(EditBulkAbstractWidget):
             items=self.items,
             multiple=False,
             initial=initial,
-            split_text_entered=self.split_text_entered,
         )
 
         self.setupUi()

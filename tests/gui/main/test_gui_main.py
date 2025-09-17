@@ -709,8 +709,7 @@ def test_MainWindow_showEditDialog_individual_edit_accepted(
     mock_get_selected_rows.assert_called_once_with(window.files_table_view)
     mock_dialog_factory_get.assert_called_once_with(
         expected_sorted_rows,
-        temp_settings.all_tags,
-        temp_settings.split_text_entered,
+        temp_settings.info_tags,
         bulk=False,
     )
 
@@ -761,8 +760,7 @@ def test_MainWindow_showEditDialog_individual_edit_rejected(
     mock_get_selected_rows.assert_called_once_with(window.files_table_view)
     mock_dialog_factory_get.assert_called_once_with(
         selected_rows,
-        temp_settings.all_tags,
-        temp_settings.split_text_entered,
+        temp_settings.info_tags,
         bulk=False,
     )
     mock_edit_dialog_instance.info_updated.connect.assert_called_once_with(
@@ -809,8 +807,7 @@ def test_MainWindow_showEditDialog_bulk_edit_accepted(
     mock_get_selected_rows.assert_called_once_with(window.files_table_view)
     mock_dialog_factory_get.assert_called_once_with(
         selected_rows,
-        temp_settings.all_tags,
-        temp_settings.split_text_entered,
+        temp_settings.info_tags,
         bulk=True,
     )
     mock_edit_dialog_instance.info_updated.connect.assert_called_once_with(

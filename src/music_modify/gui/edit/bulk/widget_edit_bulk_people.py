@@ -211,22 +211,17 @@ class EditBulkPeopleWidget(EditBulkAbstractGroupWidget):
         pairs = list(
             {f"{role}{PAIR_SEPARATOR}{person}" for (role, person) in self.items},
         )
-        self.remove_pair_widget = EditWithComplete(
-            parent=self, items=tuple(pairs), split_text_entered=self.split_text_entered
-        )
+        self.remove_pair_widget = EditWithComplete(parent=self, items=tuple(pairs))
         form_layout.addRow("Remove Pair", self.remove_pair_widget)
 
         roles = list({role for (role, _) in self.items})
-        self.remove_role_widget = EditWithComplete(
-            parent=self, items=tuple(roles), split_text_entered=self.split_text_entered
-        )
+        self.remove_role_widget = EditWithComplete(parent=self, items=tuple(roles))
         form_layout.addRow("Remove Role", self.remove_role_widget)
 
         people = list({person for (_, person) in self.items})
         self.remove_person_widget = EditWithComplete(
             parent=self,
             items=tuple(people),
-            split_text_entered=self.split_text_entered,
         )
         form_layout.addRow("Remove Person", self.remove_person_widget)
 

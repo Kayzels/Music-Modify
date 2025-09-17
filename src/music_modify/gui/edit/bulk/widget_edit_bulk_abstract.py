@@ -20,7 +20,6 @@ class EditBulkAbstractWidget(QWidget, ABC, metaclass=ABCQMeta):
 
     split_text_entered: str = ", "
     "The string that is used to split values when multiple are entered."
-    # TODO: Must be updated in MainWindow
 
     def __init__(self, tag: TagInfo, parent: QWidget | None = None) -> None:
         """Creates a widget on `parent` for displaying the data in `tag`.

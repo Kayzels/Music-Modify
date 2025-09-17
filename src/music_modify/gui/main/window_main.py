@@ -31,7 +31,10 @@ from PySide6.QtWidgets import (
 
 from music_modify.custom_types.tag_value.abstract_tag_value import AbstractTagValue
 from music_modify.gui.about import AboutDialog
+from music_modify.gui.completion._complete_line_edit import EnLineEdit
+from music_modify.gui.completion.edit_with_complete import EditWithComplete
 from music_modify.gui.edit import EditDialogFactory
+from music_modify.gui.edit.bulk.widget_edit_bulk_abstract import EditBulkAbstractWidget
 from music_modify.gui.prefs import PrefsDialog
 from music_modify.gui.utils import getSelectedRows, updateTableView
 from music_modify.models import SongRepository, SongTableModel
@@ -60,12 +63,13 @@ class MainWindow(QMainWindow):
         "Label that contains information about how many songs are present and selected"
         self.statusbar.addWidget(self.statusLabel)
 
-        AbstractTagValue.join_character = self._settings.split_values_display
-
         @Slot(str)
-        def updateTagValueJoin(character: str) -> None:
+        def updateJoinCharacter(character: str) -> None:
             AbstractTagValue.join_character = character
             self.refreshTableData()
+            EditWithComplete.split_text_entered = character
+            EditBulkAbstractWidget.split_text_entered = character
+            EnLineEdit.split_text_entered = character
 
         self.songs_repository: Final[SongRepository] = SongRepository()
         "Repository that stores the songs being managed"
@@ -75,7 +79,7 @@ class MainWindow(QMainWindow):
         "Model that links between the song repository and the display of the metadata"
 
         self._settings.tags_updated.connect(self.refreshTableLayout)
-        self._settings.split_values_display_changed.connect(updateTagValueJoin)
+        self._settings.split_values_display_changed.connect(updateJoinCharacter)
 
         self.dialog_factory: EditDialogFactory = EditDialogFactory(
             self,
@@ -110,6 +114,8 @@ class MainWindow(QMainWindow):
         self.updateStatusbarMessage()
 
         self.addStatusbarAppMessage()
+
+        updateJoinCharacter(self._settings.split_values_display)
 
     def setActionState(self) -> None:
         """Toggle the state of possible actions, based on program state."""

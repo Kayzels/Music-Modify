@@ -21,10 +21,12 @@ class EditWithComplete(QComboBox):
     item_selected: Signal = Signal(str)
     "Signal that is emitted when an item in the completion list is chosen."
 
+    split_text_entered: str = ","
+    "Character used to split values when there are multiple."
+
     def __init__(
         self,
         parent: QWidget,
-        split_text_entered: str = ", ",
         items: tuple[str, ...] | None = None,
         *,
         multiple: bool = True,
@@ -34,20 +36,17 @@ class EditWithComplete(QComboBox):
 
         Args:
             parent: The widget that this widget should be displayed on.
-            split_text_entered: Character used to split values when there are multiple
             items: The completion suggestions for the widget on initialization.
             multiple: Whether multiple values should be allowed as output.
             initial: The initial value to display in the widget.
         """
         super().__init__(parent)
         self.setMinimumContentsLength(20)
-        self.split_text_entered = split_text_entered
 
         self.line_edit: EnLineEdit = EnLineEdit(
             parent=self,
             completer_widget=self,
             multiple=multiple,
-            split_text_entered=split_text_entered,
         )
         self.setLineEdit(self.line_edit)
         self.line_edit.item_selected.connect(self.item_selected)

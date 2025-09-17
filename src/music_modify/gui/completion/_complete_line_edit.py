@@ -22,9 +22,11 @@ class EnLineEdit(QLineEdit):
     item_selected: Signal = Signal(str)
     "Signal that is emitted when an item is chosen from the completion list."
 
+    split_text_entered: str = ","
+    "Character used to split values when there are multiple."
+
     def __init__(
         self,
-        split_text_entered: str = ", ",
         parent: QWidget | None = None,
         completer_widget: QWidget | None = None,
         *,
@@ -34,7 +36,6 @@ class EnLineEdit(QLineEdit):
         """Create a line edit that has a popup for completion suggestions.
 
         Args:
-            split_text_entered: Character used to split values when there are multiple.
             parent: The widget that this widget should be displayed on.
             completer_widget: The widget that completion items should be displayed on.
                 If not set, defaults to this widget itself.
@@ -42,7 +43,6 @@ class EnLineEdit(QLineEdit):
             multiple: Whether multiple items can be displayed and selected,
                 or only single items.
         """
-        self._split_text_entered = split_text_entered
         super().__init__(parent)
         self.setClearButtonEnabled(True)
 
@@ -139,7 +139,7 @@ class EnLineEdit(QLineEdit):
         prefix = text[:cpos]
         complete_prefix = prefix.lstrip()
         if self.multiple:
-            sep = self._split_text_entered
+            sep = self.split_text_entered
             complete_prefix = prefix.split(sep)[-1].lstrip()
         self.mcompleter.setCompletionPrefix(complete_prefix)
 
@@ -147,7 +147,7 @@ class EnLineEdit(QLineEdit):
         """Get the list of completed items in before and after parts."""
         if not self.multiple:
             return text, ""
-        sep = self._split_text_entered
+        sep = self.split_text_entered
         cursor_pos = self.original_cursor_pos
         if cursor_pos is None:
             cursor_pos = self.cursorPosition()
@@ -180,7 +180,7 @@ class EnLineEdit(QLineEdit):
     def applyCurrentText(self) -> None:
         """Use the current text as a selection."""
         if self.multiple:
-            sep = self._split_text_entered
+            sep = self.split_text_entered
             text = str(self.text())
             sep_pos = text.rfind(sep)
             if sep_pos:
