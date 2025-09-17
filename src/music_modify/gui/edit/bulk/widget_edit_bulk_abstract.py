@@ -10,7 +10,7 @@ import logging
 from PySide6.QtWidgets import QWidget
 
 from music_modify.core.meta import ABCQMeta
-from music_modify.custom_types import Song, SongTag
+from music_modify.custom_types import Song, TagInfo
 
 logger = logging.getLogger(__name__)
 
@@ -18,16 +18,20 @@ logger = logging.getLogger(__name__)
 class EditBulkAbstractWidget(QWidget, ABC, metaclass=ABCQMeta):
     """Defines the functionality that all widgets on a BulkEditDialog should have."""
 
-    def __init__(self, parent: QWidget, tag: SongTag) -> None:
+    split_text_entered: str = ", "
+    "The string that is used to split values when multiple are entered."
+    # TODO: Must be updated in MainWindow
+
+    def __init__(self, tag: TagInfo, parent: QWidget | None = None) -> None:
         """Creates a widget on `parent` for displaying the data in `tag`.
 
         Args:
-            parent: The widget that this widget should be displayed on.
             tag: The field in the song that this widget displays the data for.
+            parent: The widget that this widget should be displayed on.
         """
         super().__init__(parent)
 
-        self._tag: SongTag = tag
+        self._tag: TagInfo = tag
 
     @abstractmethod
     def setupUi(self) -> None:
@@ -45,6 +49,6 @@ class EditBulkAbstractWidget(QWidget, ABC, metaclass=ABCQMeta):
         """
 
     @property
-    def tag(self) -> SongTag:
+    def tag(self) -> TagInfo:
         """The tag that contains the metadata for the data the widget displays."""
         return self._tag

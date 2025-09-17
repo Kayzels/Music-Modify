@@ -3,7 +3,6 @@
 This dialog allows editing the tags of multiple songs at the same time.
 """
 
-import copy
 import logging
 from typing import TYPE_CHECKING, cast, override
 
@@ -15,8 +14,9 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from music_modify.custom_types import TagInfo
 from music_modify.custom_types.enums import EditorType
-from music_modify.custom_types.songtag import SongTag
+from music_modify.custom_types.tag_value import PairedTextTagValue, TextTagValue
 from music_modify.gui.edit.dialog_edit_abstract import EditAbstractDialog
 from music_modify.gui.utils import createTab
 from music_modify.models.song_repository import SongRepository
@@ -75,8 +75,7 @@ class EditBulkDialog(EditAbstractDialog):
         self,
         repository: SongRepository,
         rows: list[int],
-        split_text_entered: str,
-        all_tags: list[SongTag],
+        all_tags: list[TagInfo],
         parent: QWidget | None = None,
     ) -> None:
         """Create a dialog for bulk editing songs.
@@ -90,8 +89,7 @@ class EditBulkDialog(EditAbstractDialog):
         """
         super().__init__(repository, rows, parent)
 
-        self._split_text_entered: str = split_text_entered
-        self._all_tags: list[SongTag] = all_tags
+        self._all_tags: list[TagInfo] = all_tags
 
         if len(rows) == 0:
             self.reject()
@@ -136,34 +134,39 @@ class EditBulkDialog(EditAbstractDialog):
             QVBoxLayout,
         )
 
-        people_values: dict[SongTag, list[list[str]]] = {}
-        normal_values: dict[SongTag, set[str]] = {}
+        people_values: dict[str, list[list[str]]] = {}
+        normal_values: dict[str, set[str]] = {}
 
         for tag in self._all_tags:
             # Get values from all songs, and store in dicts
             in_all: bool = True
             for song in self.songs:
-                current_data = copy.deepcopy(tag.getValue(song.id3))
-                match tag.editor_type:
-                    case EditorType.PeopleValue:
-                        people_values[tag] = addValues(
-                            cast(list[list[str]] | None, current_data),
-                            people_values.get(tag, []),
+                current_data = song.getTag(tag.id3_key)
+                if current_data is None:
+                    if tag.editor_type == EditorType.PeopleValue:
+                        current_data = PairedTextTagValue([])
+                    else:
+                        current_data = TextTagValue([])
+                match current_data, tag.editor_type:
+                    case PairedTextTagValue(), _:
+                        people_values[tag.id3_key] = addValues(
+                            current_data.value, people_values.get(tag.id3_key, [])
                         )
-                    case EditorType.MultipleText:
-                        normal_values[tag] = _addMultiValues(
-                            cast(list[str] | None, current_data),
-                            normal_values.get(tag, set()),
+                    case TextTagValue(), EditorType.MultipleText:
+                        normal_values[tag.id3_key] = _addMultiValues(
+                            current_data.value, normal_values.get(tag.id3_key, set())
                         )
-                    case EditorType.SingleText:
-                        normal_values[tag], in_all = _addSingleValues(
-                            cast(str | None, current_data),
-                            normal_values.get(tag, set()),
+                    case TextTagValue(), EditorType.SingleText:
+                        normal_values[tag.id3_key], in_all = _addSingleValues(
+                            current_data.getDisplayValue(),
+                            normal_values.get(tag.id3_key, set()),
                             in_all=in_all,
                         )
                     case _:
                         logger.warning(
-                            f"editor_type had an unsupported value: {tag.editor_type}"
+                            "Unsupported editor type or tag value. "
+                            + f"Editor type: {tag.editor_type}. "
+                            + f"Tag Value: {type(current_data)}."
                         )
 
             # Create widgets and add to layouts
@@ -171,29 +174,27 @@ class EditBulkDialog(EditAbstractDialog):
                 case EditorType.PeopleValue:
                     people_widget_layout.addWidget(
                         EditBulkPeopleWidget(
-                            self,
-                            people_values.get(tag, []),
+                            people_values.get(tag.id3_key, []),
                             tag,
+                            self,
                         ),
                     )
                 case EditorType.MultipleText:
                     multi_widget_layout.addWidget(
                         EditBulkMultipleWidget(
-                            self,
-                            normal_values.get(tag, set()),
+                            normal_values.get(tag.id3_key, set()),
                             tag,
-                            self._split_text_entered,
+                            self,
                         ),
                     )
                 case EditorType.SingleText:
                     simple_widget_form_layout.addRow(
                         tag.display_name,
                         EditBulkLineWidget(
-                            self,
-                            normal_values.get(tag, set()),
+                            normal_values.get(tag.id3_key, set()),
                             tag,
+                            self,
                             in_all=in_all,
-                            split_text_entered=self._split_text_entered,
                         ),
                     )
                 case _:

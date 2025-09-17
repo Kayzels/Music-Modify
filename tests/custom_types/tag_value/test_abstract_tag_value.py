@@ -27,6 +27,10 @@ def test_AbstractTagValue_eq_NotImplemented_raised() -> None:
         ) -> id3.Frame:
             return super().toId3Frame(id3_key, encoding)
 
+        @override
+        def updateId3Frame(self, frame: id3.Frame) -> id3.Frame:
+            return super().updateId3Frame(frame)
+
     value = _TestTagValue()
     with pytest.raises(NotImplementedError):
         _ = value == ""

@@ -344,9 +344,7 @@ class MainWindow(QMainWindow):
         if len(rows) == 0:
             return
 
-        dialog = self.dialog_factory.get(
-            rows, self._settings.all_tags, self._settings.split_text_entered, bulk=bulk
-        )
+        dialog = self.dialog_factory.get(rows, self._settings.info_tags, bulk=bulk)
 
         def processDialogResult(result: QDialog.DialogCode) -> None:
             logger.debug("Called process dialog result for edit dialog")

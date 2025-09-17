@@ -10,7 +10,7 @@ from typing import override
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QCheckBox, QGroupBox, QHBoxLayout, QVBoxLayout, QWidget
 
-from music_modify.custom_types import Song, SongTag
+from music_modify.custom_types import Song, TagInfo
 
 from .widget_edit_bulk_abstract import EditBulkAbstractWidget
 
@@ -24,14 +24,14 @@ class EditBulkAbstractGroupWidget(EditBulkAbstractWidget, ABC):
         form_container: The container that holds the form that holds the main widget.
     """
 
-    def __init__(self, parent: QWidget, tag: SongTag) -> None:
+    def __init__(self, tag: TagInfo, parent: QWidget | None = None) -> None:
         """Creates a widget for bulk editing on the `parent` widget.
 
         Args:
-            parent: The widget that this widget should be displayed on.
             tag: The tag that the data should be displayed for.
+            parent: The widget that this widget should be displayed on.
         """
-        super().__init__(parent, tag)
+        super().__init__(tag, parent)
 
         self.group_box: QGroupBox
         "The checkable box that the widget should be contained in."
@@ -92,8 +92,8 @@ class EditBulkAbstractGroupWidget(EditBulkAbstractWidget, ABC):
             return None
         updated_songs: set[Song] = set()
         for song in songs:
-            if self.tag.hasTag(song.id3):
-                self.tag.removeTag(song.id3)
+            if song.hasTag(self.tag.id3_key):
+                song.removeTag(self.tag.id3_key)
                 updated_songs.add(song)
         self._resetView()
         return updated_songs

@@ -3,8 +3,9 @@
 from PySide6.QtWidgets import QWidget
 from pytestqt.qtbot import QtBot
 
-from music_modify.custom_types.song import Song
-from music_modify.custom_types.songtag import SongTag
+from music_modify.custom_types import Song, TagInfo
+from music_modify.custom_types.enums import EditorType
+from music_modify.custom_types.tag_value.text_tag_value import TextTagValue
 from music_modify.gui.edit.bulk.widget_edit_bulk_line import EditBulkLineWidget
 
 
@@ -16,10 +17,12 @@ def test_EditBulkLineWidget_init_not_in_all(qtbot: QtBot) -> None:
     """
     parent = QWidget()
     qtbot.addWidget(parent)
-    tag = SongTag(display_name="Album", id3_key="TALB")
+    tag = TagInfo(
+        display_name="Album", id3_key="TALB", editor_type=EditorType.SingleText
+    )
     data = {"First", "Second"}
 
-    widget = EditBulkLineWidget(parent, data, tag, in_all=False, split_text_entered="")
+    widget = EditBulkLineWidget(data, tag, in_all=False, parent=parent)
     qtbot.addWidget(widget)
     assert "First" in widget.items
     assert "Second" in widget.items
@@ -42,10 +45,12 @@ def test_EditBulkLineWidget_init_in_all(qtbot: QtBot) -> None:
     """
     parent = QWidget()
     qtbot.addWidget(parent)
-    tag = SongTag(display_name="Album", id3_key="TALB")
+    tag = TagInfo(
+        display_name="Album", id3_key="TALB", editor_type=EditorType.SingleText
+    )
     data = {"First"}
 
-    widget = EditBulkLineWidget(parent, data, tag, in_all=True, split_text_entered="")
+    widget = EditBulkLineWidget(data, tag, in_all=True, parent=parent)
     qtbot.addWidget(widget)
     assert widget.items == ("First",)
 
@@ -56,13 +61,15 @@ def test_EditBulkLineWidget_init_in_all(qtbot: QtBot) -> None:
     assert hasattr(widget, "clear_checkbox")
 
 
-def _createWidget(qtbot: QtBot) -> tuple[QWidget, SongTag, EditBulkLineWidget]:
+def _createWidget(qtbot: QtBot) -> tuple[QWidget, TagInfo, EditBulkLineWidget]:
     parent = QWidget()
     qtbot.addWidget(parent)
-    tag = SongTag(display_name="Album", id3_key="TALB")
+    tag = TagInfo(
+        display_name="Album", id3_key="TALB", editor_type=EditorType.SingleText
+    )
     data = {"First"}
 
-    widget = EditBulkLineWidget(parent, data, tag, in_all=True, split_text_entered="")
+    widget = EditBulkLineWidget(data, tag, in_all=True, parent=parent)
     qtbot.addWidget(widget)
 
     return parent, tag, widget
@@ -128,12 +135,12 @@ def test_EditBulkLineWidget_updateTag_apply_empty_clears(qtbot: QtBot) -> None:
     widget.apply_checkbox.setChecked(True)
 
     song = Song()
-    song.setTag(tag, ["First"])
-    assert song.hasTag(tag)
+    song.setTag(tag.id3_key, TextTagValue(["First"]))
+    assert song.hasTag(tag.id3_key)
     widget.main_widget.setText("")
 
     assert widget.updateTag([song]) == {song}
-    assert song.hasTag(tag) is False
+    assert song.hasTag(tag.id3_key) is False
 
 
 def test_EditBulkLineWidget_updateTag_apply_only_space_clears(qtbot: QtBot) -> None:
@@ -144,12 +151,12 @@ def test_EditBulkLineWidget_updateTag_apply_only_space_clears(qtbot: QtBot) -> N
     widget.apply_checkbox.setChecked(True)
 
     song = Song()
-    song.setTag(tag, ["First"])
-    assert song.hasTag(tag)
+    song.setTag(tag.id3_key, TextTagValue(["First"]))
+    assert song.hasTag(tag.id3_key)
     widget.main_widget.setText("     ")
 
     assert widget.updateTag([song]) == {song}
-    assert song.hasTag(tag) is False
+    assert song.hasTag(tag.id3_key) is False
 
 
 def test_EditBulkLineWidget_updateTag_apply_not_empty_sets(qtbot: QtBot) -> None:
@@ -160,15 +167,15 @@ def test_EditBulkLineWidget_updateTag_apply_not_empty_sets(qtbot: QtBot) -> None
     widget.apply_checkbox.setChecked(True)
 
     song = Song()
-    song.setTag(tag, ["First"])
-    assert song.hasTag(tag)
+    song.setTag(tag.id3_key, TextTagValue(["First"]))
+    assert song.hasTag(tag.id3_key)
 
     new_value = "Second"
     widget.main_widget.setText(new_value)
 
     assert widget.updateTag([song]) == {song}
-    assert song.hasTag(tag) is True
-    assert song.getValue(tag) == new_value
+    assert song.hasTag(tag.id3_key) is True
+    assert song.getTag(tag.id3_key) == TextTagValue([new_value])
 
     assert widget.main_widget.text() == new_value
 
@@ -183,22 +190,20 @@ def test_EditBulkLineWidget_updateTag_apply_not_empty_sets_stripped(
     widget.apply_checkbox.setChecked(True)
 
     song = Song()
-    song.setTag(tag, ["First"])
-    assert song.hasTag(tag)
+    song.setTag(tag.id3_key, TextTagValue(["First"]))
+    assert song.hasTag(tag.id3_key)
 
     new_value = " Another      "
     widget.main_widget.setText(new_value)
 
     assert widget.updateTag([song]) == {song}
-    assert song.hasTag(tag) is True
-    assert song.getValue(tag) == new_value.strip()
+    assert song.hasTag(tag.id3_key) is True
+    assert song.getTag(tag.id3_key) == TextTagValue([new_value.strip()])
 
     assert widget.main_widget.text() == new_value.strip()
 
 
-def test_EditBulkLineWidget_updateTag_clear(
-    qtbot: QtBot, table_tags: list[SongTag]
-) -> None:
+def test_EditBulkLineWidget_updateTag_clear(qtbot: QtBot) -> None:
     """Test that clearing works when clear checkbox checked and updating."""
     _, tag, widget = _createWidget(qtbot)
 
@@ -208,10 +213,10 @@ def test_EditBulkLineWidget_updateTag_clear(
     widget.clear_checkbox.setChecked(True)
 
     song = Song()
-    song.setTag(tag, ["First"])
-    assert song.hasTag(tag)
+    song.setTag(tag.id3_key, TextTagValue(["First"]))
+    assert song.hasTag(tag.id3_key)
 
     assert widget.updateTag([song]) == {song}
-    assert song.hasTag(tag) is False
+    assert song.hasTag(tag.id3_key) is False
 
     assert widget.main_widget.text() == ""

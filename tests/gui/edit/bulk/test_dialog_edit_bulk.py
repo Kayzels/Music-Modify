@@ -4,15 +4,14 @@
 
 import logging
 from typing import cast
-from unittest.mock import MagicMock, Mock
+from unittest.mock import Mock
 
 from PySide6.QtWidgets import QWidget
 import pytest
 from pytestqt.qtbot import QtBot
 
+from music_modify.custom_types import Song, TagInfo
 from music_modify.custom_types.enums import EditorType
-from music_modify.custom_types.song import Song
-from music_modify.custom_types.songtag import SongTag
 from music_modify.gui.edit.bulk.dialog_edit_bulk import (
     EditBulkDialog,
     _addMultiValues,
@@ -36,7 +35,7 @@ def test_addSingleValues() -> None:
 
 
 def test_EditBulkDialog_updateSongInfo_no_changes(
-    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch, table_tags: list[SongTag]
+    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch, info_tags: list[TagInfo]
 ) -> None:
     """Tests that save is not called if no changes were made to the song."""
     parent = QWidget()
@@ -57,7 +56,7 @@ def test_EditBulkDialog_updateSongInfo_no_changes(
     mock_widget_2 = Mock()
     mock_widget_2.updateTag.return_value = set()
 
-    dialog = EditBulkDialog(parent, repo, rows, ", ", table_tags)
+    dialog = EditBulkDialog(repo, rows, info_tags, parent)
     # NOTE: DO NOT ADD to qtbot, leads to crash
 
     monkeypatch.setattr(
@@ -75,7 +74,7 @@ def test_EditBulkDialog_updateSongInfo_no_changes(
 
 
 def test_EditBulkDialog_updateSongInfo_with_changes(
-    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch, table_tags: list[SongTag]
+    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch, info_tags: list[TagInfo]
 ) -> None:
     """Test that save is called with the updated changes."""
     parent = QWidget()
@@ -96,9 +95,7 @@ def test_EditBulkDialog_updateSongInfo_with_changes(
     mock_widget_2 = Mock()
     mock_widget_2.updateTag.return_value = {song_2}
 
-    dialog = EditBulkDialog(
-        parent, repo, rows, split_text_entered=",", all_tags=table_tags
-    )
+    dialog = EditBulkDialog(repo, rows, all_tags=info_tags, parent=parent)
     # NOTE: DO NOT ADD to qtbot, leads to crash
 
     assert song_1 in dialog.songs
@@ -119,7 +116,7 @@ def test_EditBulkDialog_updateSongInfo_with_changes(
 
 
 def test_EditBulkDialog_updateSongInfo_with_changes_single(
-    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch, table_tags: list[SongTag]
+    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch, info_tags: list[TagInfo]
 ) -> None:
     """Test that save is only called for songs that actually change data."""
     parent = QWidget()
@@ -140,7 +137,7 @@ def test_EditBulkDialog_updateSongInfo_with_changes_single(
     mock_widget_2 = Mock()
     mock_widget_2.updateTag.return_value = {song_2}
 
-    dialog = EditBulkDialog(parent, repo, rows, ",", table_tags)
+    dialog = EditBulkDialog(repo, rows, info_tags, parent)
     # NOTE: DO NOT ADD to qtbot, leads to crash
 
     assert song_1 in dialog.songs
@@ -161,7 +158,7 @@ def test_EditBulkDialog_updateSongInfo_with_changes_single(
 
 
 def test_EditBulkDialog_updateSongInfo_no_widgets(
-    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch, table_tags: list[SongTag]
+    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch, info_tags: list[TagInfo]
 ) -> None:
     """Tests that save is not called, without mocking widgets."""
     parent = QWidget()
@@ -177,7 +174,7 @@ def test_EditBulkDialog_updateSongInfo_no_widgets(
     repo.add(song_2)
     rows = [0, 1]
 
-    dialog = EditBulkDialog(parent, repo, rows, ", ", table_tags)
+    dialog = EditBulkDialog(repo, rows, info_tags, parent)
     # NOTE: DO NOT ADD to qtbot, leads to crash
 
     assert song_1 in dialog.songs
@@ -199,19 +196,19 @@ def test_EditBulkDialog_setupSongInfo_unsupported_editor_type_logged(
     widget = QWidget()
     qtbot.addWidget(widget)
 
-    mock_tag = MagicMock(spec=SongTag)
-    mock_tag.editor_type = EditorType.Automatic
-    mock_tag.getValue.return_value = None
-    mock_tag.display_name = "Automatic Tag"
+    tag = TagInfo(
+        id3_key="ABCD", display_name="Automatic Tag", editor_type=EditorType.Automatic
+    )
 
     repo = SongRepository()
     repo.add()
     rows = [0]
 
     with caplog.at_level(logging.WARNING):
-        EditBulkDialog(widget, repo, rows, split_text_entered=", ", all_tags=[mock_tag])
+        EditBulkDialog(repo, rows, all_tags=[tag], parent=widget)
 
     assert (
-        f"editor_type had an unsupported value: {EditorType.Automatic}" in caplog.text
+        "Unsupported editor type or tag value. " + "Editor type: EditorType.Automatic. "
+        in caplog.text
     )
     assert caplog.records[0].levelname == "WARNING"

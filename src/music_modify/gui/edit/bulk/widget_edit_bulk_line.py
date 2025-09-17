@@ -13,7 +13,8 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from music_modify.custom_types import Song, SongTag
+from music_modify.custom_types import Song, TagInfo
+from music_modify.custom_types.tag_value import TextTagValue
 from music_modify.gui.completion import EditWithComplete
 
 from .widget_edit_bulk_abstract import EditBulkAbstractWidget
@@ -26,10 +27,9 @@ class EditBulkLineWidget(EditBulkAbstractWidget):
 
     def __init__(
         self,
-        parent: QWidget,
         data: set[str],
-        tag: SongTag,
-        split_text_entered: str,
+        tag: TagInfo,
+        parent: QWidget | None = None,
         *,
         in_all: bool = False,
     ) -> None:
@@ -40,9 +40,8 @@ class EditBulkLineWidget(EditBulkAbstractWidget):
             data: The data to be displayed.
             tag: The field in the song that should be updated.
             in_all: Whether the data appears in all songs being edited or not.
-            split_text_entered: Character used to split values when multiple entered
         """
-        super().__init__(parent, tag)
+        super().__init__(tag, parent)
 
         self.items: tuple[str, ...] = tuple(data)
 
@@ -55,7 +54,7 @@ class EditBulkLineWidget(EditBulkAbstractWidget):
             items=self.items,
             multiple=False,
             initial=initial,
-            split_text_entered=split_text_entered,
+            split_text_entered=self.split_text_entered,
         )
 
         self.setupUi()
@@ -123,17 +122,17 @@ class EditBulkLineWidget(EditBulkAbstractWidget):
             else:
                 logger.info(f"Setting value {value} for tag {self.tag.display_name}")
                 for song in songs:
-                    current_value = song.getValue(self.tag)
+                    current_value = song.getTag(self.tag.id3_key)
                     if current_value != value:
-                        song.setTag(self.tag, [value])
+                        song.setTag(self.tag.id3_key, TextTagValue([value]))
                         updated_songs.add(song)
-            self.main_widget.setText(value)
+                self.main_widget.setText(value)
 
         if should_clear:
             logger.info(f"Removing tag for {self.tag.display_name}")
             for song in songs:
-                if self.tag.hasTag(song.id3):
-                    self.tag.removeTag(song.id3)
+                if song.hasTag(self.tag.id3_key):
+                    song.removeTag(self.tag.id3_key)
                     updated_songs.add(song)
             self.main_widget.clear()
 

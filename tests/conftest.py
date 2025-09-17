@@ -14,7 +14,9 @@ from PySide6.QtCore import QSettings
 from PySide6.QtWidgets import QApplication
 import pytest
 
+from music_modify.custom_types.enums import EditorType
 from music_modify.custom_types.songtag import SongTag
+from music_modify.custom_types.tag_info import TagInfo
 from music_modify.prefs import Settings
 
 NUM_TEMP_SONGS = 3
@@ -125,6 +127,24 @@ def table_tags() -> list[SongTag]:
         SongTag(display_name="Title", id3_key="TIT2"),
         SongTag(display_name="Involved People", id3_key="TIPL"),
         SongTag(display_name="Composer", id3_key="TCOM"),
+    ]
+
+
+@pytest.fixture
+def info_tags() -> list[TagInfo]:
+    """Fixture for tags that are used for a SongTableModel."""
+    return [
+        TagInfo(
+            display_name="Title", id3_key="TIT2", editor_type=EditorType.SingleText
+        ),
+        TagInfo(
+            display_name="Involved People",
+            id3_key="TIPL",
+            editor_type=EditorType.PeopleValue,
+        ),
+        TagInfo(
+            display_name="Composer", id3_key="TCOM", editor_type=EditorType.MultipleText
+        ),
     ]
 
 

@@ -9,9 +9,10 @@ from PySide6.QtWidgets import QWidget
 import pytest
 from pytestqt.qtbot import QtBot
 
+from music_modify.custom_types import Song, TagInfo
 from music_modify.custom_types.constants import PAIR_SEPARATOR
-from music_modify.custom_types.song import Song
-from music_modify.custom_types.songtag import SongTag
+from music_modify.custom_types.enums import EditorType
+from music_modify.custom_types.tag_value.paired_text_tag_value import PairedTextTagValue
 from music_modify.gui.completion.edit_with_complete import EditWithComplete
 from music_modify.gui.edit.bulk.widget_edit_bulk_people import (
     EditBulkPeopleWidget,
@@ -51,11 +52,15 @@ def test_remapPeopleAndRoles() -> None:
 
 def _createWidget(
     qtbot: QtBot, data: list[list[str]]
-) -> tuple[QWidget, SongTag, EditBulkPeopleWidget]:
+) -> tuple[QWidget, TagInfo, EditBulkPeopleWidget]:
     parent = QWidget()
     qtbot.addWidget(parent)
-    tag = SongTag(display_name="Involved People", id3_key="TIPL")
-    widget = EditBulkPeopleWidget(parent, data, tag)
+    tag = TagInfo(
+        display_name="Involved People",
+        id3_key="TIPL",
+        editor_type=EditorType.PeopleValue,
+    )
+    widget = EditBulkPeopleWidget(data, tag, parent)
     qtbot.addWidget(widget)
 
     return parent, tag, widget
@@ -152,7 +157,7 @@ def test_ActionMapping_performChange_param(
 
     song = Song()
     if song_items is not None:
-        song.setTag(tag, song_items)
+        song.setTag(tag.id3_key, PairedTextTagValue(song_items))
 
     action_mapping: _ActionMapping[list[list[str]]] = _ActionMapping(
         widget, mapping_items, addValues
@@ -251,21 +256,21 @@ def test_EditBulkPeopleWidget_updateTag_clear_checkbox_checked(qtbot: QtBot) -> 
     _, tag, widget = _createWidget(qtbot, initial_data)
 
     song1 = Song()
-    song1.setTag(tag, initial_data)
+    song1.setTag(tag.id3_key, PairedTextTagValue(initial_data))
     song2 = Song()
-    song2.setTag(tag, initial_data)
+    song2.setTag(tag.id3_key, PairedTextTagValue(initial_data))
     songs = [song1, song2]
 
     widget.group_box.setChecked(True)
     widget.clear_checkbox.setChecked(True)
 
-    assert song1.getValue(tag) is not None
-    assert song2.getValue(tag) is not None
+    assert song1.getTag(tag.id3_key) is not None
+    assert song2.getTag(tag.id3_key) is not None
 
     assert widget.updateTag(songs) == {song1, song2}
 
-    assert song1.getValue(tag) is None
-    assert song2.getValue(tag) is None
+    assert song1.getTag(tag.id3_key) is None
+    assert song2.getTag(tag.id3_key) is None
 
 
 def test_EditBulkPeopleWidget_updateTag_no_changes_attempted(qtbot: QtBot) -> None:
@@ -274,25 +279,25 @@ def test_EditBulkPeopleWidget_updateTag_no_changes_attempted(qtbot: QtBot) -> No
     _, tag, widget = _createWidget(qtbot, widget_data)
 
     song = Song()
-    assert not song.hasTag(tag)
+    assert not song.hasTag(tag.id3_key)
     songs = [song]
 
     widget.group_box.setChecked(True)
     widget.clear_checkbox.setChecked(False)
 
-    widget.add_widget.value = []
+    widget.add_widget.value = PairedTextTagValue([])
     widget.remove_pair_widget.setText("")
     assert widget.remove_pair_widget.values == []
     widget.remove_person_widget.setText("")
     assert widget.remove_person_widget.values == []
     widget.remove_role_widget.setText("")
     assert widget.remove_role_widget.values == []
-    widget.remap_person_widget.value = []
-    widget.remap_role_widget.value = []
+    widget.remap_person_widget.value = PairedTextTagValue([])
+    widget.remap_role_widget.value = PairedTextTagValue([])
 
     assert not widget.updateTag(songs)
-    assert not song.hasTag(tag)
-    assert song.getValue(tag) is None
+    assert not song.hasTag(tag.id3_key)
+    assert song.getTag(tag.id3_key) is None
 
 
 def _set_widget_value(
@@ -310,7 +315,7 @@ def _set_widget_value(
         if len(value) > 0 and not isinstance(value[0], list):
             return
         value = cast(list[list[str]], value)
-        widget.value = value
+        widget.value = PairedTextTagValue(value)
 
 
 class _SongInfo(TypedDict):
@@ -541,7 +546,7 @@ def test_EditBulkPeopleWidget_updateTag_multiple_param(
     expected_song_values: list[list[list[str]]] = []
     for info in song_infos:
         song = Song()
-        song.setTag(tag, info["items"])
+        song.setTag(tag.id3_key, PairedTextTagValue(info["items"]))
         songs.append(song)
         if info["updated"]:
             expected_updated_songs.add(song)
@@ -555,7 +560,7 @@ def test_EditBulkPeopleWidget_updateTag_multiple_param(
     assert actual_updated_songs == expected_updated_songs
 
     for i, song in enumerate(songs):
-        assert song.getValue(tag) == expected_song_values[i]
+        assert song.getTag(tag.id3_key) == PairedTextTagValue(expected_song_values[i])
 
 
 @pytest.mark.parametrize(
@@ -579,7 +584,7 @@ def test_EditBulkPeopleWidget_updateTag_single_param(
     _, tag, widget = _createWidget(qtbot, widget_data)
 
     song = Song()
-    song.setTag(tag, info["items"])
+    song.setTag(tag.id3_key, PairedTextTagValue(info["items"]))
 
     expected_update_result: set[Song] = {song} if info["updated"] else set()
 
@@ -592,7 +597,7 @@ def test_EditBulkPeopleWidget_updateTag_single_param(
 
     assert actual_update_result == expected_update_result
 
-    assert song.getValue(tag) == info["expected_items"]
+    assert song.getTag(tag.id3_key) == PairedTextTagValue(info["expected_items"])
 
 
 def test_EditBulkPeopleWidget_updateTag_multiple_actions(qtbot: QtBot) -> None:
@@ -608,20 +613,22 @@ def test_EditBulkPeopleWidget_updateTag_multiple_actions(qtbot: QtBot) -> None:
     # one by role, one by person,
     # one whose role will be remapped, one whose person will be remapped.
     song.setTag(
-        tag,
-        [
-            ["ExistingRole", "ExistingPerson"],
-            ["RoleToRemove", "PersonToRemove"],
-            ["RoleToDelete", "SomePerson"],
-            ["SomeRole", "PersonToDelete"],
-            ["OldRole", "SomeOtherPerson"],
-            ["AnotherRole", "OldPerson"],
-            ["StaticRole", "StaticPerson"],
-        ],
+        tag.id3_key,
+        PairedTextTagValue(
+            [
+                ["ExistingRole", "ExistingPerson"],
+                ["RoleToRemove", "PersonToRemove"],
+                ["RoleToDelete", "SomePerson"],
+                ["SomeRole", "PersonToDelete"],
+                ["OldRole", "SomeOtherPerson"],
+                ["AnotherRole", "OldPerson"],
+                ["StaticRole", "StaticPerson"],
+            ]
+        ),
     )
 
     # Set up actions
-    widget.add_widget.value = [["NewRole", "NewPerson"]]
+    widget.add_widget.value = PairedTextTagValue([["NewRole", "NewPerson"]])
     widget.remove_pair_widget.setText(
         "RoleToRemove" + PAIR_SEPARATOR + "PersonToRemove"
     )
@@ -632,8 +639,10 @@ def test_EditBulkPeopleWidget_updateTag_multiple_actions(qtbot: QtBot) -> None:
     assert widget.remove_role_widget.values == ["RoleToDelete"]
     widget.remove_person_widget.setText("PersonToDelete")
     assert widget.remove_person_widget.values == ["PersonToDelete"]
-    widget.remap_role_widget.value = [["OldRole", "RemappedRole"]]
-    widget.remap_person_widget.value = [["OldPerson", "RemappedPerson"]]
+    widget.remap_role_widget.value = PairedTextTagValue([["OldRole", "RemappedRole"]])
+    widget.remap_person_widget.value = PairedTextTagValue(
+        [["OldPerson", "RemappedPerson"]]
+    )
 
     widget.group_box.setChecked(True)
     widget.clear_checkbox.setChecked(False)
@@ -643,7 +652,9 @@ def test_EditBulkPeopleWidget_updateTag_multiple_actions(qtbot: QtBot) -> None:
     # Order of operations: addValues, removePairs, _removePeople, _removeRoles,
     # _remapPeople, _remapRoles
     # The list_utils functions can reorder.
-    final_song_tags = cast(list[list[str]], song.getValue(tag))
+    final_song_tag_value = song.getTag(tag.id3_key)
+    assert final_song_tag_value is not None
+    final_song_tags = final_song_tag_value.value
     assert set(map(tuple, final_song_tags)) == {
         ("ExistingRole", "ExistingPerson"),
         ("NewRole", "NewPerson"),
@@ -661,15 +672,15 @@ def test_EditBulkPeopleWidget_resetView(
     _, __, widget = _createWidget(qtbot, initial_widget_data)
 
     # Manually populate some values to be cleared
-    widget.add_widget.value = [["TempRole", "TempPerson"]]
+    widget.add_widget.value = PairedTextTagValue([["TempRole", "TempPerson"]])
     widget.remove_pair_widget.setText("Role1" + PAIR_SEPARATOR + "Person1")
     assert widget.remove_pair_widget.values == ["Role1" + PAIR_SEPARATOR + "Person1"]
     widget.remove_role_widget.setText("Role1")
     assert widget.remove_role_widget.values == ["Role1"]
     widget.remove_person_widget.setText("Person1")
     assert widget.remove_person_widget.values == ["Person1"]
-    widget.remap_role_widget.value = [["R1", "R2"]]
-    widget.remap_person_widget.value = [["P1", "P2"]]
+    widget.remap_role_widget.value = PairedTextTagValue([["R1", "R2"]])
+    widget.remap_person_widget.value = PairedTextTagValue([["P1", "P2"]])
 
     # Set checkboxes to True to ensure they are reset to False
     widget.clear_checkbox.setChecked(True)

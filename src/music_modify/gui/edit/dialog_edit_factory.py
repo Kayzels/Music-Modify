@@ -3,9 +3,11 @@
 This is the factory class for creating different types of Edit dialogs.
 """
 
+from typing import TypedDict
+
 from PySide6.QtWidgets import QWidget
 
-from music_modify.custom_types.songtag import SongTag
+from music_modify.custom_types import TagInfo
 from music_modify.models.song_repository import SongRepository
 
 from .bulk.dialog_edit_bulk import EditBulkDialog
@@ -34,8 +36,7 @@ class EditDialogFactory:
     def get(
         self,
         rows: list[int],
-        all_tags: list[SongTag],
-        split_text_entered: str,
+        all_tags: list[TagInfo],
         *,
         bulk: bool = False,
     ) -> EditAbstractDialog:
@@ -55,8 +56,20 @@ class EditDialogFactory:
         Returns:
             A dialog for editing the metadata, of the correct form.
         """
+
+        class _DialogArgs(TypedDict):
+            repository: SongRepository
+            rows: list[int]
+            all_tags: list[TagInfo]
+            parent: QWidget | None
+
+        dialog_args: _DialogArgs = {
+            "repository": self.repository,
+            "rows": rows,
+            "all_tags": all_tags,
+            "parent": self.parent,
+        }
+
         if bulk:
-            return EditBulkDialog(
-                self.repository, rows, split_text_entered, all_tags, self.parent
-            )
-        return EditDialog(self.repository, rows, all_tags, self.parent)
+            return EditBulkDialog(**dialog_args)
+        return EditDialog(**dialog_args)

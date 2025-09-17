@@ -84,6 +84,10 @@ class EditTableWidget(EditAbstractGroupWidget):
 
         return main_widget
 
+    def setHorizontalHeaderLabels(self, labels: list[str]) -> None:
+        """Set the labels displayed on the table widget."""
+        self.main_widget.setHorizontalHeaderLabels(labels)
+
     @override
     def _setupUi(self) -> None:
         self.main_widget = self._setMainWidget()

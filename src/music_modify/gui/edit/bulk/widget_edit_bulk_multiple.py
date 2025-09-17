@@ -5,7 +5,7 @@ but these values are not pairs.
 """
 
 import logging
-from typing import Unpack, cast, override
+from typing import Unpack, override
 
 from PySide6.QtWidgets import (
     QFormLayout,
@@ -14,8 +14,9 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from music_modify.custom_types import Song, SongTag
+from music_modify.custom_types import Song, TagInfo
 from music_modify.custom_types.qt_types import QLineEditArgs
+from music_modify.custom_types.tag_value import TextTagValue
 from music_modify.gui.completion import EditWithComplete
 from music_modify.utils import getUnique
 
@@ -48,7 +49,10 @@ class EditBulkMultipleWidget(EditBulkAbstractGroupWidget):
     """Widget used for bulk editing data when the tag contains multiple values."""
 
     def __init__(
-        self, parent: QWidget, data: set[str], tag: SongTag, split_text_entered: str
+        self,
+        data: set[str],
+        tag: TagInfo,
+        parent: QWidget | None = None,
     ) -> None:
         """Create a widget for bulk editing multiple value keys.
 
@@ -59,10 +63,9 @@ class EditBulkMultipleWidget(EditBulkAbstractGroupWidget):
             split_text_entered: The string that is used to split values
                 when multiple are entered.
         """
-        super().__init__(parent, tag)
+        super().__init__(tag, parent)
 
         self.items: tuple[str, ...] = tuple(data)
-        self._split_text_entered = split_text_entered
         self.setupUi()
 
         self.add_line: _MultipleLineEdit
@@ -77,7 +80,7 @@ class EditBulkMultipleWidget(EditBulkAbstractGroupWidget):
         form_layout.setContentsMargins(0, 0, 0, 0)
 
         add_layout = QHBoxLayout()
-        self.add_line = _MultipleLineEdit("", self._split_text_entered)
+        self.add_line = _MultipleLineEdit("", self.split_text_entered)
         add_layout.addWidget(self.add_line)
         form_layout.addRow("Add", add_layout)
 
@@ -109,13 +112,17 @@ class EditBulkMultipleWidget(EditBulkAbstractGroupWidget):
         Returns None if the song doesn't have the tag, but we aren't
         adding anything to it.
         """
-        song_values = cast(list[str] | None, self.tag.getValue(song.id3))
+        song_values = song.getTag(self.tag.id3_key)
         if song_values is None:
             if not self.add_line.items:
                 return None
-            self.tag.generateFrame(song.id3)
             return []
-        return song_values
+        if not isinstance(song_values, TextTagValue):
+            logger.error(
+                f"Expected a TextTagValue for {self.tag.id3_key}, but got {type(song_values)}"
+            )
+            return None
+        return song_values.value
 
     def _addValuesToSong(self, song: Song, add_values: list[str]) -> bool:
         """Add the values from add_line to the song.
@@ -138,7 +145,7 @@ class EditBulkMultipleWidget(EditBulkAbstractGroupWidget):
         self.items = tuple(
             widget_items + [value for value in new_values if value not in widget_items]
         )
-        self.tag.setTag(song.id3, values)
+        song.setTag(self.tag.id3_key, TextTagValue(values))
         return True
 
     def _removeValuesFromSong(self, song: Song, remove_values: list[str]) -> bool:
@@ -150,7 +157,7 @@ class EditBulkMultipleWidget(EditBulkAbstractGroupWidget):
             return False
         new_values = [value for value in song_values if value not in remove_values]
         if new_values != song_values:
-            self.tag.setTag(song.id3, new_values)
+            song.setTag(self.tag.id3_key, TextTagValue(new_values))
             return True
         return False
 

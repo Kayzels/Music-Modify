@@ -6,13 +6,14 @@ when the tag contains (role, person) pairs.
 
 from collections.abc import Callable, Sized
 import logging
-from typing import cast, override
+from typing import override
 
 from PySide6.QtWidgets import QFormLayout, QWidget
 
-from music_modify.custom_types import Song, SongTag
+from music_modify.custom_types import Song, TagInfo
 from music_modify.custom_types.constants import PAIR_SEPARATOR
 from music_modify.custom_types.enums import PairIndex
+from music_modify.custom_types.tag_value import PairedTextTagValue
 from music_modify.gui.completion import EditWithComplete
 from music_modify.gui.edit.widget_edit_table import EditTableWidget
 from music_modify.utils.list_utils import (
@@ -107,7 +108,7 @@ class _ActionMapping[L: Sized]:
         """
         self.widget: EditBulkPeopleWidget = widget
         "The widget that displays the data"
-        self.tag: SongTag = self.widget.tag
+        self.tag: TagInfo = self.widget.tag
         "The tag that the data should be edited for."
         self.items: L = items
         "Any data structure that is used to transform a pair"
@@ -126,12 +127,15 @@ class _ActionMapping[L: Sized]:
 
     def _getSongValues(self, song: Song) -> list[list[str]]:
         """Get the values stored for the song, for the tag."""
-        original_values = self.tag.getValue(song.id3)
+        original_values = song.getTag(self.tag.id3_key)
         if original_values is None:
-            if not self.tag.hasTag(song.id3):
-                self.tag.generateFrame(song.id3)
-            original_values = []
-        return cast(list[list[str]], original_values)
+            return []
+        if not isinstance(original_values, PairedTextTagValue):
+            logger.error(
+                f"Expected values ot be a PairedTextTagValue, got {type(original_values)} instead."
+            )
+            return []
+        return original_values.value
 
     def performChange(self, song: Song) -> bool:
         """Call `func` on the data for the tag in the specified `song`.
@@ -145,7 +149,7 @@ class _ActionMapping[L: Sized]:
         new_values = self.func(self.items, current_values)
 
         if new_values != current_values:
-            self.tag.setTag(song.id3, new_values)
+            song.setTag(self.tag.id3_key, PairedTextTagValue(new_values))
 
             new_pairs: list[tuple[str, str]] = [
                 (role, person) for role, person in new_values
@@ -171,22 +175,18 @@ class EditBulkPeopleWidget(EditBulkAbstractGroupWidget):
 
     def __init__(
         self,
-        parent: QWidget,
         data: list[list[str]],
-        tag: SongTag,
-        split_text_entered: str = ", ",
+        tag: TagInfo,
+        parent: QWidget | None = None,
     ) -> None:
         """Create an EditBulkPeopleWidget.
 
         Args:
-            parent: The widget that this widget should be displayed on.
             data: The data to be displayed.
             tag: The field in the song that should be updated.
-            split_text_entered: Character used to separate values when multiple
+            parent: The widget that this widget should be displayed on.
         """
-        super().__init__(parent, tag)
-
-        self._split_text_entered = split_text_entered
+        super().__init__(tag, parent)
 
         self.items: list[tuple[str, str]] = [(role, person) for role, person in data]
         self.setupUi()
@@ -205,20 +205,20 @@ class EditBulkPeopleWidget(EditBulkAbstractGroupWidget):
         form_container.setLayout(form_layout)
         form_layout.setContentsMargins(0, 0, 0, 0)
 
-        self.add_widget = EditTableWidget(self, [])
+        self.add_widget = EditTableWidget(PairedTextTagValue([]), self)
         form_layout.addRow("Add", self.add_widget)
 
         pairs = list(
             {f"{role}{PAIR_SEPARATOR}{person}" for (role, person) in self.items},
         )
         self.remove_pair_widget = EditWithComplete(
-            parent=self, items=tuple(pairs), split_text_entered=self._split_text_entered
+            parent=self, items=tuple(pairs), split_text_entered=self.split_text_entered
         )
         form_layout.addRow("Remove Pair", self.remove_pair_widget)
 
         roles = list({role for (role, _) in self.items})
         self.remove_role_widget = EditWithComplete(
-            parent=self, items=tuple(roles), split_text_entered=self._split_text_entered
+            parent=self, items=tuple(roles), split_text_entered=self.split_text_entered
         )
         form_layout.addRow("Remove Role", self.remove_role_widget)
 
@@ -226,23 +226,21 @@ class EditBulkPeopleWidget(EditBulkAbstractGroupWidget):
         self.remove_person_widget = EditWithComplete(
             parent=self,
             items=tuple(people),
-            split_text_entered=self._split_text_entered,
+            split_text_entered=self.split_text_entered,
         )
         form_layout.addRow("Remove Person", self.remove_person_widget)
 
         remap_headers = ["Old", "New"]
         self.remap_role_widget = EditTableWidget(
-            parent=self,
-            data=[],
-            labels=remap_headers,
+            parent=self, initial_value=PairedTextTagValue([])
         )
+        self.remap_role_widget.setHorizontalHeaderLabels(remap_headers)
         form_layout.addRow("Remap Role", self.remap_role_widget)
 
         self.remap_person_widget = EditTableWidget(
-            parent=self,
-            data=[],
-            labels=remap_headers,
+            parent=self, initial_value=PairedTextTagValue([])
         )
+        self.remap_person_widget.setHorizontalHeaderLabels(remap_headers)
         form_layout.addRow("Remap Person", self.remap_person_widget)
 
         return form_container
@@ -284,7 +282,11 @@ class EditBulkPeopleWidget(EditBulkAbstractGroupWidget):
             return checkbox_result
 
         # Collect all possible changes
-        add_items: list[list[str]] = self.add_widget.value
+        add_items: list[list[str]] = (
+            value.value
+            if isinstance((value := self.add_widget.value), PairedTextTagValue)
+            else []
+        )
         remove_pairs: set[tuple[str, ...]] = {
             tuple(pair)
             for pair in toPairs(
@@ -295,8 +297,16 @@ class EditBulkPeopleWidget(EditBulkAbstractGroupWidget):
         remove_people: set[str] = set(self.remove_person_widget.values)
         remove_roles: set[str] = set(self.remove_role_widget.values)
         # Map to dicts so it's quicker to get the changed values.
-        map_people: dict[str, str] = dict(self.remap_person_widget.value)
-        map_roles: dict[str, str] = dict(self.remap_role_widget.value)
+        map_people: dict[str, str] = (
+            dict(value.value)
+            if isinstance((value := self.remap_person_widget.value), PairedTextTagValue)
+            else {}
+        )
+        map_roles: dict[str, str] = (
+            dict(value.value)
+            if isinstance((value := self.remap_role_widget.value), PairedTextTagValue)
+            else {}
+        )
 
         # If any of the above values aren't empty,
         # the user intends to make a change.

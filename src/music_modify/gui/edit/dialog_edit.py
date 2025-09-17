@@ -12,7 +12,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from music_modify.custom_types import Song, SongTag
+from music_modify.custom_types import Song, TagInfo
 from music_modify.custom_types.enums import NavDirection
 from music_modify.gui.utils import clearLayout
 from music_modify.models.song_repository import SongRepository
@@ -33,7 +33,7 @@ class EditDialog(EditAbstractDialog):
         self,
         repository: SongRepository,
         rows: list[int],
-        all_tags: list[SongTag],
+        all_tags: list[TagInfo],
         parent: QWidget | None = None,
     ) -> None:
         """Creates a dialog for editing songs individually.
@@ -46,7 +46,7 @@ class EditDialog(EditAbstractDialog):
         """
         super().__init__(repository, rows, parent)
 
-        self._all_tags: list[SongTag] = all_tags
+        self._all_tags: list[TagInfo] = all_tags
 
         if len(rows) == 0:
             self.reject()
