@@ -113,7 +113,7 @@ class EditDialog(EditAbstractDialog):
 
         for tag in self._all_tags:
             widget = EditWidgetFactory.createWidget(
-                tag.id3_key, tag.editor_type, self.song_info.getTag(tag.id3_key), self
+                tag.id3_key, self.song_info.getTag(tag.id3_key), self
             )
             if widget is not None:
                 self._edit_widgets[tag.id3_key] = widget

@@ -5,7 +5,7 @@ based on the format of the data.
 """
 
 import logging
-from typing import TypedDict
+from typing import ClassVar, TypedDict
 
 from PySide6.QtWidgets import QWidget
 
@@ -28,13 +28,12 @@ logger = logging.getLogger(__name__)
 class EditWidgetFactory:
     """Creates widgets displayed on an EditDialog."""
 
-    # Having a class here is probably overkill.
-    # But it makes it neater when calling, and keeps it in scope.
+    editor_types: ClassVar[dict[str, EditorType]] = {}
 
-    @staticmethod
+    @classmethod
     def createWidget(
+        cls,
         id3_key: str,
-        editor_type: EditorType,
         current_value: AbstractTagValue | None,
         parent: QWidget | None = None,
     ) -> EditAbstractWidget | None:
@@ -59,6 +58,7 @@ class EditWidgetFactory:
         So it uses the editor type to determine which,
         and falls back to line if uncertain.
         """
+        editor_type = cls.editor_types.get(id3_key, EditorType.Automatic)
         created_widget: EditAbstractWidget | None = None
         if current_value is None:
             current_value = TagValueFactory.createTagValue(
@@ -96,5 +96,3 @@ class EditWidgetFactory:
 
 
 # TODO: Should we have a "blank" widget for the values we don't support/know
-# TODO: Should we make it a class method and store the list of tags,
-# so no need to pass in editor type?

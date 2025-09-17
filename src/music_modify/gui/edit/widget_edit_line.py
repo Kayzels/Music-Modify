@@ -95,6 +95,3 @@ class EditLineWidget(EditAbstractWidget):
                 f"Expected only 1 value for EditLineWidget, but received {len(value.value)}."
             )
         self.main_widget.setText(value.getDisplayValue())
-
-
-# TODO: Tests for isModified

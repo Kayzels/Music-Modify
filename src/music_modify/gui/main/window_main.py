@@ -34,6 +34,7 @@ from music_modify.gui.about import AboutDialog
 from music_modify.gui.completion import EditWithComplete
 from music_modify.gui.edit import EditDialogFactory
 from music_modify.gui.edit.bulk import EditBulkAbstractWidget
+from music_modify.gui.edit.widget_edit_factory import EditWidgetFactory
 from music_modify.gui.prefs import PrefsDialog
 from music_modify.gui.utils import getSelectedRows, updateTableView
 from music_modify.models import SongRepository, SongTableModel
@@ -66,8 +67,17 @@ class MainWindow(QMainWindow):
         def updateJoinCharacter(character: str) -> None:
             AbstractTagValue.join_character = character
             self.refreshTableData()
+
+        @Slot(str)
+        def updateSplitEnterCharacter(character: str) -> None:
             EditWithComplete.updateJoinCharacter(character)
             EditBulkAbstractWidget.split_text_entered = character
+
+        @Slot(str)
+        def updateWidgetEditorTypes() -> None:
+            EditWidgetFactory.editor_types = {
+                info.id3_key: info.editor_type for info in self._settings.info_tags
+            }
 
         self.songs_repository: Final[SongRepository] = SongRepository()
         "Repository that stores the songs being managed"
@@ -77,7 +87,9 @@ class MainWindow(QMainWindow):
         "Model that links between the song repository and the display of the metadata"
 
         self._settings.tags_updated.connect(self.refreshTableLayout)
+        self._settings.tags_updated.connect(updateWidgetEditorTypes)
         self._settings.split_values_display_changed.connect(updateJoinCharacter)
+        self._settings.split_text_entered_changed.connect(updateSplitEnterCharacter)
 
         self.dialog_factory: EditDialogFactory = EditDialogFactory(
             self,
@@ -114,6 +126,8 @@ class MainWindow(QMainWindow):
         self.addStatusbarAppMessage()
 
         updateJoinCharacter(self._settings.split_values_display)
+        updateSplitEnterCharacter(self._settings.split_text_entered)
+        updateWidgetEditorTypes()
 
     def setActionState(self) -> None:
         """Toggle the state of possible actions, based on program state."""
