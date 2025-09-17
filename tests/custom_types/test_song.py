@@ -18,15 +18,15 @@ def test_Song_init_with_None() -> None:
     """Test that a Song object is created correctly when not passed a file."""
     song = Song()
     assert song.file is None
-    assert song.id3 is not None
-    assert song.id3.filename is None
+    assert song._id3 is not None
+    assert song._id3.filename is None
 
 
 def test_Song_init_with_file(song_path: Path) -> None:
     """Test that a Song object is created correctly when passed a file."""
     song = Song(song_path)
     assert song.file == song_path
-    assert song.id3.filename == str(song_path)
+    assert song._id3.filename == str(song_path)
 
 
 def test_Song_columns_setTag_removeTag(song_path: Path) -> None:
@@ -59,10 +59,10 @@ def test_Song_setTag_save_no_file() -> None:
     assert not song.hasTag("TIT2")
     song.setTag("TIT2", TextTagValue(["Some Title"]))
     assert song.hasTag("TIT2")
-    assert "TIT2" not in song.id3
+    assert "TIT2" not in song._id3
     song.save()
-    assert "TIT2" in song.id3
-    assert song.id3["TIT2"].text == ["Some Title"]
+    assert "TIT2" in song._id3
+    assert song._id3["TIT2"].text == ["Some Title"]
 
 
 def test_Song_setTag_save_removeTag_save() -> None:
@@ -71,14 +71,14 @@ def test_Song_setTag_save_removeTag_save() -> None:
     assert not song.hasTag("TIT2")
     song.setTag("TIT2", TextTagValue(["Some Title"]))
     assert song.hasTag("TIT2")
-    assert "TIT2" not in song.id3
+    assert "TIT2" not in song._id3
     song.save()
-    assert "TIT2" in song.id3
-    assert song.id3["TIT2"].text == ["Some Title"]
+    assert "TIT2" in song._id3
+    assert song._id3["TIT2"].text == ["Some Title"]
     song.removeTag("TIT2")
     assert not song.hasTag("TIT2")
     song.save()
-    assert "TIT2" not in song.id3
+    assert "TIT2" not in song._id3
 
 
 def test_Song_load_with_tags(song_with_tags_path: Path) -> None:

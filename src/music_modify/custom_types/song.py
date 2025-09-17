@@ -41,7 +41,6 @@ class Song:
         self._loaded_values: dict[str, AbstractTagValue] = {}
         "Values that are read from the ID3 object."
 
-        # TODO: Make this variable private, and don't use externally.
         self._id3: ID3 = ID3()
 
         if file is not None:
@@ -51,11 +50,6 @@ class Song:
     def file(self) -> str | os.PathLike[str] | None:
         """The file on disk that this `Song` object represents."""
         return self._filepath
-
-    @property
-    def id3(self) -> ID3:
-        """The metadata structure and values stored in the song."""
-        return self._id3
 
     def save(self) -> None:
         """Save the changed values for the song, and refresh the display."""
