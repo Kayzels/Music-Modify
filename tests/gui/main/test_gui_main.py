@@ -638,8 +638,6 @@ def test_MainWindow_refreshTable(
     window = MainWindow(temp_settings)
     qtbot.addWidget(window)
 
-    window.songs_repository.refreshDisplay = MagicMock()
-
     mock_update_table_view = MagicMock()
     monkeypatch.setattr(
         "music_modify.gui.main.window_main.updateTableView", mock_update_table_view
@@ -650,7 +648,6 @@ def test_MainWindow_refreshTable(
     ):
         window.refreshTableLayout()
 
-    window.songs_repository.refreshDisplay.assert_called_once()
     mock_update_table_view.assert_called_once_with(
         window.files_table_view, window.songs_repository, temp_settings.table_tags
     )

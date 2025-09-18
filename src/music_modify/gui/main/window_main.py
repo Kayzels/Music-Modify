@@ -335,7 +335,6 @@ class MainWindow(QMainWindow):
         """Update the display of the table."""
         self.songs_model.layoutAboutToBeChanged.emit()
         self.songs_model.updateTableTags(self._settings.table_tags)
-        self.songs_repository.refreshDisplay()
         self.songs_model.layoutChanged.emit()
         updateTableView(
             self.files_table_view, self.songs_repository, self._settings.table_tags

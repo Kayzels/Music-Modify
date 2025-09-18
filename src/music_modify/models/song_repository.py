@@ -99,10 +99,3 @@ class SongRepository(QObject):
         for index in indexes:
             self._songs.pop(index)
         self.songs_updated.emit()
-
-    def refreshDisplay(self) -> None:
-        """Updates the information being displayed for each song in the repository.
-
-        Should be called after any metadata is updated, to keep the view in sync.
-        """
-        # TODO: Is this function needed?
