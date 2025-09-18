@@ -5,7 +5,7 @@ This dataclass represents basic information about a tag.
 
 from dataclasses import KW_ONLY, dataclass
 
-from .enums import EditorType
+from music_modify.core.enums import EditorType
 
 
 @dataclass

@@ -9,8 +9,8 @@ from PySide6.QtCore import QSettings
 from PySide6.QtWidgets import QApplication
 import pytest
 
+from music_modify.core.enums import EditorType
 from music_modify.custom_types import TagInfo
-from music_modify.custom_types.enums import EditorType
 from music_modify.prefs import Settings
 
 

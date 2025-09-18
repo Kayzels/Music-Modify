@@ -19,7 +19,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from music_modify.custom_types.enums import NavDirection
+from music_modify.core.enums import NavDirection
 
 from ._complete_model import CompleteModel
 

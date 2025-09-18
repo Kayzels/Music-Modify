@@ -10,8 +10,8 @@ from PySide6.QtWidgets import QWidget
 import pytest
 from pytestqt.qtbot import QtBot
 
+from music_modify.core.enums import EditorType
 from music_modify.custom_types import Song, TagInfo
-from music_modify.custom_types.enums import EditorType
 from music_modify.gui.edit.bulk.dialog_edit_bulk import (
     EditBulkDialog,
     _addMultiValues,

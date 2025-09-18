@@ -7,7 +7,7 @@ from PySide6.QtCore import QAbstractItemModel, QModelIndex, Qt
 from PySide6.QtWidgets import QComboBox, QStyleOptionViewItem, QWidget
 from pytestqt.qtbot import QtBot
 
-from music_modify.custom_types.enums import EditorType
+from music_modify.core.enums import EditorType
 from music_modify.gui.prefs.delegate_editor_type import EditorTypeDelegate
 
 

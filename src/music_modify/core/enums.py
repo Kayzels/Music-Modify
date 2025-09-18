@@ -3,15 +3,6 @@
 from enum import Enum, Flag, auto
 
 
-class TagType(Enum):
-    """The form of data that a specific tag contains."""
-
-    Text = "text"
-    People = "people"
-    Data = "data"
-    Url = "url"
-
-
 class EditorType(Enum):
     """The type of widget/display that should be used for editing a tag.
 

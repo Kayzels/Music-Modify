@@ -8,7 +8,7 @@ from PySide6.QtWidgets import QToolButton, QWidget
 import pytest
 from pytestqt.qtbot import QtBot
 
-from music_modify.custom_types.enums import EditButton, RowDirection
+from music_modify.core.enums import EditButton, RowDirection
 from music_modify.gui.mixins.row_operation_mixin import RowOperationMixin
 
 

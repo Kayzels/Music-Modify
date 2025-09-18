@@ -9,7 +9,7 @@ from typing import ClassVar, TypedDict
 
 from PySide6.QtWidgets import QWidget
 
-from music_modify.custom_types.enums import EditorType
+from music_modify.core.enums import EditorType
 from music_modify.custom_types.tag_value import (
     AbstractTagValue,
     PairedTextTagValue,

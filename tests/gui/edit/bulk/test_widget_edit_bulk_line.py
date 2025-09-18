@@ -3,9 +3,9 @@
 from PySide6.QtWidgets import QWidget
 from pytestqt.qtbot import QtBot
 
+from music_modify.core.enums import EditorType
 from music_modify.custom_types import Song, TagInfo
-from music_modify.custom_types.enums import EditorType
-from music_modify.custom_types.tag_value.text_tag_value import TextTagValue
+from music_modify.custom_types.tag_value import TextTagValue
 from music_modify.gui.edit.bulk.widget_edit_bulk_line import EditBulkLineWidget
 
 

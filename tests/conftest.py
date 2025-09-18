@@ -14,8 +14,8 @@ from PySide6.QtCore import QSettings
 from PySide6.QtWidgets import QApplication
 import pytest
 
-from music_modify.custom_types.enums import EditorType
-from music_modify.custom_types.tag_info import TagInfo
+from music_modify.core.enums import EditorType
+from music_modify.custom_types import TagInfo
 from music_modify.prefs import Settings
 
 NUM_TEMP_SONGS = 3

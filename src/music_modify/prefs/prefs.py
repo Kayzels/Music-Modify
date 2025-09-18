@@ -10,7 +10,7 @@ from typing import ClassVar, final
 from PySide6.QtCore import QObject, QSettings, Signal
 from PySide6.QtWidgets import QApplication
 
-from music_modify.custom_types.enums import EditorType
+from music_modify.core.enums import EditorType
 from music_modify.custom_types.tag_info import TagInfo
 
 logger = logging.getLogger(__name__)

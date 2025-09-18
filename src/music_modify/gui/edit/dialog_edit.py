@@ -12,8 +12,8 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from music_modify.core.enums import NavDirection
 from music_modify.custom_types import Song, TagInfo
-from music_modify.custom_types.enums import NavDirection
 from music_modify.gui.utils import clearLayout
 from music_modify.models.song_repository import SongRepository
 

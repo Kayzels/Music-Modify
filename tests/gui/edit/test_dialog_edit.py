@@ -9,8 +9,8 @@ from PySide6.QtWidgets import QDialog, QWidget
 import pytest
 from pytestqt.qtbot import QtBot
 
+from music_modify.core.enums import NavDirection
 from music_modify.custom_types import Song, TagInfo
-from music_modify.custom_types.enums import NavDirection
 from music_modify.custom_types.tag_value import TextTagValue
 from music_modify.gui.edit.dialog_edit import EditDialog
 from music_modify.gui.edit.widget_edit_abstract import EditAbstractWidget

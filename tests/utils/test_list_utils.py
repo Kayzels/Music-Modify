@@ -2,7 +2,7 @@
 
 import pytest
 
-from music_modify.custom_types.enums import PairIndex
+from music_modify.core.enums import PairIndex
 from music_modify.utils.list_utils import (
     addValues,
     getUnique,

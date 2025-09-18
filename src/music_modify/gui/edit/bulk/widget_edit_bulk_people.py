@@ -11,8 +11,8 @@ from typing import override
 from PySide6.QtWidgets import QFormLayout, QWidget
 
 from music_modify.core import constants
+from music_modify.core.enums import PairIndex
 from music_modify.custom_types import Song, TagInfo
-from music_modify.custom_types.enums import PairIndex
 from music_modify.custom_types.tag_value import PairedTextTagValue
 from music_modify.gui.completion import EditWithComplete
 from music_modify.gui.edit.widget_edit_table import EditTableWidget

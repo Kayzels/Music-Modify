@@ -5,8 +5,8 @@ from typing import Literal
 from PySide6.QtCore import Qt
 import pytest
 
+from music_modify.core.enums import EditorType
 from music_modify.custom_types import TagInfo
-from music_modify.custom_types.enums import EditorType
 from music_modify.models.tag_model import TAG_MODEL_COLUMNS, TagModel
 from music_modify.utils.string_utils import tableHeader
 

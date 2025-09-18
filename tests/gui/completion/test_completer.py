@@ -27,7 +27,7 @@ from PySide6.QtWidgets import (
 import pytest
 from pytestqt.qtbot import QtBot
 
-from music_modify.custom_types.enums import NavDirection
+from music_modify.core.enums import NavDirection
 from music_modify.gui.completion._complete_model import CompleteModel
 from music_modify.gui.completion._completer import Completer
 

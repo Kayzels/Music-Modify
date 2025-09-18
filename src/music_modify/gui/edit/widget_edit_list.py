@@ -16,7 +16,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from music_modify.custom_types.enums import EditButton, RowDirection
+from music_modify.core.enums import EditButton, RowDirection
 from music_modify.custom_types.tag_value import (
     AbstractTagValue,
     TextTagValue,

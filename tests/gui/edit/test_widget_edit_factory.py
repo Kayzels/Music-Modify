@@ -5,7 +5,7 @@ import logging
 import pytest
 from pytestqt.qtbot import QtBot
 
-from music_modify.custom_types.enums import EditorType
+from music_modify.core.enums import EditorType
 from music_modify.custom_types.tag_value import (
     AbstractTagValue,
     PairedTextTagValue,
@@ -77,9 +77,7 @@ def editor_types() -> dict[str, EditorType]:
             EditTableWidget,
             id="empty_value_people_tag",
         ),
-        pytest.param(
-            "ABCD", None, None, id="unknown_tag_makes_none"
-        ),
+        pytest.param("ABCD", None, None, id="unknown_tag_makes_none"),
         pytest.param(
             "APIC",
             PictureTagValue(),
@@ -117,7 +115,8 @@ def test_EditWidgetFactory_createWidget_normal(
 
 
 def test_EditWidgetFactory_createWidget_logs_when_unknown_key(
-    caplog: pytest.LogCaptureFixture, qtbot: QtBot,
+    caplog: pytest.LogCaptureFixture,
+    qtbot: QtBot,
     editor_types: dict[str, EditorType],
 ) -> None:
     """Test that a widget isn't created when unknown key, but this is logged."""
@@ -137,7 +136,8 @@ def test_EditWidgetFactory_createWidget_logs_when_unknown_key(
 
 
 def test_EditWidgetFactory_createWidget_logs_when_valid_value_no_widget_type(
-    caplog: pytest.LogCaptureFixture, qtbot: QtBot,
+    caplog: pytest.LogCaptureFixture,
+    qtbot: QtBot,
     editor_types: dict[str, EditorType],
 ) -> None:
     """Test that a widget isn't created when no known widget type for value type."""

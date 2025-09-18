@@ -17,7 +17,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from music_modify.custom_types.enums import RowDirection
+from music_modify.core.enums import RowDirection
 from music_modify.gui.mixins.row_operation_mixin import RowOperationMixin
 from music_modify.gui.prefs.delegate_editor_type import EditorTypeDelegate
 from music_modify.gui.utils import getSelectedRows

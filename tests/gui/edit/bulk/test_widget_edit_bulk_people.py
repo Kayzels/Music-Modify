@@ -10,9 +10,9 @@ import pytest
 from pytestqt.qtbot import QtBot
 
 from music_modify.core import constants
+from music_modify.core.enums import EditorType
 from music_modify.custom_types import Song, TagInfo
-from music_modify.custom_types.enums import EditorType
-from music_modify.custom_types.tag_value.paired_text_tag_value import PairedTextTagValue
+from music_modify.custom_types.tag_value import PairedTextTagValue
 from music_modify.gui.completion.edit_with_complete import EditWithComplete
 from music_modify.gui.edit.bulk.widget_edit_bulk_people import (
     EditBulkPeopleWidget,

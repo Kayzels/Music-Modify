@@ -9,8 +9,8 @@ from typing import final
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QToolButton, QWidget
 
+from music_modify.core.enums import EditButton, RowDirection
 from music_modify.core.meta import ABCQMeta
-from music_modify.custom_types.enums import EditButton, RowDirection
 
 logger = logging.getLogger(__name__)
 

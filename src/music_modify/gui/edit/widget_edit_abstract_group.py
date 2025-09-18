@@ -10,8 +10,8 @@ from typing import TYPE_CHECKING, override
 
 from PySide6.QtWidgets import QBoxLayout, QWidget
 
+from music_modify.core.enums import EditButton
 from music_modify.core.meta import ABCQMeta
-from music_modify.custom_types.enums import EditButton
 from music_modify.custom_types.tag_value.abstract_tag_value import AbstractTagValue
 from music_modify.gui.mixins.row_operation_mixin import RowOperationMixin
 

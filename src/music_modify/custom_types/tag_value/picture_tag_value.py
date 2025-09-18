@@ -28,10 +28,6 @@ class PictureTagValue(AbstractTagValue):
             data: Raw image data, as a byte string.
             mime: The mimetype for the image. Use "->" if the data is a URI.
             picture_type: What the image being stored is of; the source of the image.
-            parent: The QObject that owns this one. When that object is deleted,
-                this object is too.
-            join_character: The character used for joining the details
-                in the string representation.
             desc: Text description of the image.
             salt: Value used to ensure unique frames with the same description.
         """
