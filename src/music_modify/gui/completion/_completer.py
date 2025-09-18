@@ -24,6 +24,7 @@ from music_modify.core.enums import NavDirection
 from ._complete_model import CompleteModel
 
 if TYPE_CHECKING:
+    # noinspection PyUnusedImports
     from .edit_with_complete import EditWithComplete
 
 
@@ -165,7 +166,7 @@ class Completer(QListView):
     def mouseMoveEvent(self, event: QMouseEvent) -> None:
         """Select the item if it is displayed and valid.
 
-        Otherwise just forward the movement.
+        Otherwise, just forward the movement.
         """
         idx = self.indexAt(event.position().toPoint())
         if idx.isValid():

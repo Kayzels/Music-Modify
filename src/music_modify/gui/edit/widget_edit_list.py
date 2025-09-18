@@ -58,7 +58,8 @@ class EditListWidget(EditAbstractGroupWidget):
 
         self._cached_value: TextTagValue | None = initial_value
 
-    def _setMainWidget(self) -> QListWidget:
+    @staticmethod
+    def _setMainWidget() -> QListWidget:
         main_widget = QListWidget()
         main_widget.setMinimumHeight(200)
         main_widget.setDragDropMode(QAbstractItemView.DragDropMode.InternalMove)

@@ -62,7 +62,8 @@ class EditTableWidget(EditAbstractGroupWidget):
 
         self._cached_value: PairedTextTagValue | None = initial_value
 
-    def _setMainWidget(self) -> DragTableWidget:
+    @staticmethod
+    def _setMainWidget() -> DragTableWidget:
         main_widget = DragTableWidget()
         main_widget.setMinimumHeight(250)
         main_widget.setColumnCount(2)

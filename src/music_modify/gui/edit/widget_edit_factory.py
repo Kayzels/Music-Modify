@@ -41,8 +41,7 @@ class EditWidgetFactory:
 
         Args:
             id3_key: Key used to access and set the tag in an ID3 object.
-            editor_type: Fallback type used if there is ambiguity based on the data.
-            current_value: Value that should be sotred and displayed in the widget.
+            current_value: Value that should be stored and displayed in the widget.
             parent: Widget that the created widget should be owned by.
 
         It uses the type of `current_value` and the internals if available.
@@ -59,7 +58,7 @@ class EditWidgetFactory:
         and falls back to line if uncertain.
         """
         editor_type = cls.editor_types.get(id3_key, EditorType.Automatic)
-        created_widget: EditAbstractWidget | None = None
+        created_widget: EditAbstractWidget | None
         if current_value is None:
             current_value = TagValueFactory.createTagValue(
                 value_input=None, id3_key=id3_key

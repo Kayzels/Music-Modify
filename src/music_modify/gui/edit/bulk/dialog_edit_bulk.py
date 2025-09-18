@@ -84,7 +84,6 @@ class EditBulkDialog(EditAbstractDialog):
             parent: The widget that the dialog should be displayed on
             repository: The list of songs being managed
             rows: The indexes of the songs to edit, in the `repository`
-            split_text_entered: Character used to split values when multiple are entered
             all_tags: Tags that are available for reading and editing
         """
         super().__init__(repository, rows, parent)
@@ -109,7 +108,7 @@ class EditBulkDialog(EditAbstractDialog):
         self.setupUi()
 
     @override
-    def _setupSongInfo(self) -> None:
+    def _setupSongInfo(self) -> None:  # noqa: PLR0912
         self.tab_widget: QTabWidget = QTabWidget()
         self.main_layout.addWidget(self.tab_widget)
 
@@ -153,6 +152,7 @@ class EditBulkDialog(EditAbstractDialog):
                             current_data.value, people_values.get(tag.id3_key, [])
                         )
                     case TextTagValue(), EditorType.MultipleText:
+                        # noinspection PyTypeChecker
                         normal_values[tag.id3_key] = _addMultiValues(
                             current_data.value, normal_values.get(tag.id3_key, set())
                         )

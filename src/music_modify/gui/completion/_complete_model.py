@@ -14,7 +14,7 @@ class CompleteModel(QAbstractListModel):
     """Model that is used for text completion suggestions.
 
     Attributes:
-        strip_completion_entries (bool): Whether the entires should keep or remove
+        strip_completion_entries (bool): Whether the entries should keep or remove
             leading and trailing whitespace
         all_items (tuple[str, ...]): The unfiltered possible items that can be listed
             as suggestions

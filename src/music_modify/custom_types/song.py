@@ -28,10 +28,6 @@ class Song:
         to any specific file.
 
         Args:
-            all_tags: The tags that should be accessible and updateable.
-            table_tags: The tags that should be used for generating columns.
-            display_split: The character used for splitting values when they
-                store multiple items.
             file: The file that the metadata should be loaded from.
         """
         self._filepath: str | os.PathLike[str] | None = file

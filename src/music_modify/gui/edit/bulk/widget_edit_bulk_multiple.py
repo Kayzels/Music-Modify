@@ -60,8 +60,6 @@ class EditBulkMultipleWidget(EditBulkAbstractGroupWidget):
             parent: The widget that this widget should be displayed on.
             data: The data to be displayed.
             tag: The field in the song that should be updated.
-            split_text_entered: The string that is used to split values
-                when multiple are entered.
         """
         super().__init__(tag, parent)
 

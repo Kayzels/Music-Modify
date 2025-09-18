@@ -52,8 +52,6 @@ class EditDialogFactory:
 
         Args:
             rows: List of indexes in the repository for the songs to edit
-            all_tags: Tags that can be viewed and edited.
-            split_text_entered: Character used to split multiple values.
             bulk (optional): Whether the songs should be edited in bulk or individually.
                 Default False.
 

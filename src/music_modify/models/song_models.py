@@ -43,7 +43,7 @@ class SongTableModel(QAbstractTableModel):
 
     @Slot()
     def updateTableTags(self, table_tags: list[TagInfo]) -> None:
-        """Updatae the tags that should be used for the columns."""
+        """Update the tags that should be used for the columns."""
         self._table_tags = table_tags
 
     @override

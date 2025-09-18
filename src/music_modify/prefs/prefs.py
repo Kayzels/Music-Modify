@@ -65,7 +65,7 @@ class Settings(QObject):
         self._initializeDefaults()
 
     def _getQSettings(self) -> QSettings:
-        """Returns insternal QSettings object, raising an error if not initialized."""
+        """Returns internal QSettings object, raising an error if not initialized."""
         if self._settings is None:
             raise RuntimeError(
                 "Settings have not been configured for the application. "

@@ -215,6 +215,7 @@ class MainWindow(QMainWindow):
         progress_dialog.setWindowTitle("Add Files")
         for index, file in enumerate(files):
             progress_dialog.setValue(index)
+            # noinspection PyTypeChecker
             self.songs_repository.add(file)
             time_taken_seconds: float = time.time() - start_time
             time_taken: str = formatTime(datetime.timedelta(seconds=time_taken_seconds))
