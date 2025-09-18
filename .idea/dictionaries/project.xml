@@ -2,6 +2,7 @@
   <dictionary name="project">
     <words>
       <w>asctime</w>
+      <w>caplog</w>
       <w>curtext</w>
       <w>edgas</w>
       <w>etype</w>

@@ -341,15 +341,12 @@ class MainWindow(QMainWindow):
             self.files_table_view, self.songs_repository, self._settings.table_tags
         )
 
-    def refreshTableData(self) -> None:
+    @Slot(list)
+    def refreshTableData(self, rows: list[int] | None = None) -> None:
         """Update the data for each item in the table."""
-        if self.songs_model.rowCount() == 0 or self.songs_model.columnCount() == 0:
-            return
-        self.songs_model.dataChanged.emit(
-            self.songs_model.index(0, 0),
-            self.songs_model.index(
-                self.songs_model.rowCount() - 1, self.songs_model.columnCount() - 1
-            ),
+        self.songs_model.refreshData(rows)
+        updateTableView(
+            self.files_table_view, self.songs_repository, self._settings.table_tags
         )
 
     def showEditDialog(self, *, bulk: bool = False) -> None:
@@ -370,12 +367,13 @@ class MainWindow(QMainWindow):
 
         dialog = EditDialogFactory.get(rows, bulk=bulk)
 
+        @Slot(QDialog.DialogCode)
         def processDialogResult(result: QDialog.DialogCode) -> None:
             logger.debug("Called process dialog result for edit dialog")
             if result == QDialog.DialogCode.Accepted:
                 dialog.updateSongInfo()
 
-        dialog.info_updated.connect(self.refreshTableLayout)
+        dialog.info_updated.connect(self.refreshTableData)
         dialog.finished.connect(processDialogResult)
 
         dialog.show()

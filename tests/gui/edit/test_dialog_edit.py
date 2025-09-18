@@ -97,8 +97,10 @@ def test_EditDialog_updateSongInfo_setsValue(
     line_widget.value = TextTagValue(["First"])
     dialog._edit_widgets["TIT2"] = line_widget
 
-    with qtbot.waitSignal(dialog.info_updated, timeout=1000):
+    with qtbot.waitSignal(dialog.info_updated, timeout=1000) as blocker:
         dialog.updateSongInfo()
+
+    assert blocker.args == [[0]]
 
     mock_song.setTag.assert_any_call("TIT2", TextTagValue(["First"]))
     mock_song.save.assert_called_once()
@@ -119,15 +121,40 @@ def test_EditDialog_updateSongInfo_afterReset(
     dialog = EditDialog(repo, [0], info_tags, widget)
     line_widget = dialog._edit_widgets["TIT2"]
     line_widget.value = new_value
-    with qtbot.waitSignal(dialog.info_updated, timeout=1000):
+    with qtbot.waitSignal(dialog.info_updated, timeout=1000) as blocker:
         dialog.updateSongInfo()
+    assert blocker.args == [[0]]
     assert song.getTag("TIT2") == new_value
     dialog.resetSongInfo()
     assert line_widget.value == initial_value
     assert song.getTag("TIT2") == new_value
-    with qtbot.waitSignal(dialog.info_updated, timeout=1000):
+    with qtbot.waitSignal(dialog.info_updated, timeout=1000) as blocker:
         dialog.updateSongInfo()
+    assert blocker.args == [[0]]
     assert song.getTag("TIT2") == initial_value
+
+
+def test_EditDialog_updateSongInfo_second_song(
+    qtbot: QtBot, info_tags: list[TagInfo]
+) -> None:
+    """Tests that info updated emits the correct index when a later song is changed."""
+    song = Song()
+    initial_value = TextTagValue(["First"])
+    new_value = TextTagValue(["New"])
+    song.setTag("TIT2", initial_value)
+    repo = SongRepository()
+    repo.add(song)
+    widget = QWidget()
+    qtbot.addWidget(widget)
+    dialog = EditDialog(repo, [0, 1], info_tags, widget)
+    dialog.showSongInDirection(NavDirection.Next)
+    assert dialog.song_info is song
+    line_widget = dialog._edit_widgets["TIT2"]
+    line_widget.value = new_value
+    with qtbot.waitSignal(dialog.info_updated, timeout=1000) as blocker:
+        dialog.updateSongInfo()
+    assert blocker.args == [[1]]
+    assert song.getTag("TIT2") == new_value
 
 
 def test_EditDialog_switchButtonState_no_buttons_logged(

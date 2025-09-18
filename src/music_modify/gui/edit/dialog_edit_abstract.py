@@ -16,9 +16,9 @@ from music_modify.models.song_repository import SongRepository
 class EditAbstractDialog(QDialog, ABC, metaclass=ABCQMeta):
     """Defines the general functionality for dialogs used to edit metadata."""
 
-    info_updated: Signal = Signal()
+    info_updated: Signal = Signal(list)
     """Signal that is emitted whenever any value being displayed
-    for the song is changed."""
+    for the song is changed. Should emit a list of the repo indexes as ints."""
 
     def __init__(
         self,

@@ -156,3 +156,13 @@ def test_SongRepository_removeAtIndexes_empty_indexes(
     with qtbot.assertNotEmitted(repo.songs_updated):
         repo.removeAtIndexes([])
     assert len(repo) == len(song_paths)
+
+
+def test_SongRepository_index() -> None:
+    """Test that the repo returns the correct index for a song."""
+    repo = SongRepository()
+    song1 = Song()
+    song2 = Song()
+    repo.add(song1)
+    repo.add(song2)
+    assert repo.index(song2) == 1

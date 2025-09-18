@@ -715,7 +715,7 @@ def test_MainWindow_showEditDialog_individual_edit_accepted(
 
     # Verify the info_updated signal is connected to the window's refreshTable method
     mock_edit_dialog_instance.info_updated.connect.assert_called_once_with(
-        window.refreshTableLayout
+        window.refreshTableData
     )
 
     # Verify the finished signal is connected to a callable (processDialogResult)
@@ -763,7 +763,7 @@ def test_MainWindow_showEditDialog_individual_edit_rejected(
         bulk=False,
     )
     mock_edit_dialog_instance.info_updated.connect.assert_called_once_with(
-        window.refreshTableLayout
+        window.refreshTableData
     )
     mock_edit_dialog_instance.finished.connect.assert_called_once()
     mock_edit_dialog_instance.show.assert_called_once()
@@ -809,7 +809,7 @@ def test_MainWindow_showEditDialog_bulk_edit_accepted(
         bulk=True,
     )
     mock_edit_dialog_instance.info_updated.connect.assert_called_once_with(
-        window.refreshTableLayout
+        window.refreshTableData
     )
     mock_edit_dialog_instance.finished.connect.assert_called_once()
     mock_edit_dialog_instance.show.assert_called_once()

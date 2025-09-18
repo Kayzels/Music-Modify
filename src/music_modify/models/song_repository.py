@@ -51,6 +51,10 @@ class SongRepository(QObject):
             return file_matches or song_matches
         return any(song.file == new_song for song in self._songs)
 
+    def index(self, song: Song) -> int:
+        """Gets the index of a song, if it is in the repository."""
+        return self._songs.index(song)
+
     def add(
         self,
         new: Song

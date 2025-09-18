@@ -141,9 +141,8 @@ class EditDialog(EditAbstractDialog):
                 self.song_info.setTag(id3_key, new_value)
         if any_updated:
             self.song_info.save()
-            # PERF: Can we make this signal work with a row number,
-            # and then use that to update the table?
-            self.info_updated.emit()
+            song_index = self.rows[self.current_index]
+            self.info_updated.emit([song_index])
 
     def resetSongInfo(self) -> None:
         """Sets values for the song back to original ones before changes occurred."""

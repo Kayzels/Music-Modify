@@ -105,8 +105,10 @@ def test_EditBulkDialog_updateSongInfo_with_changes(
         dialog, "findChildren", lambda *args, **kwargs: [mock_widget_1, mock_widget_2]
     )
 
-    with qtbot.waitSignal(dialog.info_updated, timeout=1000):
+    with qtbot.waitSignal(dialog.info_updated, timeout=1000) as blocker:
         dialog.updateSongInfo()
+    assert 0 in blocker.args[0]
+    assert 1 in blocker.args[0]
 
     mock_widget_1.updateTag.assert_called_once_with(dialog.songs)
     mock_widget_2.updateTag.assert_called_once_with(dialog.songs)
@@ -147,8 +149,9 @@ def test_EditBulkDialog_updateSongInfo_with_changes_single(
         dialog, "findChildren", lambda *args, **kwargs: [mock_widget_1, mock_widget_2]
     )
 
-    with qtbot.waitSignal(dialog.info_updated, timeout=1000):
+    with qtbot.waitSignal(dialog.info_updated, timeout=1000) as blocker:
         dialog.updateSongInfo()
+    assert blocker.args[0] == [1]
 
     mock_widget_1.updateTag.assert_called_once_with(dialog.songs)
     mock_widget_2.updateTag.assert_called_once_with(dialog.songs)

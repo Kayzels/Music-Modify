@@ -3,6 +3,7 @@
 Defines a `SongTableModel`.
 """
 
+import logging
 from typing import Final, override
 
 from PySide6.QtCore import (
@@ -17,6 +18,8 @@ from music_modify.core import constants
 from music_modify.custom_types import TagInfo
 
 from .song_repository import SongRepository
+
+logger = logging.getLogger(__name__)
 
 
 class SongTableModel(QAbstractTableModel):
@@ -104,6 +107,30 @@ class SongTableModel(QAbstractTableModel):
                 return f"{section + 1}"
             return None
         return None
+
+    def refreshData(self, rows: list[int] | None = None) -> None:
+        """Call dataChanged on all rows sent.
+
+        If not sent in any rows, calls it on every item.
+        """
+        if self.rowCount() == 0 or self.columnCount() == 0:
+            return
+
+        def updateRow(first: QModelIndex, last: QModelIndex) -> None:
+            self.dataChanged.emit(first, last, [])
+
+        if rows is None:
+            first_index = self.index(0, 0)
+            last_index = self.index(self.rowCount() - 1, self.columnCount() - 1)
+            updateRow(first_index, last_index)
+            return
+        for row in rows:
+            first_index = self.index(row, 0)
+            last_index = self.index(row, self.columnCount() - 1)
+            if not first_index.isValid() or not last_index.isValid():
+                logger.error(f"Invalid QModelIndex for row {row}")
+                continue
+            updateRow(first_index, last_index)
 
 
 # TODO: setData and flags

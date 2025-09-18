@@ -6,7 +6,6 @@ This dialog allows editing the tags of multiple songs at the same time.
 import logging
 from typing import TYPE_CHECKING, cast, override
 
-from PySide6.QtCore import Signal
 from PySide6.QtWidgets import (
     QFormLayout,
     QTabWidget,
@@ -67,9 +66,6 @@ def _addSingleValues(
 
 class EditBulkDialog(EditAbstractDialog):
     """A dialog that allows editing the tags of multiple songs at the same time."""
-
-    info_updated: Signal = Signal()
-    "Signal that should be emitted whenever data changes in any of the fields."
 
     def __init__(
         self,
@@ -210,6 +206,9 @@ class EditBulkDialog(EditAbstractDialog):
         for widget in widgets:
             updated_songs = updated_songs | widget.updateTag(self.songs)
         if updated_songs:
+            updated_indexes: list[int] = [
+                self.repository.index(song) for song in updated_songs
+            ]
             for song in updated_songs:
                 song.save()
-            self.info_updated.emit()
+            self.info_updated.emit(updated_indexes)
