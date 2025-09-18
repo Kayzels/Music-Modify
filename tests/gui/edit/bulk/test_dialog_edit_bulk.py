@@ -1,7 +1,5 @@
 """Tests for EditBulkDialog."""
 
-# pyright: reportPrivateUsage = false
-
 import logging
 from typing import cast
 from unittest.mock import Mock
@@ -12,26 +10,8 @@ from pytestqt.qtbot import QtBot
 
 from music_modify.core.enums import EditorType
 from music_modify.custom_types import Song, TagInfo
-from music_modify.gui.edit.bulk.dialog_edit_bulk import (
-    EditBulkDialog,
-    _addMultiValues,
-    _addSingleValues,
-)
+from music_modify.gui.edit.bulk.dialog_edit_bulk import EditBulkDialog
 from music_modify.models.song_repository import SongRepository
-
-
-def test_addMultiValues() -> None:
-    """Test adding multiple values from a list."""
-    assert _addMultiValues(None, {1}) == {1}
-    assert _addMultiValues([22], {3}) == {3, 22}
-    assert _addMultiValues(["a"], set()) == {"a"}
-
-
-def test_addSingleValues() -> None:
-    """Test adding single values from a list."""
-    assert _addSingleValues(None, {"a"}) == ({"a"}, False)
-    assert _addSingleValues("a", {"a"}) == ({"a"}, True)
-    assert _addSingleValues("b", {"a"}) == ({"a", "b"}, False)
 
 
 def test_EditBulkDialog_updateSongInfo_no_changes(

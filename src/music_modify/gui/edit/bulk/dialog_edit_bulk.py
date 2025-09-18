@@ -19,7 +19,7 @@ from music_modify.custom_types.tag_value import PairedTextTagValue, TextTagValue
 from music_modify.gui.edit.dialog_edit_abstract import EditAbstractDialog
 from music_modify.gui.utils import createTab
 from music_modify.models.song_repository import SongRepository
-from music_modify.utils.list_utils import addValues
+from music_modify.utils.list_utils import addItemsFromList, addItemsWithCheck, addValues
 
 from .widget_edit_bulk_abstract import EditBulkAbstractWidget
 from .widget_edit_bulk_line import EditBulkLineWidget
@@ -30,38 +30,6 @@ if TYPE_CHECKING:
     from music_modify.custom_types.song import Song
 
 logger = logging.getLogger(__name__)
-
-
-def _addMultiValues[T](
-    value: list[T] | None,
-    existing: set[T],
-) -> set[T]:
-    """Add the values from the list to the set, if not present."""
-    if value is None:
-        return existing
-    for item in value:
-        existing.add(item)
-    return existing
-
-
-def _addSingleValues(
-    value: str | None,
-    existing: set[str],
-    *,
-    in_all: bool = True,
-) -> tuple[set[str], bool]:
-    """Finds the values in all tags, and whether it appears in every song.
-
-    Populates `existing` with the values that are not present,
-    and returns a tuple that has the values, and whether the value
-    was in every song or not.
-    """
-    if value is None:
-        return existing, False
-    if len(existing) > 0 and value not in existing:
-        in_all = False
-    existing.add(value)
-    return existing, in_all
 
 
 class EditBulkDialog(EditAbstractDialog):
@@ -149,11 +117,11 @@ class EditBulkDialog(EditAbstractDialog):
                         )
                     case TextTagValue(), EditorType.MultipleText:
                         # noinspection PyTypeChecker
-                        normal_values[tag.id3_key] = _addMultiValues(
+                        normal_values[tag.id3_key] = addItemsFromList(
                             current_data.value, normal_values.get(tag.id3_key, set())
                         )
                     case TextTagValue(), EditorType.SingleText:
-                        normal_values[tag.id3_key], in_all = _addSingleValues(
+                        normal_values[tag.id3_key], in_all = addItemsWithCheck(
                             current_data.getDisplayValue(),
                             normal_values.get(tag.id3_key, set()),
                             in_all=in_all,

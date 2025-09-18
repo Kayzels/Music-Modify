@@ -4,6 +4,8 @@ import pytest
 
 from music_modify.core.enums import PairIndex
 from music_modify.utils.list_utils import (
+    addItemsFromList,
+    addItemsWithCheck,
     addValues,
     getUnique,
     remapMatchingSublistPairs,
@@ -36,6 +38,69 @@ from music_modify.utils.list_utils import (
 def test_getUnique(text: str, separator: str, expected: list[str]) -> None:
     """Tests get unique with different text and separators."""
     assert getUnique(text, separator) == expected
+
+
+@pytest.mark.parametrize(
+    ("value", "existing", "expected"),
+    [
+        pytest.param(None, {1}, {1}, id="none_as_value"),
+        pytest.param([22], {3}, {3, 22}, id="add_number"),
+        pytest.param(["a"], set(), {"a"}, id="add_to_empty"),
+        pytest.param([3, 16], {3}, {3, 16}, id="only_add_not_present"),
+        pytest.param(["a", "b", "c"], set(), {"a", "b", "c"}, id="adds_multiple"),
+    ],
+)
+def test_addItemsFromList[T](
+    value: list[T] | None, existing: set[T], expected: set[T]
+) -> None:
+    """Tests adding multiple values from a list."""
+    assert addItemsFromList(value, existing) == expected
+
+
+@pytest.mark.parametrize(
+    ("value", "existing", "in_all", "expected_set", "expected_in_all"),
+    [
+        pytest.param(
+            None,
+            {"a"},
+            True,
+            {"a"},
+            False,
+            id="None_makes_in_all_False",
+        ),
+        pytest.param(
+            "a",
+            {"a"},
+            True,
+            {"a"},
+            True,
+            id="adding_existing_keeps_in_all_True",
+        ),
+        pytest.param(
+            "a", {"a"}, False, {"a"}, False, id="value_existing_no_change_in_all"
+        ),
+        pytest.param(
+            "b",
+            {"a"},
+            True,
+            {"a", "b"},
+            False,
+            id="value_not_existing_changes_in_all",
+        ),
+    ],
+)
+def test_addItemsWithCheck[T](
+    value: T,
+    existing: set[T],
+    in_all: bool,
+    expected_set: set[T],
+    expected_in_all: bool,
+) -> None:
+    """Test adding single values from a list."""
+    assert addItemsWithCheck(value, existing, in_all=in_all) == (
+        expected_set,
+        expected_in_all,
+    )
 
 
 @pytest.mark.parametrize(

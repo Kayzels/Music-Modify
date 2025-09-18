@@ -55,6 +55,32 @@ def addValues[T](new: list[T] | None, original: list[T]) -> list[T]:
     return original + [item for item in new if item not in original]
 
 
+def addItemsFromList[T](value: list[T] | None, existing: set[T]) -> set[T]:
+    """Add the values from the list to the set, if not present."""
+    if value is None:
+        return existing
+    for item in value:
+        existing.add(item)
+    return existing
+
+
+def addItemsWithCheck[T](
+    value: T | None, existing: set[T], *, in_all: bool = True
+) -> tuple[set[T], bool]:
+    """Adds non-present values to a set, and returns it.
+
+    Returns:
+        A tuple that has the existing values, with `value` added,
+        and a boolean whether the value was already present.
+    """
+    if value is None:
+        return existing, False
+    if len(existing) > 0 and value not in existing:
+        in_all = False
+    existing.add(value)
+    return existing, in_all
+
+
 def removePairs(
     pairs: set[tuple[str, ...]],
     original: list[list[str]],
