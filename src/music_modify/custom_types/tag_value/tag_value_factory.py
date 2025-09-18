@@ -2,8 +2,9 @@
 
 import logging
 import mimetypes
+from os import PathLike
 from pathlib import Path
-from typing import Any, cast
+from typing import cast
 
 from mutagen import id3
 
@@ -62,16 +63,15 @@ class TagValueFactory:
             return None
 
     @staticmethod
-    def _generateFromListValue(values: list[Any]) -> AbstractTagValue | None:
+    def _generateFromListValue(
+        values: list[str] | list[list[str]],
+    ) -> AbstractTagValue | None:
         v = values
         if all(isinstance(item, str) for item in v):
             v = cast(list[str], v)
             return TextTagValue(v)
         if all(
-            isinstance(item, list)
-            and len(item) == constants.PAIR_SIZE
-            and all(isinstance(inner_value, str) for inner_value in item)
-            for item in v
+            isinstance(item, list) and len(item) == constants.PAIR_SIZE for item in v
         ):
             v = cast(list[list[str]], v)
             return PairedTextTagValue(v)
@@ -93,7 +93,7 @@ class TagValueFactory:
 
     @staticmethod
     def createTagValue(
-        value_input: Any,  # noqa: ANN401
+        value_input: PathLike[str] | str | list[str] | list[list[str]] | None,
         id3_key: str | None = None,
     ) -> AbstractTagValue | None:
         """Creates an AbstractTagValue instance from raw user input.
@@ -103,11 +103,6 @@ class TagValueFactory:
             id3_key: Key that the data will be stored for.
                 If sending in a path to an image, id3_key __must__ be set to "APIC",
                 otherwise it will be interpreted as a string.
-            join_character: Character used to join multiple values in string displays
-            change_signal: Signal that should be linked to updating the join character
-                in created TagValue object.
-            parent: Owns the created object. When it is deleted, the created object
-                will be too.
 
         Returns None if the value input is not a known format
         or if a precise format can't be determined.

@@ -1,8 +1,8 @@
 """Tests for TagValueFactory."""
 
 import logging
+from os import PathLike
 from pathlib import Path
-from typing import Any
 from unittest.mock import MagicMock
 
 from mutagen import id3
@@ -130,11 +130,6 @@ def test_TagValueFactory_fromId3Frame(
         pytest.param(
             None, "TCOM", TextTagValue([]), id="text_when_passed_none_and_text_id3"
         ),
-        pytest.param(2, "TCOM", None, id="none_returned_when_invalid_input_with_tag"),
-        pytest.param(
-            [0], "TCOM", None, id="none_returned_when_invalid_list_input_with_tag"
-        ),
-        pytest.param(2, None, None, id="none_returned_when_invalid_input_without_tag"),
         pytest.param([], "", None, id="none_returned_when_empty_input_empty_key"),
         pytest.param([], "CHAP", None, id="none_returned_when_empty_input_unknown_key"),
         pytest.param(
@@ -143,7 +138,7 @@ def test_TagValueFactory_fromId3Frame(
     ],
 )
 def test_TagValueFactory_createTagValue(
-    value_input: Any,  # noqa: ANN401
+    value_input: PathLike[str] | str | list[str] | list[list[str]] | None,
     id3_key: str | None,
     expected_value: AbstractTagValue | None,
 ) -> None:

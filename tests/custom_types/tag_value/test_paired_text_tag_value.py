@@ -1,7 +1,5 @@
 """Tests for PairedTextTagValue."""
 
-from typing import Any
-
 from mutagen import id3
 import pytest
 
@@ -168,7 +166,7 @@ def test_PairedTextTagValue_getDisplayValue(
 )
 def test_TextTagValue_eq(
     value: list[list[str]],
-    other: Any,  # noqa: ANN401
+    other: object,
     expected_result: bool,
 ) -> None:
     """Tests that equality checks are correct."""

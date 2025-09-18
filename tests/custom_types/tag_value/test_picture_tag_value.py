@@ -1,7 +1,7 @@
 """Tests for PictureTagValue."""
 
 import logging
-from typing import Any, TypedDict
+from typing import TypedDict
 
 from mutagen import id3
 import pytest
@@ -221,7 +221,7 @@ def test_PictureTagValue_getDisplayValue(
 )
 def test_TextTagValue_eq(
     params: _PictureParams,
-    other: Any,  # noqa: ANN401
+    other: object,
     expected_result: bool,
 ) -> None:
     """Tests that equality checks are correct."""

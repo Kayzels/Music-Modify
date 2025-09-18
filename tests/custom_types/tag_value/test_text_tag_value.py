@@ -1,7 +1,5 @@
 """Tests for TextTagValue."""
 
-from typing import Any
-
 from mutagen import id3
 import pytest
 
@@ -184,7 +182,7 @@ def test_TextTagValue_getDisplayValue(
 )
 def test_TextTagValue_eq(
     value: list[str | id3.ID3TimeStamp],
-    other: Any,  # noqa: ANN401
+    other: object,
     expected_result: bool,
 ) -> None:
     """Tests that equality checks are correct."""
