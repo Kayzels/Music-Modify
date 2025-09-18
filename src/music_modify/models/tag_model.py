@@ -159,7 +159,7 @@ class TagModel(QAbstractTableModel):
         # Editing checkbox for Show column
         if field == "show_in_table" and role == Qt.ItemDataRole.CheckStateRole:
             value = cast(int, value)
-            # Note that you need to convert to the enum value for comparison,
+            # Need to convert to the enum value for comparison,
             # otherwise it's always false.
             self._tags[row].show_in_table = value == Qt.CheckState.Checked.value
             self.dataChanged.emit(index, index, [role])

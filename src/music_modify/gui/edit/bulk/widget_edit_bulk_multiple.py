@@ -181,5 +181,5 @@ class EditBulkMultipleWidget(EditBulkAbstractGroupWidget):
         return updated_songs
 
         # TODO: Consider the logic for adding and removing.
-        # At the moment, adding is processed before removing,
-        # but this might not be obvious
+        #       At the moment, adding is processed before removing,
+        #       but this might not be obvious

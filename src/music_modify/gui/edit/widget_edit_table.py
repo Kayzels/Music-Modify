@@ -175,8 +175,8 @@ class EditTableWidget(EditAbstractGroupWidget):
         self.main_widget.blockSignals(True)  # noqa: FBT003
 
         # NOTE: To ensure rows aren't overwritten,
-        # need to ensure that ItemIsDropEnabled is unset
-        # for all items
+        #       need to ensure that ItemIsDropEnabled is unset
+        #       for all items
         for row_count, pair in enumerate(pairs):
             for col_count, val in enumerate(pair):
                 item = QTableWidgetItem(val)

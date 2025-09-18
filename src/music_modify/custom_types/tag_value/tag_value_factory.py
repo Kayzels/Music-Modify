@@ -27,7 +27,7 @@ class TagValueFactory:
 
         Returns None if the frame stores data in an unknown format.
         """
-        # NOTE: Using getattr because static analysis doesn't find attributes.
+        # Using getattr because static analysis doesn't find attributes.
         match frame:
             case id3.TextFrame():
                 return TextTagValue(getattr(frame, "text", []))

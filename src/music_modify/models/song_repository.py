@@ -94,7 +94,7 @@ class SongRepository(QObject):
         if not indexes:
             return
         # NOTE: Sort the indexes and make sure they're reversed,
-        # to avoid shifting indexes when deleting
+        #       to avoid shifting indexes when deleting
         indexes = sorted(indexes, reverse=True)
         for index in indexes:
             self._songs.pop(index)
