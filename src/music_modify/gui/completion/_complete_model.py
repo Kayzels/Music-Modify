@@ -7,7 +7,7 @@ from typing import override
 from PySide6.QtCore import QAbstractListModel, QModelIndex, QPersistentModelIndex, Qt
 from PySide6.QtWidgets import QWidget
 
-from music_modify.custom_types import constants
+from music_modify.core import constants
 
 
 class CompleteModel(QAbstractListModel):

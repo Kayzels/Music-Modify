@@ -13,7 +13,8 @@ from PySide6.QtCore import (
     Slot,
 )
 
-from music_modify.custom_types import TagInfo, constants
+from music_modify.core import constants
+from music_modify.custom_types import TagInfo
 
 from .song_repository import SongRepository
 

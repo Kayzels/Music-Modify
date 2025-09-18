@@ -9,8 +9,8 @@ from PySide6.QtWidgets import QWidget
 import pytest
 from pytestqt.qtbot import QtBot
 
+from music_modify.core import constants
 from music_modify.custom_types import Song, TagInfo
-from music_modify.custom_types.constants import PAIR_SEPARATOR
 from music_modify.custom_types.enums import EditorType
 from music_modify.custom_types.tag_value.paired_text_tag_value import PairedTextTagValue
 from music_modify.gui.completion.edit_with_complete import EditWithComplete
@@ -355,8 +355,8 @@ _add_info: list[_SongInfo] = [
 
 
 _remove_pairs_items = [
-    "RoleA" + PAIR_SEPARATOR + "PersonA",
-    "RoleB" + PAIR_SEPARATOR + "PersonB",
+    "RoleA" + constants.PAIR_SEPARATOR + "PersonA",
+    "RoleB" + constants.PAIR_SEPARATOR + "PersonB",
 ]
 _remove_pairs_info: list[_SongInfo] = [
     {
@@ -630,10 +630,10 @@ def test_EditBulkPeopleWidget_updateTag_multiple_actions(qtbot: QtBot) -> None:
     # Set up actions
     widget.add_widget.value = PairedTextTagValue([["NewRole", "NewPerson"]])
     widget.remove_pair_widget.setText(
-        "RoleToRemove" + PAIR_SEPARATOR + "PersonToRemove"
+        "RoleToRemove" + constants.PAIR_SEPARATOR + "PersonToRemove"
     )
     assert widget.remove_pair_widget.values == [
-        "RoleToRemove" + PAIR_SEPARATOR + "PersonToRemove"
+        "RoleToRemove" + constants.PAIR_SEPARATOR + "PersonToRemove"
     ]
     widget.remove_role_widget.setText("RoleToDelete")
     assert widget.remove_role_widget.values == ["RoleToDelete"]
@@ -673,8 +673,10 @@ def test_EditBulkPeopleWidget_resetView(
 
     # Manually populate some values to be cleared
     widget.add_widget.value = PairedTextTagValue([["TempRole", "TempPerson"]])
-    widget.remove_pair_widget.setText("Role1" + PAIR_SEPARATOR + "Person1")
-    assert widget.remove_pair_widget.values == ["Role1" + PAIR_SEPARATOR + "Person1"]
+    widget.remove_pair_widget.setText("Role1" + constants.PAIR_SEPARATOR + "Person1")
+    assert widget.remove_pair_widget.values == [
+        "Role1" + constants.PAIR_SEPARATOR + "Person1"
+    ]
     widget.remove_role_widget.setText("Role1")
     assert widget.remove_role_widget.values == ["Role1"]
     widget.remove_person_widget.setText("Person1")
@@ -721,7 +723,10 @@ def test_EditBulkPeopleWidget_resetView(
 
     # Assertions for updateItemsCache calls
     expected_pairs = tuple(
-        {f"{role}{PAIR_SEPARATOR}{person}" for (role, person) in initial_widget_data}
+        {
+            f"{role}{constants.PAIR_SEPARATOR}{person}"
+            for (role, person) in initial_widget_data
+        }
     )
     mock_remove_pair_update_cache.assert_called_once_with(expected_pairs)
 

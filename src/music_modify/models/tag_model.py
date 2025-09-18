@@ -16,7 +16,8 @@ from PySide6.QtCore import (
     Signal,
 )
 
-from music_modify.custom_types import TagInfo, constants
+from music_modify.core import constants
+from music_modify.custom_types import TagInfo
 from music_modify.custom_types.enums import EditorType
 from music_modify.utils import tableHeader
 

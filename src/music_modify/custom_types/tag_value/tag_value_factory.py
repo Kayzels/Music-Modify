@@ -8,7 +8,7 @@ from typing import cast
 
 from mutagen import id3
 
-from music_modify.custom_types import constants
+from music_modify.core import constants
 
 from .abstract_tag_value import AbstractTagValue
 from .paired_text_tag_value import PairedTextTagValue

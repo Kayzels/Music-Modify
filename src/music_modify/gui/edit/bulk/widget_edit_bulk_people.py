@@ -10,8 +10,8 @@ from typing import override
 
 from PySide6.QtWidgets import QFormLayout, QWidget
 
+from music_modify.core import constants
 from music_modify.custom_types import Song, TagInfo
-from music_modify.custom_types.constants import PAIR_SEPARATOR
 from music_modify.custom_types.enums import PairIndex
 from music_modify.custom_types.tag_value import PairedTextTagValue
 from music_modify.gui.completion import EditWithComplete
@@ -209,7 +209,10 @@ class EditBulkPeopleWidget(EditBulkAbstractGroupWidget):
         form_layout.addRow("Add", self.add_widget)
 
         pairs = list(
-            {f"{role}{PAIR_SEPARATOR}{person}" for (role, person) in self.items},
+            {
+                f"{role}{constants.PAIR_SEPARATOR}{person}"
+                for (role, person) in self.items
+            },
         )
         self.remove_pair_widget = EditWithComplete(parent=self, items=tuple(pairs))
         form_layout.addRow("Remove Pair", self.remove_pair_widget)
@@ -286,7 +289,7 @@ class EditBulkPeopleWidget(EditBulkAbstractGroupWidget):
             tuple(pair)
             for pair in toPairs(
                 values=self.remove_pair_widget.values,
-                separator=PAIR_SEPARATOR,
+                separator=constants.PAIR_SEPARATOR,
             )
         }
         remove_people: set[str] = set(self.remove_person_widget.values)

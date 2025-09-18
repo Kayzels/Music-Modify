@@ -1,6 +1,6 @@
 """Module for utilities related to working with lists."""
 
-from music_modify.custom_types import constants
+from music_modify.core import constants
 
 
 def getUnique(text: str, separator: str) -> list[str]:
