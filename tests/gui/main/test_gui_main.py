@@ -16,6 +16,7 @@ from pytestqt.qtbot import QtBot
 
 from music_modify.gui import MainWindow
 from music_modify.prefs import Settings
+from music_modify.gui.edit.dialog_edit_factory import EditDialogFactory
 
 
 def test_MainWindow_getFolderFiles(
@@ -668,7 +669,7 @@ def test_MainWindow_showEditDialog_no_selection(
     )
 
     mock_dialog_factory_get = MagicMock()
-    monkeypatch.setattr(window.dialog_factory, "get", mock_dialog_factory_get)
+    monkeypatch.setattr(EditDialogFactory, "get", mock_dialog_factory_get)
 
     window.showEditDialog()
 
@@ -702,14 +703,13 @@ def test_MainWindow_showEditDialog_individual_edit_accepted(
     mock_edit_dialog_instance.show = MagicMock()
 
     mock_dialog_factory_get = MagicMock(return_value=mock_edit_dialog_instance)
-    monkeypatch.setattr(window.dialog_factory, "get", mock_dialog_factory_get)
+    monkeypatch.setattr(EditDialogFactory, "get", mock_dialog_factory_get)
 
     window.showEditDialog(bulk=False)
 
     mock_get_selected_rows.assert_called_once_with(window.files_table_view)
     mock_dialog_factory_get.assert_called_once_with(
         expected_sorted_rows,
-        temp_settings.info_tags,
         bulk=False,
     )
 
@@ -753,14 +753,13 @@ def test_MainWindow_showEditDialog_individual_edit_rejected(
     mock_edit_dialog_instance.show = MagicMock()
 
     mock_dialog_factory_get = MagicMock(return_value=mock_edit_dialog_instance)
-    monkeypatch.setattr(window.dialog_factory, "get", mock_dialog_factory_get)
+    monkeypatch.setattr(EditDialogFactory, "get", mock_dialog_factory_get)
 
     window.showEditDialog(bulk=False)
 
     mock_get_selected_rows.assert_called_once_with(window.files_table_view)
     mock_dialog_factory_get.assert_called_once_with(
         selected_rows,
-        temp_settings.info_tags,
         bulk=False,
     )
     mock_edit_dialog_instance.info_updated.connect.assert_called_once_with(
@@ -800,14 +799,13 @@ def test_MainWindow_showEditDialog_bulk_edit_accepted(
     mock_edit_dialog_instance.show = MagicMock()
 
     mock_dialog_factory_get = MagicMock(return_value=mock_edit_dialog_instance)
-    monkeypatch.setattr(window.dialog_factory, "get", mock_dialog_factory_get)
+    monkeypatch.setattr(EditDialogFactory, "get", mock_dialog_factory_get)
 
     window.showEditDialog(bulk=True)
 
     mock_get_selected_rows.assert_called_once_with(window.files_table_view)
     mock_dialog_factory_get.assert_called_once_with(
         selected_rows,
-        temp_settings.info_tags,
         bulk=True,
     )
     mock_edit_dialog_instance.info_updated.connect.assert_called_once_with(

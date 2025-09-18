@@ -21,9 +21,9 @@ def test_EditDialogFactory_get(
     widget = QWidget()
     qtbot.addWidget(widget)
     repo = SongRepository()
-    factory = EditDialogFactory(widget, repo)
 
-    dialog = factory.get([], info_tags, bulk=bulk)
+    EditDialogFactory.setDetails(widget, repo, info_tags)
+    dialog = EditDialogFactory.get([], bulk=bulk)
     expected_type = EditBulkDialog if bulk else EditDialog
     qtbot.addWidget(dialog)
     assert isinstance(dialog, expected_type)

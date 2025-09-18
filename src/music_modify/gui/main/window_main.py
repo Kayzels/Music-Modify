@@ -73,11 +73,15 @@ class MainWindow(QMainWindow):
             EditWithComplete.updateJoinCharacter(character)
             EditBulkAbstractWidget.split_text_entered = character
 
-        @Slot(str)
+        @Slot()
         def updateWidgetEditorTypes() -> None:
             EditWidgetFactory.editor_types = {
                 info.id3_key: info.editor_type for info in self._settings.info_tags
             }
+
+        @Slot()
+        def updateFactoryTags() -> None:
+            EditDialogFactory.all_tags = self._settings.info_tags
 
         self.songs_repository: Final[SongRepository] = SongRepository()
         "Repository that stores the songs being managed"
@@ -88,14 +92,15 @@ class MainWindow(QMainWindow):
 
         self._settings.tags_updated.connect(self.refreshTableLayout)
         self._settings.tags_updated.connect(updateWidgetEditorTypes)
+        self._settings.tags_updated.connect(updateFactoryTags)
         self._settings.split_values_display_changed.connect(updateJoinCharacter)
         self._settings.split_text_entered_changed.connect(updateSplitEnterCharacter)
 
-        self.dialog_factory: EditDialogFactory = EditDialogFactory(
-            self,
-            self.songs_repository,
+        EditDialogFactory.setDetails(
+            parent=self,
+            repository=self.songs_repository,
+            all_tags=self._settings.info_tags,
         )
-        "Factory for generating the right type of EditDialog, based on selection"
 
         self.files_table_view.setModel(self.songs_model)
         self.files_table_view.setShowGrid(False)
@@ -362,7 +367,7 @@ class MainWindow(QMainWindow):
         if len(rows) == 0:
             return
 
-        dialog = self.dialog_factory.get(rows, self._settings.info_tags, bulk=bulk)
+        dialog = EditDialogFactory.get(rows, bulk=bulk)
 
         def processDialogResult(result: QDialog.DialogCode) -> None:
             logger.debug("Called process dialog result for edit dialog")

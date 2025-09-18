@@ -3,7 +3,7 @@
 This is the factory class for creating different types of Edit dialogs.
 """
 
-from typing import TypedDict
+from typing import ClassVar, TypedDict
 
 from PySide6.QtWidgets import QWidget
 
@@ -21,22 +21,26 @@ class EditDialogFactory:
     The dialog made depends on whether there are multiple files being edited, or not.
     """
 
-    def __init__(self, parent: QWidget, repository: SongRepository) -> None:
-        """Creates an EditDialogFactory.
+    parent: QWidget | None = None
+    "The widget the new widget should be created on."
+    repository: SongRepository = SongRepository()
+    "The list of songs the app is managing."
+    all_tags: ClassVar[list[TagInfo]]
+    "Tags that can be viewed and edited."
 
-        Args:
-            parent: The widget the new widget should be created on.
-            repository: The list of songs the app is managing.
-            all_tags:
-        """
-        self.parent: QWidget = parent
-        self.repository: SongRepository = repository
-        "The list of songs that the app is managing"
+    @classmethod
+    def setDetails(
+        cls, parent: QWidget, repository: SongRepository, all_tags: list[TagInfo]
+    ) -> None:
+        """Set the parent and repository variables for the factory."""
+        cls.parent = parent
+        cls.repository = repository
+        cls.all_tags = all_tags
 
+    @classmethod
     def get(
-        self,
+        cls,
         rows: list[int],
-        all_tags: list[TagInfo],
         *,
         bulk: bool = False,
     ) -> EditAbstractDialog:
@@ -64,10 +68,10 @@ class EditDialogFactory:
             parent: QWidget | None
 
         dialog_args: _DialogArgs = {
-            "repository": self.repository,
+            "repository": cls.repository,
             "rows": rows,
-            "all_tags": all_tags,
-            "parent": self.parent,
+            "all_tags": cls.all_tags,
+            "parent": cls.parent,
         }
 
         if bulk:
