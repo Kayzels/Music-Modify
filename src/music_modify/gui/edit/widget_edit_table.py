@@ -18,7 +18,6 @@ from music_modify.custom_types.enums import EditButton, RowDirection
 from music_modify.custom_types.tag_value import (
     AbstractTagValue,
     PairedTextTagValue,
-    TagValueFactory,
 )
 from music_modify.gui.utils import getSelectedRows, selectRows
 
@@ -145,15 +144,7 @@ class EditTableWidget(EditAbstractGroupWidget):
             return None
 
         if self._cached_value is None or values != self._cached_value.value:
-            new_value: AbstractTagValue | None = TagValueFactory.createTagValue(values)
-            if isinstance(new_value, PairedTextTagValue):
-                self._cached_value = new_value
-            else:
-                logger.warning(
-                    "Creating a new value in EditTableWidget didn't produce a PairedTextTagValue. "
-                    + f" Got {type(new_value)}."
-                )
-                self._cached_value = None
+            self._cached_value = PairedTextTagValue(values)
         return self._cached_value
 
     @value.setter

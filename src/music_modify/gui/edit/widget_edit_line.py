@@ -11,7 +11,6 @@ from PySide6.QtWidgets import QLineEdit, QWidget
 
 from music_modify.custom_types.tag_value import (
     AbstractTagValue,
-    TagValueFactory,
     TextTagValue,
 )
 
@@ -65,15 +64,7 @@ class EditLineWidget(EditAbstractWidget):
         if not text:
             return None
         if self._cached_value is None or [text] != self._cached_value.value:
-            new_value = TagValueFactory.createTagValue(text)
-            if isinstance(new_value, TextTagValue):
-                self._cached_value = new_value
-            else:
-                logger.warning(
-                    "Creating a new value in EditLineWidget didn't produce a TextTagValue. "
-                    + f" Got {type(new_value)}."
-                )
-                self._cached_value = None
+            self._cached_value = TextTagValue([text])
         return self._cached_value
 
     @value.setter
