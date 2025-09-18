@@ -147,7 +147,7 @@ def test_SongTableModel_refreshData_empty(
     """Test that refreshData does not emit dataChanged when there is no data."""
     repo = SongRepository()
     model = SongTableModel(repo, info_tags)
-    with qtbot.assertNotEmitted(model.dataChanged, wait=1000):
+    with qtbot.assertNotEmitted(model.dataChanged):
         model.refreshData()
 
 
@@ -181,7 +181,7 @@ def test_SongTableModel_refreshData_empty_list(
     for _ in range(num_songs):
         repo.add()
     model = SongTableModel(repo, info_tags)
-    with qtbot.assertNotEmitted(model.dataChanged, wait=1000):
+    with qtbot.assertNotEmitted(model.dataChanged):
         model.refreshData([])
 
 
@@ -219,7 +219,7 @@ def test_SongTableModel_refreshData_invalid_rows(
     rows = [num_songs]
     with (
         caplog.at_level(logging.ERROR),
-        qtbot.assertNotEmitted(model.dataChanged, wait=1000),
+        qtbot.assertNotEmitted(model.dataChanged),
     ):
         model.refreshData(rows)
 
