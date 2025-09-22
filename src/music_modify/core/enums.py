@@ -13,6 +13,7 @@ class EditorType(Enum):
     SingleText = "Tags storing single values."
     MultipleText = "Tags storing multiple values."
     PeopleValue = "Tags storing role, person pairs."
+    ImageValue = "Tags storing images."
 
 
 class RowDirection(Enum):

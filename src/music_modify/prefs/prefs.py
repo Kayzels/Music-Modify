@@ -353,6 +353,9 @@ class Settings(QObject):
             id3_key="TXXX:TEMPO",
             editor_type=EditorType.SingleText,
         ),
+        TagInfo(
+            display_name="Cover", id3_key="APIC:", editor_type=EditorType.ImageValue
+        ),
     ]
     "Default values for known tags, if there are no user changes."
 

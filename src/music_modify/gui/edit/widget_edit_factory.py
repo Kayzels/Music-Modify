@@ -13,9 +13,11 @@ from music_modify.core.enums import EditorType
 from music_modify.custom_types.tag_value import (
     AbstractTagValue,
     PairedTextTagValue,
+    PictureTagValue,
     TagValueFactory,
     TextTagValue,
 )
+from music_modify.gui.edit.widget_edit_image import EditImageWidget
 
 from .widget_edit_abstract import EditAbstractWidget
 from .widget_edit_line import EditLineWidget
@@ -80,6 +82,8 @@ class EditWidgetFactory:
                     created_widget = EditLineWidget(**widget_args)
             case PairedTextTagValue():
                 created_widget = EditTableWidget(**widget_args)
+            case PictureTagValue():
+                created_widget = EditImageWidget(**widget_args)
             case None:
                 logger.warning(
                     f"Unable to find a valid AbstractTagValue to make a widget for {id3_key}."
