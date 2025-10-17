@@ -41,7 +41,7 @@ class PairedTextTagValue(AbstractTagValue):
 
     @override
     def updateId3Frame(self, frame: id3.Frame) -> id3.Frame:
-        if not hasattr(frame, "text"):
+        if not hasattr(frame, "people"):
             raise ValueError(
                 "Tried to update a frame that was expected to be a paired text frame, "
                 + "but didn't have a people attribute."
