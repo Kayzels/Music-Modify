@@ -14,6 +14,7 @@ from music_modify.custom_types.tag_value import (
 )
 from music_modify.gui.edit.widget_edit_abstract import EditAbstractWidget
 from music_modify.gui.edit.widget_edit_factory import EditWidgetFactory
+from music_modify.gui.edit.widget_edit_image import EditImageWidget
 from music_modify.gui.edit.widget_edit_line import EditLineWidget
 from music_modify.gui.edit.widget_edit_list import EditListWidget
 from music_modify.gui.edit.widget_edit_table import EditTableWidget
@@ -80,14 +81,14 @@ def editor_types() -> dict[str, EditorType]:
         pytest.param("ABCD", None, None, id="unknown_tag_makes_none"),
         pytest.param(
             "APIC",
-            PictureTagValue(),
-            None,
-            id="picture_tag_makes_none",
+            PictureTagValue(b"123"),
+            EditImageWidget,
+            id="picture_tag_makes_image_widget",
         ),
         pytest.param(
             "APIC",
             None,
-            None,
+            EditImageWidget,
             id="picture_tag_from_id3_makes_none",
         ),
     ],
@@ -133,25 +134,3 @@ def test_EditWidgetFactory_createWidget_logs_when_unknown_key(
         in caplog.text
     )
     assert caplog.records[0].levelname == "WARNING"
-
-
-def test_EditWidgetFactory_createWidget_logs_when_valid_value_no_widget_type(
-    caplog: pytest.LogCaptureFixture,
-    qtbot: QtBot,
-    editor_types: dict[str, EditorType],
-) -> None:
-    """Test that a widget isn't created when no known widget type for value type."""
-    EditWidgetFactory.editor_types = editor_types
-    with caplog.at_level(logging.INFO):
-        created_widget: EditAbstractWidget | None = EditWidgetFactory.createWidget(
-            "APIC", PictureTagValue()
-        )
-    if created_widget is not None:
-        qtbot.addWidget(created_widget)
-        pytest.fail("Created widget was not None.")
-    assert (
-        f"TagValue instance {type(PictureTagValue())} is valid, "
-        + "but no widget for this type exists yet."
-        in caplog.text
-    )
-    assert caplog.records[0].levelname == "INFO"
