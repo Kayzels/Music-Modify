@@ -3,6 +3,7 @@
 import logging
 from typing import TYPE_CHECKING, override
 
+from PySide6.QtCore import Signal
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (
     QDialogButtonBox,
@@ -29,12 +30,16 @@ logger = logging.getLogger(__name__)
 class EditDialog(EditAbstractDialog):
     """Displays all tags for a song, in a format that can be edited."""
 
+    song_changed: Signal = Signal(int)
+    "Signal that is emitted when the displayed song in the dialog changes."
+
     def __init__(
         self,
         repository: SongRepository,
         rows: list[int],
         all_tags: list[TagInfo],
         parent: QWidget | None = None,
+        current_index: int = 0,
     ) -> None:
         """Creates a dialog for editing songs individually.
 
@@ -43,6 +48,7 @@ class EditDialog(EditAbstractDialog):
             repository: The list of songs being managed by the app.
             rows: The indexes of the songs to be edited in the `repository`.
             all_tags: Tags that are available for reading and editing
+            current_index: The index of the first song that should be displayed.
         """
         super().__init__(repository, rows, parent)
 
@@ -52,7 +58,7 @@ class EditDialog(EditAbstractDialog):
             self.reject()
             return
 
-        self.current_index: int = 0
+        self.current_index: int = current_index
         "The index of this specific song in the song repository"
 
         try:
@@ -101,6 +107,7 @@ class EditDialog(EditAbstractDialog):
             self._switchButtonState()
 
         self.song_layout: QFormLayout
+        self.song_changed.emit(self.rows[self.current_index])
 
     @override
     def _setupSongInfo(self) -> None:
@@ -200,5 +207,6 @@ class EditDialog(EditAbstractDialog):
         logger.debug("Got a song")
 
         self.song_info = song_info
+        self.song_changed.emit(self.rows[self.current_index])
         self._switchButtonState()
         self._setupSongInfo()

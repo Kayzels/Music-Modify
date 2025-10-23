@@ -694,6 +694,8 @@ def test_MainWindow_showEditDialog_individual_edit_accepted(
     )
 
     mock_edit_dialog_instance = MagicMock()
+    mock_edit_dialog_instance.song_changed = MagicMock()
+    mock_edit_dialog_instance.song_changed.connect = MagicMock()
     mock_edit_dialog_instance.info_updated.connect = MagicMock()
     mock_edit_dialog_instance.finished.connect = MagicMock()
     mock_edit_dialog_instance.updateSongInfo = MagicMock()
@@ -726,15 +728,20 @@ def test_MainWindow_showEditDialog_individual_edit_accepted(
 
 
 def test_MainWindow_showEditDialog_individual_edit_rejected(
-    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch, temp_settings: Settings
+    qtbot: QtBot,
+    monkeypatch: pytest.MonkeyPatch,
+    temp_settings: Settings,
+    song_paths: list[PathLike[str]],
+    num_temp_songs: int,
 ) -> None:
-    """Tests creating an EditDialog for multiple songs, but editing individually.
+    """Tests creating an EditDialog for a single song, allowing navigation.
 
     Tests that the signals for the dialog are connected correctly,
     and that information does not get updated when the dialog is rejected.
     """
     window = MainWindow(temp_settings)
     qtbot.addWidget(window)
+    window.addFiles(song_paths)
 
     selected_rows = [0]
 
@@ -748,6 +755,9 @@ def test_MainWindow_showEditDialog_individual_edit_rejected(
     mock_edit_dialog_instance.finished.connect = MagicMock()
     mock_edit_dialog_instance.updateSongInfo = MagicMock()
     mock_edit_dialog_instance.show = MagicMock()
+    # Mock the song_changed signal and its connect method
+    mock_edit_dialog_instance.song_changed = MagicMock()
+    mock_edit_dialog_instance.song_changed.connect = MagicMock()
 
     mock_dialog_factory_get = MagicMock(return_value=mock_edit_dialog_instance)
     monkeypatch.setattr(EditDialogFactory, "get", mock_dialog_factory_get)
@@ -755,8 +765,12 @@ def test_MainWindow_showEditDialog_individual_edit_rejected(
     window.showEditDialog(bulk=False)
 
     mock_get_selected_rows.assert_called_once_with(window.files_table_view)
+
+    # With one song selected, it should get all songs
+    all_rows = list(range(num_temp_songs))
     mock_dialog_factory_get.assert_called_once_with(
-        selected_rows,
+        all_rows,
+        0,
         bulk=False,
     )
     mock_edit_dialog_instance.info_updated.connect.assert_called_once_with(
@@ -764,6 +778,9 @@ def test_MainWindow_showEditDialog_individual_edit_rejected(
     )
     mock_edit_dialog_instance.finished.connect.assert_called_once()
     mock_edit_dialog_instance.show.assert_called_once()
+    mock_edit_dialog_instance.song_changed.connect.assert_called_once_with(
+        window._highlight_row
+    )
 
     # Get the callable passed to dialog.finished.connect and simulate rejection
     process_result = mock_edit_dialog_instance.finished.connect.call_args[0][0]

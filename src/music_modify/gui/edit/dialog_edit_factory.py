@@ -41,6 +41,7 @@ class EditDialogFactory:
     def get(
         cls,
         rows: list[int],
+        current_index: int = 0,
         *,
         bulk: bool = False,
     ) -> EditAbstractDialog:
@@ -54,6 +55,7 @@ class EditDialogFactory:
             rows: List of indexes in the repository for the songs to edit
             bulk (optional): Whether the songs should be edited in bulk or individually.
                 Default False.
+            current_index: The index of the song that should be displayed first on open.
 
         Returns:
             A dialog for editing the metadata, of the correct form.
@@ -74,4 +76,4 @@ class EditDialogFactory:
 
         if bulk:
             return EditBulkDialog(**dialog_args)
-        return EditDialog(**dialog_args)
+        return EditDialog(**dialog_args, current_index=current_index)

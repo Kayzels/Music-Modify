@@ -8,7 +8,7 @@ import os
 from os import PathLike
 from pathlib import Path
 import time
-from typing import Final, final
+from typing import Final, cast, final
 
 from PySide6.QtCore import QPoint, QRect, Qt, Slot
 from PySide6.QtGui import QAction, QDragEnterEvent, QDragMoveEvent, QDropEvent, QIcon
@@ -34,6 +34,7 @@ from music_modify.gui.about import AboutDialog
 from music_modify.gui.completion import EditWithComplete
 from music_modify.gui.edit import EditDialogFactory
 from music_modify.gui.edit.bulk import EditBulkAbstractWidget
+from music_modify.gui.edit.dialog_edit import EditDialog
 from music_modify.gui.edit.widget_edit_factory import EditWidgetFactory
 from music_modify.gui.prefs import PrefsDialog
 from music_modify.gui.utils import getSelectedRows, updateTableView
@@ -340,6 +341,11 @@ class MainWindow(QMainWindow):
             self.files_table_view, self.songs_repository, self._settings.table_tags
         )
 
+    def _highlight_row(self, row_index: int) -> None:
+        """Selects and scrolls to the specified row index in the table view."""
+        self.files_table_view.selectRow(row_index)
+        self.files_table_view.scrollTo(self.songs_model.index(row_index, 0))
+
     @Slot(list)
     def refreshTableData(self, rows: list[int] | None = None) -> None:
         """Update the data for each item in the table."""
@@ -359,12 +365,18 @@ class MainWindow(QMainWindow):
             bulk: Whether the information should be edited in bulk. Default False
         """
         # Need to sort the list so that it's not shown in a random order
-        rows = sorted(getSelectedRows(self.files_table_view))
+        selected_rows = sorted(getSelectedRows(self.files_table_view))
 
-        if len(rows) == 0:
+        if not selected_rows:
             return
 
-        dialog = EditDialogFactory.get(rows, bulk=bulk)
+        if len(selected_rows) == 1:
+            rows = list(range(len(self.songs_repository)))
+            current_index = rows.index(selected_rows[0])
+            dialog = EditDialogFactory.get(rows, current_index, bulk=bulk)
+        else:
+            rows = selected_rows
+            dialog = EditDialogFactory.get(rows, bulk=bulk)
 
         @Slot(QDialog.DialogCode)
         def processDialogResult(result: QDialog.DialogCode) -> None:
@@ -374,6 +386,9 @@ class MainWindow(QMainWindow):
 
         dialog.info_updated.connect(self.refreshTableData)
         dialog.finished.connect(processDialogResult)
+        if not bulk:
+            dialog = cast(EditDialog, dialog)
+            dialog.song_changed.connect(self._highlight_row)
 
         dialog.show()
 
