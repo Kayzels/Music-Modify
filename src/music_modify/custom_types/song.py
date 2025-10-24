@@ -124,6 +124,12 @@ class Song:
             return tag_value
         return None
 
+    def delete(self) -> None:
+        """Clears the internal data to allow for garbage collection."""
+        self._staged_changes.clear()
+        self._loaded_values.clear()
+        self._id3 = ID3()
+
     def removeTag(self, id3_key: str) -> None:
         """Marks a tag for removal when the song is saved."""
         self.setTag(id3_key, None)

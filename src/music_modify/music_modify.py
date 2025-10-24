@@ -2,6 +2,7 @@
 
 import logging
 import sys
+import tracemalloc
 from typing import Never
 
 from PySide6.QtWidgets import QApplication
@@ -19,6 +20,7 @@ logger = logging.getLogger()
 
 def main() -> Never:
     """The entry point function for running the app."""
+    tracemalloc.start()
     app = QApplication(sys.argv)
     app.setOrganizationName("Kayzels")
     app.setApplicationName("Music Modify")

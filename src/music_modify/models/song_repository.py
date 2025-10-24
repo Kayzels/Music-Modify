@@ -86,6 +86,8 @@ class SongRepository(QObject):
 
     def clear(self) -> None:
         """Remove all songs from the repository."""
+        for song in self._songs:
+            song.delete()
         self._songs.clear()
         self.songs_updated.emit()
 
@@ -97,5 +99,6 @@ class SongRepository(QObject):
         #       to avoid shifting indexes when deleting
         indexes = sorted(indexes, reverse=True)
         for index in indexes:
+            self._songs[index].delete()
             self._songs.pop(index)
         self.songs_updated.emit()

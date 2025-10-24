@@ -8,6 +8,7 @@ import os
 from os import PathLike
 from pathlib import Path
 import time
+import tracemalloc
 from typing import Final, cast, final
 
 from PySide6.QtCore import QPoint, QRect, Qt, Slot
@@ -90,6 +91,9 @@ class MainWindow(QMainWindow):
             self.songs_repository, self._settings.table_tags
         )
         "Model that links between the song repository and the display of the metadata"
+
+        self._memory_snapshot: tracemalloc.Snapshot | None = None
+        "Stores a memory snapshot for debugging purposes"
 
         self._settings.tags_updated.connect(self.refreshTableLayout)
         self._settings.tags_updated.connect(updateWidgetEditorTypes)
@@ -354,6 +358,24 @@ class MainWindow(QMainWindow):
             self.files_table_view, self.songs_repository, self._settings.table_tags
         )
 
+    def _take_memory_snapshot(self) -> None:
+        """Take a memory snapshot for later comparison."""
+        self._memory_snapshot = tracemalloc.take_snapshot()
+        logger.info("Initial memory snapshot taken.")
+
+    def _compare_memory_snapshots(self) -> None:
+        """Compare the current memory usage with the stored snapshot."""
+        if not self._memory_snapshot:
+            logger.warning("No initial memory snapshot to compare against.")
+            return
+
+        current_snapshot = tracemalloc.take_snapshot()
+        stats = current_snapshot.compare_to(self._memory_snapshot, "lineno")
+
+        logger.info("Top 10 memory differences:")
+        for stat in stats[:10]:
+            logger.info(stat)
+
     def showEditDialog(self, *, bulk: bool = False) -> None:
         """Create a dialog for editing the metadata in the selected songs.
 
@@ -457,6 +479,12 @@ class MainWindow(QMainWindow):
             ),
             _ActionInfo("Edit individually", None, self.showEditDialog),
             _ActionInfo("Edit in bulk", None, lambda: self.showEditDialog(bulk=True)),
+            _ActionInfo(
+                "Take Initial Memory Snapshot", None, self._take_memory_snapshot
+            ),
+            _ActionInfo(
+                "Compare and Show Memory Growth", None, self._compare_memory_snapshots
+            ),
         )
 
         def createAction(info: _ActionInfo) -> QAction:
@@ -478,13 +506,22 @@ class MainWindow(QMainWindow):
             self.action_remove_selected,
             self.action_edit_individual,
             self.action_edit_bulk,
+            self.action_take_snapshot,
+            self.action_compare_snapshot,
         ) = [createAction(info) for info in actions]
 
         self.menubar = QMenuBar(self)
         self.menubar.setGeometry(QRect(0, 0, 800, 22))
 
-        self.menu_file, self.menu_view, self.menu_edit, self.menu_help = (
-            QMenu(name, self.menubar) for name in ("File", "View", "Edit", "Help")
+        (
+            self.menu_file,
+            self.menu_view,
+            self.menu_edit,
+            self.menu_help,
+            self.menu_debug,
+        ) = (
+            QMenu(name, self.menubar)
+            for name in ("File", "View", "Edit", "Help", "Debug")
         )
         self.menu_edit_songs = QMenu("Edit Songs", self.menu_edit)
         self.setMenuBar(self.menubar)
@@ -494,6 +531,7 @@ class MainWindow(QMainWindow):
             self.menu_edit,
             self.menu_view,
             self.menu_help,
+            self.menu_debug,
         ):
             self.menubar.addAction(menu_action.menuAction())
 
@@ -518,6 +556,9 @@ class MainWindow(QMainWindow):
             self.menu_edit_songs.addAction(song_action)
 
         self.menu_help.addAction(self.action_about)
+
+        for debug_action in (self.action_take_snapshot, self.action_compare_snapshot):
+            self.menu_debug.addAction(debug_action)
 
     @final
     def _setupUi(self) -> None:
