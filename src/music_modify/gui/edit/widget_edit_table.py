@@ -195,13 +195,18 @@ class EditTableWidget(EditAbstractGroupWidget):
 
     @override
     def _addRow(self) -> None:
-        self.main_widget.insertRow(self.main_widget.rowCount())
+        insert_pos = self.main_widget.rowCount()
+        selected_rows = sorted(getSelectedRows(self.main_widget))
+        if selected_rows:
+            insert_pos = selected_rows[-1] + 1
+
+        self.main_widget.insertRow(insert_pos)
         # Need to add items here, rather than keeping as None,
         # to ensure they have the right flags for drag and drop
         for col in range(self.main_widget.columnCount()):
             item = QTableWidgetItem("")
             item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsDropEnabled)
-            self.main_widget.setItem(self.main_widget.rowCount() - 1, col, item)
+            self.main_widget.setItem(insert_pos, col, item)
 
     @override
     def _removeRow(self) -> None:

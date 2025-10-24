@@ -131,7 +131,13 @@ class EditListWidget(EditAbstractGroupWidget):
     def _addRow(self) -> None:
         item = QListWidgetItem("")
         item.setFlags(item.flags() | Qt.ItemFlag.ItemIsEditable)
-        self.main_widget.addItem(item)
+
+        insert_pos = self.main_widget.count()
+        selected_rows = sorted(getSelectedRows(self.main_widget))
+        if selected_rows:
+            insert_pos = selected_rows[-1] + 1
+
+        self.main_widget.insertItem(insert_pos, item)
 
     @override
     def _removeRow(self) -> None:
