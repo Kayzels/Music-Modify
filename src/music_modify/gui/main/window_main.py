@@ -417,7 +417,15 @@ class MainWindow(QMainWindow):
 
     def showMappingDialog(self) -> None:
         """Create a dialog for remapping people's names for multiple tags."""
-        dialog = DialogRemap(self)
+        selected_rows = sorted(getSelectedRows(self.files_table_view))
+        rows = (
+            selected_rows if selected_rows else list(range(len(self.songs_repository)))
+        )
+        if not rows:
+            return
+        person_tags = [tag for tag in self._settings.info_tags if tag.is_person_tag]
+
+        dialog = DialogRemap(self.songs_repository, rows, person_tags, parent=self)
 
         @Slot(QDialog.DialogCode)
         def processDialogResult(result: QDialog.DialogCode) -> None:
@@ -425,7 +433,9 @@ class MainWindow(QMainWindow):
             if result == QDialog.DialogCode.Accepted:
                 dialog.updateSongs()
 
+        dialog.songs_updated.connect(self.refreshTableData)
         dialog.finished.connect(processDialogResult)
+
         dialog.show()
 
     def showCustomContextMenu(self, position: QPoint) -> None:
@@ -619,3 +629,6 @@ class MainWindow(QMainWindow):
         self.tool_bar = QToolBar(self)
         self.tool_bar.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextBesideIcon)
         self.addToolBar(Qt.ToolBarArea.TopToolBarArea, self.tool_bar)
+
+
+# TODO: Edit Song actions should be disabled when there are no songs
