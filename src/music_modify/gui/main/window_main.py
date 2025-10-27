@@ -346,7 +346,7 @@ class MainWindow(QMainWindow):
             self.files_table_view, self.songs_repository, self._settings.table_tags
         )
 
-    def _highlight_row(self, row_index: int) -> None:
+    def _highlightRow(self, row_index: int) -> None:
         """Selects and scrolls to the specified row index in the table view."""
         self.files_table_view.selectRow(row_index)
         self.files_table_view.scrollTo(self.songs_model.index(row_index, 0))
@@ -411,7 +411,7 @@ class MainWindow(QMainWindow):
         dialog.finished.connect(processDialogResult)
         if not bulk:
             dialog = cast(EditDialog, dialog)
-            dialog.song_changed.connect(self._highlight_row)
+            dialog.song_changed.connect(self._highlightRow)
 
         dialog.show()
 

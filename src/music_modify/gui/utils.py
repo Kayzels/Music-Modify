@@ -43,7 +43,7 @@ def clearLayout(layout: QLayout) -> None:
         if cast(QLayout | None, item.layout()) is not None:
             clearLayout(item.layout())
         widget = item.widget()
-        if cast(QWidget | None, widget) is not None:
+        if widget is not None:
             widget.deleteLater()
         del item
 

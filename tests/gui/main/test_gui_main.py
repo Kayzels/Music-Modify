@@ -15,8 +15,8 @@ import pytest
 from pytestqt.qtbot import QtBot
 
 from music_modify.gui import MainWindow
-from music_modify.prefs import Settings
 from music_modify.gui.edit.dialog_edit_factory import EditDialogFactory
+from music_modify.prefs import Settings
 
 
 def test_MainWindow_getFolderFiles(
@@ -779,7 +779,7 @@ def test_MainWindow_showEditDialog_individual_edit_rejected(
     mock_edit_dialog_instance.finished.connect.assert_called_once()
     mock_edit_dialog_instance.show.assert_called_once()
     mock_edit_dialog_instance.song_changed.connect.assert_called_once_with(
-        window._highlight_row
+        window._highlightRow
     )
 
     # Get the callable passed to dialog.finished.connect and simulate rejection
@@ -1043,6 +1043,7 @@ def test_MainWindow_showCustomContextMenu_single_selection(
     mock_qmenu_constructor.assert_called_once_with(window)
     assert mock_context_menu.added_actions_list == [
         window.action_edit_individual,
+        window.action_remap_names,
         window.action_remove_selected,
     ]
     assert not mock_context_menu.added_menus_list
@@ -1102,6 +1103,7 @@ def test_MainWindow_showCustomContextMenu_multiple_selection(
     expected_song_menu_actions = [
         window.action_edit_individual,
         window.action_edit_bulk,
+        window.action_remap_names,
     ]
     assert mock_song_menu.added_actions_list == expected_song_menu_actions
 
