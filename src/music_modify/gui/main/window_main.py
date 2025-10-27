@@ -36,6 +36,7 @@ from music_modify.gui.completion import EditWithComplete
 from music_modify.gui.edit import EditDialogFactory
 from music_modify.gui.edit.bulk import EditBulkAbstractWidget
 from music_modify.gui.edit.dialog_edit import EditDialog
+from music_modify.gui.edit.dialog_remap import DialogRemap
 from music_modify.gui.edit.widget_edit_factory import EditWidgetFactory
 from music_modify.gui.prefs import PrefsDialog
 from music_modify.gui.utils import getSelectedRows, updateTableView
@@ -414,6 +415,19 @@ class MainWindow(QMainWindow):
 
         dialog.show()
 
+    def showMappingDialog(self) -> None:
+        """Create a dialog for remapping people's names for multiple tags."""
+        dialog = DialogRemap(self)
+
+        @Slot(QDialog.DialogCode)
+        def processDialogResult(result: QDialog.DialogCode) -> None:
+            logger.debug("Called process dialog result for mapping dialog")
+            if result == QDialog.DialogCode.Accepted:
+                dialog.updateSongs()
+
+        dialog.finished.connect(processDialogResult)
+        dialog.show()
+
     def showCustomContextMenu(self, position: QPoint) -> None:
         """Show a context menu for the selected item in the table.
 
@@ -431,6 +445,7 @@ class MainWindow(QMainWindow):
         # so don't show bulk, or child menu
         if self.getSelectionLength() == 1:
             context_menu.addAction(self.action_edit_individual)
+            context_menu.addAction(self.action_remap_names)
         else:
             song_menu = QMenu("Edit Songs")
             song_menu.addActions(self.menu_edit_songs.actions())
@@ -479,6 +494,7 @@ class MainWindow(QMainWindow):
             ),
             _ActionInfo("Edit individually", None, self.showEditDialog),
             _ActionInfo("Edit in bulk", None, lambda: self.showEditDialog(bulk=True)),
+            _ActionInfo("Remap Names", None, self.showMappingDialog),
             _ActionInfo(
                 "Take Initial Memory Snapshot", None, self._take_memory_snapshot
             ),
@@ -506,6 +522,7 @@ class MainWindow(QMainWindow):
             self.action_remove_selected,
             self.action_edit_individual,
             self.action_edit_bulk,
+            self.action_remap_names,
             self.action_take_snapshot,
             self.action_compare_snapshot,
         ) = [createAction(info) for info in actions]
@@ -552,7 +569,13 @@ class MainWindow(QMainWindow):
         self.menu_edit.addSeparator()
         self.menu_edit.addAction(self.action_preferences)
 
-        for song_action in (self.action_edit_individual, self.action_edit_bulk):
+        song_actions = (
+            self.action_edit_individual,
+            self.action_edit_bulk,
+            self.action_remap_names,
+        )
+
+        for song_action in song_actions:
             self.menu_edit_songs.addAction(song_action)
 
         self.menu_help.addAction(self.action_about)
