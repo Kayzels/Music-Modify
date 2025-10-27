@@ -359,12 +359,12 @@ class MainWindow(QMainWindow):
             self.files_table_view, self.songs_repository, self._settings.table_tags
         )
 
-    def _take_memory_snapshot(self) -> None:
+    def _takeMemorySnapshot(self) -> None:
         """Take a memory snapshot for later comparison."""
         self._memory_snapshot = tracemalloc.take_snapshot()
         logger.info("Initial memory snapshot taken.")
 
-    def _compare_memory_snapshots(self) -> None:
+    def _compareMemorySnapshots(self) -> None:
         """Compare the current memory usage with the stored snapshot."""
         if not self._memory_snapshot:
             logger.warning("No initial memory snapshot to compare against.")
@@ -495,11 +495,9 @@ class MainWindow(QMainWindow):
             _ActionInfo("Edit individually", None, self.showEditDialog),
             _ActionInfo("Edit in bulk", None, lambda: self.showEditDialog(bulk=True)),
             _ActionInfo("Remap Names", None, self.showMappingDialog),
+            _ActionInfo("Take Initial Memory Snapshot", None, self._takeMemorySnapshot),
             _ActionInfo(
-                "Take Initial Memory Snapshot", None, self._take_memory_snapshot
-            ),
-            _ActionInfo(
-                "Compare and Show Memory Growth", None, self._compare_memory_snapshots
+                "Compare and Show Memory Growth", None, self._compareMemorySnapshots
             ),
         )
 
