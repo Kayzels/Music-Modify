@@ -154,7 +154,7 @@ class PrefsTagDialog(PrefsAbstractDialog, RowOperationMixin):
     @override
     def setupUi(self) -> None:
         """Creates the interface for the dialog."""
-        self.resize(510, 434)
+        self.resize(850, 434)
 
         vertical_layout = QVBoxLayout(self)
 

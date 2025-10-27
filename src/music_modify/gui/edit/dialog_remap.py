@@ -48,6 +48,7 @@ class DialogRemap(QDialog):
         """
         super().__init__(parent)
         self.setModal(True)
+        self.setMinimumWidth(300)
 
         self.repository: SongRepository = repository
         "The list of songs that is currently being managed."
