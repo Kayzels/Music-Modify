@@ -21,3 +21,5 @@ class TagInfo:
     "Whether the tag should appear in the main files table, or not."
     editor_type: EditorType = EditorType.Automatic
     "The type of widget/display that should be used for editing a tag."
+    is_person_tag: bool = False
+    "Indicates whether the tag stores people's names or not."

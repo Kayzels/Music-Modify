@@ -23,7 +23,7 @@ from music_modify.utils import tableHeader
 
 logger = logging.getLogger(__name__)
 
-TAG_MODEL_COLUMNS = [field.name for field in dataclasses.fields(TagInfo)]
+TAG_MODEL_COLUMNS = dataclasses.fields(TagInfo)
 "List of display names for the tags that should be managed."
 
 
@@ -70,7 +70,7 @@ class TagModel(QAbstractTableModel):
             return None
         if section >= self.columnCount() or section < 0:
             return None
-        return tableHeader(TAG_MODEL_COLUMNS[section])
+        return tableHeader(TAG_MODEL_COLUMNS[section].name)
 
     @override
     def data(  # noqa: PLR0911
@@ -86,19 +86,19 @@ class TagModel(QAbstractTableModel):
         row = index.row()
         field = TAG_MODEL_COLUMNS[col]
 
-        if field == "show_in_table":
+        if field.type is bool:
             if role == Qt.ItemDataRole.CheckStateRole:
                 return (
                     Qt.CheckState.Checked
-                    if getattr(self._tags[row], field)
+                    if getattr(self._tags[row], field.name)
                     else Qt.CheckState.Unchecked
                 )
             if role == Qt.ItemDataRole.DisplayRole:
                 return ""
             return None
 
-        if field == "editor_type":
-            editor_type_enum = getattr(self._tags[row], field)
+        if field.name == "editor_type":
+            editor_type_enum = getattr(self._tags[row], field.name)
             if role == Qt.ItemDataRole.DisplayRole:
                 return editor_type_enum.value
             if role == Qt.ItemDataRole.EditRole:
@@ -106,7 +106,7 @@ class TagModel(QAbstractTableModel):
             return None
 
         if role in (Qt.ItemDataRole.DisplayRole, Qt.ItemDataRole.EditRole):
-            return getattr(self._tags[row], field)
+            return getattr(self._tags[row], field.name)
 
         return None
 
@@ -118,7 +118,7 @@ class TagModel(QAbstractTableModel):
         col = index.column()
         field = TAG_MODEL_COLUMNS[col]
 
-        if field == "show_in_table":
+        if field.type is bool:
             return super().flags(index) | Qt.ItemFlag.ItemIsUserCheckable
         return super().flags(index) | Qt.ItemFlag.ItemIsEditable
 
@@ -137,35 +137,38 @@ class TagModel(QAbstractTableModel):
         field = TAG_MODEL_COLUMNS[col]
 
         # Editing display name or id3_key
-        if role == Qt.ItemDataRole.EditRole and field in ("display_name", "id3_key"):
+        if role == Qt.ItemDataRole.EditRole and field.name in (
+            "display_name",
+            "id3_key",
+        ):
             value = cast(str, value)
             if value == "":
-                self.invalid_input.emit(f"{tableHeader(field)} cannot be empty.")
+                self.invalid_input.emit(f"{tableHeader(field.name)} cannot be empty.")
                 return False
             if value in (
-                getattr(tag, field) for i, tag in enumerate(self._tags) if i != row
+                getattr(tag, field.name) for i, tag in enumerate(self._tags) if i != row
             ):
                 self.invalid_input.emit(
-                    f"{tableHeader(field)} with {value} already exists.",
+                    f"{tableHeader(field.name)} with {value} already exists.",
                 )
                 return False
 
             # Only update the value if it's not the same already
-            if getattr(self._tags[row], field) != value:
-                setattr(self._tags[row], field, value)
+            if getattr(self._tags[row], field.name) != value:
+                setattr(self._tags[row], field.name, value)
                 self.dataChanged.emit(index, index, [role])
             return True
 
-        # Editing checkbox for Show column
-        if field == "show_in_table" and role == Qt.ItemDataRole.CheckStateRole:
+        # Editing checkbox for Bool columns
+        if field.type is bool and role == Qt.ItemDataRole.CheckStateRole:
             value = cast(int, value)
             # Need to convert to the enum value for comparison,
             # otherwise it's always false.
-            self._tags[row].show_in_table = value == Qt.CheckState.Checked.value
+            setattr(self._tags[row], field.name, value == Qt.CheckState.Checked.value)
             self.dataChanged.emit(index, index, [role])
             return True
 
-        if field == "editor_type" and role == Qt.ItemDataRole.EditRole:
+        if field.name == "editor_type" and role == Qt.ItemDataRole.EditRole:
             new_editor_type: EditorType | None = None
             for et in EditorType:
                 if value == et.value:
@@ -176,8 +179,8 @@ class TagModel(QAbstractTableModel):
                 logger.warning(f"Could not find EditorType for value: {value}")
                 return False
 
-            if getattr(self._tags[row], field) != new_editor_type:
-                setattr(self._tags[row], field, new_editor_type)
+            if getattr(self._tags[row], field.name) != new_editor_type:
+                setattr(self._tags[row], field.name, new_editor_type)
                 self.dataChanged.emit(index, index, [role])
             return True
 

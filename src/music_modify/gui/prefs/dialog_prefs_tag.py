@@ -58,7 +58,11 @@ class PrefsTagDialog(PrefsAbstractDialog, RowOperationMixin):
         self.tag_table.setModel(self.model)
         self.tag_table.resizeColumnsToContents()
 
-        editor_type_col_index = TAG_MODEL_COLUMNS.index("editor_type")
+        editor_type_col_index = next(
+            i
+            for i, field in enumerate(TAG_MODEL_COLUMNS)
+            if field.name == "editor_type"
+        )
         delegate = EditorTypeDelegate()
         self.tag_table.setItemDelegateForColumn(editor_type_col_index, delegate)
 

@@ -152,12 +152,14 @@ class Settings(QObject):
             id3_key="TPE1",
             show_in_table=True,
             editor_type=EditorType.MultipleText,
+            is_person_tag=True,
         ),
         TagInfo(
             display_name="Album Artist",
             id3_key="TPE2",
             show_in_table=True,
             editor_type=EditorType.SingleText,
+            is_person_tag=True,
         ),
         TagInfo(
             display_name="Album",
@@ -170,12 +172,14 @@ class Settings(QObject):
             id3_key="TCOM",
             show_in_table=True,
             editor_type=EditorType.MultipleText,
+            is_person_tag=True,
         ),
         TagInfo(
             display_name="Lyricist",
             id3_key="TEXT",
             show_in_table=True,
             editor_type=EditorType.MultipleText,
+            is_person_tag=True,
         ),
         TagInfo(
             display_name="Language",
@@ -200,12 +204,14 @@ class Settings(QObject):
             id3_key="TIPL",
             show_in_table=True,
             editor_type=EditorType.PeopleValue,
+            is_person_tag=True,
         ),
         TagInfo(
             display_name="Musician Credits",
             id3_key="TMCL",
             show_in_table=True,
             editor_type=EditorType.PeopleValue,
+            is_person_tag=True,
         ),
         TagInfo(
             display_name="Sort Composer",
@@ -213,7 +219,10 @@ class Settings(QObject):
             editor_type=EditorType.SingleText,
         ),
         TagInfo(
-            display_name="Conductor", id3_key="TPE3", editor_type=EditorType.SingleText
+            display_name="Conductor",
+            id3_key="TPE3",
+            editor_type=EditorType.SingleText,
+            is_person_tag=True,
         ),
         TagInfo(display_name="Year", id3_key="TDRC", editor_type=EditorType.SingleText),
         TagInfo(
@@ -225,6 +234,7 @@ class Settings(QObject):
             display_name="Original Artist",
             id3_key="TOPE",
             editor_type=EditorType.MultipleText,
+            is_person_tag=True,
         ),
         TagInfo(
             display_name="Subtitle", id3_key="TIT3", editor_type=EditorType.SingleText
@@ -400,6 +410,7 @@ class Settings(QObject):
             qsettings.setValue("id3_key", tag.id3_key)
             qsettings.setValue("show_in_table", str(tag.show_in_table))
             qsettings.setValue("editor_type", tag.editor_type.name)
+            qsettings.setValue("is_person_tag", str(tag.is_person_tag))
         qsettings.endArray()
 
     def _getArray(self, key: str) -> list[TagInfo]:
@@ -423,12 +434,14 @@ class Settings(QObject):
             editor_type_enum: EditorType = getattr(
                 EditorType, editor_type_str, EditorType.Automatic
             )
+            is_person_tag: bool = qsettings.value("is_person_tag", "False") == "True"
             tags.append(
                 TagInfo(
                     display_name=display_name,
                     id3_key=id3_key,
                     show_in_table=show_in_table,
                     editor_type=editor_type_enum,
+                    is_person_tag=is_person_tag,
                 ),
             )
         qsettings.endArray()

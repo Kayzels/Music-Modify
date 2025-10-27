@@ -51,7 +51,7 @@ def test_TagModel_headerData(model: TagModel) -> None:
     Headers for invalid indexes and roles should return None.
     """
     for col in range(len(TAG_MODEL_COLUMNS)):
-        check_val: str = tableHeader(TAG_MODEL_COLUMNS[col])
+        check_val: str = tableHeader(TAG_MODEL_COLUMNS[col].name)
         assert (
             model.headerData(
                 section=col,
@@ -102,24 +102,26 @@ def test_TagModel_data(model: TagModel, tags: list[TagInfo]) -> None:
         field = TAG_MODEL_COLUMNS[i]
         role: Literal[Qt.ItemDataRole.DisplayRole, Qt.ItemDataRole.CheckStateRole] = (
             Qt.ItemDataRole.DisplayRole
-            if field != "show_in_table"
+            if field.type is not bool
             else Qt.ItemDataRole.CheckStateRole
         )
         actual_data = model.data(index, role)
-        if field == "show_in_table":
+        if field.name == "show_in_table":
             assert actual_data == Qt.CheckState.Checked
-        elif field == "editor_type":
-            assert actual_data == getattr(tags[0], field).value
+        elif field.name == "editor_type":
+            assert actual_data == getattr(tags[0], field.name).value
+        elif field.name == "is_person_tag":
+            assert actual_data == Qt.CheckState.Unchecked
         else:
-            assert actual_data == getattr(tags[0], field)
+            assert actual_data == getattr(tags[0], field.name)
 
         edit_role = Qt.ItemDataRole.EditRole
-        if field != "show_in_table":
+        if field.type is not bool:
             actual_edit_data = model.data(index, edit_role)
-            if field == "editor_type":
+            if field.name == "editor_type":
                 assert actual_edit_data == EditorType.Automatic
             else:
-                assert actual_edit_data == getattr(tags[0], field)
+                assert actual_edit_data == getattr(tags[0], field.name)
 
     invalid_index = model.index(len(tags), 0)
     assert model.data(invalid_index, Qt.ItemDataRole.DisplayRole) is None
@@ -128,7 +130,7 @@ def test_TagModel_data(model: TagModel, tags: list[TagInfo]) -> None:
 def test_TagModel_setData(model: TagModel) -> None:
     """Test that data can be added to the TagModel."""
     # Check setting strings first
-    cols = [i for i, column in enumerate(TAG_MODEL_COLUMNS) if column == "id3_key"]
+    cols = [i for i, column in enumerate(TAG_MODEL_COLUMNS) if column.name == "id3_key"]
     if len(cols) != 1:
         # Failed to find the right column, so something is wrong
         pytest.fail("Zero or more than one columns found.")
@@ -136,13 +138,23 @@ def test_TagModel_setData(model: TagModel) -> None:
     id3_val = "TRCK"
     assert model.setData(id3_index, id3_val, Qt.ItemDataRole.EditRole)
     assert model.tags == [
-        TagInfo(id3_key="TRCK", display_name="Title", show_in_table=True),
-        TagInfo(id3_key="TPE2", display_name="Artist", show_in_table=False),
+        TagInfo(
+            id3_key="TRCK",
+            display_name="Title",
+            show_in_table=True,
+        ),
+        TagInfo(
+            id3_key="TPE2",
+            display_name="Artist",
+            show_in_table=False,
+        ),
     ]
 
     # Check setting check val
     cols = [
-        i for i, column in enumerate(TAG_MODEL_COLUMNS) if column == "show_in_table"
+        i
+        for i, column in enumerate(TAG_MODEL_COLUMNS)
+        if column.name == "show_in_table"
     ]
     if len(cols) != 1:
         pytest.fail("Zero or more than one columns found.")
@@ -154,8 +166,31 @@ def test_TagModel_setData(model: TagModel) -> None:
         TagInfo(id3_key="TPE2", display_name="Artist", show_in_table=False),
     ]
 
+    # Check setting person tag
+    cols = [
+        i
+        for i, column in enumerate(TAG_MODEL_COLUMNS)
+        if column.name == "is_person_tag"
+    ]
+    if len(cols) != 1:
+        pytest.fail("Zero or more than one columns found.")
+    check_index = model.index(1, cols[0])
+    check_val = Qt.CheckState.Checked.value
+    assert model.setData(check_index, check_val, Qt.ItemDataRole.CheckStateRole)
+    assert model.tags == [
+        TagInfo(id3_key="TRCK", display_name="Title", show_in_table=False),
+        TagInfo(
+            id3_key="TPE2",
+            display_name="Artist",
+            show_in_table=False,
+            is_person_tag=True,
+        ),
+    ]
+
     # Check setting editor_type
-    cols = [i for i, column in enumerate(TAG_MODEL_COLUMNS) if column == "editor_type"]
+    cols = [
+        i for i, column in enumerate(TAG_MODEL_COLUMNS) if column.name == "editor_type"
+    ]
     if len(cols) != 1:
         pytest.fail("Zero or more than one columns found.")
     editor_index = model.index(0, cols[0])
@@ -247,7 +282,7 @@ def test_TagModel_flags(model: TagModel) -> None:
         index = model.index(0, col_idx)
         current_flags = model.flags(index)
 
-        if field == "show_in_table":
+        if field.type is bool:
             assert current_flags & Qt.ItemFlag.ItemIsUserCheckable
             assert current_flags & Qt.ItemFlag.ItemIsEnabled
             assert not (current_flags & Qt.ItemFlag.ItemIsEditable)
